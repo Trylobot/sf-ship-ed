@@ -1,0 +1,9 @@
+Prerequisites for Compilation
+=============================
+* BlitzMax http://blitzmax.com/
+
+Open sf-ship-ed.bmx using the MaxIDE program that ships with the BlitzMax installation package. Build & Run.
+
+Alternatively, use the command line compiler (BMK) directly:
+bmk makeapp -a -r -t gui -o sf-ship-ed.exe sf-ship-ed.bmx
+
