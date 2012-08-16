@@ -1,0 +1,6 @@
+.bmx
+*.exe
+*.sublime-workspace
+*.lnk
+sf-ship-ed.log
+sf-ship-ed-settings.json

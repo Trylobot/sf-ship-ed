@@ -1,0 +1,1 @@
+{ s }_{ x }=\frac { W-{ S\cdot i }_{ w } }{ 2 } +{ p }_{ x }\\ { i }_{ x }=\frac { { m }_{ x }-{ s }_{ x } }{ S } \\ { S\cdot i }_{ x }={ m }_{ x }-{ s }_{ x }\\ { m }_{ x }-\frac { W-{ S\cdot i }_{ w } }{ 2 } +{ p }_{ x }={ S\cdot i }_{ x }\\ { p }_{ x }={ S\cdot i }_{ x }+\frac { W-{ S\cdot i }_{ w } }{ 2 } -{ m }_{ x }
