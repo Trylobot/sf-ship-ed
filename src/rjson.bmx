@@ -115,13 +115,13 @@ Type json
 	Global transforms_stringify:TList = CreateList()
 	Global transforms_parse:TList = CreateList()
 	
-	Function add_stringify_transform( selector$, imperative_id%, argument:Object, condition_func%( val:TValue ) )
+	Function add_stringify_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue )=Null )
 		transforms_stringify.AddLast( ..
 			TValue_Transformation.Create( ..
 				selector, imperative_id, argument, condition_func ))
 	EndFunction
 
-	Function add_parse_transform( selector$, imperative_id%, argument:Object, condition_func%( val:TValue ) )
+	Function add_parse_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue )=Null )
 		transforms_parse.AddLast( ..
 			TValue_Transformation.Create( ..
 				selector, imperative_id, argument, condition_func ))
