@@ -21,6 +21,8 @@ but it does support the following BlitzMax built-in types which are cyclic:
 * TList
 * TMap
 
+///////////////////////////////////
+
 The following intermediate types are used for storage during stringifying/parsing
 and are used to control Transformations that can override the default field mappings:
 * TNull    Extends TValue
@@ -32,6 +34,28 @@ and are used to control Transformations that can override the default field mapp
 
 A separate set of mapping functions is used to map these very simple objects
 to arbitrary BlitzMax types, via reflection.
+
+///////////////////////////////////
+
+Transformations are imperatives applied to a subset of data contained in a TValue.
+They thus can transform the parsed or stringified JSON data mid-way through the process.
+Filtering is performed via case-insensitive Selector strings, for example:
+	"/:string" --> any TString at root-level
+	"/$field"  --> root-level TObject's field named "field"
+	"/@5"      --> root-level TArray's element at position 5
+	""         --> nothing
+
+Any given Transformation must also specify whether it is to be applied during parse or stringify.
+All Transformations are globally applied, but can be added/removed at any time.
+Transformations can optionally specify a condition function that determines at run time whether an
+  imperative for a selected object should actually run; in this way they can vary based on arbitrary
+  user-defined conditions.
+
+Supported transformation imperatives:
+* XJ_DELETE ()
+* XJ_RENAME ( new_field_name )
+* XJ_COPY   ( new_field_name )
+
 
 EndRem
 
@@ -57,6 +81,9 @@ Type json
 	Function stringify:String( source_object:Object )
 		If Not source_object Then Return TValue.VALUE_NULL ' --> "null"
 		Local source_object_converted:TValue = reflect_to_TValue( source_object )
+		For Local xform:TValue_Transformation = EachIn transforms_stringify
+			xform.Execute( source_object_converted ) 'Execute any available transformations
+		Next
 		Return source_object_converted.Encode( 0, precision )
 	EndFunction
 	
@@ -64,9 +91,12 @@ Type json
 	Function parse:Object( encoded$, type_id$="" )
 		If encoded = "" Then Return Null
 		Local cursor% = 0
-		Local intermediate_object:TValue = create_TValue( encoded, cursor )
+		Local intermediate_object:TValue = allocate_TValue( encoded, cursor )
 		If intermediate_object = Null Then Return Null
 		intermediate_object.Decode( encoded, cursor )
+		For Local xform:TValue_Transformation = EachIn transforms_parse
+			xform.Execute( intermediate_object ) 'Execute any available transformations
+		Next
 		If type_id <> ""
 			Local destination_type_id:TTypeId = TTypeId.ForName( type_id )
 			If destination_type_id
@@ -80,9 +110,26 @@ Type json
 		EndIf
 	EndFunction
 
+
+	'Transformations
+	Global transforms_stringify:TList = CreateList()
+	Global transforms_parse:TList = CreateList()
+	
+	Function add_stringify_transform( selector$, imperative_id%, argument:Object, condition_func%( val:TValue ) )
+		transforms_stringify.AddLast( ..
+			TValue_Transformation.Create( ..
+				selector, imperative_id, argument, condition_func ))
+	EndFunction
+
+	Function add_parse_transform( selector$, imperative_id%, argument:Object, condition_func%( val:TValue ) )
+		transforms_parse.AddLast( ..
+			TValue_Transformation.Create( ..
+				selector, imperative_id, argument, condition_func ))
+	EndFunction
+
 	'////////////////////////////////////////////////////////////////////////////
 
-	Function create_TValue:TValue( encoded$, cursor% )
+	Function allocate_TValue:TValue( encoded$, cursor% )
 		Local jsontype% = TValue.PredictJSONType( encoded, cursor )
 		If jsontype = TValue.JSONTYPE_INVALID Then Return Null
 		Local intermediate_object:TValue
@@ -102,6 +149,7 @@ Type json
 		EndSelect
 		Return intermediate_object
 	EndFunction
+
 
 	'Nested Array Types (e.g.: Int[][][] ) ARE supported
 	'Single Arrays with Multiple Dimensions (e.g.: Int[4,3,5] ) are NOT supported
@@ -183,8 +231,8 @@ Type json
 		Return converted_object
 	EndFunction
 
-	'fields defined by the destination type are OPTIONAL by default; no errors for extra data or data not found.
-	'  they can also be individually set to REQUIRED or DISALLOWED to trigger errors in appropriate cases.
+	'fields defined by the destination type are OPTIONAL by default; 
+	'  extra data or data not found will only generate warnings
 	Function initialize_object:Object( source:TValue, type_id:TTypeId )
 		If TNull(source) Or source = Null Then Return Null
 		Local source_mapped:Object
@@ -406,16 +454,25 @@ Type json
 		Return "~n"+slice+"~n"+JSON.RepeatSpace(dist)+"^"
 	EndFunction
 
-	'////////////////////////////////////////////////////////////////////////////
-
+	'logging/exceptions /////////////////////////////////////////////////////////
 	Const LOG_WARN$ = "[WARN]"
 	Const LOG_ERROR$ = "[ERROR]"
 
-	'////////////////////////////////////////////////////////////////////////////
-
-	'supported built-in cyclic data types
+	'supported built-in cyclic data types ///////////////////////////////////////
 	Global TMap_TTypeId:TTypeId = TTypeId.ForName("TMap")
 	Global TList_TTypeId:TTypeId = TTypeId.ForName("TList")
+
+	'transformations ////////////////////////////////////////////////////////////
+	Const XJ_DELETE% = 86
+	Const XJ_RENAME% = 102
+	Const XJ_COPY% = 4242
+	'Selector Type Codes
+	Const SEL_NULL$    = "null"
+	Const SEL_BOOLEAN$ = "boolean"
+	Const SEL_NUMBER$  = "number"
+	Const SEL_STRING$  = "string"
+	Const SEL_ARRAY$   = "array"
+	Const SEL_OBJECT$  = "object"
 
 End Type
 
@@ -455,11 +512,6 @@ Type TValue
 	Method ToString:String()
 		Return Encode( 0, JSON.precision )
 	EndMethod
-
-	'performs a self-search and returns any objects that match the selector
-	Function Find:TValue[]( selector$ )
-		Return Null
-	EndFunction
 
 	'this method is used to select an appropriate intermediate type to decode into
 	'  given only the encoded JSON data
@@ -787,7 +839,7 @@ Type TArray Extends TValue
 				cursor :+ 1 'eat it
 				Exit 'empty object with no fields
 			EndIf
-			element_value = JSON.create_TValue( encoded, cursor )
+			element_value = JSON.allocate_TValue( encoded, cursor )
 			If element_value = Null
 				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor) )
 			EndIf
@@ -897,7 +949,7 @@ Type TObject Extends TValue
 				json_error( json.LOG_ERROR+" expected colon character at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor)  )
 			End If
 			JSON.EatWhitespace( encoded, cursor )
-			field_value = JSON.create_TValue( encoded, cursor )
+			field_value = JSON.allocate_TValue( encoded, cursor )
 			If field_value = Null
 				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor)  )
 			EndIf
@@ -930,4 +982,138 @@ Type TObject Extends TValue
 	EndMethod
 
 EndType
+
+
+'////////////////////////////////////////////////////////////////////////////
+'////////////////////////////////////////////////////////////////////////////
+'////////////////////////////////////////////////////////////////////////////
+
+
+
+Type TValue_Selector_Token
+
+	Field type_name$
+	Field object_field_name$
+	Field array_element_index%
+
+	Function Create:TValue_Selector_Token( selector_token$ )
+		Local tok:TValue_Selector_Token = New TValue_Selector_Token
+		tok.type_name = ParseSelectorTypeName( selector_token )
+		tok.object_field_name = ParseSelectorObjectFieldName( selector_token )
+		tok.array_element_index = ParseSelectorArrayElementIndex( selector_token )
+		Return tok
+	EndFunction
+
+	Function ParseSelectorTypeName$( selector_token$ )
+		Local cursor% = selector_token.Find( SELECTOR_TYPE_NAME_START )
+		If cursor <> -1
+			Local value$ = ""
+			cursor :+ 1
+			While cursor < selector_token.Length ..
+			And   json.IsAlphaNumericOrUnderscore( Chr( selector_token[cursor] ))
+				value :+ Chr( selector_token[cursor] )
+				cursor :+ 1
+			EndWhile
+			Return value
+		EndIf
+		Return Null
+	EndFunction
+
+	Function ParseSelectorObjectFieldName$( selector_token$ )
+		Local cursor% = selector_token.Find( SELECTOR_OBJECT_FIELD_NAME_START )
+		If cursor <> -1
+			Local value$ = ""
+			cursor :+ 1
+			While cursor < selector_token.Length ..
+			And   json.IsAlphaNumericOrUnderscore( Chr( selector_token[cursor] ))
+				value :+ Chr( selector_token[cursor] )
+				cursor :+ 1
+			EndWhile
+			Return value
+		EndIf
+		Return Null
+	EndFunction
+
+	Function ParseSelectorArrayElementIndex%( selector_token$ )
+		Local cursor% = selector_token.Find( SELECTOR_ARRAY_ELEMENT_INDEX_START )
+		If cursor <> -1
+			Local value$ = ""
+			cursor :+ 1
+			While cursor < selector_token.Length ..
+			And   json.IsNumeric( Chr( selector_token[cursor] ))
+				value :+ Chr( selector_token[cursor] )
+				cursor :+ 1
+			EndWhile
+			Return value.ToInt()
+		EndIf
+		Return -1
+	EndFunction
+
+	'//////////
+	Global SELECTOR_LEVEL_SEPARATOR$ =           "/"
+	Global SELECTOR_TYPE_NAME_START$ =           ":"
+	Global SELECTOR_OBJECT_FIELD_NAME_START$ =   "$"
+	Global SELECTOR_ARRAY_ELEMENT_INDEX_START$ = "@"
+
+EndType
+
+
+
+Type TValue_Transformation
+	
+	Field selector:TValue_Selector_Token[]
+	Field imperative_id%
+	Field argument:Object
+	Field condition_func%( val:TValue )
+
+	Function Create:TValue_Transformation( selector$, imperative_id%, argument:Object, condition_func%( val:TValue ) )
+		Local xf:TValue_Transformation = New TValue_Transformation
+		xf.selector = ParseSelectorString( selector )
+		xf.imperative_id = imperative_id
+		xf.argument = argument
+		xf.condition_func = condition_func
+		Return xf
+	EndFunction
+
+	Method Execute( val:TValue )
+		Local matches:TList = Search( val )
+		For Local result:TValue[] = EachIn matches
+			If condition_func <> Null And condition_func( result[0] ) = True
+				Select imperative_id
+					Case json.XJ_DELETE
+
+					Case json.XJ_RENAME
+
+					Case json.XJ_COPY
+
+				EndSelect
+			EndIf
+		Next
+	EndMethod
+
+	'recursive function (naturally) that
+	'returns a List of Tuples where, for each Tuple,
+	'  [0] is the matched value, and 
+	'  [1] is the parent if any else null
+	Method Search:TList( this:TValue, results:TList=Null, path:TValue_Selector_Token[]=Null )
+		If results = Null Then results = CreateList()
+		'determine if the current path matches the selector
+		'if this TValue is a container type, traverse them also, sending a new version of the path to each
+		Return results
+	EndMethod
+
+	'////////////////
+
+	Function ParseSelectorString:TValue_Selector_Token[]( selector_str$ )
+		Local selector_tok$[] = selector_str.Split( TValue_Selector_Token.SELECTOR_LEVEL_SEPARATOR )
+		Local selector:TValue_Selector_Token[] = New TValue_Selector_Token[selector_tok.Length]
+		For Local i% = 0 Until selector.Length
+			selector[i] = TValue_Selector_Token.Create( selector_tok[i] )
+		Next
+		Return selector
+	EndFunction
+
+EndType
+
+
 
