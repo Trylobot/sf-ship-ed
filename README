@@ -7,3 +7,15 @@ Open sf-ship-ed.bmx using the MaxIDE program that ships with the BlitzMax instal
 Alternatively, use the command line compiler (BMK) directly:
 bmk makeapp -a -r -t gui -o sf-ship-ed.exe sf-ship-ed.bmx
 
+
+
+Prerequisites for Use
+=====================
+* Starfarer http://fractalsoftworks.com/
+
+This is an editor for modders of the game Starfarer, and it requires
+that you have installed a copy of the game. The editor scans the core
+game data and uses it to populate graphs and string enumerations to help
+you decide on reasonable starting values, so that educated guesses are
+more convenient. It is not meant to be a full-on balancing tool, however.
+
