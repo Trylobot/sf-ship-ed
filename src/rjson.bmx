@@ -52,9 +52,8 @@ Transformations can optionally specify a condition function that determines at r
   user-defined conditions.
 
 Supported transformation imperatives:
-* XJ_DELETE ()
-* XJ_RENAME ( new_field_name )
-* XJ_COPY   ( new_field_name )
+* XJ_DELETE ()                  -- applies to: Object, Array
+* XJ_RENAME ( new_field_name )  -- applies to: Object
 
 
 EndRem
@@ -465,7 +464,6 @@ Type json
 	'transformations ////////////////////////////////////////////////////////////
 	Const XJ_DELETE% = 86
 	Const XJ_RENAME% = 102
-	Const XJ_COPY% = 4242
 	'Selector Type Codes
 	Const SEL_NULL$    = "null"
 	Const SEL_BOOLEAN$ = "boolean"
@@ -1058,6 +1056,19 @@ Type TValue_Selector_Token
 EndType
 
 
+Type TValue_Search_Result
+	
+	'the value in question
+	Field matched:TValue
+	'the containing object and field name, if any
+	Field container_TObject:TObject
+	Field object_field_name$
+	'the containing array and index, if any
+	Field container_TArray:TArray
+	Field array_element_index%
+
+EndType
+
 
 Type TValue_Transformation
 	
@@ -1077,29 +1088,42 @@ Type TValue_Transformation
 
 	Method Execute( val:TValue )
 		Local matches:TList = Search( val )
-		For Local result:TValue[] = EachIn matches
-			If condition_func <> Null And condition_func( result[0] ) = True
+		For Local result:TValue_Search_Result = EachIn matches
+			If (condition_func = Null) Or (condition_func( result.matched ) = True)
 				Select imperative_id
 					Case json.XJ_DELETE
-
+						If result.container_TObject
+							result.container_TObject.fields.Remove( result.object_field_name )
+						ElseIf result.container_TArray
+							result.container_TArray.elements.Remove( result )
+						EndIf
 					Case json.XJ_RENAME
-
-					Case json.XJ_COPY
-
+						If result.container_TObject
+							result.container_TObject.fields.Insert( String(argument), result.matched )
+							result.container_TObject.fields.Remove( result.object_field_name )
+						EndIf
 				EndSelect
 			EndIf
 		Next
 	EndMethod
 
 	'recursive function (naturally) that
-	'returns a List of Tuples where, for each Tuple,
-	'  [0] is the matched value, and 
-	'  [1] is the parent if any else null
-	Method Search:TList( this:TValue, results:TList=Null, path:TValue_Selector_Token[]=Null )
-		If results = Null Then results = CreateList()
-		'determine if the current path matches the selector
-		'if this TValue is a container type, traverse them also, sending a new version of the path to each
-		Return results
+	'returns a List of SelectorResult objects
+	Method Search:TList( this:TValue, matches:TList=Null, path:TValue_Selector_Token[]=Null )
+		If matches = Null Then matches = CreateList()
+		If path <> Null And path.Length = selector.Length
+			'determine if the current path matches the selector
+			Local this_selector_token:TValue_Selector_Token = selector[selector.Length - 1]
+			Local this_path_token:TValue_Selector_Token = path[path.Length - 1]
+			'If this_selector_token.type_name <> Null
+			'EndIf
+		ElseIf path = Null Or path.Length < selector.Length
+			'if this TValue is a container type, search the children
+			If TObject(this)
+			ElseIf TArray(this)
+			EndIf
+		EndIf
+		Return matches
 	EndMethod
 
 	'////////////////
