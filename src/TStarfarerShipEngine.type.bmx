@@ -6,6 +6,7 @@ Type TStarfarerShipEngine
 	Field length#
 	Field location#[]
 	Field style$
+	Field styleId$
 	Field styleSpec:TStarfarerCustomEngineStyleSpec
 	Field width#
 	
@@ -15,6 +16,8 @@ Type TStarfarerShipEngine
 		length = 30.0
 		location = [ 0.0, 0.0 ]
 		style = "LOW_TECH"
+		styleId = Null
+		styleSpec = Null
 		width = 10.0
 	End Method
 
@@ -25,6 +28,7 @@ Type TStarfarerShipEngine
 		copy.length = length
 		copy.location = location[..]
 		copy.style = style
+		copy.styleId = styleId
 		If styleSpec
 			copy.styleSpec = styleSpec.Clone()
 		EndIf
