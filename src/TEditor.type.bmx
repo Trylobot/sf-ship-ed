@@ -51,6 +51,7 @@ Type TEditor
 	Field stock_ships:TMap 'String (hullId) --> TStarfarerShip
 	Field stock_variants:TMap 'String (variantId) --> TStarfarerVariant
 	Field stock_weapons:TMap 'String(id) --> TStarfarerWeapon
+	Field stock_engine_styles:TMap'<String,TStarfarerCustomEngineStyleSpec>  'CUSTOM Engine styleId --> engine data object
 	Field stock_ship_stats:TMap 'String (id:hullId) --> TMap (csv stats keys --> values)
 	Field stock_wing_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
 	Field stock_weapon_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
@@ -70,6 +71,8 @@ Type TEditor
 		stock_ships = CreateMap()
 		stock_variants = CreateMap()
 		stock_weapons = CreateMap()
+		stock_engine_styles = CreateMap()
+		stock_engine_styles.Insert( "", "" ) 'NULL engine style means "use the included styleSpec data"
 		'csv data
 		stock_ship_stats = CreateMap()
 		stock_wing_stats = CreateMap()
@@ -140,6 +143,18 @@ Type TEditor
 			Return Null
 		EndTry
 	End Method
+
+	Method load_stock_engine_styles( dir$, file$ )
+		Try
+			Local input_json_str$ = LoadString( dir+file )
+			Local engine_styles:TMap = TMap( json.parse( input_json_str, "TMap" ))
+			For Local styleId$ = EachIn engine_styles.Keys()
+				load_multiselect_value( "ship.engine.styleId", styleId )
+			Next
+		Catch ex$ 'ignore parsing errors and continue
+			DebugLogFile " Error: "+file+" "+ex
+		EndTry
+	EndMEthod
 
 	Method load_stock_ship_stats( dir$, file$, save_field_order%=FALSE )
 		Try

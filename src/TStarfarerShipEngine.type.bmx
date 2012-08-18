@@ -38,12 +38,12 @@ Type TStarfarerShipEngine
 End Type
 
 
-Function predicate_TStarfarerShipEngine_omit_styleSpec%( val:TValue_Search_Result )
-	Return False
+Function predicate_TStarfarerShipEngine_omit_styleSpec%( val:TValue )
+	Return (TNull(val) <> Null)
 EndFunction
 
-Function predicate_TStarfarerShipEngine_omit_styleId%( val:TValue_Search_Result )
-	Return False
+Function predicate_TStarfarerShipEngine_omit_styleId%( val:TValue )
+	Return (TString(val).value = "")
 EndFunction
 
 

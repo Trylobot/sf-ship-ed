@@ -11,7 +11,7 @@ Type TData
 	Field json_view_variant:TList'<TextWidget>
 
 	Field csv_row:TMap'<String,String>  'column name --> value
-	
+
 	'requires subsequent call to update()
 	Method New()
 		ship = New TStarfarerShip
@@ -34,12 +34,14 @@ Type TData
 	End Method
 	
 	Method update()
+		json.formatted = true
 		'encode ship object as json data
 		json_str = json.stringify( ship )
 		json_view = columnize_text( json_str )
 	End Method
 	
 	Method update_variant()
+		json.formatted = true
 		'encode ship object as json data
 		json_str_variant = json.stringify( variant )
 		json_view_variant = columnize_text( json_str_variant )

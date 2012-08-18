@@ -126,15 +126,16 @@ json.error_level = 1
 json.formatted = True
 json.precision = 6
 'TStarfarerShipWeapon
-json.add_parse_transform(     "$weaponSlots:array/:object/$type:string",  json.XJ_RENAME, "type_" )
+json.add_parse_transform( "$weaponSlots:array/:object/$type:string", json.XJ_RENAME, "type_" )
 json.add_stringify_transform( "$weaponSlots:array/:object/$type_:string", json.XJ_RENAME, "type"  )
+json.add_stringify_transform( "$builtInWeapons:object", json.XJ_DELETE,, predicate_TStarfarerShip_omit_builtInWeapons )
 'TStarfarerCustomEngineStyleSpec
-json.add_parse_transform(     "$engineSlots:array/:object/$styleSpec:object/$type:string",  json.XJ_RENAME, "type_" )
+json.add_parse_transform( "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
 json.add_stringify_transform( "$engineSlots:array/:object/$styleSpec:object/$type_:string", json.XJ_RENAME, "type"  )
 json.add_stringify_transform( "$engineSlots:array/:object/$styleSpec:object", json.XJ_DELETE,, predicate_TStarfarerShipEngine_omit_styleSpec )
 json.add_stringify_transform( "$engineSlots:array/:object/$styleId:string", json.XJ_DELETE,, predicate_TStarfarerShipEngine_omit_styleId )
 'TStarfarerWeapon
-json.add_parse_transform(     "$type:string",  json.XJ_RENAME, "type_" )
+json.add_parse_transform( "$type:string", json.XJ_RENAME, "type_" )
 json.add_stringify_transform( "$type_:string", json.XJ_RENAME, "type"  )
 
 '////////////////////////////////////////////////
@@ -649,7 +650,7 @@ Function draw_data( ed:TEditor, data:TData )
 End Function
 
 Function draw_debug( ed:TEditor, sprite:TSprite )
-	If ed.show_debug
+	If ed.show_debug And sprite
 		Local img_x#, img_y#
 		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y, False )
 		Local col% = Int(img_x)
@@ -851,27 +852,34 @@ Function load_ui( ed:TEditor )
 	AutoMidHandle( true )
 End Function
 
-'data_dir$ should be either "starfarer-core/" or "mods/{MyMod}/"
+'data_dir$ should be either "starfarer-core/" or "mods/{ModDirectory}/"
 Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla%=FALSE )
 	Local stock_ships_dir$ =    data_dir+"data/hulls/"
 	Local stock_variants_dir$ = data_dir+"data/variants/"
 	Local stock_weapons_dir$ =  data_dir+"data/weapons/"
 	Local stock_hullmods_dir$ = data_dir+"data/hullmods/"
+	Local stock_config_dir$ =   data_dir+"data/config/"
 	'/////
 	Local stock_ships_files$[] = LoadDir( stock_ships_dir )
 	For Local stock_ship_file$ = EachIn stock_ships_files
 		If ExtractExt( stock_ship_file ) <> "ship" Then Continue
-		Local ship:TStarfarerShip = ed.load_stock_ship( stock_ships_dir, stock_ship_file )
+		ed.load_stock_ship( stock_ships_dir, stock_ship_file )
 	Next
 	Local stock_variants_files$[] = LoadDir( stock_variants_dir )
 	For Local stock_variant_file$ = EachIn stock_variants_files
 		If ExtractExt( stock_variant_file ) <> "variant" Then Continue
-		Local variant:TStarfarerVariant = ed.load_stock_variant( stock_variants_dir, stock_variant_file )
+		ed.load_stock_variant( stock_variants_dir, stock_variant_file )
 	Next
 	Local stock_weapons_files$[] = LoadDir( stock_weapons_dir )
 	For Local stock_weapon_file$ = EachIn stock_weapons_files
 		If ExtractExt( stock_weapon_file ) <> "wpn" Then Continue
-		Local weapon:TStarfarerWeapon = ed.load_stock_weapon( stock_weapons_dir, stock_weapon_file )
+		ed.load_stock_weapon( stock_weapons_dir, stock_weapon_file )
+	Next
+	Local stock_engine_styles_files$[] = LoadDir( stock_config_dir )
+	For Local stock_engine_styles_file$ = EachIn stock_engine_styles_files
+		If ExtractExt( stock_engine_styles_file ) <> "json" ..
+		Or StripAll( stock_engine_styles_file ) <> "engine_styles" Then Continue
+		ed.load_stock_engine_styles( stock_config_dir, stock_engine_styles_file )
 	Next
 	'/////
 	If FileType( stock_ships_dir+"ship_data.csv" ) = FILETYPE_FILE

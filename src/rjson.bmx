@@ -116,13 +116,13 @@ Type json
 	Global transforms_stringify:TList = CreateList()
 	Global transforms_parse:TList = CreateList()
 	
-	Function add_stringify_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue_Search_Result )=Null )
+	Function add_stringify_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue )=Null )
 		transforms_stringify.AddLast( ..
 			TValue_Transformation.Create( ..
 				selector, imperative_id, argument, condition_func ))
 	EndFunction
 
-	Function add_parse_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue_Search_Result )=Null )
+	Function add_parse_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue )=Null )
 		transforms_parse.AddLast( ..
 			TValue_Transformation.Create( ..
 				selector, imperative_id, argument, condition_func ))
@@ -786,6 +786,7 @@ Type TString Extends TValue
 	EndMethod
 
 	Method Encode:String( indent%, precision% )
+		If value = "" Then Return VALUE_NULL
 		Return STRING_BEGIN + json.Escape( value ) + STRING_END
 	EndMethod
 
@@ -1213,9 +1214,9 @@ Type TValue_Transformation
 	Field selector:TValue_Selector_Token[]
 	Field imperative_id%
 	Field argument:Object
-	Field condition_func%( val:TValue_Search_Result )
+	Field condition_func%( val:TValue )
 
-	Function Create:TValue_Transformation( selector$, imperative_id%, argument:Object, condition_func%( val:TValue_Search_Result ) )
+	Function Create:TValue_Transformation( selector$, imperative_id%, argument:Object, condition_func%( val:TValue ) )
 		Local xf:TValue_Transformation = New TValue_Transformation
 		xf.selector = ParseSelectorString( selector )
 		xf.imperative_id = imperative_id
@@ -1227,7 +1228,7 @@ Type TValue_Transformation
 	Method Execute( val:TValue )
 		Local matches:TList = Search( val )
 		For Local result:TValue_Search_Result = EachIn matches
-			If (condition_func = Null) Or (condition_func( result ) = True)
+			If (condition_func = Null) Or (condition_func( result.matched ) = True)
 				Select imperative_id
 					Case json.XJ_DELETE
 						If result.container_TObject
@@ -1256,7 +1257,7 @@ Type TValue_Transformation
 			'determine if the current path matches the selector
 			Local s:TValue_Selector_Token = selector[selector.Length - 1]
 			Local p:TValue_Selector_Token = path[path.Length - 1]
-			If  (s.type_name = Null Or s.type_name = p.type_name) ..
+			If  (s.type_name = Null Or s.type_name = p.type_name Or p.type_name = json.SEL_NULL) ..
 			And (s.object_field_name = Null Or s.object_field_name = p.object_field_name) ..
 			And (s.array_element_index = -1 Or s.array_element_index = p.array_element_index)
 				matches.AddLast( TValue_Search_Result.Create( ..

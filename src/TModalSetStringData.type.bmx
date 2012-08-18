@@ -203,6 +203,7 @@ Type TModalSetStringData Extends TSubroutine
 	EndFunction
 
 	Function Load( ed:TEditor, data:TData, sprite:TSprite )
+		json.formatted = false
 		'setup edit box and initialize with values
 		Select subroutine_mode
 			'////////////////////////////////////////
@@ -292,6 +293,7 @@ Type TModalSetStringData Extends TSubroutine
 			EndIf
 		Next
 		update_cursor( data )
+		json.formatted = true
 	EndFunction
 
 EndType
