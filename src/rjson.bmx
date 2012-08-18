@@ -825,16 +825,17 @@ Type TString Extends TValue
 			' This means AlphaNumeric or Underscore characters ONLY
 			' Any other characters encountered from this point on will trigger the end of the string
 			Repeat
-				If cursor >= (encoded.Length)
+				If cursor >= encoded.Length
 					Exit 'done (but could indicate an error higher up the chain)
 				EndIf
 				char = Chr(encoded[cursor]); cursor :+ 1
 				If json.IsAlphaNumericOrUnderscore( char )
 					decoded_value :+ char 'NORMAL STRING CHARACTER
 				Else
+					cursor :- 1
 					Exit 'done
 				EndIf
-			Until cursor >= (encoded.Length)
+			Until cursor >= encoded.Length
 		EndIf
 		value = decoded_value
 	EndMethod
@@ -911,10 +912,12 @@ Type TArray Extends TValue
 			If element_value = Null
 				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+json.ShowPosition(encoded,(cursor-1)) )
 			EndIf
+			'//////////////////////////////////////
 			element_value.Decode( encoded, cursor )
+			'//////////////////////////////////////
 			decoded_elements.AddLast( element_value ) ' add element
 			json.EatWhitespace( encoded, cursor )
-			If cursor >= (encoded.Length) Then Exit
+			If cursor >= encoded.Length Then Exit
 			char = Chr(encoded[cursor]); cursor :+ 1
 			If char <> VALUE_SEPARATOR And char <> VALUE_SEPARATOR_ALTERNATE And char <> ARRAY_END
 				json_error( json.LOG_ERROR+" expected comma or semicolon or close-square-bracket character but found "+char+" at position "+(cursor-1)+json.ShowPosition(encoded,(cursor-1)) )
@@ -1012,7 +1015,9 @@ Type TObject Extends TValue
 				cursor :+ 1 'eat it
 				Exit 'empty object with no fields
 			EndIf
+			'///////////////////////////////////
 			field_name.Decode( encoded, cursor )
+			'//////////////////////////////////////
 			json.EatWhitespace( encoded, cursor )
 			If cursor >= encoded.Length Then Exit
 			char = Chr(encoded[cursor]); cursor :+ 1
@@ -1024,7 +1029,9 @@ Type TObject Extends TValue
 			If field_value = Null
 				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+json.ShowPosition(encoded,(cursor-1))  )
 			EndIf
+			'////////////////////////////////////
 			field_value.Decode( encoded, cursor )
+			'////////////////////////////////////
 			decoded_fields.Insert( field_name.value, field_value )
 			json.EatWhitespace( encoded, cursor )
 			If cursor >= (encoded.Length) Then Exit
