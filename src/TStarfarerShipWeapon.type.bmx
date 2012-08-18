@@ -4,6 +4,7 @@ Type TStarfarerShipWeapon
 	Field arc#
 	Field id$
 	Field locations#[]
+	Field position#[]
 	Field mount$
 	Field size$
 	Field type_$
@@ -17,6 +18,7 @@ Type TStarfarerShipWeapon
 		arc = 0.0
 		id = "WS 001"
 		locations = [ 0.0, 0.0 ]
+		position = Null
 		mount = "TURRET"
 		size = "MEDIUM"
 		type_ = "ENERGY"

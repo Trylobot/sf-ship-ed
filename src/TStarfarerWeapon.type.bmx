@@ -20,9 +20,10 @@ Type TStarfarerWeapon
 	Field coreColor%[]
 	Field glowColor%[]
 	Field darkCore%
+	Field convergeOnPoint%
 	Field width#
 	Field height#
-	Field textureType$
+	Field textureType:Object 'String, String[]
 	Field textureScrollSpeed#
 	Field pixelsPerTexel#
 	Field turretOffsets#[]

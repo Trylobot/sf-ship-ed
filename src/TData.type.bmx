@@ -22,11 +22,15 @@ Type TData
 	'requires subsequent call to update()
 	Method decode( input_json_str$ )
 		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip" ))
+		Fix_Map_TStrings( ship.builtInWeapons ) 'TEMPORARY
 	End Method
 	
 	'requires subsequent call to update_variant()
 	Method decode_variant( input_json_str$ )
 		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
+		For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
+			Fix_Map_TStrings( weaponGroup.weapons ) 'TEMPORARY
+		Next
 	End Method
 	
 	Method update()
@@ -700,6 +704,18 @@ Type TData
 		Return columns
 	EndMethod
 
+
+	'Temporary Fix to address not being able to override generic container element types
+	Function Fix_Map_TStrings( map:TMap )
+		If map And Not map.IsEmpty()
+			For Local key$ = EachIn map.Keys()
+				Local val:TString = TString( map.ValueForKey( key ))
+				If val
+					map.Insert( key, val.value )
+				EndIf
+			Next
+		EndIf
+	EndFunction
 
 End Type
 

@@ -33,6 +33,6 @@ End Type
 
 
 Function predicate_TStarfarerShip_omit_builtInWeapons%( val:TValue_Search_Result )
-	Return False
+	Return TObject(val.container_TObject.fields.ValueForKey("builtInWeapons")).fields.IsEmpty()
 EndFunction
 

@@ -254,18 +254,27 @@ Type json
 	Function initialize_object:Object( source:TValue, type_id:TTypeId )
 		If TNull(source) Or source = Null Then Return Null
 		Local source_mapped:Object
-		If type_id = TTypeId.ForName("TValue") Or type_id.SuperType() = TTypeId.ForName("TValue")
+		If type_id = TTypeId.ForName("TValue") ..
+		Or type_id.SuperType() = TTypeId.ForName("TValue") ..
+		Or type_id = TTypeId.ForName("Object")
 			source_mapped = source
 		Else
 			Local source_object_type_id:TTypeId = TTypeId.ForObject( source ) 
-			If type_id.ElementType() = Null
+			'Check for cyclic built-in types; process them in a special way for convenience
+			If type_id = TMap_TTypeId And TObject(source)
+				source_mapped = TObject(source).fields
+				'TODO: provide a way to specify a conversion type for these
+			ElseIf type_id = TList_TTypeId And TArray(source)
+				source_mapped = TArray(source).elements
+				'TODO: provide a way to specify a conversion type for these
+			ElseIf type_id.ElementType() = Null
 				'Not Array Type
 				If type_id = StringTypeId
 					'String
 					If TString(source)
 						source_mapped = TString(source).value
 					Else
-						json_error( json.LOG_ERROR+" could not initialize "+type_id.Name()+" from "+source_object_type_id.Name() )
+						json_error( json.LOG_WARN+" could not initialize "+type_id.Name()+" from "+source_object_type_id.Name() )
 					EndIf
 				Else
 					'Non-array Non-string: User Defined Object
@@ -282,24 +291,40 @@ Type json
 									Case IntTypeId, ShortTypeId, ByteTypeId
 										If TNumber(source_field_value)
 											source_mapped_field.SetInt( source_mapped, Int(TNumber(source_field_value).value) )
+										ElseIf TBoolean(source_field_value)
+											source_mapped_field.SetInt( source_mapped, Int(TBoolean(source_field_value).value) )
+										ElseIf TString(source_field_value)
+											source_mapped_field.SetInt( source_mapped, Int(TString(source_field_value).value.ToInt()) )
 										Else
 											json_error( json.LOG_WARN+" could not initialize "+source_mapped_field.TypeId().Name()+" from "+TTypeId.ForObject( source_field_value ).Name() )
 										EndIf
 									Case LongTypeId
 										If TNumber(source_field_value)
 											source_mapped_field.SetLong( source_mapped, Long(TNumber(source_field_value).value) )
+										ElseIf TBoolean(source_field_value)
+											source_mapped_field.SetLong( source_mapped, Long(TBoolean(source_field_value).value) )
+										ElseIf TString(source_field_value)
+											source_mapped_field.SetLong( source_mapped, Long(TString(source_field_value).value.ToLong()) )
 										Else
 											json_error( json.LOG_WARN+" could not initialize "+source_mapped_field.TypeId().Name()+" from "+TTypeId.ForObject( source_field_value ).Name() )
 										EndIf
 									Case FloatTypeId
 										If TNumber(source_field_value)
 											source_mapped_field.SetFloat( source_mapped, Float(TNumber(source_field_value).value) )
+										ElseIf TBoolean(source_field_value)
+											source_mapped_field.SetFloat( source_mapped, Float(TBoolean(source_field_value).value) )
+										ElseIf TString(source_field_value)
+											source_mapped_field.SetFloat( source_mapped, Float(TString(source_field_value).value.ToFloat()) )
 										Else
 											json_error( json.LOG_WARN+" could not initialize "+source_mapped_field.TypeId().Name()+" from "+TTypeId.ForObject( source_field_value ).Name() )
 										EndIf
 									Case DoubleTypeId
 										If TNumber(source_field_value)
 											source_mapped_field.SetDouble( source_mapped, Double(TNumber(source_field_value).value) )
+										ElseIf TBoolean(source_field_value)
+											source_mapped_field.SetDouble( source_mapped, Double(TBoolean(source_field_value).value) )
+										ElseIf TString(source_field_value)
+											source_mapped_field.SetDouble( source_mapped, Double(TString(source_field_value).value.ToDouble()) )
 										Else
 											json_error( json.LOG_WARN+" could not initialize "+source_mapped_field.TypeId().Name()+" from "+TTypeId.ForObject( source_field_value ).Name() )
 										EndIf
@@ -313,7 +338,7 @@ Type json
 						Next
 					Else
 						'Some other type of TValue provided
-						json_error( json.LOG_ERROR+" could not initialize "+type_id.Name()+" from "+source_object_type_id.Name() )
+						json_error( json.LOG_WARN+" could not initialize "+type_id.Name()+" from "+source_object_type_id.Name() )
 					EndIf
 				EndIf
 			Else ' type_id.ElementType() <> Null
@@ -346,7 +371,7 @@ Type json
 						index :+ 1
 					Next
 				Else
-					json_error( json.LOG_ERROR+" could not initialize "+type_id.Name()+" from "+source_object_type_id.Name() )
+					json_error( json.LOG_WARN+" could not initialize "+type_id.Name()+" from "+source_object_type_id.Name() )
 				EndIf
 			EndIf
 		EndIf
@@ -534,9 +559,11 @@ Function json_error( message$ )
 		Case 1 ' ignore warnings
 			If message.StartsWith( json.LOG_ERROR )
 				Throw message
+			Else
+				DebugLog message
 			EndIf
 		Case 0 ' ignore all
-			' do nothing
+			DebugLog message
 	EndSelect
 EndFunction
 
