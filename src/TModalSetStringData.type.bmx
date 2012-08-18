@@ -226,6 +226,12 @@ Type TModalSetStringData Extends TSubroutine
 					"ship.engine.style" )
 				values = TextWidget.Create( ..
 					TStarfarerShipEngine(target).style )
+				If TStarfarerShipEngine(target).style = "CUSTOM"
+					labels.append( TextWidget.Create( ..
+						"ship.engine.styleId" ))
+					values.append( TextWidget.Create( ..
+						TStarfarerShipEngine(target).styleId ))
+				EndIf
 				If TStarfarerShipEngine(target).styleSpec <> NULL
 					labels.append( TextWidget.Create( ..
 						"ship.engine.styleSpec.type" +"~n"+..
