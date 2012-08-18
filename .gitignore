@@ -1,4 +1,5 @@
 .bmx
+*.bmx.bak
 *.exe
 *.sublime-workspace
 *.lnk

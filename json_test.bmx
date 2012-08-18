@@ -9,9 +9,9 @@ Global test_dir$ = "test"
 ''    assert = require("assert"),
 ''    parser = require("../lib/jsonlint").parser;
 
-json.formatted = false
+json.formatted = False
 
-function test_object()
+Function test_object()
 	Print "*** test_object"
 	Local json_str$ = "{~qfoo~q: ~qbar~q}"
 	Local val:TString = New TString
@@ -20,9 +20,9 @@ function test_object()
 	obj.fields.Insert( "foo", val )
 	Local json_obj:TValue = TValue( json.parse( json_str ))
 	verify( json_obj.Equals( obj ), json_obj.ToString()+"~n"+obj.ToString() )
-endfunction
+EndFunction
 
-function test_escaped_backslash()
+Function test_escaped_backslash()
 	Print "*** test_escaped_backslash"
 	Local json_str$ = "{~qfoo~q: ~q\\~q}"
 	Local val:TString = New TString
@@ -31,9 +31,9 @@ function test_escaped_backslash()
 	obj.fields.Insert( "foo", val )
 	Local json_obj:TValue = TValue( json.parse( json_str ))
 	verify( json_obj.Equals( obj ), json_obj.ToString()+"~n"+obj.ToString() )
-endfunction
+EndFunction
 
-function test_escaped_chars()
+Function test_escaped_chars()
 	Print "*** test_escaped_chars"
 	Local json_str$ = "{~qfoo~q: ~q\\\\\\\~q~q}"
 	Local val:TString = New TString
@@ -42,9 +42,9 @@ function test_escaped_chars()
 	obj.fields.Insert( "foo", val )
 	Local json_obj:TValue = TValue( json.parse( json_str ))
 	verify( json_obj.Equals( obj ), json_obj.ToString()+"~n"+obj.ToString() )
-endfunction
+EndFunction
 
-function test_escaped_newline()
+Function test_escaped_newline()
 	Print "*** test_escaped_newline"
 	Local json_str$ = "{~qfoo~q: ~q\\\n~q}"
 	Local val:TString = New TString
@@ -53,9 +53,9 @@ function test_escaped_newline()
 	obj.fields.Insert( "foo", val )
 	Local json_obj:TValue = TValue( json.parse( json_str ))
 	verify( json_obj.Equals( obj ), json_obj.ToString()+"~n"+obj.ToString() )
-endfunction
+EndFunction
 
-function test_string_with_escaped_line_break()
+Function test_string_with_escaped_line_break()
 	Print "*** test_string_with_escaped_line_break"
 	Local json_str$ = "{~qfoo~q:~qbar\nbar~q}"
 	Local val:TString = New TString
@@ -66,9 +66,9 @@ function test_string_with_escaped_line_break()
 	verify( json_obj.Equals( obj ), json_obj.ToString()+"~n"+obj.ToString() )
 	Local json_str_roundtrip$ = json.stringify( json_obj )
 	verify( json_str_roundtrip = json_str,  json_str+"~n"+json_str_roundtrip )
-endfunction
+EndFunction
 
-function test_string_with_line_break()
+Function test_string_with_line_break()
 	Print "*** test_string_with_line_break"
 	Local json_str$ = "{~qfoo~q: ~qbar~nbar~q}"
 	Try
@@ -76,38 +76,38 @@ function test_string_with_line_break()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_string_literal()
+Function test_string_literal()
 	Print "*** test_string_literal"
 	Local json_str$ = "~qfoo~q"
 	Local val:TString = New TString; val.value = "foo";
 	verify( val.Equals( json.parse( json_str )) )
-endfunction
+EndFunction
 
-function test_number_literal()
+Function test_number_literal()
 	Print "*** test_number_literal"
 	Local json_str$ = "1234"
 	Local val:TNumber = New TNumber; val.value = 1234;
 	verify( val.Equals( json.parse( json_str )) )
-endfunction
+EndFunction
 
-function test_null_literal()
+Function test_null_literal()
 	Print "*** test_null_literal"
 	Local json_str$ = "null"
 	Local val:TNull = New TNull
 	verify( val.Equals( json.parse( json_str )) )
-endfunction
+EndFunction
 
-function test_boolean_literal()
+Function test_boolean_literal()
 	Print "*** test_boolean_literal"
 	Local json_str$ = "true"
-	Local val:TBoolean = New TBoolean; val.value = true
+	Local val:TBoolean = New TBoolean; val.value = True
 	verify( val.Equals( json.parse( json_str )) )
-endfunction
+EndFunction
 
-function test_unclosed_array()
+Function test_unclosed_array()
 	Print "*** test_unclosed_array"
 	Local json_str$ = LoadString( test_dir + "/fails/2.json" )
 	Try
@@ -115,10 +115,10 @@ function test_unclosed_array()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_unquotedkey_keys_must_be_quoted()
+Function test_unquotedkey_keys_must_be_quoted()
 	Print "*** test_unquotedkey_keys_must_be_quoted"
 	Local json_str$ = LoadString( test_dir + "/fails/3.json" )
 	Try
@@ -126,10 +126,10 @@ function test_unquotedkey_keys_must_be_quoted()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_extra_comma()
+Function test_extra_comma()
 	Print "*** test_extra_comma"
 	Local json_str$ = LoadString( test_dir + "/fails/4.json" )
 	Try
@@ -137,10 +137,10 @@ function test_extra_comma()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_double_extra_comma()
+Function test_double_extra_comma()
 	Print "*** test_double_extra_comma"
 	Local json_str$ = LoadString( test_dir + "/fails/5.json" )
 	Try
@@ -148,10 +148,10 @@ function test_double_extra_comma()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_missing_value()
+Function test_missing_value()
 	Print "*** test_missing_value"
 	Local json_str$ = LoadString( test_dir + "/fails/6.json" )
 	Try
@@ -159,10 +159,10 @@ function test_missing_value()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_comma_after_the_close()
+Function test_comma_after_the_close()
 	Print "*** test_comma_after_the_close"
 	Local json_str$ = LoadString( test_dir + "/fails/7.json" )
 	Try
@@ -170,10 +170,10 @@ function test_comma_after_the_close()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_extra_close()
+Function test_extra_close()
 	Print "*** test_extra_close"
 	Local json_str$ = LoadString( test_dir + "/fails/8.json" )
 	Try
@@ -181,10 +181,10 @@ function test_extra_close()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_extra_comma_after_value()
+Function test_extra_comma_after_value()
 	Print "*** test_extra_comma_after_value"
 	Local json_str$ = LoadString( test_dir + "/fails/9.json" )
 	Try
@@ -192,10 +192,10 @@ function test_extra_comma_after_value()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_extra_value_after_close_with_misplaced_quotes()
+Function test_extra_value_after_close_with_misplaced_quotes()
 	Print "*** test_extra_value_after_close_with_misplaced_quotes"
 	Local json_str$ = LoadString( test_dir + "/fails/10.json" )
 	Try
@@ -203,10 +203,10 @@ function test_extra_value_after_close_with_misplaced_quotes()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_illegal_expression_addition()
+Function test_illegal_expression_addition()
 	Print "*** test_illegal_expression_addition"
 	Local json_str$ = LoadString( test_dir + "/fails/11.json" )
 	Try
@@ -214,10 +214,10 @@ function test_illegal_expression_addition()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_illegal_invocation_of_alert()
+Function test_illegal_invocation_of_alert()
 	Print "*** test_illegal_invocation_of_alert"
 	Local json_str$ = LoadString( test_dir + "/fails/12.json" )
 	Try
@@ -225,10 +225,10 @@ function test_illegal_invocation_of_alert()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_numbers_cannot_have_leading_zeroes()
+Function test_numbers_cannot_have_leading_zeroes()
 	Print "*** test_numbers_cannot_have_leading_zeroes"
 	Local json_str$ = LoadString( test_dir + "/fails/13.json" )
 	Try
@@ -236,10 +236,10 @@ function test_numbers_cannot_have_leading_zeroes()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_numbers_cannot_be_hex()
+Function test_numbers_cannot_be_hex()
 	Print "*** test_numbers_cannot_be_hex"
 	Local json_str$ = LoadString( test_dir + "/fails/14.json" )
 	Try
@@ -247,10 +247,10 @@ function test_numbers_cannot_be_hex()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_illegal_backslash_escape_null()
+Function test_illegal_backslash_escape_null()
 	Print "*** test_illegal_backslash_escape_null"
 	Local json_str$ = LoadString( test_dir + "/fails/15.json" )
 	Try
@@ -258,10 +258,10 @@ function test_illegal_backslash_escape_null()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_unquoted_text()
+Function test_unquoted_text()
 	Print "*** test_unquoted_text"
 	Local json_str$ = LoadString( test_dir + "/fails/16.json" )
 	Try
@@ -269,10 +269,10 @@ function test_unquoted_text()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_illegal_backslash_escape_sequence()
+Function test_illegal_backslash_escape_sequence()
 	Print "*** test_illegal_backslash_escape_sequence"
 	Local json_str$ = LoadString( test_dir + "/fails/17.json" )
 	Try
@@ -280,10 +280,10 @@ function test_illegal_backslash_escape_sequence()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_missing_colon()
+Function test_missing_colon()
 	Print "*** test_missing_colon"
 	Local json_str$ = LoadString( test_dir + "/fails/19.json" )
 	Try
@@ -291,10 +291,10 @@ function test_missing_colon()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_double_colon()
+Function test_double_colon()
 	Print "*** test_double_colon"
 	Local json_str$ = LoadString( test_dir + "/fails/20.json" )
 	Try
@@ -302,10 +302,10 @@ function test_double_colon()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_comma_instead_of_colon()
+Function test_comma_instead_of_colon()
 	Print "*** test_comma_instead_of_colon"
 	Local json_str$ = LoadString( test_dir + "/fails/21.json" )
 	Try
@@ -313,10 +313,10 @@ function test_comma_instead_of_colon()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_colon_instead_of_comma()
+Function test_colon_instead_of_comma()
 	Print "*** test_colon_instead_of_comma"
 	Local json_str$ = LoadString( test_dir + "/fails/22.json" )
 	Try
@@ -324,10 +324,10 @@ function test_colon_instead_of_comma()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_bad_raw_value()
+Function test_bad_raw_value()
 	Print "*** test_bad_raw_value"
 	Local json_str$ = LoadString( test_dir + "/fails/23.json" )
 	Try
@@ -335,10 +335,10 @@ function test_bad_raw_value()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_single_quotes()
+Function test_single_quotes()
 	Print "*** test_single_quotes"
 	Local json_str$ = LoadString( test_dir + "/fails/24.json" )
 	Try
@@ -346,10 +346,10 @@ function test_single_quotes()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_tab_character_in_string()
+Function test_tab_character_in_string()
 	Print "*** test_tab_character_in_string"
 	Local json_str$ = LoadString( test_dir + "/fails/25.json" )
 	Try
@@ -357,10 +357,10 @@ function test_tab_character_in_string()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_tab_character_in_string_2()
+Function test_tab_character_in_string_2()
 	Print "*** test_tab_character_in_string_2"
 	Local json_str$ = LoadString( test_dir + "/fails/26.json" )
 	Try
@@ -368,10 +368,10 @@ function test_tab_character_in_string_2()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_line_break_in_string()
+Function test_line_break_in_string()
 	Print "*** test_line_break_in_string"
 	Local json_str$ = LoadString( test_dir + "/fails/27.json" )
 	Try
@@ -379,10 +379,10 @@ function test_line_break_in_string()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_line_break_in_string_in_array()
+Function test_line_break_in_string_in_array()
 	Print "*** test_line_break_in_string_in_array"
 	Local json_str$ = LoadString( test_dir + "/fails/28.json" )
 	Try
@@ -390,10 +390,10 @@ function test_line_break_in_string_in_array()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_0e()
+Function test_0e()
 	Print "*** test_0e"
 	Local json_str$ = LoadString( test_dir + "/fails/29.json" )
 	Try
@@ -401,10 +401,10 @@ function test_0e()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_0e_()
+Function test_0e_()
 	Print "*** test_0e_"
 	Local json_str$ = LoadString( test_dir + "/fails/30.json" )
 	Try
@@ -412,10 +412,10 @@ function test_0e_()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_0e__1()
+Function test_0e__1()
 	Print "*** test_0e__1"
 	Local json_str$ = LoadString( test_dir + "/fails/31.json" )
 	Try
@@ -423,10 +423,10 @@ function test_0e__1()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_comma_instead_of_closing_brace()
+Function test_comma_instead_of_closing_brace()
 	Print "*** test_comma_instead_of_closing_brace"
 	Local json_str$ = LoadString( test_dir + "/fails/32.json" )
 	Try
@@ -434,10 +434,10 @@ function test_comma_instead_of_closing_brace()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_bracket_mismatch()
+Function test_bracket_mismatch()
 	Print "*** test_bracket_mismatch"
 	Local json_str$ = LoadString( test_dir + "/fails/33.json" )
 	Try
@@ -445,10 +445,10 @@ function test_bracket_mismatch()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_extra_brace()
+Function test_extra_brace()
 	Print "*** test_extra_brace"
 	Local json_str$ = LoadString( test_dir + "/fails/34.json" )
 	Try
@@ -456,26 +456,26 @@ function test_extra_brace()
 	Catch ex$
 		Return
 	EndTry
-	verify( false, "    should throw error" )
-endfunction
+	verify( False, "    should throw error" )
+EndFunction
 
-function test_pass_1()
+Function test_pass_1()
 	Print "*** test_pass_1"
 	Local json_str$ = LoadString( test_dir + "/passes/1.json" )
 	json.parse( json_str )
-endfunction
+EndFunction
 
-function test_pass_2()
+Function test_pass_2()
 	Print "*** test_pass_2"
 	Local json_str$ = LoadString( test_dir + "/passes/2.json" )
 	json.parse( json_str )
-endfunction
+EndFunction
 
-function test_pass_3()
+Function test_pass_3()
 	Print "*** test_pass_3"
 	Local json_str$ = LoadString( test_dir + "/passes/3.json" )
 	json.parse( json_str )
-endfunction
+EndFunction
 
 
 
@@ -497,7 +497,7 @@ Type type_2_complex
 	Field stArr:String[]
 EndType
 
-function test_map_object_to_tvalue()
+Function test_map_object_to_tvalue()
 	Print "*** test_map_object_to_tvalue"
 	Local obj:type_1_simple = New type_1_simple
 	obj.in1 = 75
@@ -516,25 +516,25 @@ function test_map_object_to_tvalue()
 	Local json_str$ = json.stringify( obj2 )
 	Local test_str$ = "{~qby~q:128,~qbyArr~q:[24,1,99],~qdo~q:3,~qfl~q:3848.5,~qin~q:1457428982,~qlo~q:-2038719820,~qsh~q:1280,~qstArr~q:[~qs1~q,~q\n~q,~q\t~q,~q\\~q],~qt1~q:{~qin1~q:75,~qst1~q:~qstri\~qng1\~q~q,~qst2~q:~qstring2~q}}"
 	verify( json_str = test_str, test_str+"~n"+json_str )
-endfunction
+EndFunction
 
-function test_map_tvalue_to_object()
+Function test_map_tvalue_to_object()
 	Print "*** test_map_tvalue_to_object"
 	Local obj2:type_2_complex
 	Local json_str$ = "{~qby~q:128,~qbyArr~q:[24,1,99],~qdo~q:3,~qfl~q:3848.5,~qin~q:1457428982,~qlo~q:-2038719820,~qsh~q:1280,~qstArr~q:[~qs1~q,~q\n~q,~q\t~q,~q\\~q],~qt1~q:{~qin1~q:75,~qst1~q:~qstri\~qng1\~q~q,~qst2~q:~qstring2~q}}"
 	obj2 = type_2_complex( json.parse( json_str, "type_2_complex" ))
 	Local roundtrip_str$ = json.stringify( obj2 )
 	verify( json_str = roundtrip_str, "   ORIGINAL: "+json_str+"~n   ROUNDTRIP: "+roundtrip_str )
-endfunction
+EndFunction
 
-function test_pass_starfarer()
+Function test_pass_starfarer()
 	Print "*** test_pass_starfarer"
 	Local json_str$ = LoadString( test_dir + "/passes/starfarer.json" )
 	Local decoded:Object = json.parse( json_str )
 	verify( TObject(decoded).fields.ValueForKey( "enum1" ).ToString() = "~qENUM_VALUE~q", "~qENUM_VALUE~q <> "+TObject(decoded).fields.ValueForKey( "enum1" ).ToString() )
-endfunction
+EndFunction
 
-function test_encode_TList()
+Function test_encode_TList()
 	Print "*** test_encode_TList"
 	Local list:TList = CreateList()
 	list.AddLast( "string1" )
@@ -543,9 +543,9 @@ function test_encode_TList()
 	Local json_str$ = json.stringify( list )
 	Local test_str$ = "[~qstring1~q,~qstring2~q,~qstring3~q]"
 	verify( test_str = json_str, test_str+"~n"+json_str )
-endfunction
+EndFunction
 
-function test_encode_TMap()
+Function test_encode_TMap()
 	Print "*** test_encode_TMap"
 	Local map:TMap = CreateMap()
 	map.Insert( "key1", "string1" )
@@ -554,17 +554,44 @@ function test_encode_TMap()
 	Local json_str$ = json.stringify( map )
 	Local test_str$ = "{~qkey1~q:~qstring1~q,~qkey2~q:~qstring2~q,~qkey3~q:~qstring3~q}"
 	verify( test_str = json_str, test_str+"~n"+json_str )
-endfunction
+EndFunction
 
-function test_tvalue_transformations()
-	'Print "*** test_tvalue_transformations"
-	
-endfunction
+Function test_tvalue_transformation_search()
+	Print "*** test_tvalue_transformation_search"
+	Local json_str$ = LoadString( test_dir + "/passes/xf1_in.json" )
+	Local val:TValue = TValue( json.parse( json_str ))
+	Local xf:TValue_Transformation = TValue_Transformation.Create( ..
+		":string", json.XJ_DELETE, Null, Null )
+	Local results:TList = xf.Search( val )
+	Local json_out_expected$ = LoadString( test_dir + "/passes/xf1_out.json" )
+	Local json_out_actual$ = json.stringify( results )
+	verify( json_out_expected = json_out_actual, "   EXPECTED:~n"+json_out_expected+"~n   ACTUAL:~n"+json_out_actual )
+EndFunction
+
+
+Function test_tvalue_transformation_conditional_delete()
+	Print "*** test_tvalue_transformation_conditional_delete"
+	Local json_str$ = LoadString( test_dir + "/passes/xf2_in.json" )
+	json.add_parse_transform( ":object/$ALPHA:string", json.XJ_DELETE, Null, Null )
+	json.add_parse_transform( "@4:number", json.XJ_DELETE, Null, Null )
+	json.add_parse_transform( "@5:boolean", json.XJ_DELETE, Null, Null )
+	json.add_parse_transform( ":object/:boolean", json.XJ_DELETE, Null, __TBoolean_NOT )
+	Local val:TValue = TValue( json.parse( json_str ))
+	json.clear_transforms()
+	verify( TObject(TArray(val).elements.ValueAtIndex(8)).fields.Contains("ALPHA") = False, "value should not be found" )
+	For Local xf:TValue_Transformation = EachIn json.transforms_parse
+		verify( xf.Search( val ).IsEmpty(), "all specified fields should have been deleted" )
+	Next
+EndFunction
+Function __TBoolean_NOT%( val:TValue )
+	Return (Not TBoolean(val).value)
+EndFunction
+
 
 
 '/////////////////////////////////////////////////////////////////
 
-FUNCTION calc_hash%(s:String)
+Function calc_hash%(s:String)
 	Local hc% = 0
 	Local l% = Len(s)
 	For Local i% = 0 To l
@@ -572,23 +599,23 @@ FUNCTION calc_hash%(s:String)
 	Next
 	hc = Abs(hc)
 	Return hc
-ENDFUNCTION
+EndFunction
 
-FUNCTION verify( boolean_expression%, error_str$="" )
+Function verify( boolean_expression%, error_str$="" )
 	If Not boolean_expression
 		Throw "  TEST FAILED~n"+error_str
 	EndIf
-ENDFUNCTION
+EndFunction
 
-FUNCTION run_test( test_function() )
+Function run_test( test_function() )
 	Try
 		test_function()
 	Catch ex$
 		Print ex
 	EndTry
-ENDFUNCTION
+EndFunction
 
-FUNCTION main()
+Function Main()
 	run_test( test_object )
 	run_test( test_escaped_backslash )
 	run_test( test_escaped_chars )
@@ -639,8 +666,9 @@ FUNCTION main()
 	run_test( test_pass_starfarer )
 	run_test( test_encode_TList )
 	run_test( test_encode_TMap )
-	run_test( test_tvalue_transformations )
-ENDFUNCTION
+	run_test( test_tvalue_transformation_search )
+	run_test( test_tvalue_transformation_conditional_delete )
+EndFunction
 
-main()
+Main()
 

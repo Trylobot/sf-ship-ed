@@ -39,11 +39,11 @@ to arbitrary BlitzMax types, via reflection.
 
 Transformations are imperatives applied to a subset of data contained in a TValue.
 They thus can transform the parsed or stringified JSON data mid-way through the process.
-Filtering is performed via case-insensitive Selector strings, for example:
-	"/:string" --> any TString at root-level
-	"/$field"  --> root-level TObject's field named "field"
-	"/@5"      --> root-level TArray's element at position 5
-	""         --> nothing
+Filtering is performed via case-sensitive Selector strings, for example:
+	":string" --> any TString belonging to the root-level container
+	"$field"  --> root-level TObject's field named "field"
+	"@5"      --> root-level TArray's element at position 5
+	""        --> (wildcard) every root-level field or element
 
 Any given Transformation must also specify whether it is to be applied during parse or stringify.
 All Transformations are globally applied, but can be added/removed at any time.
@@ -72,7 +72,7 @@ Type json
 	Global error_level% = 2 'legend   2: as strict as possible   1: ignore warnings   0: ignore errors & warnings
 
 	'Encode settings
-	Global formatted% = true 'false: compact, true: indented; global setting
+	Global formatted% = True 'false: compact, true: indented; global setting
 	Global indent_size% = 2 'spaces per indent level, if formatted is true; global setting
 	Global precision% = 6 'default floating-point precision, can be overridden per field/object/instance/item/value
 	
@@ -126,6 +126,11 @@ Type json
 				selector, imperative_id, argument, condition_func ))
 	EndFunction
 
+	Function clear_transforms()
+		transforms_stringify.Clear()
+		transforms_parse.Clear()
+	EndFunction
+
 	'////////////////////////////////////////////////////////////////////////////
 
 	Function allocate_TValue:TValue( encoded$, cursor% )
@@ -134,17 +139,17 @@ Type json
 		Local intermediate_object:TValue
 		Select jsontype
 			Case TValue.JSONTYPE_NULL
-				intermediate_object = new TNull
+				intermediate_object = New TNull
 			Case TValue.JSONTYPE_BOOLEAN
-				intermediate_object = new TBoolean
+				intermediate_object = New TBoolean
 			Case TValue.JSONTYPE_NUMBER
-				intermediate_object = new TNumber
+				intermediate_object = New TNumber
 			Case TValue.JSONTYPE_STRING
-				intermediate_object = new TString
+				intermediate_object = New TString
 			Case TValue.JSONTYPE_ARRAY
-				intermediate_object = new TArray
+				intermediate_object = New TArray
 			Case TValue.JSONTYPE_OBJECT
-				intermediate_object = new TObject
+				intermediate_object = New TObject
 		EndSelect
 		Return intermediate_object
 	EndFunction
@@ -206,7 +211,7 @@ Type json
 					EndIf
 				Else ' source_object_type_id.ElementType() <> Null
 					'Is Array
-					converted_object = new TArray
+					converted_object = New TArray
 					Local array_length% = source_object_type_id.ArrayLength( source_object )
 					If array_length > 0
 						Local element:Object
@@ -358,13 +363,13 @@ Type json
 		Const STR_FMT:String = "%.*f"
 		If precision = -1 Then precision = 6 'cstdio.h default
 		Local i:Double
-		Local buf:Byte[32]
+		Local buf:Byte[256]
 		Local sz:Int = snprintf_( buf, buf.Length, STR_FMT, precision, value)
 		sz :- 1
 		While (sz > 0) And (buf[sz] = CHAR_0)
 			sz :- 1
 		Wend
-		If buf[sz] <> CHAR_DOT
+		If (sz < buf.Length) And buf[sz] <> CHAR_DOT
 			sz :+ 1
 		EndIf
 		If sz > 0
@@ -376,13 +381,13 @@ Type json
 
 	Function EatWhitespace( encoded$, cursor% Var )
 		' advance cursor to first printable character
-		Local cursor_char$, comment% = false
+		Local cursor_char$, comment% = False
 		While cursor < encoded.Length
 			cursor_char = Chr( encoded[cursor] )
 			If Chr( encoded[cursor] ) = "#"
-				comment = true
+				comment = True
 			Else If Chr( encoded[cursor] ) = "~r" Or Chr( encoded[cursor] ) = "~n"
-				comment = false
+				comment = False
 			End If
 			If comment Or Not IsPrintable( cursor_char )
 				cursor :+ 1
@@ -450,7 +455,7 @@ Type json
 	Function ShowPosition$( encoded$, cursor% )
 		Local dist% = 15
 		Local slice$ = encoded[cursor-1-dist..cursor+dist].Replace("~n"," ").Replace("~t"," ")
-		Return "~n"+slice+"~n"+JSON.RepeatSpace(dist)+"^"
+		Return "~n"+slice+"~n"+json.RepeatSpace(dist)+"^"
 	EndFunction
 
 	'logging/exceptions /////////////////////////////////////////////////////////
@@ -508,20 +513,41 @@ Type TValue
 	'////////////////////////////////////////////////////////////////////////////
 
 	Method ToString:String()
-		Return Encode( 0, JSON.precision )
+		Return Encode( 0, json.precision )
 	EndMethod
+
+	Method GetSelectorCode$()
+		Select value_type
+			Case JSONTYPE_NULL
+				Return json.SEL_NULL
+			Case JSONTYPE_BOOLEAN
+				Return json.SEL_BOOLEAN
+			Case JSONTYPE_NUMBER
+				Return json.SEL_NUMBER
+			Case JSONTYPE_STRING
+				Return json.SEL_STRING
+			Case JSONTYPE_ARRAY
+				Return json.SEL_ARRAY
+			Case JSONTYPE_OBJECT
+				Return json.SEL_OBJECT
+			Default
+				Return Null
+		EndSelect
+	EndMethod
+
+	'////////////////////////////////////////////////////////////////////////////
 
 	'this method is used to select an appropriate intermediate type to decode into
 	'  given only the encoded JSON data
 	Function PredictJSONType%( encoded$, cursor% )
 		If encoded = Null Or encoded = "" Then Return JSONTYPE_NULL
-		JSON.EatWhitespace( encoded, cursor )
+		json.EatWhitespace( encoded, cursor )
 		encoded = encoded[cursor..(cursor+SCAN_DISTANCE)]
 		If encoded.StartsWith( VALUE_NULL )
 			Return JSONTYPE_NULL
 		ElseIf encoded.StartsWith( VALUE_TRUE ) Or encoded.StartsWith( VALUE_FALSE )
 			Return JSONTYPE_BOOLEAN
-		ElseIf JSON.IsNumeric( encoded )
+		ElseIf json.IsNumeric( encoded )
 			Return JSONTYPE_NUMBER
 		ElseIf encoded.StartsWith( STRING_BEGIN )
 			Return JSONTYPE_STRING
@@ -529,14 +555,12 @@ Type TValue
 			Return JSONTYPE_ARRAY
 		ElseIf encoded.StartsWith( OBJECT_BEGIN )
 			Return JSONTYPE_OBJECT
-		ElseIf JSON.IsAlphaNumericOrUnderscore( encoded )
+		ElseIf json.IsAlphaNumericOrUnderscore( encoded )
 			Return JSONTYPE_STRING 'unquoted string
 		Else
 			Return JSONTYPE_INVALID
 		EndIf
 	EndFunction
-
-	'////////////////////////////////////////////////////////////////////////////
 
 	'Internal Type Enums
 	Const JSONTYPE_INVALID% = -1
@@ -584,11 +608,11 @@ Type TNull Extends TValue
 	EndMethod
 
 	Method Encode:String( indent%, precision% )
-		return VALUE_NULL
+		Return VALUE_NULL
 	EndMethod
 
 	Method Decode( encoded$, cursor% Var )
-		JSON.EatWhitespace( encoded, cursor )
+		json.EatWhitespace( encoded, cursor )
 		If encoded[cursor..(cursor+VALUE_NULL.Length)] = VALUE_NULL
 			cursor :+ VALUE_NULL.Length
 		EndIf
@@ -618,7 +642,7 @@ Type TBoolean Extends TValue
 	EndMethod
 
 	Method Decode( encoded$, cursor% Var )
-		JSON.EatWhitespace( encoded, cursor )
+		json.EatWhitespace( encoded, cursor )
 		If encoded[cursor..(cursor+VALUE_FALSE.Length)] = VALUE_FALSE
 			value = False
 			cursor :+ VALUE_FALSE.Length
@@ -644,25 +668,25 @@ Type TNumber Extends TValue
 	EndMethod
 
 	Method Encode:String( indent%, precision% )
-		Return JSON.FormatDouble( value, precision )
+		Return json.FormatDouble( value, precision )
 	EndMethod
 
 	Method Decode( encoded$, cursor% Var )
-		JSON.EatWhitespace( encoded, cursor )
+		json.EatWhitespace( encoded, cursor )
 		Local cursor_start% = cursor
 		Local floating_point% = False
-		JSON.EatSpecific( encoded, cursor, "+-", 1 ) 'positive/negative
-		JSON.EatSpecific( encoded, cursor, "0123456789",, 1 )
-		If JSON.EatSpecific( encoded, cursor, ".", 1 ) 'decimal pt.
+		json.EatSpecific( encoded, cursor, "+-", 1 ) 'positive/negative
+		json.EatSpecific( encoded, cursor, "0123456789",, 1 )
+		If json.EatSpecific( encoded, cursor, ".", 1 ) 'decimal pt.
 			floating_point = True
-			JSON.EatSpecific( encoded, cursor, "0123456789",, 1 )
+			json.EatSpecific( encoded, cursor, "0123456789",, 1 )
 		End If
-		If JSON.EatSpecific( encoded, cursor, "eE", 1 ) 'scientific notation
+		If json.EatSpecific( encoded, cursor, "eE", 1 ) 'scientific notation
 			floating_point = True
-			JSON.EatSpecific( encoded, cursor, "+-", 1 ) 'mantissa
-			JSON.EatSpecific( encoded, cursor, "0123456789",, 1 )
+			json.EatSpecific( encoded, cursor, "+-", 1 ) 'mantissa
+			json.EatSpecific( encoded, cursor, "0123456789",, 1 )
 		End If
-		If JSON.EatSpecific( encoded, cursor, "f", 1, 0 ) 'trailing f (floating point, java)
+		If json.EatSpecific( encoded, cursor, "f", 1, 0 ) 'trailing f (floating point, java)
 			floating_point = True
 		End If
 		If (cursor - cursor_start) > 0
@@ -689,22 +713,22 @@ Type TString Extends TValue
 	EndMethod
 
 	Method Encode:String( indent%, precision% )
-		Return STRING_BEGIN + JSON.Escape( value ) + STRING_END
+		Return STRING_BEGIN + json.Escape( value ) + STRING_END
 	EndMethod
 
 	Method Decode( encoded$, cursor% Var )
 		Local decoded_value$ = ""
 		Local unquoted_mode_active% = False
-		JSON.EatWhitespace( encoded, cursor )
+		json.EatWhitespace( encoded, cursor )
 		Local char$, char_temp$
 		If cursor >= (encoded.Length) Then Return
 		char = Chr(encoded[cursor]); cursor :+ 1
 		If char <> STRING_BEGIN
-			If JSON.IsAlphaNumericOrUnderscore( char )
+			If json.IsAlphaNumericOrUnderscore( char )
 				decoded_value :+ char 'NORMAL STRING CHARACTER
 				unquoted_mode_active = True
 			Else
-				json_error( json.LOG_ERROR+" expected string at position "+(cursor-1)+JSON.ShowPosition(encoded,cursor) )
+				json_error( json.LOG_ERROR+" expected string at position "+(cursor-1)+json.ShowPosition(encoded,cursor) )
 			EndIf
 		End If
 		If Not unquoted_mode_active
@@ -715,9 +739,9 @@ Type TString Extends TValue
 					Exit
 				End If
 				If char = "~r" Or char = "~n"
-					json_error( json.LOG_ERROR+" unescaped newline in string at position "+(cursor-1)+JSON.ShowPosition(encoded,cursor) )
+					json_error( json.LOG_ERROR+" unescaped newline in string at position "+(cursor-1)+json.ShowPosition(encoded,cursor) )
 				ElseIf char = "~t"
-					json_error( json.LOG_ERROR+" unescaped horizontal-tab in string at position "+(cursor-1)+JSON.ShowPosition(encoded,cursor) )
+					json_error( json.LOG_ERROR+" unescaped horizontal-tab in string at position "+(cursor-1)+json.ShowPosition(encoded,cursor) )
 				ElseIf char <> STRING_ESCAPE_SEQUENCE_BEGIN
 					decoded_value :+ char 'NORMAL STRING CHARACTER
 				Else
@@ -746,7 +770,7 @@ Type TString Extends TValue
 							'ignore
 							cursor :+ 4
 						Default
-							json_error( json.LOG_ERROR+" bad string escape sequence at position "+(cursor-1)+JSON.ShowPosition(encoded,cursor) )
+							json_error( json.LOG_ERROR+" bad string escape sequence at position "+(cursor-1)+json.ShowPosition(encoded,cursor) )
 					End Select
 				End If
 			Until cursor >= (encoded.Length - 1)
@@ -759,7 +783,7 @@ Type TString Extends TValue
 					Exit 'done (but could indicate an error higher up the chain)
 				EndIf
 				char = Chr(encoded[cursor]); cursor :+ 1
-				If JSON.IsAlphaNumericOrUnderscore( char )
+				If json.IsAlphaNumericOrUnderscore( char )
 					decoded_value :+ char 'NORMAL STRING CHARACTER
 				Else
 					Exit 'done
@@ -789,9 +813,9 @@ Type TArray Extends TValue
 		If elements = Null Or elements.IsEmpty() Then Return VALUE_NULL
 		Local encoded$ = ""
 		encoded :+ ARRAY_BEGIN
-		If JSON.formatted Then encoded :+ "~n"
-		If JSON.formatted Then indent :+ 1
-		If JSON.formatted Then encoded :+ JSON.RepeatSpace( indent*JSON.indent_size )
+		If json.formatted Then encoded :+ "~n"
+		If json.formatted Then indent :+ 1
+		If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
 		Local size% = elements.Count()
 		Local index% = 0
 		For Local element:TValue = EachIn elements
@@ -803,12 +827,12 @@ Type TArray Extends TValue
 			index :+ 1
 			If index < size
 				encoded :+ VALUE_SEPARATOR
-				If JSON.formatted Then encoded :+ "~n"
-				If JSON.formatted Then encoded :+ JSON.RepeatSpace( indent*JSON.indent_size )
+				If json.formatted Then encoded :+ "~n"
+				If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
 			Else 'index >= size
-				If JSON.formatted Then encoded :+ "~n"
-				If JSON.formatted Then indent :- 1
-				If JSON.formatted Then encoded :+ JSON.RepeatSpace( indent*JSON.indent_size )
+				If json.formatted Then encoded :+ "~n"
+				If json.formatted Then indent :- 1
+				If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
 			EndIf
 		Next
 		encoded :+ ARRAY_END
@@ -817,37 +841,37 @@ Type TArray Extends TValue
 
 	Method Decode( encoded$, cursor% Var )
 		If encoded = "" Then Return
-		JSON.EatWhitespace( encoded, cursor )
+		json.EatWhitespace( encoded, cursor )
 		Local char$
 		If cursor >= (encoded.Length - 1) Then Return
 		char = Chr(encoded[cursor]); cursor :+ 1
 		If char <> ARRAY_BEGIN
-			json_error( json.LOG_ERROR+" expected open-square-bracket character at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor) )
+			json_error( json.LOG_ERROR+" expected open-square-bracket character at position "+(cursor-1)+json.ShowPosition(encoded, cursor) )
 		End If
 		Local decoded_elements:TList = CreateList()
 		Local element_value:TValue
 		Repeat
 			If cursor >= (encoded.Length - 1)
-				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor) )
+				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+json.ShowPosition(encoded, cursor) )
 			EndIf					
-			JSON.EatWhitespace( encoded, cursor )
+			json.EatWhitespace( encoded, cursor )
 			If cursor >= (encoded.Length) Then Exit
 			char = Chr(encoded[cursor])
 			If char = ARRAY_END
 				cursor :+ 1 'eat it
 				Exit 'empty object with no fields
 			EndIf
-			element_value = JSON.allocate_TValue( encoded, cursor )
+			element_value = json.allocate_TValue( encoded, cursor )
 			If element_value = Null
-				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor) )
+				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+json.ShowPosition(encoded, cursor) )
 			EndIf
 			element_value.Decode( encoded, cursor )
 			decoded_elements.AddLast( element_value ) ' add element
-			JSON.EatWhitespace( encoded, cursor )
+			json.EatWhitespace( encoded, cursor )
 			If cursor >= (encoded.Length) Then Exit
 			char = Chr(encoded[cursor]); cursor :+ 1
 			If char <> VALUE_SEPARATOR And char <> VALUE_SEPARATOR_ALTERNATE And char <> ARRAY_END
-				json_error( json.LOG_ERROR+" expected comma or semicolon or close-square-bracket character at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor) )
+				json_error( json.LOG_ERROR+" expected comma or semicolon or close-square-bracket character at position "+(cursor-1)+json.ShowPosition(encoded, cursor) )
 			End If
 		Until char = ARRAY_END Or cursor >= (encoded.Length - 1)
 		elements = decoded_elements
@@ -893,26 +917,26 @@ Type TObject Extends TValue
 		encoded :+ OBJECT_BEGIN
 		Local iter:TNodeEnumerator = fields.Keys().ObjectEnumerator()
 		If iter.HasNext()
-			If JSON.formatted Then encoded :+ "~n"
-			If JSON.formatted Then indent :+ 1
-			If JSON.formatted Then encoded :+ JSON.RepeatSpace( indent*JSON.indent_size )
+			If json.formatted Then encoded :+ "~n"
+			If json.formatted Then indent :+ 1
+			If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
 			While iter.HasNext()
 				Local field_name:String = String( iter.NextObject() )
 				encoded :+ STRING_BEGIN
 				encoded :+ field_name
 				encoded :+ STRING_END
 				encoded :+ PAIR_SEPARATOR
-				If JSON.formatted Then encoded :+ " "
+				If json.formatted Then encoded :+ " "
 				Local field_value:TValue = TValue( fields.ValueForKey( field_name ))
 				encoded :+ field_value.Encode( indent, precision )
 				If iter.HasNext()
 					encoded :+ VALUE_SEPARATOR
-					If JSON.formatted Then encoded :+ "~n"
-					If JSON.formatted Then encoded :+ JSON.RepeatSpace( indent*JSON.indent_size )
+					If json.formatted Then encoded :+ "~n"
+					If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
 				Else 'last element
-					If JSON.formatted Then encoded :+ "~n"
-					If JSON.formatted Then indent :- 1
-					If JSON.formatted Then encoded :+ JSON.RepeatSpace( indent*JSON.indent_size )
+					If json.formatted Then encoded :+ "~n"
+					If json.formatted Then indent :- 1
+					If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
 				End If
 			End While
 		End If
@@ -922,17 +946,17 @@ Type TObject Extends TValue
 
 	Method Decode( encoded$, cursor% Var )
 		Local decoded_fields:TMap = CreateMap()
-		JSON.EatWhitespace( encoded, cursor )
+		json.EatWhitespace( encoded, cursor )
 		Local char$
 		If cursor >= (encoded.Length) Then Return
 		char = Chr(encoded[cursor]); cursor :+ 1
 		If char <> OBJECT_BEGIN
-			json_error( json.LOG_ERROR+" expected open-curly-brace character at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor)  )
+			json_error( json.LOG_ERROR+" expected open-curly-brace character at position "+(cursor-1)+json.ShowPosition(encoded, cursor)  )
 		End If
 		Local field_name:TString = New TString
 		Local field_value:TValue
 		Repeat
-			JSON.EatWhitespace( encoded, cursor )
+			json.EatWhitespace( encoded, cursor )
 			If cursor >= (encoded.Length) Then Exit
 			char = Chr(encoded[cursor])
 			If char = OBJECT_END
@@ -940,24 +964,24 @@ Type TObject Extends TValue
 				Exit 'empty object with no fields
 			EndIf
 			field_name.Decode( encoded, cursor )
-			JSON.EatWhitespace( encoded, cursor )
+			json.EatWhitespace( encoded, cursor )
 			If cursor >= (encoded.Length) Then Exit
 			char = Chr(encoded[cursor]); cursor :+ 1
 			If char <> PAIR_SEPARATOR
-				json_error( json.LOG_ERROR+" expected colon character at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor)  )
+				json_error( json.LOG_ERROR+" expected colon character at position "+(cursor-1)+json.ShowPosition(encoded, cursor)  )
 			End If
-			JSON.EatWhitespace( encoded, cursor )
-			field_value = JSON.allocate_TValue( encoded, cursor )
+			json.EatWhitespace( encoded, cursor )
+			field_value = json.allocate_TValue( encoded, cursor )
 			If field_value = Null
-				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor)  )
+				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+json.ShowPosition(encoded, cursor)  )
 			EndIf
 			field_value.Decode( encoded, cursor )
 			decoded_fields.Insert( field_name.value, field_value )
-			JSON.EatWhitespace( encoded, cursor )
+			json.EatWhitespace( encoded, cursor )
 			If cursor >= (encoded.Length) Then Exit
 			char = Chr(encoded[cursor]); cursor :+ 1
 			If char <> VALUE_SEPARATOR And char <> VALUE_SEPARATOR_ALTERNATE And char <> OBJECT_END
-				json_error( json.LOG_ERROR+" expected comma or semicolon or close-curly-brace character at position "+(cursor-1)+JSON.ShowPosition(encoded, cursor)  )
+				json_error( json.LOG_ERROR+" expected comma or semicolon or close-curly-brace character at position "+(cursor-1)+json.ShowPosition(encoded, cursor)  )
 			End If
 		Until char = OBJECT_END Or cursor >= (encoded.Length - 1)
 		fields = decoded_fields
@@ -994,13 +1018,29 @@ Type TValue_Selector_Token
 	Field object_field_name$
 	Field array_element_index%
 
+	Method New()
+		type_name = Null
+		object_field_name = Null
+		array_element_index = -1
+	EndMethod
+
 	Function Create:TValue_Selector_Token( selector_token$ )
+		If Not selector_token Then Return Null
 		Local tok:TValue_Selector_Token = New TValue_Selector_Token
+		selector_token = selector_token
 		tok.type_name = ParseSelectorTypeName( selector_token )
 		tok.object_field_name = ParseSelectorObjectFieldName( selector_token )
 		tok.array_element_index = ParseSelectorArrayElementIndex( selector_token )
 		Return tok
 	EndFunction
+
+	Method ToString$()
+		Local s$ = ""
+		If object_field_name <> Null Then s:+"$"+object_field_name
+		If array_element_index <> -1 Then s:+"@"+array_element_index
+		If type_name <> Null         Then s:+":"+type_name
+		Return s
+	EndMethod
 
 	Function ParseSelectorTypeName$( selector_token$ )
 		Local cursor% = selector_token.Find( SELECTOR_TYPE_NAME_START )
@@ -1067,6 +1107,18 @@ Type TValue_Search_Result
 	Field container_TArray:TArray
 	Field array_element_index%
 
+	Function Create:TValue_Search_Result( matched:TValue, ..
+	container_TObject:TObject=Null, object_field_name$=Null, ..
+	container_TArray:TArray=Null, array_element_index%=-1 )
+		Local r:TValue_Search_Result = New TValue_Search_Result
+		r.matched = matched
+		r.container_TObject = container_TObject
+		r.object_field_name = object_field_name
+		r.container_TArray = container_TArray
+		r.array_element_index = array_element_index
+		Return r
+	EndFunction
+
 EndType
 
 
@@ -1109,22 +1161,70 @@ Type TValue_Transformation
 
 	'recursive function (naturally) that
 	'returns a List of SelectorResult objects
-	Method Search:TList( this:TValue, matches:TList=Null, path:TValue_Selector_Token[]=Null )
+	Method Search:TList( this:TValue, container:TValue=Null, matches:TList=Null, path:TValue_Selector_Token[]=Null )
+		'DebugLog " "+PathIndent(path)+LSet(ObjectInfo(this),18)+", "+PathInfo(path)
 		If matches = Null Then matches = CreateList()
 		If path <> Null And path.Length = selector.Length
 			'determine if the current path matches the selector
-			Local this_selector_token:TValue_Selector_Token = selector[selector.Length - 1]
-			Local this_path_token:TValue_Selector_Token = path[path.Length - 1]
-			'If this_selector_token.type_name <> Null
-			'EndIf
+			Local s:TValue_Selector_Token = selector[selector.Length - 1]
+			Local p:TValue_Selector_Token = path[path.Length - 1]
+			If  (s.type_name = Null Or s.type_name = p.type_name) ..
+			And (s.object_field_name = Null Or s.object_field_name = p.object_field_name) ..
+			And (s.array_element_index = -1 Or s.array_element_index = p.array_element_index)
+				matches.AddLast( TValue_Search_Result.Create( ..
+					this, TObject(container), p.object_field_name, TArray(container), p.array_element_index ))
+			EndIf
 		ElseIf path = Null Or path.Length < selector.Length
-			'if this TValue is a container type, search the children
+			'Allocate space for new path token
+			If path = Null Then path = New TValue_Selector_Token[1] ..
+			Else path = path[..path.Length + 1]
+			'if this TValue is a container type, search its children
 			If TObject(this)
+				'search all fields of objects
+				For Local field_name$ = EachIn TObject(this).fields.Keys()
+					Local field_value:TValue = TValue(TObject(this).fields.ValueForKey( field_name ))
+					path[path.Length - 1] = New TValue_Selector_Token
+					path[path.Length - 1].type_name = field_value.GetSelectorCode()
+					path[path.Length - 1].object_field_name = field_name
+					Search( field_value, this, matches, path )
+				Next
 			ElseIf TArray(this)
+				'search all elements of arrays
+				Local element_index% = 0
+				For Local array_element:TValue = EachIn TArray(this).elements
+					path[path.Length - 1] = New TValue_Selector_Token
+					path[path.Length - 1].type_name = array_element.GetSelectorCode()
+					path[path.Length - 1].array_element_index = element_index
+					Search( array_element, this, matches, path )
+					element_index :+ 1
+				Next
 			EndIf
 		EndIf
 		Return matches
 	EndMethod
+
+	?Debug
+	Function ObjectInfo$( obj:Object )
+		If obj <> Null
+			Return "$" + Hex( Int( Byte Ptr( obj ))) + ":" + TTypeId.ForObject( obj ).Name()
+		Else
+			Return "$" + Hex( 0 )
+		End If
+	End Function
+	Function PathInfo$( path:TValue_Selector_Token[] )
+		Local s$ = ""
+		If path
+			For Local i% = 0 Until path.Length
+				If i > 0 Then s :+ "/"
+				s :+ path[i].ToString()
+			Next
+		EndIf
+		Return s
+	EndFunction
+	Function PathIndent$( path:TValue_Selector_Token[] )
+		If Not path Then Return "" Else Return LSet("",path.Length*2)
+	EndFunction
+	?
 
 	'////////////////
 
