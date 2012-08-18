@@ -142,11 +142,11 @@ Function modal_draw_set_engine_slots( ed:TEditor, data:TData, sprite:TSprite )
 		EndIf
 	ElseIf ALT
 		If engine
-			mouse_str :+ FormatDouble(engine.width,1,FALSE)+"x"+FormatDouble(engine.length,1,FALSE)+"~n"
+			mouse_str :+ json.FormatDouble(engine.width,1)+"x"+json.FormatDouble(engine.length,1)+"~n"
 		EndIf
 	Else
 		If engine
-			mouse_str :+ FormatDouble(engine.angle,2,FALSE)+Chr($00B0)+"~n"
+			mouse_str :+ json.FormatDouble(engine.angle,2)+Chr($00B0)+"~n"
 		EndIf
 	EndIf
 	SetAlpha( 1 )

@@ -16,17 +16,19 @@ Type Application
 
 	Function Load:Application()
 		Local settings_json$ = LoadString( "sf-ship-ed-settings.json" )
-		Local app_obj:Application = Application( JSON.Decode( settings_json,, TTypeId.ForName("Application")))
+		Local app_obj:Application = Application( json.parse( settings_json, "Application" ))
 		app_obj.get_starfarer_dir()
 		If app_obj.images_dir.length = 0  Then app_obj.images_dir = app_obj.starfarer_base_dir
 		If app_obj.data_dir.length = 0    Then app_obj.data_dir = app_obj.starfarer_base_dir
 		If app_obj.variant_dir.length = 0 Then app_obj.variant_dir = app_obj.starfarer_base_dir
 		Return app_obj
 	EndFunction
+	
 	Method Save()
-		Local settings_json$ = JSON.Encode( self )
+		Local settings_json$ = json.stringify( self )
 		SaveString( settings_json, "sf-ship-ed-settings.json" )
 	End Method
+	
 	'///////////
 	Method get_starfarer_dir()
 		If  0 = FileType( starfarer_base_dir+STARFARER_CORE_DIR[0] ) ..
@@ -41,5 +43,6 @@ Type Application
 			EndIf
 		EndIf
 	EndMethod
+
 EndType
 

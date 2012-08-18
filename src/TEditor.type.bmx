@@ -81,10 +81,10 @@ Type TEditor
 		multiselect_values = CreateMap()
 	End Method
 
-	Method load_stock_ship:TStarfarerShip( dir$, file$, settings:TJSONDecodeSettings )
+	Method load_stock_ship:TStarfarerShip( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir+file )
-			Local ship:TStarfarerShip = TStarfarerShip( JSON.decode( input_json_str, settings, TTypeId.ForName("TStarfarerShip")))
+			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip" ))
 			stock_ships.Insert( ship.hullId, ship )
 			load_multiselect_value( "ship.hullSize", ship.hullSize )
 			load_multiselect_value( "ship.style", ship.style )
@@ -107,10 +107,10 @@ Type TEditor
 		EndTry
 	End Method
 
-	Method load_stock_variant:TStarfarerVariant( dir$, file$, settings:TJSONDecodeSettings )
+	Method load_stock_variant:TStarfarerVariant( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir+file )
-			Local variant:TStarfarerVariant = TStarfarerVariant( JSON.decode( input_json_str, settings, TTypeId.ForName("TStarfarerVariant")))
+			Local variant:TStarfarerVariant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
 			stock_variants.Insert( variant.variantId, variant )
 			For Local weapongroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
 				load_multiselect_value( "variant.weaponGroup.mode", weapongroup.mode )
@@ -123,10 +123,10 @@ Type TEditor
 		EndTry
 	End Method
 
-	Method load_stock_weapon:TStarfarerWeapon( dir$, file$, settings:TJSONDecodeSettings )
+	Method load_stock_weapon:TStarfarerWeapon( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir+file )
-			Local weapon:TStarfarerWeapon = TStarfarerWeapon( JSON.decode( input_json_str, settings, TTypeId.ForName("TStarfarerWeapon")))
+			Local weapon:TStarfarerWeapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon" ))
 			stock_weapons.Insert( weapon.id, weapon )
 			load_multiselect_value( "weapon.specClass", weapon.specClass )
 			load_multiselect_value( "weapon.type", weapon.type_ )

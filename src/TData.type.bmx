@@ -11,39 +11,33 @@ Type TData
 	Field json_view_variant:TList'<TextWidget>
 
 	Field csv_row:TMap'<String,String>  'column name --> value
-
-	Field encode_settings:TJSONEncodeSettings
-	Field decode_settings:TJSONDecodeSettings
 	
 	'requires subsequent call to update()
 	Method New()
 		ship = New TStarfarerShip
 		variant = New TStarfarerVariant
 		csv_row = ship_data_csv_field_template.Copy()
-
-		encode_settings = New TJSONEncodeSettings
-		decode_settings = New TJSONDecodeSettings
 	End Method
 	
 	'requires subsequent call to update()
 	Method decode( input_json_str$ )
-		ship = TStarfarerShip( JSON.decode( input_json_str, decode_settings, TTypeId.ForName("TStarfarerShip")))
+		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip" ))
 	End Method
 	
 	'requires subsequent call to update_variant()
 	Method decode_variant( input_json_str$ )
-		variant = TStarfarerVariant( JSON.decode( input_json_str, decode_settings, TTypeId.ForName("TStarfarerVariant")))
+		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
 	End Method
 	
 	Method update()
 		'encode ship object as json data
-		json_str = JSON.Encode( ship, encode_settings )
+		json_str = json.stringify( ship )
 		json_view = columnize_text( json_str )
 	End Method
 	
 	Method update_variant()
 		'encode ship object as json data
-		json_str_variant = JSON.Encode( variant, encode_settings )
+		json_str_variant = json.stringify( variant )
 		json_view_variant = columnize_text( json_str_variant )
 	End Method
 

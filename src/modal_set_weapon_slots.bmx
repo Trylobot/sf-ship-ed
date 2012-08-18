@@ -149,11 +149,11 @@ Function modal_draw_set_weapon_slots( ed:TEditor, data:TData, sprite:TSprite )
 		EndIf
 	ElseIf ALT
 		If weapon
-			mouse_str :+ FormatDouble(weapon.arc,2,FALSE)+Chr($00B0)+" (arc)~n"
+			mouse_str :+ json.FormatDouble(weapon.arc,2)+Chr($00B0)+" (arc)~n"
 		EndIf
 	Else
 		If weapon
-			mouse_str :+ FormatDouble(weapon.angle,2,FALSE)+Chr($00B0)+"~n"
+			mouse_str :+ json.FormatDouble(weapon.angle,2)+Chr($00B0)+"~n"
 		EndIf
 	EndIf
 	SetAlpha( 1 )

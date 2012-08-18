@@ -1,10 +1,10 @@
 Type TStarfarerVariantWeaponGroup
-	Field autofire:TJSONBoolean
+	Field autofire:TBoolean
 	Field mode$
 	Field weapons:TMap
 	
 	Method New()
-		autofire = TJSONBoolean.Create( false )
+		autofire = New TBoolean; autofire.value = false
 		mode = "LINKED"
 		weapons = CreateMap()
 	End Method

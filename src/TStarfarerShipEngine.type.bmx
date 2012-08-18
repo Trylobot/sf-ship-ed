@@ -34,7 +34,15 @@ Type TStarfarerShipEngine
 End Type
 
 
-'BLITZMAX: Y U NO TEMPLATES
+Function predicate_TStarfarerShipEngine_omit_styleSpec%( val:TValue_Search_Result )
+	Return False
+EndFunction
+
+Function predicate_TStarfarerShipEngine_omit_styleId%( val:TValue_Search_Result )
+	Return False
+EndFunction
+
+
 Function remove_TStarfarerShipEngine:TStarfarerShipEngine[]( arr:TStarfarerShipEngine[], e:TStarfarerShipEngine )
 	Local i%
 	For i = 0 Until arr.length
@@ -57,15 +65,15 @@ Function remove_TStarfarerShipEngine:TStarfarerShipEngine[]( arr:TStarfarerShipE
 End Function
 
 
-Function TStarfarerShipEngine_ToJSON$( source_object:Object, settings:TJSONEncodeSettings, override_type:TTypeId, indent% )
-	If source_object = Null Then Return ""
-	Local instance_settings:TJSONEncodeSettings = settings.Clone()
-	Local this_type:TTypeId = TTypeId.ForName( "TStarfarerShipEngine" )
-	Local styleSpec_field:TField = this_type.FindField( "styleSpec" )
-	If TStarfarerShipEngine(source_object).styleSpec = Null
-		instance_settings.IgnoreField( this_type, styleSpec_field )
-	EndIf
-	Return JSON._EncodeObject( source_object, instance_settings, this_type, indent )
-EndFunction
+'Function TStarfarerShipEngine_ToJSON$( source_object:Object, settings:TJSONEncodeSettings, override_type:TTypeId, indent% )
+'	If source_object = Null Then Return ""
+'	Local instance_settings:TJSONEncodeSettings = settings.Clone()
+'	Local this_type:TTypeId = TTypeId.ForName( "TStarfarerShipEngine" )
+'	Local styleSpec_field:TField = this_type.FindField( "styleSpec" )
+'	If TStarfarerShipEngine(source_object).styleSpec = Null
+'		instance_settings.IgnoreField( this_type, styleSpec_field )
+'	EndIf
+'	Return JSON._EncodeObject( source_object, instance_settings, this_type, indent )
+'EndFunction
 
 

@@ -161,10 +161,10 @@ Function draw_bar_graph( x#,y#, w#,h#, ox#=0.0,oy#=0.0, values#[], em_i%=-1, non
 	wi = w/values.length
 	'tickmark and label: max
 	draw_line( x-11,y, x-11 - 10,y )
-	draw_string( FormatDouble(values[values.length-1],4), x-11 - 10 - 3,y,,, 1.0,0.5 )
+	draw_string( json.FormatDouble(values[values.length-1],4), x-11 - 10 - 3,y,,, 1.0,0.5 )
 	'tickmark and label: min
 	draw_line( x-11,y+h, x-11 - 10,y+h )
-	draw_string( FormatDouble(0.0,4), x-11 - 10 - 3,y+h,,, 1.0,0.5 )
+	draw_string( json.FormatDouble(0.0,4), x-11 - 10 - 3,y+h,,, 1.0,0.5 )
 	'emphasis through a horizontal line at top of emphasized bar, and tickmark with label
 	If em_i >= 0 And em_i < values.length
 		'line
@@ -172,7 +172,7 @@ Function draw_bar_graph( x#,y#, w#,h#, ox#=0.0,oy#=0.0, values#[], em_i%=-1, non
 		draw_line( x-9,yi, x+w+9,yi )
 		'tickmark and label
 		draw_line( x-11,yi, x-11 - 5,yi )
-		draw_string( FormatDouble(values[em_i],4), x-11 - 5 - 3,yi,,, 1.0,0.5 )
+		draw_string( json.FormatDouble(values[em_i],4), x-11 - 5 - 3,yi,,, 1.0,0.5 )
 	EndIf
 	set_color( bar_fg )
 	For Local i% = 0 Until values.length

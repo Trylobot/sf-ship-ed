@@ -26,8 +26,7 @@ Import BRL.RamStream
 Import BRL.PNGLoader
 Import BRL.JPGLoader
 Import BRL.FreeTypeFont
-'Import "src/rjson.bmx" 'Not ready for primetime, yet
-Import "src/rjson_old.bmx"
+Import "src/rjson.bmx"
 Import "src/console.bmx"
 ?Win32
 Import "assets/sf_icon.o"
@@ -121,6 +120,25 @@ Cls
 draw_string( "Loadin' ...", W_MID, H_MID,,, 0.5, 0.5 )
 Flip( 1 )
 
+'////////////////////////////////////////////////
+'json
+json.error_level = 1
+json.formatted = True
+json.precision = 6
+'TStarfarerShipWeapon
+json.add_parse_transform(     "$weaponSlots:array/:object/$type:string",  json.XJ_RENAME, "type_" )
+json.add_stringify_transform( "$weaponSlots:array/:object/$type_:string", json.XJ_RENAME, "type"  )
+'TStarfarerCustomEngineStyleSpec
+json.add_parse_transform(     "$engineSlots:array/:object/$styleSpec:object/$type:string",  json.XJ_RENAME, "type_" )
+json.add_stringify_transform( "$engineSlots:array/:object/$styleSpec:object/$type_:string", json.XJ_RENAME, "type"  )
+json.add_stringify_transform( "$engineSlots:array/:object/$styleSpec:object", json.XJ_DELETE,, predicate_TStarfarerShipEngine_omit_styleSpec )
+json.add_stringify_transform( "$engineSlots:array/:object/$styleId:string", json.XJ_DELETE,, predicate_TStarfarerShipEngine_omit_styleId )
+'TStarfarerWeapon
+json.add_parse_transform(     "$type:string",  json.XJ_RENAME, "type_" )
+json.add_stringify_transform( "$type_:string", json.XJ_RENAME, "type"  )
+
+'////////////////////////////////////////////////
+
 Local ed:TEditor = New TEditor
 ed.show_help = True
 
@@ -129,16 +147,6 @@ sprite.scale = ZOOM_LEVELS[ed.selected_zoom_level]
 ed.target_sprite_scale = sprite.scale
 
 Local data:TData = New TData
-data.encode_settings.pretty_print = True
-data.encode_settings.default_precision = 6
-data.encode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerShipWeapon"), "type_", "type" )
-data.decode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerShipWeapon"), "type", "type_" )
-data.encode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerWeapon"), "type_", "type" )
-data.decode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerWeapon"), "type", "type_" )
-data.encode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerCustomEngineStyleSpec"), "type_", "type" )
-data.decode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerCustomEngineStyleSpec"), "type", "type_" )
-' custom engine styles stuff
-data.encode_settings.SetCustomEncoder( TTypeId.ForName("TStarfarerShipEngine"), TStarfarerShipEngine_ToJSON )
 data.update()
 data.update_variant()
 
@@ -688,9 +696,9 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
 	Local ico_h% = 18
 	Local w$ = ""+sprite.img.width
 	Local h$ = ""+sprite.img.height
-	Local x$ = FormatDouble( img_x - data.ship.center[1], 1, False )
-	Local y$ = FormatDouble( -( img_y - data.ship.center[0] ), 1, False )
-	Local a$ = FormatDouble( 0, 1, False )
+	Local x$ = json.FormatDouble( img_x - data.ship.center[1], 1 )
+	Local y$ = json.FormatDouble( -( img_y - data.ship.center[0] ), 1 )
+	Local a$ = json.FormatDouble( 0, 1 )
 	Local z$ = Int(100.0*sprite.scale)
 	Local m% = ed.bounds_symmetrical
 	If  ed.program_mode = "ship" ..
@@ -700,7 +708,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
 		If ni <> -1
 			Local weapon:TStarfarerShipWeapon = data.ship.weaponSlots[ni]
 			ang_relevant = True
-			a = FormatDouble( calc_angle( weapon.locations[0], weapon.locations[1], img_x - data.ship.center[1], -( img_y - data.ship.center[0] )), 1, False )
+			a = json.FormatDouble( calc_angle( weapon.locations[0], weapon.locations[1], img_x - data.ship.center[1], -( img_y - data.ship.center[0] )), 1 )
 		EndIf
 	ElseIf ed.program_mode = "ship" ..
 	And    ed.mode = "engine_slots" 
@@ -709,7 +717,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
 		If ni <> -1
 			Local engine:TStarfarerShipEngine = data.ship.engineSlots[ni]
 			ang_relevant = True
-			a = FormatDouble( calc_angle( engine.location[0], engine.location[1], img_x - data.ship.center[1], -( img_y - data.ship.center[0] )), 1, False )
+			a = json.FormatDouble( calc_angle( engine.location[0], engine.location[1], img_x - data.ship.center[1], -( img_y - data.ship.center[0] )), 1 )
 		EndIf
 	EndIf
 	'  From Right to Left along bottom:
@@ -853,17 +861,17 @@ Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla%=FALSE )
 	Local stock_ships_files$[] = LoadDir( stock_ships_dir )
 	For Local stock_ship_file$ = EachIn stock_ships_files
 		If ExtractExt( stock_ship_file ) <> "ship" Then Continue
-		Local ship:TStarfarerShip = ed.load_stock_ship( stock_ships_dir, stock_ship_file, data.decode_settings )
+		Local ship:TStarfarerShip = ed.load_stock_ship( stock_ships_dir, stock_ship_file )
 	Next
 	Local stock_variants_files$[] = LoadDir( stock_variants_dir )
 	For Local stock_variant_file$ = EachIn stock_variants_files
 		If ExtractExt( stock_variant_file ) <> "variant" Then Continue
-		Local variant:TStarfarerVariant = ed.load_stock_variant( stock_variants_dir, stock_variant_file, data.decode_settings )
+		Local variant:TStarfarerVariant = ed.load_stock_variant( stock_variants_dir, stock_variant_file )
 	Next
 	Local stock_weapons_files$[] = LoadDir( stock_weapons_dir )
 	For Local stock_weapon_file$ = EachIn stock_weapons_files
 		If ExtractExt( stock_weapon_file ) <> "wpn" Then Continue
-		Local weapon:TStarfarerWeapon = ed.load_stock_weapon( stock_weapons_dir, stock_weapon_file, data.decode_settings )
+		Local weapon:TStarfarerWeapon = ed.load_stock_weapon( stock_weapons_dir, stock_weapon_file )
 	Next
 	'/////
 	If FileType( stock_ships_dir+"ship_data.csv" ) = FILETYPE_FILE

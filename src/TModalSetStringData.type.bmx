@@ -24,21 +24,7 @@ Type TModalSetStringData Extends TSubroutine
 	Global MODE_VARIANT% = 3
 	Global subroutine_mode%
 
-	Global encode_settings:TJSONEncodeSettings
-	Global decode_settings:TJSONDecodeSettings
-
-
 	Function Activate( ed:TEditor, data:TData, sprite:TSprite )
-		'JSON settings
-		encode_settings = New TJSONEncodeSettings
-		encode_settings.pretty_print = False
-		decode_settings = New TJSONDecodeSettings
-		encode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerShipWeapon"), "type_", "type" )
-		decode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerShipWeapon"), "type", "type_" )
-		encode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerWeapon"), "type_", "type" )
-		decode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerWeapon"), "type", "type_" )
-		encode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerCustomEngineStyleSpec"), "type_", "type" )
-		decode_settings.OverrideFieldName( TTypeId.ForName("TStarfarerCustomEngineStyleSpec"), "type", "type_" )
 		'set the subroutine module state
 		FlushKeys()
 		line_i = 0
@@ -182,11 +168,11 @@ Type TModalSetStringData Extends TSubroutine
 				If TStarfarerShipEngine(target).styleSpec <> NULL
 					TStarfarerShipEngine(target).styleSpec.type_ = values.lines[i]; i:+1
 					Try
-						TStarfarerShipEngine(target).styleSpec.engineColor = Int[]( JSON.Decode( values.lines[i], decode_settings, TTypeId.ForName("Int[]") )); i:+1
+						TStarfarerShipEngine(target).styleSpec.engineColor = Int[]( json.parse( values.lines[i], "Int[]" )); i:+1
 					Catch ex$
 					EndTry
 					Try
-						TStarfarerShipEngine(target).styleSpec.contrailColor = Int[]( JSON.Decode( values.lines[i], decode_settings, TTypeId.ForName("Int[]") )); i:+1
+						TStarfarerShipEngine(target).styleSpec.contrailColor = Int[]( json.parse( values.lines[i], "Int[]" )); i:+1
 					Catch ex$
 					EndTry
 					TStarfarerShipEngine(target).styleSpec.contrailParticleSizeMult = values.lines[i].ToDouble(); i:+1
@@ -250,12 +236,12 @@ Type TModalSetStringData Extends TSubroutine
 						"ship.engine.styleSpec.contrailAngularVelocityMult" ))
 					values.append( TextWidget.Create( ..
 						TStarfarerShipEngine(target).styleSpec.type_ +"~n"+..
-						JSON.Encode( TStarfarerShipEngine(target).styleSpec.engineColor, encode_settings ) +"~n"+..
-						JSON.Encode( TStarfarerShipEngine(target).styleSpec.contrailColor, encode_settings ) +"~n"+..
-						FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailParticleSizeMult, 3 ) +"~n"+..
-						FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailParticleDuration, 3 ) +"~n"+..
-						FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailMaxSpeedMult, 3 ) +"~n"+..
-						FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailAngularVelocityMult, 3 ) ))
+						json.stringify( TStarfarerShipEngine(target).styleSpec.engineColor ) +"~n"+..
+						json.stringify( TStarfarerShipEngine(target).styleSpec.contrailColor ) +"~n"+..
+						json.FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailParticleSizeMult, 3 ) +"~n"+..
+						json.FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailParticleDuration, 3 ) +"~n"+..
+						json.FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailMaxSpeedMult, 3 ) +"~n"+..
+						json.FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailAngularVelocityMult, 3 ) ))
 				EndIf
 			'///////////////////////////////////////
 			Case MODE_WEAPON 

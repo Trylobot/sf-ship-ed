@@ -583,8 +583,8 @@ Function test_tvalue_transformation_conditional_delete()
 		verify( xf.Search( val ).IsEmpty(), "all specified fields should have been deleted" )
 	Next
 EndFunction
-Function __TBoolean_NOT%( val:TValue )
-	Return (Not TBoolean(val).value)
+Function __TBoolean_NOT%( val:TValue_Search_Result )
+	Return (Not TBoolean(val.matched).value)
 EndFunction
 
 

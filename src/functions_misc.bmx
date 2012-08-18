@@ -1,7 +1,6 @@
-'-----------------------
 
 Function coord_string$( x!, y! )
-	Return "("+FormatDouble(x,1,False)+","+FormatDouble(y,1,False)+")"
+	Return "("+json.FormatDouble(x,1)+","+json.FormatDouble(y,1)+")"
 End Function
 
 Function nearest_half#( x# )
@@ -57,28 +56,6 @@ End Function
 Function polar_to_cartesian( r#, a#, x# Var, y# Var )
 	x = r*Cos( a )
 	y = r*Sin( a )
-End Function
-
-'has bug: will not output "shieldCenter" properly for some dumbass fucking reason
-Function encode_float_array$( source_object:Object, settings:TJSONEncodeSettings = Null, override_type:TTypeId = Null, indent% = 0 )
-	Local arr#[] = Float[](source_object)
-	Local jstr$ = "["
-	indent :+ 1
-	Local first% = True
-	For Local i% = 0 Until arr.length
-		If first
-			first = False
-		Else
-			jstr :+ ","
-		End If
-		If i Mod 2 = 0
-			jstr :+ "~n" + JSON._RepeatSpace(indent*settings.tab_size)
-		End If
-		jstr :+ FormatDouble( arr[i], 1, FALSE )
-	Next
-	indent :- 1
-	jstr :+ "~n" + JSON._RepeatSpace(indent*settings.tab_size) + "]"
-	Return jstr
 End Function
 
 Function count_keys%( map:TMap )

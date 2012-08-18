@@ -52,8 +52,9 @@ Transformations can optionally specify a condition function that determines at r
   user-defined conditions.
 
 Supported transformation imperatives:
-* XJ_DELETE ()                  -- applies to: Object, Array
-* XJ_RENAME ( new_field_name )  -- applies to: Object
+* XJ_DELETE 
+* XJ_RENAME ( new_field_name )
+* XJ_CONVERT( new_type )
 
 
 EndRem
@@ -114,13 +115,13 @@ Type json
 	Global transforms_stringify:TList = CreateList()
 	Global transforms_parse:TList = CreateList()
 	
-	Function add_stringify_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue )=Null )
+	Function add_stringify_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue_Search_Result )=Null )
 		transforms_stringify.AddLast( ..
 			TValue_Transformation.Create( ..
 				selector, imperative_id, argument, condition_func ))
 	EndFunction
 
-	Function add_parse_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue )=Null )
+	Function add_parse_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue_Search_Result )=Null )
 		transforms_parse.AddLast( ..
 			TValue_Transformation.Create( ..
 				selector, imperative_id, argument, condition_func ))
@@ -130,6 +131,18 @@ Type json
 		transforms_stringify.Clear()
 		transforms_parse.Clear()
 	EndFunction
+
+	'transformations ////////////////////////////////////////////////////////////
+	Const XJ_DELETE% = 86
+	Const XJ_RENAME% = 102
+	Const XJ_CONVERT% = 1199
+	'Selector Type Codes
+	Const SEL_NULL$    = "null"
+	Const SEL_BOOLEAN$ = "boolean"
+	Const SEL_NUMBER$  = "number"
+	Const SEL_STRING$  = "string"
+	Const SEL_ARRAY$   = "array"
+	Const SEL_OBJECT$  = "object"
 
 	'////////////////////////////////////////////////////////////////////////////
 
@@ -465,17 +478,6 @@ Type json
 	'supported built-in cyclic data types ///////////////////////////////////////
 	Global TMap_TTypeId:TTypeId = TTypeId.ForName("TMap")
 	Global TList_TTypeId:TTypeId = TTypeId.ForName("TList")
-
-	'transformations ////////////////////////////////////////////////////////////
-	Const XJ_DELETE% = 86
-	Const XJ_RENAME% = 102
-	'Selector Type Codes
-	Const SEL_NULL$    = "null"
-	Const SEL_BOOLEAN$ = "boolean"
-	Const SEL_NUMBER$  = "number"
-	Const SEL_STRING$  = "string"
-	Const SEL_ARRAY$   = "array"
-	Const SEL_OBJECT$  = "object"
 
 End Type
 
@@ -1011,7 +1013,7 @@ EndType
 '////////////////////////////////////////////////////////////////////////////
 
 
-
+'This needs to be more robust about how it accepts type names and field names.
 Type TValue_Selector_Token
 
 	Field type_name$
@@ -1127,9 +1129,9 @@ Type TValue_Transformation
 	Field selector:TValue_Selector_Token[]
 	Field imperative_id%
 	Field argument:Object
-	Field condition_func%( val:TValue )
+	Field condition_func%( val:TValue_Search_Result )
 
-	Function Create:TValue_Transformation( selector$, imperative_id%, argument:Object, condition_func%( val:TValue ) )
+	Function Create:TValue_Transformation( selector$, imperative_id%, argument:Object, condition_func%( val:TValue_Search_Result ) )
 		Local xf:TValue_Transformation = New TValue_Transformation
 		xf.selector = ParseSelectorString( selector )
 		xf.imperative_id = imperative_id
@@ -1141,7 +1143,7 @@ Type TValue_Transformation
 	Method Execute( val:TValue )
 		Local matches:TList = Search( val )
 		For Local result:TValue_Search_Result = EachIn matches
-			If (condition_func = Null) Or (condition_func( result.matched ) = True)
+			If (condition_func = Null) Or (condition_func( result ) = True)
 				Select imperative_id
 					Case json.XJ_DELETE
 						If result.container_TObject
@@ -1154,6 +1156,8 @@ Type TValue_Transformation
 							result.container_TObject.fields.Insert( String(argument), result.matched )
 							result.container_TObject.fields.Remove( result.object_field_name )
 						EndIf
+					Case json.XJ_CONVERT
+						'???
 				EndSelect
 			EndIf
 		Next
