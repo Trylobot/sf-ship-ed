@@ -588,6 +588,18 @@ Function __TBoolean_NOT%( val:TValue_Search_Result )
 EndFunction
 
 
+Function test_pass_sf_1()
+	Print "*** test_pass_sf_1"
+	Local json_str$ = LoadString( test_dir + "/passes/sfw1.json" )
+	json.parse( json_str )
+EndFunction
+
+Function test_pass_sf_2()
+	Print "*** test_pass_sf_2"
+	Local json_str$ = LoadString( test_dir + "/passes/sfw2.json" )
+	json.parse( json_str )
+EndFunction
+
 
 '/////////////////////////////////////////////////////////////////
 
@@ -628,12 +640,12 @@ Function Main()
 	run_test( test_boolean_literal )
 	run_test( test_unclosed_array )
 	run_test( test_unquotedkey_keys_must_be_quoted )
-	'run_test( test_extra_comma ) 'I accept specifically: a single trailing comma
+	'run_test( test_extra_comma ) 'I explicitly choose to accept: a single trailing comma (ARRAY)
 	run_test( test_double_extra_comma )
 	run_test( test_missing_value )
 	run_test( test_comma_after_the_close )
 	run_test( test_extra_close )
-	run_test( test_extra_comma_after_value )
+	'run_test( test_extra_comma_after_value ) 'I explicitly choose to accept: a single trailing comma (OBJECT)
 	run_test( test_extra_value_after_close_with_misplaced_quotes )
 	run_test( test_illegal_expression_addition )
 	'run_test( test_illegal_invocation_of_alert ) 'Doesn't apply here; not Javascript
@@ -668,6 +680,8 @@ Function Main()
 	run_test( test_encode_TMap )
 	run_test( test_tvalue_transformation_search )
 	run_test( test_tvalue_transformation_conditional_delete )
+	run_test( test_pass_sf_1 )
+	run_test( test_pass_sf_2 )
 EndFunction
 
 Main()

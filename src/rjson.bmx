@@ -94,6 +94,7 @@ Type json
 		Local intermediate_object:TValue = allocate_TValue( encoded, cursor )
 		If intermediate_object = Null Then Return Null
 		intermediate_object.Decode( encoded, cursor )
+		CheckLeftovers( encoded, cursor )
 		For Local xform:TValue_Transformation = EachIn transforms_parse
 			xform.Execute( intermediate_object ) 'Execute any available transformations
 		Next
@@ -434,6 +435,15 @@ Type json
 		Return cursor - cursor_start
 	EndFunction
 
+	Function CheckLeftovers( encoded$, cursor% Var )
+		If cursor < encoded.Length
+			EatWhitespace( encoded, cursor )
+			If cursor < encoded.Length
+				json_error( json.LOG_ERROR+" unexpected data following root-level entity: "+Chr(encoded[cursor]) )
+			EndIf
+		EndIf
+	EndFunction
+
 	Function RepeatSpace$( count% )
 		Return LSet( "", count )
 	EndFunction
@@ -747,7 +757,7 @@ Type TString Extends TValue
 				ElseIf char <> STRING_ESCAPE_SEQUENCE_BEGIN
 					decoded_value :+ char 'NORMAL STRING CHARACTER
 				Else
-					If cursor >= (encoded.Length - 1)
+					If cursor >= encoded.Length
 						json_error( json.LOG_ERROR+" unterminated string literal" )
 					End If
 					char_temp = Chr(encoded[cursor]); cursor :+ 1
@@ -775,7 +785,7 @@ Type TString Extends TValue
 							json_error( json.LOG_ERROR+" bad string escape sequence at position "+(cursor-1)+json.ShowPosition(encoded,cursor) )
 					End Select
 				End If
-			Until cursor >= (encoded.Length - 1)
+			Until cursor >= encoded.Length
 		Else 'unquoted_mode_active
 			'Unquoted String / Enumeration Mode
 			' This means AlphaNumeric or Underscore characters ONLY
@@ -845,7 +855,7 @@ Type TArray Extends TValue
 		If encoded = "" Then Return
 		json.EatWhitespace( encoded, cursor )
 		Local char$
-		If cursor >= (encoded.Length - 1) Then Return
+		If cursor >= encoded.Length Then Return
 		char = Chr(encoded[cursor]); cursor :+ 1
 		If char <> ARRAY_BEGIN
 			json_error( json.LOG_ERROR+" expected open-square-bracket character at position "+(cursor-1)+json.ShowPosition(encoded, cursor) )
@@ -853,11 +863,11 @@ Type TArray Extends TValue
 		Local decoded_elements:TList = CreateList()
 		Local element_value:TValue
 		Repeat
-			If cursor >= (encoded.Length - 1)
+			If cursor >= encoded.Length
 				json_error( json.LOG_ERROR+" expected JSON Value at position "+(cursor-1)+json.ShowPosition(encoded, cursor) )
 			EndIf					
 			json.EatWhitespace( encoded, cursor )
-			If cursor >= (encoded.Length) Then Exit
+			If cursor >= encoded.Length Then Exit
 			char = Chr(encoded[cursor])
 			If char = ARRAY_END
 				cursor :+ 1 'eat it
@@ -875,7 +885,10 @@ Type TArray Extends TValue
 			If char <> VALUE_SEPARATOR And char <> VALUE_SEPARATOR_ALTERNATE And char <> ARRAY_END
 				json_error( json.LOG_ERROR+" expected comma or semicolon or close-square-bracket character at position "+(cursor-1)+json.ShowPosition(encoded, cursor) )
 			End If
-		Until char = ARRAY_END Or cursor >= (encoded.Length - 1)
+		Until char = ARRAY_END Or cursor >= encoded.Length
+		If char <> ARRAY_END
+			json_error(json.LOG_ERROR+" expected close-square-bracket character at position "+(cursor-1)+json.ShowPosition(encoded,cursor))
+		EndIf
 		elements = decoded_elements
 	EndMethod
 
@@ -959,7 +972,7 @@ Type TObject Extends TValue
 		Local field_value:TValue
 		Repeat
 			json.EatWhitespace( encoded, cursor )
-			If cursor >= (encoded.Length) Then Exit
+			If cursor >= encoded.Length Then Exit
 			char = Chr(encoded[cursor])
 			If char = OBJECT_END
 				cursor :+ 1 'eat it
@@ -967,7 +980,7 @@ Type TObject Extends TValue
 			EndIf
 			field_name.Decode( encoded, cursor )
 			json.EatWhitespace( encoded, cursor )
-			If cursor >= (encoded.Length) Then Exit
+			If cursor >= encoded.Length Then Exit
 			char = Chr(encoded[cursor]); cursor :+ 1
 			If char <> PAIR_SEPARATOR
 				json_error( json.LOG_ERROR+" expected colon character at position "+(cursor-1)+json.ShowPosition(encoded, cursor)  )
@@ -985,7 +998,10 @@ Type TObject Extends TValue
 			If char <> VALUE_SEPARATOR And char <> VALUE_SEPARATOR_ALTERNATE And char <> OBJECT_END
 				json_error( json.LOG_ERROR+" expected comma or semicolon or close-curly-brace character at position "+(cursor-1)+json.ShowPosition(encoded, cursor)  )
 			End If
-		Until char = OBJECT_END Or cursor >= (encoded.Length - 1)
+		Until char = OBJECT_END Or cursor >= encoded.Length
+		If char <> OBJECT_END
+			json_error(json.LOG_ERROR+" expected close-curly-brace character at position "+(cursor-1)+json.ShowPosition(encoded,cursor))
+		EndIf
 		fields = decoded_fields
 	EndMethod
 
