@@ -109,12 +109,29 @@ Type TModalSetStringData Extends TSubroutine
 					reset_cursor_color_period()
 					'///////////////////////
 					'Custom Engines check
-					If subroutine_mode = MODE_ENGINE And labels.lines[line_i] = "ship.engine.style"
-						If TStarfarerShipEngine(target).style = "CUSTOM"
+					If subroutine_mode = MODE_ENGINE ..
+					And labels.lines[line_i] = "ship.engine.style"
+						If TStarfarerShipEngine(target).style <> "CUSTOM"
+							TStarfarerShipEngine(target).styleId = ""
+							TStarfarerShipEngine(target).styleSpec = Null
+						Else ' style is custom
+							TStarfarerShipEngine(target).styleId = ed.get_default_multiselect_value( "ship.engine.styleId" )
+							If TStarfarerShipEngine(target).styleId <> ""
+								TStarfarerShipEngine(target).styleSpec = Null
+							Else ' style id is blank/null (not specified)
+								TStarfarerShipEngine(target).styleSpec = New TStarfarerCustomEngineStyleSpec
+							EndIf
+						EndIf
+						Load( ed,data,sprite ) 're-create string-editing window
+						Save( ed,data,sprite )
+					ElseIf subroutine_mode = MODE_ENGINE ..
+					And TStarfarerShipEngine(target).style = "CUSTOM" ..
+					And labels.lines[line_i] = "ship.engine.styleId"
+						If TStarfarerShipEngine(target).styleId <> ""
+							TStarfarerShipEngine(target).styleSpec = Null
+						Else ' style id is blank/null (not specified)
 							TStarfarerShipEngine(target).styleSpec = New TStarfarerCustomEngineStyleSpec
-						Else ' non custom
-							TStarfarerShipEngine(target).styleSpec = NULL
-						endIf
+						EndIf
 						Load( ed,data,sprite ) 're-create string-editing window
 						Save( ed,data,sprite )
 					EndIf
@@ -165,16 +182,15 @@ Type TModalSetStringData Extends TSubroutine
 			Case MODE_ENGINE
 				i = 0
 				TStarfarerShipEngine(target).style = values.lines[i]; i:+1
-				If TStarfarerShipEngine(target).styleSpec <> NULL
+				If values.lines.length >= 2 And TStarfarerShipEngine(target).style = "CUSTOM"
+					TStarfarerShipEngine(target).styleId = values.lines[i]; i:+1
+				EndIf
+				If values.lines.length >= 9 And TStarfarerShipEngine(target).styleSpec <> Null
 					TStarfarerShipEngine(target).styleSpec.type_ = values.lines[i]; i:+1
-					Try
-						TStarfarerShipEngine(target).styleSpec.engineColor = Int[]( json.parse( values.lines[i], "Int[]" )); i:+1
-					Catch ex$
-					EndTry
-					Try
-						TStarfarerShipEngine(target).styleSpec.contrailColor = Int[]( json.parse( values.lines[i], "Int[]" )); i:+1
-					Catch ex$
-					EndTry
+					json.error_level = 0
+					TStarfarerShipEngine(target).styleSpec.engineColor = Int[]( json.parse( values.lines[i], "Int[]" )); i:+1
+					TStarfarerShipEngine(target).styleSpec.contrailColor = Int[]( json.parse( values.lines[i], "Int[]" )); i:+1
+					json.error_level = 1
 					TStarfarerShipEngine(target).styleSpec.contrailParticleSizeMult = values.lines[i].ToDouble(); i:+1
 					TStarfarerShipEngine(target).styleSpec.contrailParticleDuration = values.lines[i].ToDouble(); i:+1
 					TStarfarerShipEngine(target).styleSpec.contrailMaxSpeedMult = values.lines[i].ToDouble(); i:+1

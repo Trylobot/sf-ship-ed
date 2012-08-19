@@ -233,7 +233,7 @@ Type TEditor
 	EndFunction
 
 	Method load_multiselect_value( name$, value$ )
-		If name And name <> "" And value And value <> ""
+		If name And name <> ""
 			If Not multiselect_values Then multiselect_values = CreateMap()
 			Local set:TMap = TMap( multiselect_values.ValueForKey( name ))
 			If Not set
@@ -250,6 +250,14 @@ Type TEditor
 	Method get_multiselect_values:TMap( name$ )
 		Local set:TMap = TMap( multiselect_values.ValueForKey( name ))
 		Return set
+	End Method
+
+	Method get_default_multiselect_value$( name$ )
+		Local set:TMap = TMap( multiselect_values.ValueForKey( name ))
+		For Local key$ = EachIn set.Keys()
+			If key <> "" Then Return key
+		Next
+		Return ""
 	End Method
 
 	Method get_max_fluxMods%( hullSize$ )
