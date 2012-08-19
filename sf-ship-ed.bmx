@@ -211,10 +211,10 @@ Repeat
 	'update
 	If ed.mode = "string_data"
 		TModalSetStringData.Update( ed, data, sprite )
-		update_zoom( ed, sprite, True )
+		update_zoom( ed, data, sprite, True )
 	ElseIf ed.program_mode = "csv" And TModalSetShipCSV.csv_row_values
 		TModalSetShipCSV.Update( ed, data, sprite )
-		update_zoom( ed, sprite, True )
+		update_zoom( ed, data, sprite, True )
 	Else
 		'these functions conflict with string editing
 		check_mode( ed, data, sprite )
@@ -224,7 +224,7 @@ Repeat
 		check_save_ship_data( ed, data, sprite )
 		check_load_mod( ed, data )
 		escape_key_update()
-		update_zoom( ed, sprite )
+		update_zoom( ed, data, sprite )
 	EndIf
 	update_flags( ed )
 	update_pan( ed, sprite )
@@ -438,7 +438,7 @@ Function update_flags( ed:TEditor )
 	If KeyHit( KEY_F3 ) Then ed.show_debug = Not ed.show_debug
 End Function
 
-Function update_zoom( ed:TEditor, sprite:TSprite, ignore_kb%=False )
+Function update_zoom( ed:TEditor, data:TData, sprite:TSprite, ignore_kb%=False )
 	Local z_delta% = 0
 	If MouseZ() <> ed.mouse_z
 		z_delta = MouseZ() - ed.mouse_z
@@ -468,18 +468,29 @@ Function update_zoom( ed:TEditor, sprite:TSprite, ignore_kb%=False )
 		End If
 		'sprite.scale = ZOOM_LEVELS[ed.selected_zoom_level]
 		ed.target_sprite_scale = ZOOM_LEVELS[ed.selected_zoom_level]
-		Rem
-		'(FAILURE #6) update pan to keep img_x, img_y constant
-		sprite.scale = ZOOM_LEVELS[ed.selected_zoom_level]
-		sprite.update() 'update early to facilitate auto-pan
-		sprite.pan_to( MouseX(), MouseY(), img_x, img_y )
-		EndRem
+		''zoom to cursor (FAILED ATTEMPT #7 : CLOSER THAN EVER)
+		'If data.ship And data.ship.center
+		'	Local ship_c_x%, ship_c_y%
+		'	sprite.xform_ship_c_to_scr( data.ship.center, ship_c_x, ship_c_y )
+		'	'sprite.zpan_x :+ MouseX() - ship_c_x
+		'	'sprite.zpan_y :+ MouseY() - ship_c_y
+		'	ed.target_zpan_x :- MouseX() - ship_c_x
+		'	ed.target_zpan_y :- MouseY() - ship_c_y
+		'EndIf
 	End If
 	If Abs(ed.target_sprite_scale - sprite.scale) < ZOOM_SNAP
 		sprite.scale = ed.target_sprite_scale
+		'sprite.zpan_x = ed.target_zpan_x
+		'sprite.zpan_y = ed.target_zpan_y
 	Else
 		sprite.scale :+ ZOOM_UPDATE_FACTOR*(ed.target_sprite_scale - sprite.scale)
+		'sprite.zpan_x :+ ZOOM_UPDATE_FACTOR*(ed.target_zpan_x - sprite.zpan_x)
+		'sprite.zpan_y :+ ZOOM_UPDATE_FACTOR*(ed.target_zpan_y - sprite.zpan_y)
 	EndIf
+	''trap sprite in viewable area
+	'If sprite.sx + sprite.sw < 0
+	'	sprite.zpan_x :- (sprite.sx + sprite.sw)
+	'EndIf
 End Function
 
 Function update_pan( ed:TEditor, sprite:TSprite )
@@ -529,7 +540,7 @@ Function draw_ship( ed:TEditor, sprite:TSprite )
 		Or ed.program_mode = "csv"
 			SetColor( 127, 127, 127 )
 		EndIf
-		DrawImage( sprite.img, W_MID + sprite.pan_x, H_MID + sprite.pan_y )
+		DrawImage( sprite.img, W_MID + sprite.pan_x + sprite.zpan_x, H_MID + sprite.pan_y + sprite.zpan_y )
 	End If
 End Function
 

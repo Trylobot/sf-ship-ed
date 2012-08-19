@@ -6,19 +6,20 @@ Type TSprite
 	'zoom and pan
 	Field scale#
 	Field pan_x#, pan_y#
+	Field zpan_x#, zpan_y#
 	'actual bounds, translated to screen coordinates
 	Field sx#, sy#
 	Field sw#, sh#
 	
 	Method update()
 		If img
-			sx = Float(W_MID) - 0.5*scale*Float(img.height) + pan_x
-			sy = Float(H_MID) - 0.5*scale*Float(img.width) + pan_y
+			sx = Float(W_MID) - 0.5*scale*Float(img.height) + pan_x + zpan_x
+			sy = Float(H_MID) - 0.5*scale*Float(img.width) + pan_y + zpan_y
 			sw = scale*Float(img.height)
 			sh = scale*Float(img.width)
 		Else
-			sx = Float(W_MID) + pan_x
-			sy = Float(H_MID) + pan_y
+			sx = Float(W_MID) + pan_x + zpan_x
+			sy = Float(H_MID) + pan_y + zpan_y
 			sw = 0
 			sh = 0
 		End If
@@ -31,21 +32,6 @@ Type TSprite
 			img_x = nearest_half( img_x )
 			img_y = nearest_half( img_y )
 		End If
-	EndMethod
-
-	'(FAILURE #6) does not work as intended
-	Method pan_to( mouse_x#, mouse_y#, img_x_target#, img_y_target# )
-		'alter pan_x/y so that get_img_xy() returns the given img_x, img_y
-		pan_x = scale*img_x_target + Float(W_MID) - 0.5*scale*Float(img.height) - mouse_x
-		pan_y = scale*img_y_target + Float(H_MID) - 0.5*scale*Float(img.width) - mouse_y
-		Rem
-		?Debug
-		update()
-		Local img_x#, img_y#
-		get_img_xy( mouse_x, mouse_y, img_x, img_y )
-		mouse_str :+ coord_string( img_x_target - img_x, img_y_target - img_y )
-		?
-		EndRem
 	EndMethod
 
 	'map the "ship center" to real screen coordinates
