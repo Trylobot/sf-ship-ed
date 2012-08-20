@@ -25,10 +25,14 @@ Function load_help()
 	ICON_ALT_CLICK = 32
 	ICON_SPACEBAR = 33
 	ICON_CTRL_ALT_RIGHT_CLICK = 34
-	'/////////////////////////////////////////////  ( key, description,             icon,    enable, margin, program modes, sub-modes )
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "1", "*.ship Mode          ", ICON_KB, True,   0 ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "2", "*.variant Mode       ", ICON_KB, True,   0 ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "3", "*.csv Mode           ", ICON_KB, True,   1 ))
+	'/////////////////////////////////////////////  ( key, description,         icon,    enable, space_after, program modes, sub-modes )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "1", "Hull Mode         ", ICON_KB, True,   0 ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "2", "Variant Mode      ", ICON_KB, True,   0 ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "3", "Ship Stats Mode   ", ICON_KB, True,   0 ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "4", "Fighter Wing Mode ", ICON_KB, True,   0 ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "5", "Weapon Mode       ", ICON_KB, False,  0 ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "6", "Weapon Stats Mode ", ICON_KB, False,  0 ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "7", "Projectile Mode   ", ICON_KB, False,  1 ))
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", "Pan View", ICON_MS_RIGHT, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", "Zoom +/-", ICON_MS_MIDDLE, True, 1 ))
@@ -104,6 +108,8 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "/", "Strip All", ICON_KB, True, 1, "variant" ))
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", "Edit CSV Data", ICON_KB, True, 1, "csv" ))
+	'////////////
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", "Edit CSV Data", ICON_KB, True, 1, "csv_wing" ))
 	'/////////////////////////////////////////////'
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F1", "Toggle This Help", 0, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F2", "Toggle Raw Data", 0, True, 0 ))

@@ -59,6 +59,8 @@ Type TEditor
 	Field stock_weapon_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
 	Field stock_hullmod_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
 	Field stock_ship_stats_field_order:TList'<String> 'column names
+	Field stock_weapon_stats_field_order:TList'<String> 'column names
+	Field stock_wing_stats_field_order:TList'<String> 'column names
 	Field multiselect_values:TMap 'String (field) --> TMap (set of valid values)
 
 	Method New()
@@ -82,6 +84,8 @@ Type TEditor
 		stock_hullmod_stats = CreateMap()
 		'csv field order
 		stock_ship_stats_field_order = ship_data_csv_field_order_template.Copy()
+		stock_weapon_stats_field_order = weapon_data_csv_field_order_template.Copy()
+		stock_wing_stats_field_order = wing_data_csv_field_order_template.Copy()
 		'scraped enum values
 		multiselect_values = CreateMap()
 	End Method
@@ -177,25 +181,35 @@ Type TEditor
 		EndTry
 	End Method
 
-	Method load_stock_wing_stats( dir$, file$ )
+	Method load_stock_wing_stats( dir$, file$, save_field_order%=FALSE )
 		Try
-			TCSVLoader.Load( dir+file, "id", stock_wing_stats )
+			If save_field_order
+				stock_wing_stats_field_order = CreateList()
+				TCSVLoader.Load( dir+file, "id", stock_wing_stats, stock_wing_stats_field_order )
+			Else
+				TCSVLoader.Load( dir+file, "id", stock_wing_stats )
+			EndIf
 			DebugLogFile " LOADED "+file
 		Catch ex$ 'ignore parsing errors and continue
 			DebugLogFile " Error: "+file+" "+ex
 		EndTry
 	End Method
 
-	Method load_stock_weapon_stats( dir$, file$ )
+	Method load_stock_weapon_stats( dir$, file$, save_field_order%=FALSE )
 		Try
-			TCSVLoader.Load( dir+file, "id", stock_weapon_stats )
+			If save_field_order
+				stock_weapon_stats_field_order = CreateList()
+				TCSVLoader.Load( dir+file, "id", stock_weapon_stats, stock_weapon_stats_field_order )
+			Else
+				TCSVLoader.Load( dir+file, "id", stock_weapon_stats )
+			EndIf
 			DebugLogFile " LOADED "+file
 		Catch ex$ 'ignore parsing errors and continue
 			DebugLogFile " Error: "+file+" "+ex
 		EndTry
 	End Method
 
-	Method load_stock_hullmod_stats( dir$, file$ )
+	Method load_stock_hullmod_stats( dir$, file$, save_field_order%=FALSE )
 		Try
 			TCSVLoader.Load( dir+file, "id", stock_hullmod_stats )
 			DebugLogFile " LOADED "+file

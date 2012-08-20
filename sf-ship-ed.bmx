@@ -62,11 +62,13 @@ Include "src/TStarfarerWeapon.type.bmx"
 Include "src/TStarfarerWeaponMuzzleFlashSpec.type.bmx"
 Include "src/TStarfarerWeaponSmokeSpec.type.bmx"
 Include "src/ShipDataCSVFieldTemplate.bmx"
+Include "src/WingDataCSVFieldTemplate.bmx"
 Include "src/TCSVLoader.type.bmx"
 Include "src/TData.type.bmx"
 Include "src/TSprite.type.bmx"
 Include "src/TEditor.type.bmx"
 Include "src/TSubroutine.type.bmx"
+Include "src/TGenericCSVSubroutine.type.bmx"
 Include "src/modal_set_center.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_collision_radius.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_shield_center.bmx" 'TODO: Convert to use TSubroutine
@@ -80,6 +82,7 @@ Include "src/modal_set_variant.bmx" 'TODO: Convert to use TSubroutine
 Include "src/TModalSetStringData.type.bmx"
 Include "src/TModalSetShipCSV.type.bmx"
 Include "src/TModalLaunchBays.type.bmx"
+Include "src/TModalSetWingCSV.type.bmx"
 Include "src/Application.type.bmx"
 Include "src/help.bmx"
 Include "src/multiselect_values.bmx"
@@ -359,6 +362,11 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 	EndIf
 	If KeyHit( KEY_3 )
 		ed.program_mode = "csv"
+		TModalSetShipCSV.Activate( ed, data, sprite )
+	EndIf
+	If KeyHit( KEY_4 )
+		ed.program_mode = "csv_wing"
+		TModalSetWingCSV.Activate( ed, data, sprite )
 	EndIf
 
 	If KeyHit( KEY_SPACE )
@@ -419,7 +427,10 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 		EndIf
 	EndIf
 
-	If ed.program_mode <> "csv" 'csv has its own, more complicated string editor
+	'if editing strings in the ship mode string editor
+	'pressing T will give a context-sensitive window
+	If  ed.program_mode <> "csv" ..
+	And ed.program_mode <> "csv_wing"
 		If KeyHit( KEY_T )
 			ed.last_mode = ed.mode
 			ed.mode = "string_data"
@@ -909,13 +920,13 @@ Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla%=FALSE )
 		ed.load_stock_ship_stats( stock_ships_dir, "ship_data.csv", vanilla )
 	EndIf
 	If FileType( stock_ships_dir+"wing_data.csv" ) = FILETYPE_FILE
-		ed.load_stock_wing_stats( stock_ships_dir, "wing_data.csv" )
+		ed.load_stock_wing_stats( stock_ships_dir, "wing_data.csv", vanilla )
 	EndIf
 	If FileType( stock_weapons_dir+"weapon_data.csv" ) = FILETYPE_FILE
-		ed.load_stock_weapon_stats( stock_weapons_dir, "weapon_data.csv" )
+		ed.load_stock_weapon_stats( stock_weapons_dir, "weapon_data.csv", vanilla )
 	EndIf
 	If FileType( stock_hullmods_dir+"hull_mods.csv" ) = FILETYPE_FILE
-		ed.load_stock_hullmod_stats( stock_hullmods_dir, "hull_mods.csv" )
+		ed.load_stock_hullmod_stats( stock_hullmods_dir, "hull_mods.csv", vanilla )
 	EndIf
 End Function
 
