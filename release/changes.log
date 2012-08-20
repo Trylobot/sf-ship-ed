@@ -1,4 +1,15 @@
 ______________________________________________________________________________
+editor version 2.3 (starfarer 0.53.1a RC5)
+- added support for BUILT_IN and SYSTEM weapons
+  includes being able to set the weapon from *.SHIP mode
+  and includes not being able to modify the built-in weapons in *.VARIANT mode
+  and includes not counting OPs from built-in weapons in *.VARIANT mode
+- added support for Custom Engine STYLE ID:
+  this is HIGHLY RECOMMENDED to use over the STYLE SPEC per-engine.
+  But to use it, you must first define your Engine Style ID in the following:
+    data/config/engine_styles.json
+- fixed bug in CSV Loader to properly quote fields containing commas
+______________________________________________________________________________
 editor version 2.2.3 (starfarer 0.53a)
 - bugfix for a crash related to custom engines
 ______________________________________________________________________________

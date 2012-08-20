@@ -73,6 +73,7 @@ Include "src/modal_set_shield_center.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_shield_radius.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_bounds.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_weapon_slots.bmx" 'TODO: Convert to use TSubroutine
+Include "src/modal_set_built_in_weapons.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_engine_slots.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_preview_all.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_variant.bmx" 'TODO: Convert to use TSubroutine
@@ -244,6 +245,8 @@ Repeat
 					modal_update_set_shield_radius( ed, data, sprite )
 				Case "weapon_slots"
 					modal_update_set_weapon_slots( ed, data, sprite )
+				Case "built_in_weapons"
+					modal_update_set_built_in_weapons( ed, data, sprite )
 				Case "engine_slots"
 					modal_update_set_engine_slots( ed, data, sprite )
 				Case "launch_bays"
@@ -285,6 +288,8 @@ Repeat
 					modal_draw_set_shield_radius( data, sprite )
 				Case "weapon_slots"
 					modal_draw_set_weapon_slots( ed, data, sprite )
+				Case "built_in_weapons"
+					modal_draw_set_built_in_weapons( ed, data, sprite )
 				Case "engine_slots"
 					modal_draw_set_engine_slots( ed, data, sprite )
 				Case "launch_bays"
@@ -361,7 +366,9 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 	EndIf
 
 	If ed.program_mode = "ship"
-		If KeyHit( KEY_ESCAPE )
+		'If not selecting a weapon for a built-in slot, check ESCAPE key
+		If Not( ed.mode = "built_in_weapons" And ed.weapon_lock_i <> -1 ) ..
+		And KeyHit( KEY_ESCAPE )
 			ed.last_mode = ed.mode
 			ed.mode = "none"
 			ed.field_i = 0
@@ -391,6 +398,12 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 			ed.mode = "weapon_slots"
 			ed.field_i = 0
 		EndIf
+		If KeyHit( KEY_U )
+			ed.last_mode = ed.mode
+			ed.mode = "built_in_weapons"
+			ed.weapon_lock_i = -1
+			ed.field_i = 0
+		EndIf
 		If KeyHit( KEY_L )
 			TModalLaunchBays.Activate( ed, data, sprite )
 		EndIf
@@ -402,9 +415,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 
 	ElseIf ed.program_mode = "variant"
 		If KeyHit( KEY_SLASH )
-			data.variant = New TStarfarerVariant
-			data.variant.hullId = data.ship.hullId
-			data.update_variant()
+			new_variant_data( data )
 		EndIf
 	EndIf
 
@@ -468,12 +479,12 @@ Function update_zoom( ed:TEditor, data:TData, sprite:TSprite, ignore_kb%=False )
 		End If
 		'sprite.scale = ZOOM_LEVELS[ed.selected_zoom_level]
 		ed.target_sprite_scale = ZOOM_LEVELS[ed.selected_zoom_level]
-		''zoom to cursor (FAILED ATTEMPT #7 : CLOSER THAN EVER)
+		'''zoom to cursor (FAILED ATTEMPT #7 : CLOSER THAN EVER)
 		'If data.ship And data.ship.center
 		'	Local ship_c_x%, ship_c_y%
 		'	sprite.xform_ship_c_to_scr( data.ship.center, ship_c_x, ship_c_y )
-		'	'sprite.zpan_x :+ MouseX() - ship_c_x
-		'	'sprite.zpan_y :+ MouseY() - ship_c_y
+		'	'''sprite.zpan_x :+ MouseX() - ship_c_x
+		'	'''sprite.zpan_y :+ MouseY() - ship_c_y
 		'	ed.target_zpan_x :- MouseX() - ship_c_x
 		'	ed.target_zpan_y :- MouseY() - ship_c_y
 		'EndIf
@@ -534,6 +545,7 @@ Function draw_ship( ed:TEditor, sprite:TSprite )
 		SetAlpha( 1 )
 		SetColor( 255, 255, 255 )
 		If ed.mode = "weapon_slots" ..
+		Or ed.mode = "built_in_weapons" ..
 		Or ed.mode = "launch_bays" ..
 		Or ed.mode = "string_data" ..
 		Or ed.program_mode = "variant" ..
@@ -958,6 +970,8 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 		APP.save()
 		data.decode( LoadString( data_path ))
 		data.update()
+		'update variant references to ship's built-in weapons
+		data.update_variant_enforce_builtin_weapons()
 		'update variant references to ship
 		data.variant.hullId = data.ship.hullId
 		If data.variant.variantId = "new_hull_variant_id"
@@ -1001,8 +1015,16 @@ Function load_variant_data( data:TData )
 		APP.variant_dir = ExtractDir( variant_path )+"/"
 		APP.save()
 		data.decode_variant( LoadString( variant_path ))
+		data.update_variant_enforce_builtin_weapons()
 		data.update_variant()
 	End If
+End Function
+
+Function new_variant_data( data:TData )
+	data.variant = New TStarfarerVariant
+	data.variant.hullId = data.ship.hullId
+	data.update_variant_enforce_builtin_weapons()
+	data.update_variant()
 End Function
 
 Function load_mod( ed:TEditor, data:TData )

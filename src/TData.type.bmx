@@ -384,6 +384,20 @@ Type TData
 	'////////////
 	
 	'requires subsequent call to update_variant()
+	Method update_variant_enforce_builtin_weapons()
+		For Local weaponSlot:TStarfarerShipWeapon = EachIn ship.weaponSlots
+			If weaponSlot.is_builtin()
+				Local weapon_id$ = String(ship.builtInWeapons.ValueForKey( weaponSlot.id ))
+				If weapon_id <> Null
+					assign_weapon_to_slot( weaponSlot.id, weapon_id )
+				Else 'weapon_id == Null
+					unassign_weapon_from_slot( weaponSlot.id )
+				EndIf
+			EndIf
+		Next
+	EndMethod
+
+	'requires subsequent call to update_variant()
 	Method assign_weapon_to_slot( ship_weapon_slot_id$, weapon_id$, group_i%=0 )
 		Local found% = False
 		If variant.weaponGroups
@@ -433,6 +447,20 @@ Type TData
 				EndIf
 			Next
 		Next
+	EndMethod
+
+	'requires subsequent call to update()
+	'AND a subsequent call to update_variant() !!!
+	Method assign_builtin_weapon_to_slot( ship_weapon_slot_id$, weapon_id$ )
+		ship.builtInWeapons.Insert( ship_weapon_slot_id, weapon_id )
+		assign_weapon_to_slot( ship_weapon_slot_id, weapon_id )
+	EndMethod
+
+	'requires subsequent call to update()
+	'AND a subsequent call to update_variant() !!!
+	Method unassign_builtin_weapon_from_slot( ship_weapon_slot_id$ )
+		ship.builtInWeapons.Remove( ship_weapon_slot_id )
+		unassign_weapon_from_slot( ship_weapon_slot_id )
 	EndMethod
 
 	'requires subsequent call to update_variant()
@@ -574,6 +602,8 @@ Type TData
 		Return nearest_i
 	End Method
 
+	'excludes only launch bays; intended to be used while defining
+	'weapon slots in SHIP mode.
 	Method find_nearest_weapon_slot%( img_x#, img_y# )
 		If Not ship.weaponSlots Or Not ship.center Then Return -1
 		img_x = img_x - ship.center[1]
@@ -583,6 +613,50 @@ Type TData
 		Local dist#
 		For Local i% = 0 Until ship.weaponSlots.length
 			If ship.weaponSlots[i].is_launch_bay()
+				Continue 'skip these
+			EndIf
+			dist = calc_distance( img_x, img_y, ship.weaponSlots[i].locations[0], ship.weaponSlots[i].locations[1] )
+			If nearest_i = -1 Or dist < nearest_dist
+				nearest_dist = dist
+				nearest_i = i
+			End If
+		Next
+		Return nearest_i
+	End Method
+	
+	'excludes built-in weapon slots because this method is intended
+	'to work properly in VARIANT mode;
+	Method find_nearest_variant_weapon_slot%( img_x#, img_y# )
+		If Not ship.weaponSlots Or Not ship.center Then Return -1
+		img_x = img_x - ship.center[1]
+		img_y = -( img_y - ship.center[0] )
+		Local nearest_i% = -1
+		Local nearest_dist# = -1
+		Local dist#
+		For Local i% = 0 Until ship.weaponSlots.length
+			If Not ship.weaponSlots[i].is_visible_to_variant()
+				Continue 'skip these
+			EndIf
+			dist = calc_distance( img_x, img_y, ship.weaponSlots[i].locations[0], ship.weaponSlots[i].locations[1] )
+			If nearest_i = -1 Or dist < nearest_dist
+				nearest_dist = dist
+				nearest_i = i
+			End If
+		Next
+		Return nearest_i
+	End Method
+	
+	'this method is intended to work exclusively while editing BUILT-IN weapon slots
+	'so it exludes non-built-in and launch bay weapon slots;
+	Method find_nearest_builtin_weapon_slot%( img_x#, img_y# )
+		If Not ship.weaponSlots Or Not ship.center Then Return -1
+		img_x = img_x - ship.center[1]
+		img_y = -( img_y - ship.center[0] )
+		Local nearest_i% = -1
+		Local nearest_dist# = -1
+		Local dist#
+		For Local i% = 0 Until ship.weaponSlots.length
+			If Not ship.weaponSlots[i].is_builtin()
 				Continue 'skip these
 			EndIf
 			dist = calc_distance( img_x, img_y, ship.weaponSlots[i].locations[0], ship.weaponSlots[i].locations[1] )

@@ -133,7 +133,7 @@ Type TEditor
 			Local input_json_str$ = LoadString( dir+file )
 			Local weapon:TStarfarerWeapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon" ))
 			stock_weapons.Insert( weapon.id, weapon )
-			load_multiselect_value( "ship.builtInWeapons.id", weapon.id )
+			'load_multiselect_value( "ship.builtInWeapons.id", weapon.id )
 			load_multiselect_value( "weapon.specClass", weapon.specClass )
 			load_multiselect_value( "weapon.type", weapon.type_ )
 			load_multiselect_value( "weapon.size", weapon.size )
@@ -212,8 +212,9 @@ Type TEditor
 			Local weapon:TStarfarerWeapon = TStarfarerWeapon( stock_weapons.ValueForKey( weapon_id ))
 			Local size_diff% = (weapon_size_value( slot_size ) - weapon_size_value( weapon.size ))
 			'slot type match and same size or bigger by one step
-			'or universal type with same size
+			'or universal/built-in type with same size
 			If ( slot_type = "UNIVERSAL" And size_diff = 0 ) ..
+			Or ( slot_type = "BUILT_IN" And size_diff = 0 ) ..
 			Or ( slot_type = weapon.type_ And size_diff >= 0 And size_diff <= 1 )
 				matches = matches[..(matches.length + 1)]
 				matches[matches.length - 1] = weapon.id

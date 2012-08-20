@@ -135,18 +135,18 @@ Type TModalSetStringData Extends TSubroutine
 						Load( ed,data,sprite ) 're-create string-editing window
 						Save( ed,data,sprite )
 					EndIf
-					'///////////////////////
-					'Built-In Weapons check
-					If subroutine_mode = MODE_WEAPON ..
-					And labels.lines[line_i] = "ship.builtInWeapons.id"
-						If TStarfarerShipWeapon(target).type_ = "BUILT_IN"
-							data.ship.builtInWeapons.Insert( TStarfarerShipWeapon(target).id, ed.get_default_multiselect_value( "ship.builtInWeapons.id" ))
-						Else ' not built in
-							data.ship.builtInWeapons.Remove( TStarfarerShipWeapon(target).id )
-						EndIf
-						Load( ed,data,sprite ) 're-create string-editing window
-						Save( ed,data,sprite )
-					EndIf
+					''///////////////////////
+					''Built-In Weapons check
+					'If subroutine_mode = MODE_WEAPON ..
+					'And labels.lines[line_i] = "ship.builtInWeapons.id"
+					'	If TStarfarerShipWeapon(target).type_ = "BUILT_IN"
+					'		data.ship.builtInWeapons.Insert( TStarfarerShipWeapon(target).id, ed.get_default_multiselect_value( "ship.builtInWeapons.id" ))
+					'	Else ' not built in
+					'		data.ship.builtInWeapons.Remove( TStarfarerShipWeapon(target).id )
+					'	EndIf
+					'	Load( ed,data,sprite ) 're-create string-editing window
+					'	Save( ed,data,sprite )
+					'EndIf
 					'///////////////////////
 				EndIf
 		EndSelect
@@ -216,9 +216,9 @@ Type TModalSetStringData Extends TSubroutine
 				TStarfarerShipWeapon(target).mount = values.lines[i]; i:+1
 				TStarfarerShipWeapon(target).size = values.lines[i]; i:+1
 				TStarfarerShipWeapon(target).type_ = values.lines[i]; i:+1
-				If values.lines.length >= i + 1 And TStarfarerShipWeapon(target).type_ = "BUILT_IN"
-					data.ship.builtInWeapons.Insert( TStarfarerShipWeapon(target).id, values.lines[i] ); i:+1
-				EndIf
+				'If values.lines.length >= i + 1 And TStarfarerShipWeapon(target).type_ = "BUILT_IN"
+				'	data.ship.builtInWeapons.Insert( TStarfarerShipWeapon(target).id, values.lines[i] ); i:+1
+				'EndIf
 				data.update()
 			'//////////////////////////////////////
 			Case MODE_VARIANT 
@@ -293,12 +293,12 @@ Type TModalSetStringData Extends TSubroutine
 					TStarfarerShipWeapon(target).mount +"~n"+..
 					TStarfarerShipWeapon(target).size +"~n"+..
 					TStarfarerShipWeapon(target).type_ )
-				If TStarfarerShipWeapon(target).type_ = "BUILT_IN"
-					labels.append( TextWidget.Create( ..
-						"ship.builtInWeapons.id" ))
-					values.append( TextWidget.Create( ..
-						String( data.ship.builtInWeapons.ValueForKey( TStarfarerShipWeapon(target).id ))))
-				EndIf
+				'If TStarfarerShipWeapon(target).type_ = "BUILT_IN"
+				'	labels.append( TextWidget.Create( ..
+				'		"ship.builtInWeapons.id" ))
+				'	values.append( TextWidget.Create( ..
+				'		String( data.ship.builtInWeapons.ValueForKey( TStarfarerShipWeapon(target).id ))))
+				'EndIf
 			'//////////////////////////////////////
 			Case MODE_VARIANT 
 				labels = TextWidget.Create( ..
@@ -318,10 +318,10 @@ Type TModalSetStringData Extends TSubroutine
 		EndSelect
 		labels.update_size()
 		values.update_size()
-		'add all weapons to the known enums
-		For val = EachIn ed.stock_weapon_stats.Keys()
-			ed.load_multiselect_value( "ship.builtInWeapons.id", val )
-		Next
+		''add all weapons to the known enums
+		'For val = EachIn ed.stock_weapon_stats.Keys()
+		'	ed.load_multiselect_value( "ship.builtInWeapons.id", val )
+		'Next
 		'search for known enums
 		data_types = New Int[labels.lines.length] 'DATATYPE_STRING
 		enum_defs = New String[][labels.lines.length]

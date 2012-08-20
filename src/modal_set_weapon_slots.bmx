@@ -159,28 +159,28 @@ Function modal_draw_set_weapon_slots( ed:TEditor, data:TData, sprite:TSprite )
 	SetAlpha( 1 )
 End Function
 
-Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36 )
+Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36, fg%=$FFFFFF,bg%=$000000 )
 	Local a# = GetAlpha()
 	'draw arc
-	SetColor( 255, 255, 255 )
+	SetColor((fg&$FF0000) Shr 16,(fg&$FF00) Shr 8,(fg&$FF))
 	SetAlpha( a*0.20 )
 	DrawOval( x - ra, y - ra, 2*ra, 2*ra )
 	SetAlpha( a*1.00 )
 	draw_arc( x, y, ra, rot+(arc/2), rot-(arc/2), arc/2 ) '1 segment per 2 degrees, assuming ra=36
 	'draw dot and pointer
-	SetColor( 0, 0, 0 )
+	SetColor((bg&$FF0000) Shr 16,(bg&$FF00) Shr 8,(bg&$FF))
 	DrawOval( x-r, y-r, 2*r, 2*r )
 	SetLineWidth( 4 )
 	DrawLine( x, y, x + (l + 1)*cos(rot), y - (l + 1)*sin(rot) )
-	SetColor( 255, 255, 255 )
+	SetColor((fg&$FF0000) Shr 16,(fg&$FF00) Shr 8,(fg&$FF))
 	DrawOval( x-(r-2), y-(r-2), 2*(r-2), 2*(r-2) )
 	SetLineWidth( 2 )
 	DrawLine( x, y, x + l*cos(rot), y - l*sin(rot) )
-	SetColor( 0, 0, 0 )
+	SetColor((bg&$FF0000) Shr 16,(bg&$FF00) Shr 8,(bg&$FF))
 	DrawOval( x-(r-4), y-(r-4), 2*(r-4), 2*(r-4) )
 	'draw emphasis
 	If em
-		SetColor( 255, 255, 255 )
+		SetColor((fg&$FF0000) Shr 16,(fg&$FF00) Shr 8,(fg&$FF))
 		DrawOval( x-(r-3), y-(r-3), 2*(r-3), 2*(r-3) )
 	EndIf
 	'cleanup

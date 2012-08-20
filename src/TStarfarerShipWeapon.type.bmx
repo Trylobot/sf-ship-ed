@@ -8,11 +8,25 @@ Type TStarfarerShipWeapon
 	Field mount$
 	Field size$
 	Field type_$
-	'derived data
+	
+	'derived field
 	Method is_launch_bay%()
 		Return (type_ = "LAUNCH_BAY" Or (locations.length > 2))
 	EndMethod
-	'ctor
+	'derived field
+	Method is_builtin%()
+		Return (type_ = "BUILT_IN")
+	EndMethod
+	'derived field
+	Method is_system%()
+		Return (type_ = "SYSTEM")
+	EndMethod
+	'derived field
+	Method is_visible_to_variant%()
+		Return Not is_launch_bay() ..
+		  And  Not is_system()
+	EndMethod
+
 	Method New()
 		angle = 0.0
 		arc = 0.0
@@ -37,7 +51,6 @@ Type TStarfarerShipWeapon
 	End Method
 End Type
 
-'BLITZMAX: Y U NO TEMPLATES
 Function remove_TStarfarerShipWeapon:TStarfarerShipWeapon[]( arr:TStarfarerShipWeapon[], w:TStarfarerShipWeapon )
 	Local i%
 	For i = 0 Until arr.length

@@ -10,9 +10,9 @@ Function modal_update_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 	Local img_x#, img_y#
 	sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
 	'locate nearest entity
-	Local ni% = data.find_nearest_weapon_slot( img_x, img_y )
+	Local ni% = data.find_nearest_variant_weapon_slot( img_x, img_y )
 	
-	'choose weapon for previously selected slot
+	'choose a weapon from a nice vertical list for the clicked slot
 	If ed.weapon_lock_i <> -1
 		'load valid weapons list for the slot
 		Local weapon_slot:TStarfarerShipWeapon = data.ship.weaponSlots[ed.weapon_lock_i]
@@ -61,11 +61,13 @@ Function modal_update_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 			data.update_variant()
 		EndIf
 	
+	'use the mouse to choose a slot to select
 	Else 'ed.weapon_lock_i = -1
 		If ni <> -1
 			Local weapon_slot:TStarfarerShipWeapon = data.ship.weaponSlots[ni]
 			'select weapon slot to assign weapon to
-			If left_click%
+			'block attempts to assign if the weapon is considered built-in
+			If left_click% And Not weapon_slot.is_builtin()
 				ed.weapon_lock_i = ni
 				'try to find currently assigned weapon and select it in the list
 				Local weapon_list$[] = ed.select_weapons( weapon_slot.type_, weapon_slot.size )
@@ -87,7 +89,8 @@ Function modal_update_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 					If found Then Exit
 				Next
 			EndIf
-			If KeyHIT( KEY_BACKSPACE )
+			'can't let user strip built-in weapon slots either
+			If KeyHIT( KEY_BACKSPACE ) And Not weapon_slot.is_builtin()
 				data.unassign_weapon_from_slot( weapon_slot.id )
 				data.update_variant()
 			EndIf
@@ -101,8 +104,8 @@ Function modal_update_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 			data.update_variant()
 		EndIf
 		
+		'selecting a hullmod
 		If ed.variant_hullMod_i <> -1
-			'selecting a hullmod
 			Local hullMods:TMap[] = New TMap[hullMods_count]
 			Local i% = 0
 			Local selected_hullMod:TMap
@@ -150,6 +153,7 @@ Function modal_update_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 			EndIf
 		EndIf
 
+		'edit weapon groups
 		If ed.group_field_i <> -1
 			Local max_group_offset% = (MAX_WEAPON_GROUPS - 1) '[ 0, 1, 2, 3, 4 ]
 			Local count%
@@ -259,7 +263,7 @@ Function modal_draw_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 	Local img_x#, img_y#
 	sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
 	'locate nearest entity
-	Local ni% = data.find_nearest_weapon_slot( img_x, img_y )
+	Local ni% = data.find_nearest_variant_weapon_slot( img_x, img_y )
 	If ed.weapon_lock_i <> -1
 		ni = ed.weapon_lock_i
 	End If
@@ -302,7 +306,7 @@ Function modal_draw_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 		Local x%, y%, w%, h%
 		'FIRST PASS: draw text boxes but make "really faint" if zoomed out too far
 		For Local i% = 0 Until data.ship.weaponSlots.Length
-			If data.ship.weaponSlots[i].is_launch_bay()
+			If Not data.ship.weaponSlots[i].is_visible_to_variant()
 				Continue 'skip these
 			EndIf
 			weaponSlot = data.ship.weaponSlots[i]
@@ -329,7 +333,7 @@ Function modal_draw_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 		Next
 		'SECOND PASS: draw slot mount icons
 		For Local i% = 0 Until data.ship.weaponSlots.Length
-			If data.ship.weaponSlots[i].is_launch_bay()
+			If Not data.ship.weaponSlots[i].is_visible_to_variant()
 				Continue 'skip these
 			EndIf
 			weaponSlot = data.ship.weaponSlots[i]
@@ -349,7 +353,7 @@ Function modal_draw_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 			If Not nearest
 				SetAlpha( 0.5 )
 			EndIf
-			draw_weapon_mount( wx, wy, weaponSlot.angle, weaponSlot.arc, nearest, 8, 16, 24 )
+			draw_variant_weapon_mount( wx, wy, weaponSlot )
 		Next
 		SetAlpha( 1 )
 		If ni <> -1
@@ -373,7 +377,7 @@ Function modal_draw_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 			If Not weapon_list_widget 'the select-a-weapon list will be drawn instead if it's non-null
 				draw_assigned_weapon_info( ed,data,sprite, weaponSlot )
 			EndIf
-			draw_weapon_mount( wx, wy, weaponSlot.angle, weaponSlot.arc, True, 8, 16, 24 )
+			draw_variant_weapon_mount( wx, wy, weaponSlot )
 			Rem
 			'info
 			Local wep_info:TextWidget = TextWidget.Create( ..
@@ -509,7 +513,7 @@ Function modal_draw_set_variant( ed:TEditor, data:TData, sprite:TSprite )
 							'draw_arc( wx, wy, 20, 0,360, 4*360, false )
 							draw_weapon_slot_info( ed,data,sprite, weapon_slot )
 							draw_assigned_weapon_info( ed,data,sprite, weapon_slot )
-							draw_weapon_mount( wx, wy, weapon_slot.angle, weapon_slot.arc, TRUE, 8, 16, 24 )
+							draw_variant_weapon_mount( wx, wy, weapon_slot )
 							Exit
 						EndIf
 					Next
@@ -567,7 +571,9 @@ Function calc_variant_used_ordnance_points%( ed:TEditor, data:TData )
 			Local weapon_id$ = String( group.weapons.ValueForKey( ship_weapon_slot_id ))
 			If weapon_id
 				Local weapon_op% = get_weapon_csv_ordnance_points( ed, data, weapon_id )
-				op :+ weapon_op
+				If Not is_weapon_assigned_to_builtin_weapon_slot( ed, data, ship_weapon_slot_id )
+					op :+ weapon_op
+				EndIf
 			End If
 		Next
 	Next
@@ -576,6 +582,15 @@ Function calc_variant_used_ordnance_points%( ed:TEditor, data:TData )
 		op :+ hullMod_op
 	Next
 	Return op
+EndFunction
+
+Function is_weapon_assigned_to_builtin_weapon_slot%( ed:TEditor, data:TData, ship_weapon_slot_id$ )
+	For Local weaponSlot:TStarfarerShipWeapon = EachIn data.ship.weaponSlots
+		If weaponSlot.id = ship_weapon_slot_id And weaponSlot.is_builtin()
+			Return True
+		EndIf
+	Next
+	Return False
 EndFunction
 
 Function get_weapon_csv_ordnance_points%( ed:TEditor, data:TData, weapon_id$ )
@@ -617,9 +632,16 @@ Function draw_weapon_slot_info( ed:TEditor, data:TData, sprite:TSprite, weaponSl
 		weaponSlot.size+"~n"+..
 		weaponSlot.type_+"~n"+..
 		weaponSlot.mount )
+	'set colors
+	Local fg_color% = $FFFFFF
+	Local bg_color% = $000000
+	If weaponSlot.is_builtin()
+		fg_color = $BFBFBF
+		bg_color = $3F3F3F
+	EndIf
 	'draw textbox
-	draw_container( wx + 30,wy, wep_info.w + 20,wep_info.h + 20, 0.0,0.5 )
-	draw_string( wep_info, wx + 40,wy,,, 0.0,0.5 )
+	draw_container( wx + 30,wy, wep_info.w + 20,wep_info.h + 20, 0.0,0.5, fg_color,bg_color )
+	draw_string( wep_info, wx + 40,wy, fg_color,bg_color, 0.0,0.5 )
 EndFunction
 
 Function draw_assigned_weapon_info( ed:TEditor, data:TData, sprite:TSprite, weaponSlot:TStarfarerShipWeapon )
@@ -633,23 +655,45 @@ Function draw_assigned_weapon_info( ed:TEditor, data:TData, sprite:TSprite, weap
 		If wep_stats
 			Local wep_name$ = String( wep_stats.ValueForKey( "name" ))
 			If wep_name
-				current_weapon_str :+ wep_name + "~n"
+				current_weapon_str :+ wep_name
 			Else
-				current_weapon_str :+ weapon_id + "~n"
+				current_weapon_str :+ weapon_id
 			EndIf
-			Local op_cost$ = String( wep_stats.ValueForKey( "OPs" ))
-			If op_cost
-				current_weapon_str :+ op_cost + " OP"
-			Else
-				current_weapon_str :+ "? OP"
+			If Not weaponSlot.is_builtin()
+				current_weapon_str :+ "~n"
+				Local op_cost$ = String( wep_stats.ValueForKey( "OPs" ))
+				If op_cost
+					current_weapon_str :+ op_cost + " OP"
+				Else
+					current_weapon_str :+ "? OP"
+				EndIf
 			EndIf
 		Endif
 	Else
 		current_weapon_str :+ "empty"
 	EndIf
+	'set colors
+	Local fg_color% = $FFFFFF
+	Local bg_color% = $000000
+	If weaponSlot.is_builtin()
+		fg_color = $BFBFBF
+		bg_color = $3F3F3F
+	EndIf
 	'draw textbox
 	Local current_weapon_widget:TextWidget = TextWidget.Create( current_weapon_str )
-	draw_container( wx - 30, wy, current_weapon_widget.w + 20, current_weapon_widget.h + 20, 1.0,0.5 )
-	draw_string( current_weapon_widget, wx - 40, wy,,, 1.0,0.5 )
+	draw_container( wx - 30, wy, current_weapon_widget.w + 20, current_weapon_widget.h + 20, 1.0,0.5, fg_color,bg_color )
+	draw_string( current_weapon_widget, wx - 40, wy, fg_color,bg_color, 1.0,0.5 )
+EndFunction
+
+Function draw_variant_weapon_mount( wx%, wy%, weaponSlot:TStarfarerShipWeapon )
+	'set colors
+	Local fg_color% = $FFFFFF
+	Local bg_color% = $000000
+	If weaponSlot.is_builtin()
+		fg_color = $BFBFBF
+		bg_color = $3F3F3F
+	EndIf
+	'draw icon
+	draw_weapon_mount( wx, wy, weaponSlot.angle, weaponSlot.arc, TRUE, 8, 16, 24, fg_color,bg_color )
 EndFunction
 

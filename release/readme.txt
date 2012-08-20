@@ -25,6 +25,8 @@
     Move existing weapon slots with Ctrl Click and drag
     Set cone-of-attack arc with Alt Click and drag
 
+  Press (U) to enter "Built-In Weapons" mode
+    
   Press (E) to enter "Engine Slot" mode
     While holding Shift, click to add engine slots
     Set direction with click and drag

@@ -1,0 +1,20 @@
+
+load all shipsystems
+	propagate system ID's to enum "system.id" and use in CSV mode
+	show system name and description in CSV mode instead of bar graph
+	(?) show CSV "defense ID" in this context as well
+
+fighter wing csv data in mode 4
+
+support weapons in mode 5
+
+projectiles in mode 6
+
+when changing weapon slot ID's in ship mode
+  propagate changes to built-in weapon assignments
+  and to the loaded variant as well
+
+fix shitty performance in complex non-TSubroutine modal functions
+	use static memory allocation and stateful transitions
+
+	
