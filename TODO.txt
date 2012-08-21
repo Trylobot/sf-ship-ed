@@ -33,3 +33,7 @@ fix shitty performance in complex non-TSubroutine modal functions
 
 zoom-to-cursor (UGH)
 
+- key to Set CSV line to blank
+
+- Allow to Type in values for the angle & firing arcs on weapons?
+
