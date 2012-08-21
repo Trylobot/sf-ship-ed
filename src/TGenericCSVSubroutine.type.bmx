@@ -11,7 +11,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 	Global row_load_identifier$
 	Global csv_identifier_field$
 	Global stock_stats:TMap
-	Global stock_stats_field_order:TMap
+	Global stock_stats_field_order:TList
 	Global data_csv_row:TMap
 	'loading a specific CSV file, and optionally choosing a row from it
 	Global loaded_csv_fullpath$

@@ -427,10 +427,9 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 		EndIf
 	EndIf
 
-	'if editing strings in the ship mode string editor
-	'pressing T will give a context-sensitive window
-	If  ed.program_mode <> "csv" ..
-	And ed.program_mode <> "csv_wing"
+	'context-sensitive sub-object string data editor
+	If ed.program_mode = "ship" ..
+	Or ed.program_mode = "variant"
 		If KeyHit( KEY_T )
 			ed.last_mode = ed.mode
 			ed.mode = "string_data"

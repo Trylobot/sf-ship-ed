@@ -12,7 +12,6 @@ Type TData
 
 	Field csv_row:TMap'<String,String>  'column name --> value
 	Field csv_row_wing:TMap'<String,String>  'column name --> value
-	Field csv_row_weapon:TMap'<String,String>  'column name --> value
 
 	'requires subsequent call to update()
 	Method New()
@@ -20,7 +19,6 @@ Type TData
 		variant = New TStarfarerVariant
 		csv_row = ship_data_csv_field_template.Copy()
 		csv_row_wing = wing_data_csv_field_template.Copy()
-		csv_row_weapon = weapon_data_csv_field_template.Copy()
 	End Method
 	
 	'requires subsequent call to update()
@@ -59,8 +57,6 @@ Type TData
 				csv_row = data_row
 			Case "wing_data.csv"
 				csv_row_wing = data_row
-			Case "weapon_data.csv"
-				csv_row_weapon = data_row
 		EndSelect
 	End Method
 

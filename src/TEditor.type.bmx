@@ -59,7 +59,6 @@ Type TEditor
 	Field stock_weapon_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
 	Field stock_hullmod_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
 	Field stock_ship_stats_field_order:TList'<String> 'column names
-	Field stock_weapon_stats_field_order:TList'<String> 'column names
 	Field stock_wing_stats_field_order:TList'<String> 'column names
 	Field multiselect_values:TMap 'String (field) --> TMap (set of valid values)
 
@@ -84,7 +83,6 @@ Type TEditor
 		stock_hullmod_stats = CreateMap()
 		'csv field order
 		stock_ship_stats_field_order = ship_data_csv_field_order_template.Copy()
-		stock_weapon_stats_field_order = weapon_data_csv_field_order_template.Copy()
 		stock_wing_stats_field_order = wing_data_csv_field_order_template.Copy()
 		'scraped enum values
 		multiselect_values = CreateMap()
@@ -198,8 +196,8 @@ Type TEditor
 	Method load_stock_weapon_stats( dir$, file$, save_field_order%=FALSE )
 		Try
 			If save_field_order
-				stock_weapon_stats_field_order = CreateList()
-				TCSVLoader.Load( dir+file, "id", stock_weapon_stats, stock_weapon_stats_field_order )
+				'stock_weapon_stats_field_order = CreateList()
+				TCSVLoader.Load( dir+file, "id", stock_weapon_stats )', stock_weapon_stats_field_order )
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_weapon_stats )
 			EndIf

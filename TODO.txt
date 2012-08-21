@@ -1,4 +1,8 @@
 
+- To create "maneuvering jets"
+  set the otherwise-unused "contrailSize" field to 128 to flag the engines as hidden
+  They'll be activated by any system that modifies the engine glow.
+
 fighter wing csv data in mode 4
 
 enhance rjson.parse() and rjson.stringify()
