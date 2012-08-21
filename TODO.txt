@@ -37,3 +37,10 @@ zoom-to-cursor (UGH)
 
 - Allow to Type in values for the angle & firing arcs on weapons?
 
+CSV - preserve blank lines and row-order
+
+ship-mounted engine graphic previews
+
+ship-mounted weapon graphic previews
+
+phase effect preview
