@@ -31,6 +31,7 @@ Import "src/console.bmx"
 ?Win32
 Import "assets/sf_icon.o"
 ?
+Incbin "release/sf-ship-ed-settings.json" 'for defaults
 Incbin "assets/bg.jpg"
 Incbin "assets/kb_key.png"
 Incbin "assets/kb_key_wide.png"

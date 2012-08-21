@@ -39,11 +39,18 @@ Type TGenericCSVSubroutine Extends TSubroutine
 	Const COLUMN_ENUM% = 1 'implies multiselect
 	Const COLUMN_STATISTIC% = 2 '(default) implies bar-graph comparison dataset
 	'//// specialized
-	Const COLUMN_FIGHTER_FORMATION% = 60 'shows the current formation in 'wing_data.csv' mode 
+	Const COLUMN_HULL_ID% = 100 '(SHIP) displays a checkmark if the hull ID is recognized
+	Const COLUMN_SYSTEM_ID% = 105 '(SHIP) displays a reasonable amount of system-related data, if found
+	'////
+	Const COLUMN_FIGHTER_FORMATION% = 600 '(WING) shows the current formation graphically
+
 
 	
-	Function Activate( ed:TEditor, data:TData, sprite:TSprite ) Abstract
-
+	Function Activate( ed:TEditor, data:TData, sprite:TSprite )
+		FlushKeys()
+		loaded_csv_id_list = Null
+		csv_row_values = Null
+	EndFunction
 
 	Function Update( ed:TEditor, data:TData, sprite:TSprite )
 		If loaded_csv_id_list

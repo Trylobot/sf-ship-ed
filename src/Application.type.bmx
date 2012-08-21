@@ -15,7 +15,12 @@ Type Application
 	Field mod_dirs$[]
 
 	Function Load:Application()
-		Local settings_json$ = LoadString( "sf-ship-ed-settings.json" )
+		Local settings_json$
+		Try
+			settings_json = LoadString( "sf-ship-ed-settings.json" )
+		Catch ex$
+			'settings_json = LoadString( "incbin::release/sf-ship-ed-settings.json" )
+		EndTry
 		Local app_obj:Application = Application( json.parse( settings_json, "Application" ))
 		app_obj.get_starfarer_dir()
 		If app_obj.images_dir.length = 0  Then app_obj.images_dir = app_obj.starfarer_base_dir

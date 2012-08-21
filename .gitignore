@@ -5,4 +5,4 @@
 *.lnk
 *.appref-ms
 sf-ship-ed.log
-sf-ship-ed-settings.json
+./sf-ship-ed-settings.json

@@ -2,6 +2,7 @@
 Type TModalSetWingCSV Extends TGenericCSVSubroutine
 
 	Function Activate( ed:TEditor, data:TData, sprite:TSprite )
+		Super.Activate( ed, data, sprite )
 		mode_name = "Wing"
 		default_filename = "wing_data.csv"
 		row_load_identifier = data.variant.variantId
