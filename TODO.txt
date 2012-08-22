@@ -1,4 +1,8 @@
 
+BUG: Editing weapon groups with no assigned weapons
+  G, right arrow
+  causes crash
+
 - To create "maneuvering jets"
   set the otherwise-unused "contrailSize" field to 128 to flag the engines as hidden
   They'll be activated by any system that modifies the engine glow.
@@ -44,3 +48,6 @@ ship-mounted engine graphic previews
 ship-mounted weapon graphic previews
 
 phase effect preview
+
+add zoom-out effect to CSV row id list (it's too long), (dirty hacks ftw)
+

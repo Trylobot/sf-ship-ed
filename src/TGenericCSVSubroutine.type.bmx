@@ -1,6 +1,6 @@
 
 Type TGenericCSVSubroutine Extends TSubroutine
-	Global i%, j%
+	Global i%, j%, field_type%
 	Global row:TMap
 	Global val$
 	Global line_str$
@@ -13,6 +13,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 	Global stock_stats:TMap
 	Global stock_stats_field_order:TList
 	Global data_csv_row:TMap
+	Global recognized_data_types:TMap
 	'loading a specific CSV file, and optionally choosing a row from it
 	Global loaded_csv_fullpath$
 	Global loaded_csv:TMap
@@ -39,17 +40,16 @@ Type TGenericCSVSubroutine Extends TSubroutine
 	Const COLUMN_ENUM% = 1 'implies multiselect
 	Const COLUMN_STATISTIC% = 2 '(default) implies bar-graph comparison dataset
 	'//// specialized
-	Const COLUMN_HULL_ID% = 100 '(SHIP) displays a checkmark if the hull ID is recognized
-	Const COLUMN_SYSTEM_ID% = 105 '(SHIP) displays a reasonable amount of system-related data, if found
+	Const COLUMN_HULL_ID% = 3 '(SHIP) displays a checkmark if the hull ID is recognized
+	Const COLUMN_SYSTEM_ID% = 4 '(SHIP) displays a reasonable amount of system-related data, if found
 	'////
-	Const COLUMN_FIGHTER_FORMATION% = 600 '(WING) shows the current formation graphically
+	Const COLUMN_FIGHTER_FORMATION% = 5 '(WING) shows the current formation graphically
 
 
-	
+	'this function should be overridden, but don't forget to call it
 	Function Activate( ed:TEditor, data:TData, sprite:TSprite )
 		FlushKeys()
-		loaded_csv_id_list = Null
-		csv_row_values = Null
+		recognized_data_types = CreateMap()
 	EndFunction
 
 	Function Update( ed:TEditor, data:TData, sprite:TSprite )
@@ -120,17 +120,15 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		For line_str = EachIn stock_stats_field_order
 			If widget_str <> "" Then widget_str :+ "~n"
 			widget_str :+ line_str
-			'special fields
-			If line_str = "name" ..
-			Or line_str = "id" ..
-			Or line_str = "system id" ..
-			Or line_str = "designation" ..
-			Or line_str = "8/6/5/4%" ..
-			Or line_str = "number"
-				csv_row_column_data_types[i] = COLUMN_STRING
+			If recognized_data_types.Contains( line_str )
+				csv_row_column_data_types[i] = (Int[]( recognized_data_types.ValueForKey( line_str )))[0]
+			Else
+				csv_row_column_data_types[i] = COLUMN_STATISTIC
+			EndIf
+			'////
+			If csv_row_column_data_types[i] = COLUMN_STRING
 				'do nothing further
-			ElseIf line_str = "shield type"
-				csv_row_column_data_types[i] = COLUMN_ENUM
+			ElseIf csv_row_column_data_types[i] = COLUMN_ENUM
 				Local set:TMap = ed.get_multiselect_values( "ship_csv."+line_str )
 				csv_row_column_data_enum_defs[i] = New String[count_keys( set )]
 				j = 0 'enum iterator
@@ -138,8 +136,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 					csv_row_column_data_enum_defs[i][j] = val
 					j :+ 1
 				Next
-			Else 'default; most fields are this
-				csv_row_column_data_types[i] = COLUMN_STATISTIC
+			Else 'csv_row_column_data_types[i] = COLUMN_STATISTIC
 				csv_row_column_data_numeric_datasets[i] = New Float[csv_rows_count]
 				j = 0 'row iterator
 				For row = EachIn stock_stats.Values()

@@ -548,7 +548,35 @@ Type json
 	Global TMap_TTypeId:TTypeId = TTypeId.ForName("TMap")
 	Global TList_TTypeId:TTypeId = TTypeId.ForName("TList")
 
+	'////////////////////////////////////////////////////////////////////////////
+	?Debug
+	Function ObjectInfo$( obj:Object )
+		If obj <> Null
+			Return "$" + Hex( Int( Byte Ptr( obj ))) + ":" + TTypeId.ForObject( obj ).Name()
+		Else
+			Return "$" + Hex( 0 )
+		End If
+	End Function
+	'////
+	Function PathInfo$( path:TValue_Selector_Token[] )
+		Local s$ = ""
+		If path
+			For Local i% = 0 Until path.Length
+				If i > 0 Then s :+ "/"
+				s :+ path[i].ToString()
+			Next
+		EndIf
+		Return s
+	EndFunction
+	'////
+	Function PathIndent$( path:TValue_Selector_Token[] )
+		If Not path Then Return "" Else Return LSet("",path.Length*2)
+	EndFunction
+	?
+
 End Type
+
+'////////////////////////////////////////////////////////////////////////////
 
 Function json_error( message$ )
 	Select json.error_level
@@ -1251,7 +1279,7 @@ Type TValue_Transformation
 	'recursive function (naturally) that
 	'returns a List of SelectorResult objects
 	Method Search:TList( this:TValue, container:TValue=Null, matches:TList=Null, path:TValue_Selector_Token[]=Null )
-		'DebugLog " "+PathIndent(path)+LSet(ObjectInfo(this),18)+", "+PathInfo(path)
+		'DebugLog " "+json.PathIndent(path)+LSet(json.ObjectInfo(this),18)+", "+json.PathInfo(path)
 		If matches = Null Then matches = CreateList()
 		If path <> Null And path.Length = selector.Length
 			'determine if the current path matches the selector
@@ -1291,29 +1319,6 @@ Type TValue_Transformation
 		EndIf
 		Return matches
 	EndMethod
-
-	?Debug
-	Function ObjectInfo$( obj:Object )
-		If obj <> Null
-			Return "$" + Hex( Int( Byte Ptr( obj ))) + ":" + TTypeId.ForObject( obj ).Name()
-		Else
-			Return "$" + Hex( 0 )
-		End If
-	End Function
-	Function PathInfo$( path:TValue_Selector_Token[] )
-		Local s$ = ""
-		If path
-			For Local i% = 0 Until path.Length
-				If i > 0 Then s :+ "/"
-				s :+ path[i].ToString()
-			Next
-		EndIf
-		Return s
-	EndFunction
-	Function PathIndent$( path:TValue_Selector_Token[] )
-		If Not path Then Return "" Else Return LSet("",path.Length*2)
-	EndFunction
-	?
 
 	'////////////////
 

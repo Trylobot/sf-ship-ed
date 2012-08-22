@@ -18,8 +18,8 @@ Type Application
 		Local settings_json$
 		Try
 			settings_json = LoadString( "sf-ship-ed-settings.json" )
-		Catch ex$
-			'settings_json = LoadString( "incbin::release/sf-ship-ed-settings.json" )
+		Catch ex:TStreamException
+			settings_json = LoadString( "incbin::release/sf-ship-ed-settings.json" )
 		EndTry
 		Local app_obj:Application = Application( json.parse( settings_json, "Application" ))
 		app_obj.get_starfarer_dir()

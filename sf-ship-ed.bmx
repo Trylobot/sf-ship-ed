@@ -3,21 +3,6 @@ Rem
 Starfarer ship data editor
 by Trylobot
 
-BUGS:
-
-- Editing weapon groups with no assigned weapons
-  G, right arrow
-  causes crash
-
-TODO:
-
-- Make "modal_draw/update_set_XXX" functions into objects
-  extending an abstract API, with their own fields
-  to increase performance by caching re-usable data
-  and removing the endless calls to New XXX
-
-
-
 EndRem
 
 SuperStrict
@@ -216,10 +201,10 @@ Repeat
 	'update
 	If ed.mode = "string_data"
 		TModalSetStringData.Update( ed, data, sprite )
-		update_zoom( ed, data, sprite, True )
 	ElseIf ed.program_mode = "csv" And TModalSetShipCSV.csv_row_values
 		TModalSetShipCSV.Update( ed, data, sprite )
-		update_zoom( ed, data, sprite, True )
+	ElseIf ed.program_mode = "csv_wing" And TModalSetWingCSV.csv_row_values
+		TModalSetWingCSV.Update( ed, data, sprite )
 	Else
 		'these functions conflict with string editing
 		check_mode( ed, data, sprite )
@@ -229,8 +214,8 @@ Repeat
 		check_save_ship_data( ed, data, sprite )
 		check_load_mod( ed, data )
 		escape_key_update()
-		update_zoom( ed, data, sprite )
 	EndIf
+	update_zoom( ed, data, sprite, True )
 	update_flags( ed )
 	update_pan( ed, sprite )
 	sprite.update()
@@ -271,6 +256,9 @@ Repeat
 		
 		Case "csv"
 			TModalSetShipCSV.Update( ed, data, sprite )
+
+		Case "csv_wing"
+			TModalSetWingCSV.Update( ed, data, sprite )
 
 	End Select
 
@@ -315,6 +303,9 @@ Repeat
 		Case "csv"
 			TModalSetShipCSV.Draw( ed, data, sprite )
 
+		Case "csv_wing"
+			TModalSetWingCSV.Draw( ed, data, sprite )
+			
 	End Select
 	draw_help( ed )
 	draw_data( ed, data )

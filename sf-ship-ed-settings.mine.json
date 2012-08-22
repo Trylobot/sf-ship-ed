@@ -1,0 +1,15 @@
+{
+  "data_dir": "C:/Games/Starfarer/mods/sc2/data/hulls/",
+  "data_font_size": 9,
+  "font_size": 14,
+  "height": 1000,
+  "images_dir": "C:/Games/Starfarer/mods/sc2/graphics/sc2/ships/",
+  "mod_dirs": [
+    "C:\\Games\\Starfarer\\mods\\nom/",
+    "C:\\Games\\Starfarer\\mods\\gsp/",
+    "C:\\Games\\Starfarer\\mods\\sc2/"
+  ],
+  "starfarer_base_dir": "C:\\Games\\Starfarer/",
+  "variant_dir": "C:/Games/Starfarer/starfarer-core/data/variants/",
+  "width": 1300
+}
