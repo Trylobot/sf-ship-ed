@@ -21,7 +21,6 @@ Type TModalLaunchBays Extends TSubroutine
 		ed.last_mode = ed.mode
 		ed.mode = "launch_bays"
 		ed.field_i = 0
-
 		dragging = false
 		n_LB = null
 		n_LB_loc_i = -1
@@ -85,7 +84,7 @@ Type TModalLaunchBays Extends TSubroutine
 			EndIf
 		EndIf
 		If CONTROL And ALT
-			If ed.mouse_2 'dragging
+			If ed.mouse_2 'dragging everything
 				If data.ship.weaponSlots
 					For LB_i = 0 until data.ship.weaponSlots.length
 						weapon = data.ship.weaponSlots[LB_i]
@@ -111,7 +110,7 @@ Type TModalLaunchBays Extends TSubroutine
 				ed.mouse_2 = False
 			End If
 		End If
-		If MouseHit( MOUSE_RIGHT )
+		If MouseHit( MOUSE_RIGHT ) And Not (CONTROL And ALT)
 			'right click
 			selected_launch_bay_index :+ 1
 		EndIf
@@ -180,6 +179,12 @@ Type TModalLaunchBays Extends TSubroutine
 			Next
 		End If
 		SetImageFont( FONT )
+	EndMethod
+
+	Method Load( ed:TEditor, data:TData, sprite:TSprite )
+	EndMethod
+	
+	Method Save( ed:TEditor, data:TData, sprite:TSprite )
 	EndMethod
 
 EndType

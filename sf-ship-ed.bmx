@@ -59,12 +59,13 @@ Include "src/modal_set_center.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_collision_radius.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_shield_center.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_shield_radius.bmx" 'TODO: Convert to use TSubroutine
-Include "src/modal_set_bounds.bmx" 'TODO: Convert to use TSubroutine
+'Include "src/modal_set_bounds.bmx" 
 Include "src/modal_set_weapon_slots.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_built_in_weapons.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_engine_slots.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_preview_all.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_variant.bmx" 'TODO: Convert to use TSubroutine
+Include "src/TModalSetBounds.type.bmx"
 Include "src/TModalSetStringData.type.bmx"
 Include "src/TModalSetShipCSV.type.bmx"
 Include "src/TModalLaunchBays.type.bmx"
@@ -177,7 +178,7 @@ If APP.mod_dirs And APP.mod_dirs.length > 0
 		load_stock_data( ed, data, mod_dir )
 	Next
 EndIf
-Rem 'data mining
+Rem 'for initial data mining
 For Local set$ = EachIn ed.multiselect_values.Keys()
 	For Local val$ = EachIn TMap(ed.multiselect_values.ValueForKey(set)).Keys()
 		DebugLogFile( "~q"+set+"~q, ~q"+val+"~q")
@@ -188,6 +189,7 @@ EndRem
 
 '////////////////////////////////////////////////
 
+Global sub_set_bounds:TModalSetBounds = New TModalSetBounds
 Global sub_string_data:TModalSetStringData = New TModalSetStringData
 Global sub_launchbays:TModalLaunchBays = New TModalLaunchBays
 Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
@@ -234,7 +236,7 @@ Repeat
 				Case "center"
 					modal_update_set_center( ed, data, sprite )
 				Case "bounds"
-					modal_update_set_bounds( ed, data, sprite )
+					sub_set_bounds.Update( ed, data, sprite )
 				Case "collision_radius"
 					modal_update_set_collision_radius( ed, data, sprite )
 				Case "shield_center"
@@ -280,7 +282,7 @@ Repeat
 				Case "center"
 					modal_draw_set_center( data, sprite )
 				Case "bounds"
-					modal_draw_set_bounds( ed, data, sprite, SHIFT, (Not SHIFT) )
+					sub_set_bounds.Draw( ed, data, sprite )
 				Case "collision_radius"
 					modal_draw_set_collision_radius( data, sprite )
 				Case "shield_center"
@@ -388,9 +390,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 			ed.field_i = 0
 		EndIf
 		If KeyHit( KEY_B )
-			ed.last_mode = ed.mode
-			ed.mode = "bounds"
-			ed.field_i = 0
+			sub_set_bounds.Activate( ed, data, sprite )
 		EndIf
 		If KeyHit( KEY_E )
 			ed.last_mode = ed.mode
