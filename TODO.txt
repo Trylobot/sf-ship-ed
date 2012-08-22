@@ -1,6 +1,10 @@
 
 When opening a ship file:
+	refresh TModal* data; bounds, weapons, engines coordinates etc are cached and have to be refreshed!
 	auto-attempt load of ship variant and ship CSV data
+
+When opening an image:
+	clear all data, but use names derived from the image name
 
 BUG: Editing weapon groups with no assigned weapons
   G, right arrow
@@ -53,4 +57,8 @@ ship-mounted weapon graphic previews
 phase effect preview
 
 add zoom-out effect to CSV row id list (it's too long), (dirty hacks ftw)
+
+Variant: Improve workflow for multiple weapon groups / linked / alternating / autofire.
+
+Load new graphic (I): request permission from user to clear out (new) all data. ship hull, variant, csv.
 

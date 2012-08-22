@@ -235,6 +235,38 @@ Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36,
 	SetAlpha( a )
 End Function
 
+Function draw_engine( x%, y%, w%, l%, rot#, z#, em%=False )
+	Local a# = GetAlpha()
+	Local outer_r% = 5
+	Local inner_r% = 4
+	If em
+		outer_r = 10
+		inner_r = 8
+	End If
+	'draw sizing rect
+	SetRotation( -rot )
+	SetScale( z, z )
+	SetColor( 255, 255, 255 )
+	If em
+		SetAlpha( a*0.25 )
+	Else
+		SetAlpha( a*0.18 )
+	EndIf
+	DrawRect( x + z*(l/2)*cos(rot+90), y - z*(l/2)*sin(rot+90), w, l )
+	SetRotation( 0 )
+	SetScale( 1, 1 )
+	SetAlpha( a*1 )
+	'draw bg
+	SetColor( 0, 0, 0 )
+	DrawOval( x-outer_r, y-outer_r, 2*outer_r, 2*outer_r )
+	'draw fg
+	SetColor( 255, 255, 255 )
+	DrawOval( x-inner_r, y-inner_r, 2*inner_r, 2*inner_r )
+	'reset
+	SetLineWidth( 1 )
+	SetAlpha( a )
+End Function
+
 '------------
 
 Global cursor_color_ts% = 0

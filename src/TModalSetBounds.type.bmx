@@ -16,7 +16,6 @@ Type TModalSetBounds Extends TSubroutine
 		ed.last_mode = ed.mode
 		ed.mode = "bounds"
 		ed.field_i = 0
-		update_bounds_coords( data, sprite )
 	EndMethod
 	
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
@@ -88,6 +87,7 @@ Type TModalSetBounds Extends TSubroutine
 	
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
+		update_bounds_coords( data, sprite )
 		draw_ghost_add_preview = SHIFT
 		draw_nearest_bound_indicator = Not SHIFT
 		'get input
