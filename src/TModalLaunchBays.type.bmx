@@ -1,23 +1,23 @@
 
 Type TModalLaunchBays Extends TSubroutine
 	
-	Global dragging% 'whether a drag is in progress
-	Global n_LB:TStarfarerShipWeapon 'nearest launch bay location's weapon object
-	Global n_LB_i% 'index of launch bay in data
-	Global n_LB_loc_i% 'nearest launch bay's location offset in the weapon object's location array
-	Global n_LB_x%, n_LB_y%
-	Global n_dist# 'distance to current nearest to compare against others
-	Global img_x#, img_y# 'location of mouse cursor on image, relative to rotated image's top left
-	Global mx%, my% 'screen position of coordinate to be potentially added
-	Global weapon:TStarfarerShipWeapon
-	Global LB_i% 'index of current weapon/launchbay
-	Global i% 'index of current location in current weapon/launchbay
-	Global L_dist# 'distance to selected launch bay
-	Global Lx%, Ly% 'screen position of selected launch bay port
-	Global selected_launch_bay_index%
-	Global launch_bay_count%
+	Field dragging% 'whether a drag is in progress
+	Field n_LB:TStarfarerShipWeapon 'nearest launch bay location's weapon object
+	Field n_LB_i% 'index of launch bay in data
+	Field n_LB_loc_i% 'nearest launch bay's location offset in the weapon object's location array
+	Field n_LB_x%, n_LB_y%
+	Field n_dist# 'distance to current nearest to compare against others
+	Field img_x#, img_y# 'location of mouse cursor on image, relative to rotated image's top left
+	Field mx%, my% 'screen position of coordinate to be potentially added
+	Field weapon:TStarfarerShipWeapon
+	Field LB_i% 'index of current weapon/launchbay
+	Field i% 'index of current location in current weapon/launchbay
+	Field L_dist# 'distance to selected launch bay
+	Field Lx%, Ly% 'screen position of selected launch bay port
+	Field selected_launch_bay_index%
+	Field launch_bay_count%
 
-	Function Activate( ed:TEditor, data:TData, sprite:TSprite ) 'mode is now active and has control
+	Method Activate( ed:TEditor, data:TData, sprite:TSprite ) 'mode is now active and has control
 		ed.last_mode = ed.mode
 		ed.mode = "launch_bays"
 		ed.field_i = 0
@@ -25,9 +25,9 @@ Type TModalLaunchBays Extends TSubroutine
 		dragging = false
 		n_LB = null
 		n_LB_loc_i = -1
-	EndFunction
+	EndMethod
 
-	Function Update( ed:TEditor, data:TData, sprite:TSprite )
+	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
 		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
 		mx = sprite.sx + img_x*sprite.scale 
@@ -133,9 +133,9 @@ Type TModalLaunchBays Extends TSubroutine
 		Else
 			mouse_str :+ "Add New Launch Bay"
 		EndIf
-	EndFunction
+	EndMethod
 
-	Function Draw( ed:TEditor, data:TData, sprite:TSprite )
+	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
 		'draw lasso to nearest
 		'(if not dragging and there is at least one existing launch bay port)
 		If Not dragging And n_LB <> null
@@ -180,7 +180,7 @@ Type TModalLaunchBays Extends TSubroutine
 			Next
 		End If
 		SetImageFont( FONT )
-	EndFunction
+	EndMethod
 
 EndType
 

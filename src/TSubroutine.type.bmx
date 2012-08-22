@@ -1,19 +1,19 @@
 
 Type TSubroutine Abstract
 	
-	Function Activate( ed:TEditor, data:TData, sprite:TSprite )
-	EndFunction
+	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
+	EndMethod
 	
-	Function Update( ed:TEditor, data:TData, sprite:TSprite )
-	EndFunction
+	Method Update( ed:TEditor, data:TData, sprite:TSprite )
+	EndMethod
 	
-	Function Draw( ed:TEditor, data:TData, sprite:TSprite )
-	EndFunction
+	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
+	EndMethod
 	
-	Function Load( ed:TEditor, data:TData, sprite:TSprite )
-	EndFunction
+	Method Load( ed:TEditor, data:TData, sprite:TSprite )
+	EndMethod
 	
-	Function Save( ed:TEditor, data:TData, sprite:TSprite )
-	EndFunction
+	Method Save( ed:TEditor, data:TData, sprite:TSprite )
+	EndMethod
 	
 EndType

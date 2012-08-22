@@ -1,4 +1,7 @@
 
+When opening a ship file:
+	auto-attempt load of ship variant and ship CSV data
+
 BUG: Editing weapon groups with no assigned weapons
   G, right arrow
   causes crash

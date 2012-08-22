@@ -1,6 +1,6 @@
 '-----------------------
 
-Function draw_string( source:Object, x%, y%, fg% = $FFFFFF, bg% = $000000, origin_x# = 0.0, origin_y# = 0.0, line_height_override% = -1, draw_bg% = True )
+Function draw_string( source:Object, x%, y%, fg%=$FFFFFF, bg%=$000000, origin_x#=0.0, origin_y#=0.0, line_height_override%=-1, draw_bg%=True, s#=1.0 )
 	Local LH% = LINE_HEIGHT
 	If line_height_override > -1
 		LH = line_height_override
@@ -22,13 +22,13 @@ Function draw_string( source:Object, x%, y%, fg% = $FFFFFF, bg% = $000000, origi
 		If Not widget
 			widget = TextWidget.Create( text )
 		End If
-		x :- origin_x*Float( widget.w )
-		y :- origin_y*Float( widget.h )
+		x :- origin_x*Float( s*widget.w )
+		y :- origin_y*Float( s*widget.h )
 	End If
 	Local x_cur% = x
 	Local y_cur% = y
 	SetRotation( 0 )
-	SetScale( 1.0, 1.0 )
+	SetScale( s, s )
 	Local a# = GetAlpha()
 	If draw_bg
 		SetColor( (bg & $FF0000) Shr 16, (bg & $00FF00) Shr 8, (bg & $0000FF) Shr 0 )
@@ -39,7 +39,7 @@ Function draw_string( source:Object, x%, y%, fg% = $FFFFFF, bg% = $000000, origi
 			DrawText( line, x_cur - 1, y_cur     );                                         DrawText( line, x_cur + 1, y_cur     )
 			DrawText( line, x_cur - 1, y_cur + 1 ); DrawText( line, x_cur    , y_cur + 1 ); DrawText( line, x_cur + 1, y_cur + 1 )
 			DrawText( line, x_cur + 2, y_cur + 2 )
-			y_cur :+ LH
+			y_cur :+ s*LH
 		Next
 		x_cur = x
 		y_cur = y
@@ -49,24 +49,25 @@ Function draw_string( source:Object, x%, y%, fg% = $FFFFFF, bg% = $000000, origi
 	For Local line$ = EachIn lines
 		'foreground
 		DrawText( line, x_cur, y_cur )
-		y_cur :+ LH
+		y_cur :+ s*LH
 	Next
+	SetScale( 1, 1 )
 End Function
 
-Function draw_container( x%, y%, w%, h%, ox#=0.0, oy#=0.0, fg%=$FFFFFF, bg%=$000000, bg_fill_alpha#=0.5 )
-	x :- ox*Float( w )
-	y :- oy*Float( h )
+Function draw_container( x%, y%, w%, h%, ox#=0.0, oy#=0.0, fg%=$FFFFFF, bg%=$000000, bg_fill_alpha#=0.5, s#=1.0 )
+	x :- ox*Float( s*w )
+	y :- oy*Float( s*h )
 	SetRotation( 0 )
-	SetScale( 1,1 )
+	SetScale( 1, 1 )
 	SetColor((bg&$FF0000) Shr 16,(bg&$FF00) Shr 8,(bg&$FF))
 	Local a# = GetAlpha()
 	SetAlpha( a*bg_fill_alpha )
-	DrawRect( x,y, w,h )
+	DrawRect( x,y, s*w,s*h )
 	SetAlpha( a*1 )
-	DrawRectLines( x-1,y-1, w+2,h+2 )
-	DrawRectLines( x+1,y+1, w-2,h-2 )
+	DrawRectLines( x-1,y-1, s*w+2,s*h+2 )
+	DrawRectLines( x+1,y+1, s*w-2,s*h-2 )
 	SetColor((fg&$FF0000) Shr 16,(fg&$FF00) Shr 8,(fg&$FF))
-	DrawRectLines( x,y, w,h )
+	DrawRectLines( x,y, s*w,s*h )
 	SetAlpha( a )
 EndFunction
 

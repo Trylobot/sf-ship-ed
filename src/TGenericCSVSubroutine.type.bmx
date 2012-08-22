@@ -1,40 +1,43 @@
 
 Type TGenericCSVSubroutine Extends TSubroutine
-	Global i%, j%, field_type%
-	Global row:TMap
-	Global val$
-	Global line_str$
-	Global widget_str$
+	Field i%, j%, field_type%
+	Field row:TMap
+	Field val$
+	Field line_str$
+	Field widget_str$
 	'hooks into global data
-	Global mode_name$
-	Global default_filename$
-	Global multiselect_prefix$
-	Global row_load_identifier$
-	Global csv_identifier_field$
-	Global stock_stats:TMap
-	Global stock_stats_field_order:TList
-	Global data_csv_row:TMap
-	Global recognized_data_types:TMap
+	Field mode_name$
+	Field default_filename$
+	Field multiselect_prefix$
+	Field row_load_identifier$
+	Field csv_identifier_field$
+	Field stock_stats:TMap
+	Field stock_stats_field_order:TList
+	Field data_csv_row:TMap
+	Field recognized_data_types:TMap
 	'loading a specific CSV file, and optionally choosing a row from it
-	Global loaded_csv_fullpath$
-	Global loaded_csv:TMap
-	Global loaded_csv_id_list:TextWidget
-	Global loaded_csv_id_list_item_i%
-	Global loaded_csv_id_list_item_cursor:TextWidget
+	Field loaded_csv_fullpath$
+	Field loaded_csv:TMap
+	Field loaded_csv_id_list:TextWidget
+	Field loaded_csv_id_list_item_i%
+	Field loaded_csv_id_list_item_cursor:TextWidget
 	'editing a CSV row's column data
-	Global csv_columns_count%
-	Global csv_rows_count%
-	Global csv_row_fields:TextWidget
-	Global csv_row_values:TextWidget
-	Global csv_row_column_i%
-	Global csv_row_column_cursor:TextWidget
-	Global csv_row_column_data_types%[]
-	Global csv_row_column_data_enum_defs$[][]
-	Global csv_row_column_data_numeric_datasets#[][]
-	Global csv_row_column_data_numeric_datasets_i%[]
-	Global modified% 'current field being edited has been modified
+	Field csv_columns_count%
+	Field csv_rows_count%
+	Field csv_row_fields:TextWidget
+	Field csv_row_values:TextWidget
+	Field csv_row_column_i%
+	Field csv_row_column_cursor:TextWidget
+	Field csv_row_column_data_types%[]
+	Field csv_row_column_data_enum_defs$[][]
+	Field csv_row_column_data_numeric_datasets#[][]
+	Field csv_row_column_data_numeric_datasets_i%[]
+	Field modified% 'current field being edited has been modified
+	'size considerations
+	Field csv_id_list_scale#
+	Field csv_data_box_scale#
 	'idle
-	Global idle_message:TextWidget
+	Field idle_message:TextWidget
 	
 	'//// generic
 	Const COLUMN_STRING% = 0 'free-form string input entry
@@ -46,12 +49,11 @@ Type TGenericCSVSubroutine Extends TSubroutine
 
 
 	'this function should be overridden, but don't forget to call it
-	Function Activate( ed:TEditor, data:TData, sprite:TSprite )
+	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		FlushKeys()
-		recognized_data_types = CreateMap()
-	EndFunction
+	EndMethod
 
-	Function Update( ed:TEditor, data:TData, sprite:TSprite )
+	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		If loaded_csv_id_list
 			update_csv_row_selector( ed, data )
 		ElseIf csv_row_values
@@ -61,9 +63,9 @@ Type TGenericCSVSubroutine Extends TSubroutine
 				initialize_csv_editor( ed, data )
 			EndIf
 		EndIf
-	EndFunction
+	EndMethod
 
-	Function Draw( ed:TEditor, data:TData, sprite:TSprite )
+	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
 		If loaded_csv_id_list
 			draw_csv_row_selector()
 		ElseIf csv_row_values
@@ -71,9 +73,9 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		Else
 			draw_idle()
 		EndIf
-	EndFunction
+	EndMethod
 
-	Function Save( ed:TEditor, data:TData, sprite:TSprite )
+	Method Save( ed:TEditor, data:TData, sprite:TSprite )
 		'prompt for a location
 		Local save_path$ = loaded_csv_fullpath
 		If Not save_path Or save_path = "" Then save_path = APP.data_dir+"/"+default_filename
@@ -83,30 +85,32 @@ Type TGenericCSVSubroutine Extends TSubroutine
 			loaded_csv_fullpath = save_path
 			TCSVLoader.Save_Row( loaded_csv_fullpath, data_csv_row, csv_identifier_field, stock_stats_field_order )
 		EndIf
-	EndFunction
+	EndMethod
 
-	Function Load( ed:TEditor, data:TData, sprite:TSprite )
+	Method Load( ed:TEditor, data:TData, sprite:TSprite )
 		loaded_csv_fullpath = RequestFile( "LOAD "+mode_name+" CSV", "csv", False, APP.data_dir+"/"+default_filename )
 		FlushKeys()
 		If FILETYPE_FILE = FileType( loaded_csv_fullpath )
 			APP.data_dir = ExtractDir( loaded_csv_fullpath )+"/"
 			APP.save()
 			loaded_csv = TCSVLoader.Load( loaded_csv_fullpath, csv_identifier_field )
-			'if loaded csv data contains a row with the same ID as the loaded ship, use it
-			'else prompt the user to choose one
-			If loaded_csv.Contains( row_load_identifier )
-				data_csv_row = TMap( loaded_csv.ValueForKey( row_load_identifier ))
-				data.set_csv_data( data_csv_row, default_filename )
-				initialize_csv_editor( ed, data )
-			Else 'none found
-				initialize_csv_row_chooser()
+			If loaded_csv
+				'if loaded csv data contains a row with the same ID as the loaded ship, use it
+				'else prompt the user to choose one
+				If loaded_csv.Contains( row_load_identifier )
+					data_csv_row = TMap( loaded_csv.ValueForKey( row_load_identifier ))
+					data.set_csv_data( data_csv_row, default_filename )
+					initialize_csv_editor( ed, data )
+				Else 'none found
+					initialize_csv_row_chooser()
+				EndIf
 			EndIf
 		EndIf
-	EndFunction
+	EndMethod
 
 	' CSV Editor ------------
 
-	Function initialize_csv_editor( ed:TEditor, data:TData )
+	Method initialize_csv_editor( ed:TEditor, data:TData )
 		FlushKeys()
 		csv_rows_count = count_keys( stock_stats )
 		csv_columns_count = stock_stats_field_order.Count()
@@ -169,9 +173,9 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		'setup cursor
 		csv_row_column_i = 0
 		update_csv_row_column_cursor( data )
-	EndFunction
+	EndMethod
 
-	Function update_csv_editor( data:TData )
+	Method update_csv_editor( data:TData )
 		'up or down/tab/enter to change selected csv row column index
 		'if the field is string or numeric, type to input characters
 		'if the field is numeric, alpha keys will be blocked
@@ -241,23 +245,27 @@ Type TGenericCSVSubroutine Extends TSubroutine
 			csv_row_column_i = -1
 			update_csv_row_column_cursor( data )
 		EndIf
-	EndFunction
+	EndMethod
 
-	Function draw_csv_editor()
+	Method draw_csv_editor()
 		'text
-		draw_container( W_MID+10,H_MID, 10+csv_row_fields.w+20+csv_row_values.w+10,10+csv_row_fields.h+10, 0.0,0.5 )
-		draw_string( csv_row_fields, W_MID+10+10,H_MID,,, 0.0,0.5 )
-		draw_string( csv_row_values, W_MID+10+10+20+csv_row_fields.w,H_MID,,, 0.0,0.5)
-		draw_string( csv_row_column_cursor, W_MID+10+10+20+csv_row_fields.w-TextWidth(" "),H_MID,get_cursor_color(),$000000, 0.0,0.5 )
+		csv_data_box_scale = 1
+		If csv_row_fields.h > H_MAX
+			csv_data_box_scale = Float(H_MAX)/Float(csv_row_fields.h)
+		EndIf
+		draw_container( W_MID+10,H_MID, 10+csv_row_fields.w+20+csv_row_values.w+10,10+csv_row_fields.h+10, 0.0,0.5,,,, csv_data_box_scale )
+		draw_string( csv_row_fields, W_MID+10+10,H_MID,,, 0.0,0.5,,, csv_data_box_scale )
+		draw_string( csv_row_values,        Int((W_MID+10+10+20+csv_data_box_scale*csv_row_fields.w)),                                  H_MID,,,                          0.0,0.5,,, csv_data_box_scale )
+		draw_string( csv_row_column_cursor, Int((W_MID+10+10+20+csv_data_box_scale*csv_row_fields.w-csv_data_box_scale*TextWidth(" "))),H_MID,get_cursor_color(),$000000, 0.0,0.5,,, csv_data_box_scale )
 		'graph
 		If COLUMN_STATISTIC = csv_row_column_data_types[csv_row_column_i]
 			draw_bar_graph( W_MID,H_MID, Int(W_MID/1.2),Int(H_MAX/1.8), 1.0,0.5, ..
 				csv_row_column_data_numeric_datasets[csv_row_column_i], ..
 				csv_row_column_data_numeric_datasets_i[csv_row_column_i], 0.333 )
 		EndIf
-	EndFunction
+	EndMethod
 
-	Function update_csv_row_column_cursor( data:TData )
+	Method update_csv_row_column_cursor( data:TData )
 		If csv_row_values
 			csv_row_column_cursor = TextWidget.Create( csv_row_values.lines[..] )
 			For i% = 0 Until csv_row_column_cursor.lines.length
@@ -277,9 +285,9 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		Else
 			csv_row_column_cursor = Null
 		EndIf
-	EndFunction
+	EndMethod
 
-	Function update_numeric_dataset( idx%, val# )
+	Method update_numeric_dataset( idx%, val# )
 		csv_row_column_data_numeric_datasets[idx][csv_row_column_data_numeric_datasets_i[idx]] = val
 		csv_row_column_data_numeric_datasets[idx].Sort()
 		For j = 0 Until csv_row_column_data_numeric_datasets[idx].length
@@ -288,11 +296,11 @@ Type TGenericCSVSubroutine Extends TSubroutine
 				Exit
 			EndIf
 		Next
-	EndFunction
+	EndMethod
 
 	' CSV Manual Row-Chooser ------------
 
-	Function initialize_csv_row_chooser()
+	Method initialize_csv_row_chooser()
 		widget_str = ""
 		For line_str = EachIn loaded_csv.Keys()
 			If widget_str <> "" Then widget_str :+ "~n"
@@ -301,9 +309,9 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		loaded_csv_id_list = TextWidget.Create( widget_str )
 		loaded_csv_id_list_item_i = 0
 		update_csv_row_cursor()
-	EndFunction
+	EndMethod
 
-	Function update_csv_row_selector( ed:TEditor, data:TData )
+	Method update_csv_row_selector( ed:TEditor, data:TData )
 		'up or down/tab to change selected csv row id
 		'enter to finalize choice
 		If KeyHit( KEY_DOWN ) Or KeyHIT( KEY_TAB )
@@ -326,15 +334,19 @@ Type TGenericCSVSubroutine Extends TSubroutine
 			loaded_csv_id_list_item_i = -1
 			update_csv_row_cursor()
 		EndIf
-	EndFunction
+	EndMethod
 
-	Function draw_csv_row_selector()
-		draw_container( W_MID,H_MID, loaded_csv_id_list.w+20,loaded_csv_id_list.h+20, 0.5,0.5 )
-		draw_string( loaded_csv_id_list, W_MID,H_MID,,, 0.5,0.5 )
-		draw_string( loaded_csv_id_list_item_cursor, W_MID,H_MID,get_cursor_color(),$000000, 0.5,0.5 )
-	EndFunction
+	Method draw_csv_row_selector()
+		csv_id_list_scale = 1
+		If loaded_csv_id_list.h > H_MAX
+			csv_id_list_scale = Float(H_MAX)/Float(loaded_csv_id_list.h)
+		EndIf
+		draw_container( W_MID,H_MID, loaded_csv_id_list.w+20,loaded_csv_id_list.h+20, 0.5,0.5,,,, csv_id_list_scale )
+		draw_string( loaded_csv_id_list, W_MID,H_MID,,, 0.5,0.5,,, csv_id_list_scale )
+		draw_string( loaded_csv_id_list_item_cursor, W_MID,H_MID,get_cursor_color(),$000000, 0.5,0.5,,, csv_id_list_scale )
+	EndMethod
 
-	Function update_csv_row_cursor()
+	Method update_csv_row_cursor()
 		If loaded_csv_id_list
 			loaded_csv_id_list_item_cursor = TextWidget.Create( loaded_csv_id_list.lines[..] )
 			For i% = 0 Until loaded_csv_id_list_item_cursor.lines.length
@@ -343,17 +355,17 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		Else
 			loaded_csv_id_list_item_cursor = Null
 		EndIf
-	EndFunction
+	EndMethod
 
 	' Idle message ------------
 
-	Function draw_idle()
+	Method draw_idle()
 		If Not idle_message
 			idle_message = TextWidget.Create( "Press T to edit CSV data" )
 		EndIf
 		draw_container( W_MID,H_MID, idle_message.w+20,idle_message.h+20, 0.5,0.5 )
 		draw_string( idle_message, W_MID,H_MID,,, 0.5,0.5 )
-	EndFunction
+	EndMethod
 
 EndType
 

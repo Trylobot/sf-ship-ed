@@ -161,6 +161,8 @@ Global TEXT_L:TextWidget = TextWidget.Create( "L" )
 
 load_ui( ed )
 
+'////////////////////////////////////////////////
+
 DebugLogFile( " Loading STARFARER-CORE Data (Vanilla)" )
 load_known_multiselect_values( ed )
 'go load the rest of it if able
@@ -169,7 +171,7 @@ If 0 <> FileType( APP.starfarer_base_dir+STARFARER_CORE_DIR[0] )
 ElseIf 0 <> FileType( APP.starfarer_base_dir+STARFARER_CORE_DIR[1] ) 
 	load_stock_data( ed, data, APP.starfarer_base_dir+STARFARER_CORE_DIR[1]+"/", TRUE )
 EndIf
-If APP.mod_dirs
+If APP.mod_dirs And APP.mod_dirs.length > 0
 	For Local mod_dir$ = EachIn APP.mod_dirs
 		DebugLogFile " Loading MOD Data: "+mod_dir
 		load_stock_data( ed, data, mod_dir )
@@ -183,6 +185,13 @@ For Local set$ = EachIn ed.multiselect_values.Keys()
 Next
 End
 EndRem
+
+'////////////////////////////////////////////////
+
+Global sub_string_data:TModalSetStringData = New TModalSetStringData
+Global sub_launchbays:TModalLaunchBays = New TModalLaunchBays
+Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
+Global sub_wing_csv:TModalSetWingCSV = New TModalSetWingCSV
 
 '//////////////////////////////////////////////////////////////////////////////
 '//////////////////////////////////////////////////////////////////////////////
@@ -200,11 +209,11 @@ Repeat
 	
 	'update
 	If ed.mode = "string_data"
-		TModalSetStringData.Update( ed, data, sprite )
-	ElseIf ed.program_mode = "csv" And TModalSetShipCSV.csv_row_values
-		TModalSetShipCSV.Update( ed, data, sprite )
-	ElseIf ed.program_mode = "csv_wing" And TModalSetWingCSV.csv_row_values
-		TModalSetWingCSV.Update( ed, data, sprite )
+		sub_string_data.Update( ed, data, sprite )
+	ElseIf ed.program_mode = "csv" And sub_ship_csv.csv_row_values
+		sub_ship_csv.Update( ed, data, sprite )
+	ElseIf ed.program_mode = "csv_wing" And sub_wing_csv.csv_row_values
+		sub_wing_csv.Update( ed, data, sprite )
 	Else
 		'these functions conflict with string editing
 		check_mode( ed, data, sprite )
@@ -239,7 +248,7 @@ Repeat
 				Case "engine_slots"
 					modal_update_set_engine_slots( ed, data, sprite )
 				Case "launch_bays"
-					TModalLaunchBays.Update( ed, data, sprite )
+					sub_launchbays.Update( ed, data, sprite )
 				Case "string_data"
 					'performed above, instead of any other keyboard updates
 				Case "preview_all"
@@ -255,10 +264,10 @@ Repeat
 			EndSelect
 		
 		Case "csv"
-			TModalSetShipCSV.Update( ed, data, sprite )
+			sub_ship_csv.Update( ed, data, sprite )
 
 		Case "csv_wing"
-			TModalSetWingCSV.Update( ed, data, sprite )
+			sub_wing_csv.Update( ed, data, sprite )
 
 	End Select
 
@@ -285,7 +294,7 @@ Repeat
 				Case "engine_slots"
 					modal_draw_set_engine_slots( ed, data, sprite )
 				Case "launch_bays"
-					TModalLaunchBays.Draw( ed, data, sprite )
+					sub_launchbays.Draw( ed, data, sprite )
 				Case "string_data"
 					'performed below, after nearly every other mode
 				Case "preview_all"
@@ -301,10 +310,10 @@ Repeat
 			EndSelect
 		
 		Case "csv"
-			TModalSetShipCSV.Draw( ed, data, sprite )
+			sub_ship_csv.Draw( ed, data, sprite )
 
 		Case "csv_wing"
-			TModalSetWingCSV.Draw( ed, data, sprite )
+			sub_wing_csv.Draw( ed, data, sprite )
 			
 	End Select
 	draw_help( ed )
@@ -314,7 +323,7 @@ Repeat
 	draw_debug( ed, sprite )
 
 	If ed.mode = "string_data"
-		TModalSetStringData.Draw( ed, data, sprite )
+		sub_string_data.Draw( ed, data, sprite )
 	End If
 
 	draw_instaquit_progress( W_MAX, H_MAX ) 
@@ -354,11 +363,11 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 	EndIf
 	If KeyHit( KEY_3 )
 		ed.program_mode = "csv"
-		TModalSetShipCSV.Activate( ed, data, sprite )
+		sub_ship_csv.Activate( ed, data, sprite )
 	EndIf
 	If KeyHit( KEY_4 )
 		ed.program_mode = "csv_wing"
-		TModalSetWingCSV.Activate( ed, data, sprite )
+		sub_wing_csv.Activate( ed, data, sprite )
 	EndIf
 
 	If KeyHit( KEY_SPACE )
@@ -405,7 +414,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 			ed.field_i = 0
 		EndIf
 		If KeyHit( KEY_L )
-			TModalLaunchBays.Activate( ed, data, sprite )
+			sub_launchbays.Activate( ed, data, sprite )
 		EndIf
 		If KeyHit( KEY_P )
 			ed.last_mode = ed.mode
@@ -438,7 +447,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 					ed.edit_strings_engine_i = data.find_nearest_engine( img_x, img_y )
 				EndIf
 			EndIf
-			TModalSetStringData.Activate( ed, data, sprite )
+			sub_string_data.Activate( ed, data, sprite )
 		EndIf
 	EndIf
 End Function
@@ -824,7 +833,7 @@ Function check_open_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 			Case "variant"
 				load_variant_data( data )
 			Case "csv"
-				TModalSetShipCSV.Load( ed, data, sprite )
+				sub_ship_csv.Load( ed, data, sprite )
 		EndSelect
 	End If
 End Function
@@ -849,7 +858,7 @@ Function check_save_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 					SaveString( data.json_str_variant, variant_path )
 				End If
 			Case "csv"	
-				TModalSetShipCSV.Save( ed, data, sprite )
+				sub_ship_csv.Save( ed, data, sprite )
 		EndSelect
 	End If
 End Function
@@ -982,8 +991,10 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 		data.update_variant()
 		'update csv row data that references to ship
 		If ed.stock_ship_stats.Contains( data.ship.hullId )
-			data.csv_row = TMap( ed.stock_ship_stats.ValueForKey( data.ship.hullId ))
-			TModalSetShipCSV.initialize_csv_editor( ed, data )
+			data.set_csv_data( TMap( ed.stock_ship_stats.ValueForKey( data.ship.hullId )), sub_ship_csv.default_filename )
+			If sub_ship_csv.data_csv_row
+				sub_ship_csv.initialize_csv_editor( ed, data )
+			EndIf
 		EndIf
 		'try to load the associated image, if one can be found
 		Local found% = False

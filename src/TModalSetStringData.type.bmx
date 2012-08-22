@@ -1,30 +1,30 @@
 
 Type TModalSetStringData Extends TSubroutine
 	
-	Global i%, j%, val$
-	Global enum_set:TMap
+	Field i%, j%, val$
+	Field enum_set:TMap
 
-	Global target:Object
-	Global modified%
+	Field target:Object
+	Field modified%
 
-	Global line_i%
-	Global line_enum_i%
-	Global labels:TextWidget
-	Global values:TextWidget
-	Global cursor:TextWidget
+	Field line_i%
+	Field line_enum_i%
+	Field labels:TextWidget
+	Field values:TextWidget
+	Field cursor:TextWidget
 
-	Global DATATYPE_STRING% = 0 'string types are entered free-form and then converted to/from JSON
-	Global DATATYPE_ENUM%   = 1 'enum types are restricted to a discrete set of values and use arrow keys to select
-	Global data_types%[]
-	Global enum_defs$[][]
+	Field DATATYPE_STRING% = 0 'string types are entered free-form and then converted to/from JSON
+	Field DATATYPE_ENUM%   = 1 'enum types are restricted to a discrete set of values and use arrow keys to select
+	Field data_types%[]
+	Field enum_defs$[][]
 
-	Global MODE_SHIP%    = 0
-	Global MODE_WEAPON%  = 1
-	Global MODE_ENGINE%  = 2
-	Global MODE_VARIANT% = 3
-	Global subroutine_mode%
+	Field MODE_SHIP%    = 0
+	Field MODE_WEAPON%  = 1
+	Field MODE_ENGINE%  = 2
+	Field MODE_VARIANT% = 3
+	Field subroutine_mode%
 
-	Function Activate( ed:TEditor, data:TData, sprite:TSprite )
+	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		'set the subroutine module state
 		FlushKeys()
 		line_i = 0
@@ -47,9 +47,9 @@ Type TModalSetStringData Extends TSubroutine
 		EndIf
 		'load data from appropriate source
 		Load( ed,data,sprite )
-	EndFunction
+	EndMethod
 
-	Function Update( ed:TEditor, data:TData, sprite:TSprite )
+	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		'back out (old way)
 		If KeyHit( KEY_ESCAPE )
 			ed.mode = ed.last_mode
@@ -150,9 +150,9 @@ Type TModalSetStringData Extends TSubroutine
 					'///////////////////////
 				EndIf
 		EndSelect
-	EndFunction
+	EndMethod
 
-	Function update_cursor( data:TData )
+	Method update_cursor( data:TData )
 		If values
 			cursor = TextWidget.Create( values )
 			For i = 0 Until cursor.lines.length
@@ -170,16 +170,16 @@ Type TModalSetStringData Extends TSubroutine
 		Else
 			cursor = NULL
 		EndIf
-	EndFunction
+	EndMethod
 
-	Function Draw( ed:TEditor, data:TData, sprite:TSprite )
+	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
 		draw_container( (W_MID-(10+labels.w+10)),H_MID, (10+labels.w+10)+(10+values.w+10),(10+labels.h+10), 0.0,0.5 )
 		draw_string( labels, (W_MID-10),H_MID,,, 1.0,0.5 )
 		draw_string( values, (W_MID+10),H_MID,,, 0.0,0.5 )
 		draw_string( cursor, (W_MID+10)-TextWidth(" "),H_MID, get_cursor_color(),$000000, 0.0,0.5 )
-	EndFunction
+	EndMethod
 
-	Function Save( ed:TEditor, data:TData, sprite:TSprite )
+	Method Save( ed:TEditor, data:TData, sprite:TSprite )
 		Select subroutine_mode
 			'////////////////////////////////////////
 			Case MODE_SHIP
@@ -231,9 +231,9 @@ Type TModalSetStringData Extends TSubroutine
 				Next
 				data.update_variant()
 		EndSelect
-	EndFunction
+	EndMethod
 
-	Function Load( ed:TEditor, data:TData, sprite:TSprite )
+	Method Load( ed:TEditor, data:TData, sprite:TSprite )
 		json.formatted = false
 		'setup edit box and initialize with values
 		Select subroutine_mode
@@ -341,7 +341,7 @@ Type TModalSetStringData Extends TSubroutine
 		Next
 		update_cursor( data )
 		json.formatted = true
-	EndFunction
+	EndMethod
 
 EndType
 
