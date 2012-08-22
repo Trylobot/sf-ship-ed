@@ -8,6 +8,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 	'hooks into global data
 	Global mode_name$
 	Global default_filename$
+	Global multiselect_prefix$
 	Global row_load_identifier$
 	Global csv_identifier_field$
 	Global stock_stats:TMap
@@ -39,11 +40,9 @@ Type TGenericCSVSubroutine Extends TSubroutine
 	Const COLUMN_STRING% = 0 'free-form string input entry
 	Const COLUMN_ENUM% = 1 'implies multiselect
 	Const COLUMN_STATISTIC% = 2 '(default) implies bar-graph comparison dataset
-	'//// specialized
-	Const COLUMN_HULL_ID% = 3 '(SHIP) displays a checkmark if the hull ID is recognized
-	Const COLUMN_SYSTEM_ID% = 4 '(SHIP) displays a reasonable amount of system-related data, if found
-	'////
-	Const COLUMN_FIGHTER_FORMATION% = 5 '(WING) shows the current formation graphically
+	''//// specialized
+	'Const COLUMN_HULL_ID% = 3 '(SHIP) displays a checkmark if the hull ID is recognized
+	'Const COLUMN_SYSTEM_ID% = 4 '(SHIP) displays a reasonable amount of system-related data, if found
 
 
 	'this function should be overridden, but don't forget to call it
@@ -125,18 +124,20 @@ Type TGenericCSVSubroutine Extends TSubroutine
 			Else
 				csv_row_column_data_types[i] = COLUMN_STATISTIC
 			EndIf
-			'////
-			If csv_row_column_data_types[i] = COLUMN_STRING
+			'/////////////////////////
+			If COLUMN_STRING = csv_row_column_data_types[i]
 				'do nothing further
-			ElseIf csv_row_column_data_types[i] = COLUMN_ENUM
-				Local set:TMap = ed.get_multiselect_values( "ship_csv."+line_str )
+			'/////////////////////////
+			ElseIf COLUMN_ENUM = csv_row_column_data_types[i]
+				Local set:TMap = ed.get_multiselect_values( multiselect_prefix+"."+line_str )
 				csv_row_column_data_enum_defs[i] = New String[count_keys( set )]
 				j = 0 'enum iterator
 				For val = EachIn set.Keys()
 					csv_row_column_data_enum_defs[i][j] = val
 					j :+ 1
 				Next
-			Else 'csv_row_column_data_types[i] = COLUMN_STATISTIC
+			'/////////////////////////
+			ElseIf COLUMN_STATISTIC = csv_row_column_data_types[i]
 				csv_row_column_data_numeric_datasets[i] = New Float[csv_rows_count]
 				j = 0 'row iterator
 				For row = EachIn stock_stats.Values()
