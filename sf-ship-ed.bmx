@@ -60,12 +60,13 @@ Include "src/modal_set_collision_radius.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_shield_center.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_shield_radius.bmx" 'TODO: Convert to use TSubroutine
 'Include "src/modal_set_bounds.bmx" 
-Include "src/modal_set_weapon_slots.bmx" 'TODO: Convert to use TSubroutine
+'Include "src/modal_set_weapon_slots.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_built_in_weapons.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_engine_slots.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_preview_all.bmx" 'TODO: Convert to use TSubroutine
 Include "src/modal_set_variant.bmx" 'TODO: Convert to use TSubroutine
 Include "src/TModalSetBounds.type.bmx"
+Include "src/TModalSetWeaponSlots.type.bmx"
 Include "src/TModalSetStringData.type.bmx"
 Include "src/TModalSetShipCSV.type.bmx"
 Include "src/TModalLaunchBays.type.bmx"
@@ -190,6 +191,7 @@ EndRem
 '////////////////////////////////////////////////
 
 Global sub_set_bounds:TModalSetBounds = New TModalSetBounds
+Global sub_set_weapon_slots:TModalSetWeaponSlots = New TModalSetWeaponSlots
 Global sub_string_data:TModalSetStringData = New TModalSetStringData
 Global sub_launchbays:TModalLaunchBays = New TModalLaunchBays
 Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
@@ -244,7 +246,7 @@ Repeat
 				Case "shield_radius"
 					modal_update_set_shield_radius( ed, data, sprite )
 				Case "weapon_slots"
-					modal_update_set_weapon_slots( ed, data, sprite )
+					sub_set_weapon_slots.Update( ed, data, sprite )
 				Case "built_in_weapons"
 					modal_update_set_built_in_weapons( ed, data, sprite )
 				Case "engine_slots"
@@ -290,7 +292,7 @@ Repeat
 				Case "shield_radius"
 					modal_draw_set_shield_radius( data, sprite )
 				Case "weapon_slots"
-					modal_draw_set_weapon_slots( ed, data, sprite )
+					sub_set_weapon_slots.Draw( ed, data, sprite )
 				Case "built_in_weapons"
 					modal_draw_set_built_in_weapons( ed, data, sprite )
 				Case "engine_slots"
@@ -403,9 +405,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 			ed.field_i = 0
 		EndIf
 		If KeyHit( KEY_W )
-			ed.last_mode = ed.mode
-			ed.mode = "weapon_slots"
-			ed.field_i = 0
+			sub_set_weapon_slots.Activate( ed, data, sprite )
 		EndIf
 		If KeyHit( KEY_U )
 			ed.last_mode = ed.mode
