@@ -267,6 +267,57 @@ Function draw_engine( x%, y%, w%, l%, rot#, z#, em%=False )
 	SetAlpha( a )
 End Function
 
+Function draw_builtin_weapon_slot_info( ed:TEditor, data:TData, sprite:TSprite, weaponSlot:TStarfarerShipWeapon )
+	'prep and compose string data
+	Local wx% = sprite.sx + (weaponSlot.locations[0] + data.ship.center[1])*sprite.Scale
+	Local wy% = sprite.sy + (-weaponSlot.locations[1] + data.ship.center[0])*sprite.Scale
+	Local wep_info:TextWidget = TextWidget.Create( ..
+		weaponSlot.size+"~n"+..
+		weaponSlot.type_+"~n"+..
+		weaponSlot.mount )
+	'set colors
+	Local fg_color% = $FFFFFF
+	Local bg_color% = $000000
+	'draw textbox
+	draw_container( wx + 30,wy, wep_info.w + 20,wep_info.h + 20, 0.0,0.5, fg_color,bg_color )
+	draw_string( wep_info, wx + 40,wy, fg_color,bg_color, 0.0,0.5 )
+EndFunction
+
+Function draw_builtin_assigned_weapon_info( ed:TEditor, data:TData, sprite:TSprite, weaponSlot:TStarfarerShipWeapon )
+	'prep and compose string data
+	Local wx% = sprite.sx + (weaponSlot.locations[0] + data.ship.center[1])*sprite.Scale
+	Local wy% = sprite.sy + (-weaponSlot.locations[1] + data.ship.center[0])*sprite.Scale
+	Local weapon_id$ = String( data.ship.builtInWeapons.ValueForKey( weaponSlot.id )) 'data.find_assigned_slot_weapon( weaponSlot.id )
+	Local current_weapon_str$ = ""
+	If weapon_id
+		Local wep_stats:TMap = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
+		If wep_stats
+			Local wep_name$ = String( wep_stats.ValueForKey( "name" ))
+			If wep_name
+				current_weapon_str :+ wep_name
+			Else
+				current_weapon_str :+ weapon_id
+			EndIf
+		Endif
+	Else
+		current_weapon_str :+ "empty"
+	EndIf
+	'set colors
+	Local fg_color% = $FFFFFF
+	Local bg_color% = $000000
+	'draw textbox
+	Local current_weapon_widget:TextWidget = TextWidget.Create( current_weapon_str )
+	draw_container( wx - 30, wy, current_weapon_widget.w + 20, current_weapon_widget.h + 20, 1.0,0.5, fg_color,bg_color )
+	draw_string( current_weapon_widget, wx - 40, wy, fg_color,bg_color, 1.0,0.5 )
+EndFunction
+
+Function draw_builtin_weapon_mount( wx%, wy%, weaponSlot:TStarfarerShipWeapon )
+	Local fg_color% = $FFFFFF
+	Local bg_color% = $000000
+	'draw icon
+	draw_weapon_mount( wx, wy, weaponSlot.angle, weaponSlot.arc, TRUE, 8, 16, 24, fg_color,bg_color )
+EndFunction
+
 '------------
 
 Global cursor_color_ts% = 0
