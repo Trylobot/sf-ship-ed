@@ -1,10 +1,17 @@
 
-When opening a ship file:
-	refresh TModal* data; bounds, weapons, engines coordinates etc are cached and have to be refreshed!
-	auto-attempt load of ship variant and ship CSV data
+BUG:  in variant mode when click on weapon slot you get list of weapons but when you click on any weapon list of weapon stays... I switch between weapons but list stays...
 
-When opening an image:
-	clear all data, but use names derived from the image name
+BUG:  If you've defined a .ship that has BUILT_IN weapons and assign said weapons, the next .ship you build will have the BUILT_IN weapons assigned, even if you've wiped out all of the weapon slots.  
+
+BUG: If you build a ship, then its variant, then you go back to ship editor and remove a gun, back to the variant editor, save both (all slots are correctly filled with guns), it seems everything's ok but that variant is actually broken because it still count the removed weapon as existing.
+
+BUG: Trylobot - In the ship variant screen, when I press H for hull mods, nothing happens any more.
+
+
+Provide a way to clear out data in each of the 4 modes (probably '/')
+  and a way to clear out ALL data to 'new' status CTRL+ALT+'N' maybe?
+
+Variant: Improve workflow for multiple weapon groups / linked / alternating / autofire.
 
 fighter wing csv data in mode 4
 - the fighter image should always be sourced from the variant referenced
@@ -62,8 +69,6 @@ ship-mounted weapon graphic previews
 phase effect preview
 
 add zoom-out effect to CSV row id list (it's too long), (dirty hacks ftw)
-
-Variant: Improve workflow for multiple weapon groups / linked / alternating / autofire.
 
 Load new graphic (I): request permission from user to clear out (new) all data. ship hull, variant, csv.
 

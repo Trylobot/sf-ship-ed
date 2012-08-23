@@ -34,7 +34,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 		ed.field_i = 0
 	EndMethod
 
-	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
+	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
 		fluxMods_max = ed.get_max_fluxMods( data.ship.hullSize )
 		hullMods_count = count_keys( ed.stock_hullmod_stats )
@@ -127,7 +127,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 		EndIf
 	End Method
 
-	Method Update( ed:TEditor, data:TData, sprite:TSprite ) 
+	Method Draw( ed:TEditor, data:TData, sprite:TSprite ) 
 		If Not data.ship.center Then Return
 		'get input
 		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
@@ -161,6 +161,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 				EndIf
 			Next
 		EndIf
+		
 		''screen position of coordinate to be potentially added
 		'draw pointers
 		nearest = false
@@ -169,16 +170,13 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 			If Not data.ship.weaponSlots[i].is_builtin()
 				Continue 'skip non-built-in slots
 			EndIf
-			weapon_slot = data.ship.weaponSlots[i]
-			wx = sprite.sx + (weapon_slot.locations[0] + data.ship.center[1])*sprite.Scale
-			wy = sprite.sy + (-weapon_slot.locations[1] + data.ship.center[0])*sprite.Scale
-			If ni = i
-				nearest = True
-			Else
-				nearest = False
+			nearest = (i = ni)
+			If Not nearest And ed.weapon_lock_i <> -1
+				Continue ' do not draw other weapons when selecting a weapon
 			EndIf
-			If Not nearest And ed.weapon_lock_i <> -1 Then Continue ' do not draw other weapons when selecting a weapon
-			'TODO: handle weapon slots with multiple locations (launch-bays)
+			weapon_slot = data.ship.weaponSlots[i]
+			wx = sprite.sx + ( weapon_slot.locations[0] + data.ship.center[1])*sprite.Scale
+			wy = sprite.sy + (-weapon_slot.locations[1] + data.ship.center[0])*sprite.Scale
 			SetRotation( 0 )
 			SetScale( 1, 1 )
 			SetAlpha( 1 )
@@ -195,16 +193,13 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 			If Not data.ship.weaponSlots[i].is_builtin()
 				Continue 'skip non-built-in slots
 			EndIf
-			weapon_slot = data.ship.weaponSlots[i]
-			wx = sprite.sx + (weapon_slot.locations[0] + data.ship.center[1])*sprite.Scale
-			wy = sprite.sy + (-weapon_slot.locations[1] + data.ship.center[0])*sprite.Scale
-			If ni = i
-				nearest = True
-			Else
-				nearest = False
+			nearest = (i = ni)
+			If Not nearest And ed.weapon_lock_i <> -1
+				Continue ' do not draw other weapons when selecting a weapon
 			EndIf
-			If Not nearest And ed.weapon_lock_i <> -1 Then Continue ' do not draw other weapons when selecting a weapon
-			'TODO: handle weapon slots with multiple locations (launch-bays)
+			weapon_slot = data.ship.weaponSlots[i]
+			wx = sprite.sx + ( weapon_slot.locations[0] + data.ship.center[1])*sprite.Scale
+			wy = sprite.sy + (-weapon_slot.locations[1] + data.ship.center[0])*sprite.Scale
 			SetRotation( 0 )
 			SetScale( 1, 1 )
 			SetAlpha( 1 )
@@ -214,6 +209,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 			draw_builtin_weapon_mount( wx, wy, weapon_slot )
 		Next
 		SetAlpha( 1 )
+		
 		If ni <> -1
 			weapon_slot = data.ship.weaponSlots[ni]
 			wx = sprite.sx + (weapon_slot.locations[0] + data.ship.center[1])*sprite.Scale
@@ -229,7 +225,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 				draw_builtin_assigned_weapon_info( ed,data,sprite, weapon_slot )
 			EndIf
 			draw_builtin_weapon_mount( wx, wy, weapon_slot )
-			If weapon_list_widget
+			If ed.weapon_lock_i <> -1 And weapon_list_widget
 				'select new weapon
 				SetColor( 0,0,0 )
 				SetRotation( 0 )
