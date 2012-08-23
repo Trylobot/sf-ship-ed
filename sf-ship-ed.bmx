@@ -423,6 +423,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 	EndIf
 
 	'STRING data editor, context-sensitive (has sub-object target)
+	'TODO: move this to TSubroutines
 	If ed.program_mode = "ship" ..
 	Or ed.program_mode = "variant"
 		If KeyHit( KEY_T )
@@ -544,6 +545,11 @@ Function draw_bg( ed:TEditor )
 End Function
 
 Function draw_ship( ed:TEditor, sprite:TSprite )
+	If ed.program_mode = "csv_wing" ..
+	And sub_wing_csv.hide_main_ship
+		Return
+	EndIf
+	'///
 	If sprite.img
 		SetRotation( 90 )
 		SetScale( sprite.scale, sprite.scale )
@@ -554,7 +560,8 @@ Function draw_ship( ed:TEditor, sprite:TSprite )
 		Or ed.mode = "launch_bays" ..
 		Or ed.mode = "string_data" ..
 		Or ed.program_mode = "variant" ..
-		Or ed.program_mode = "csv"
+		Or ed.program_mode = "csv" ..
+		Or ed.program_mode = "csv_wing"
 			SetColor( 127, 127, 127 )
 		EndIf
 		DrawImage( sprite.img, W_MID + sprite.pan_x + sprite.zpan_x, H_MID + sprite.pan_y + sprite.zpan_y )
@@ -792,6 +799,12 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
 			Else
 				title_w = TextWidget.Create( "ship_data.csv" )
 			EndIf
+		Case "csv_wing"
+			If data.csv_row
+				title_w = TextWidget.Create( "wing_data.csv : " + String( data.csv_row_wing.ValueForKey( "id" )))
+			Else
+				title_w = TextWidget.Create( "wing_data.csv" )
+			EndIf
 	EndSelect
 	draw_string( title_w, 4,4 )
 Endfunction
@@ -828,6 +841,8 @@ Function check_open_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 				load_variant_data( data )
 			Case "csv"
 				sub_ship_csv.Load( ed, data, sprite )
+			Case "csv_wing"
+				sub_wing_csv.Load( ed, data, sprite )
 		EndSelect
 	End If
 End Function
@@ -853,6 +868,8 @@ Function check_save_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 				End If
 			Case "csv"	
 				sub_ship_csv.Save( ed, data, sprite )
+			Case "csv_wing"	
+				sub_wing_csv.Save( ed, data, sprite )
 		EndSelect
 	End If
 End Function

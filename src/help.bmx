@@ -48,6 +48,9 @@ Function load_help()
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "D", "Open Row of *.csv", ICON_KB, True, 0, "csv" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", "Save Row to *.csv", ICON_KB, True, 1, "csv" ))
+	'////////////
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "D", "Open Row of *.csv", ICON_KB, True, 0, "csv_wing" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", "Save Row to *.csv", ICON_KB, True, 1, "csv_wing" ))
 	'/////////////////////////////////////////////'
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "C", "Center of Mass", ICON_KB, True, 0, "ship" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "S", "Shield Emitter", ICON_KB, True, 0, "ship" ))

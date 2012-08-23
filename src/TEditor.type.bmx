@@ -4,6 +4,7 @@ Type TEditor
 	'modal flags
 	Field program_mode$
 	Field mode$
+	Field hide_ship%
 	Field last_mode$
 	Field show_help%
 	Field show_data%
