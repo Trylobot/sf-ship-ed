@@ -566,7 +566,7 @@ Type TModalSetVariant Extends TSubroutine
 				SetAlpha( Min( 0.5, 0.5*(sprite.scale/3.0) ))
 			EndIf
 			draw_weapon_slot_info( ed,data,sprite, weapon_slot )
-			If Not weapon_list_widget 'the select-a-weapon list will be drawn instead if it's non-null
+			If ed.weapon_lock_i = -1 'the select-a-weapon list will be drawn instead if it's non-null
 				draw_assigned_weapon_info( ed,data,sprite, weapon_slot )
 			EndIf
 		Next

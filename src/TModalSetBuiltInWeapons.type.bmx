@@ -43,8 +43,10 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
 		'locate nearest entity
 		ni = data.find_nearest_builtin_weapon_slot( img_x, img_y )
+
 		'choose weapon for previously selected slot
 		If ed.weapon_lock_i <> -1
+			ni = ed.weapon_lock_i
 			'load valid weapons list for the slot
 			weapon_slot = data.ship.weaponSlots[ed.weapon_lock_i]
 			weapon_list = ed.select_weapons( weapon_slot.type_, weapon_slot.size )
@@ -129,13 +131,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite ) 
 		If Not data.ship.center Then Return
-		'get input
-		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
-		'locate nearest entity
-		ni = data.find_nearest_builtin_weapon_slot( img_x, img_y )
-		If ed.weapon_lock_i <> -1
-			ni = ed.weapon_lock_i
-		End If
+
 		'prepare to show list of weapons
 		If ed.weapon_lock_i <> -1
 			weapon_slot = data.ship.weaponSlots[ed.weapon_lock_i]
@@ -162,9 +158,9 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 			Next
 		EndIf
 		
-		''screen position of coordinate to be potentially added
-		'draw pointers
+		'screen position of coordinate to be potentially added
 		nearest = false
+		
 		'FIRST PASS: draw text boxes but make "really faint" if zoomed out too far
 		For i = 0 Until data.ship.weaponSlots.Length
 			If Not data.ship.weaponSlots[i].is_builtin()
@@ -184,10 +180,11 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 				SetAlpha( Min( 0.5, 0.5*(sprite.scale/3.0) ))
 			EndIf
 			draw_builtin_weapon_slot_info( ed,data,sprite, weapon_slot )
-			If Not weapon_list_widget 'the select-a-weapon list will be drawn instead if it's non-null
+			If ed.weapon_lock_i = -1 'the select-a-weapon list will be drawn instead if it's non-null
 				draw_builtin_assigned_weapon_info( ed,data,sprite, weapon_slot )
 			EndIf
 		Next
+		
 		'SECOND PASS: draw slot mount icons
 		For i = 0 Until data.ship.weaponSlots.Length
 			If Not data.ship.weaponSlots[i].is_builtin()
@@ -225,7 +222,8 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 				draw_builtin_assigned_weapon_info( ed,data,sprite, weapon_slot )
 			EndIf
 			draw_builtin_weapon_mount( wx, wy, weapon_slot )
-			If ed.weapon_lock_i <> -1 And weapon_list_widget
+			
+			If ed.weapon_lock_i <> -1
 				'select new weapon
 				SetColor( 0,0,0 )
 				SetRotation( 0 )
@@ -257,6 +255,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 				draw_string( cursor_widget, (wx - 40),wy, get_cursor_color(),$000000, 1.0,0.5 )
 				SetAlpha( 1 )
 			EndIf
+
 		EndIf
 		SetAlpha( 1 )
 	End Method
