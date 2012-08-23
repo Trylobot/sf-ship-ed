@@ -20,6 +20,7 @@ Type TModalSetBounds Extends TSubroutine
 	
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
+		update_bounds_coords( data, sprite )
 		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
 		If MouseHit( 1 ) And SHIFT
 			'get input
@@ -87,7 +88,6 @@ Type TModalSetBounds Extends TSubroutine
 	
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
-		update_bounds_coords( data, sprite )
 		draw_ghost_add_preview = SHIFT
 		draw_nearest_bound_indicator = Not SHIFT
 		'get input

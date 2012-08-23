@@ -61,17 +61,18 @@ Include "src/modal_set_shield_center.bmx"
 Include "src/modal_set_shield_radius.bmx"
 'Include "src/modal_set_bounds.bmx" 
 'Include "src/modal_set_weapon_slots.bmx"
-'Include "src/modal_set_built_in_weapons.bmx" 'TODO: Convert to use TSubroutine
+'Include "src/modal_set_built_in_weapons.bmx"
 'Include "src/modal_set_engine_slots.bmx"
-Include "src/modal_preview_all.bmx" 'TODO: Convert to use TSubroutine
+'Include "src/modal_preview_all.bmx"
 Include "src/modal_set_variant.bmx" 'TODO: Convert to use TSubroutine
+Include "src/TModalPreviewAll.type.bmx"
 Include "src/TModalSetBounds.type.bmx"
 Include "src/TModalSetWeaponSlots.type.bmx"
 Include "src/TModalSetBuiltInWeapons.type.bmx"
 Include "src/TModalSetEngineSlots.type.bmx"
 Include "src/TModalSetStringData.type.bmx"
-Include "src/TModalSetShipCSV.type.bmx"
 Include "src/TModalLaunchBays.type.bmx"
+Include "src/TModalSetShipCSV.type.bmx"
 Include "src/TModalSetWingCSV.type.bmx"
 Include "src/Application.type.bmx"
 Include "src/help.bmx"
@@ -192,6 +193,7 @@ EndRem
 
 '////////////////////////////////////////////////
 
+Global sub_preview_all:TModalPreviewAll = New TModalPreviewAll
 Global sub_set_bounds:TModalSetBounds = New TModalSetBounds
 Global sub_set_weapon_slots:TModalSetWeaponSlots = New TModalSetWeaponSlots
 Global sub_set_built_in_weapons:TModalSetBuiltInWeapons = New TModalSetBuiltInWeapons
@@ -260,7 +262,7 @@ Repeat
 				Case "string_data"
 					'performed above, instead of any other keyboard updates
 				Case "preview_all"
-					'nothing
+					sub_preview_all.Update( ed, data, sprite )
 			End Select
 		
 		Case "variant"
@@ -306,7 +308,7 @@ Repeat
 				Case "string_data"
 					'performed below, after nearly every other mode
 				Case "preview_all"
-					modal_draw_preview_all( ed, data, sprite )
+					sub_preview_all.Draw( ed, data, sprite )
 			End Select
 		
 		Case "variant"
@@ -416,9 +418,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 			sub_launchbays.Activate( ed, data, sprite )
 		EndIf
 		If KeyHit( KEY_P )
-			ed.last_mode = ed.mode
-			ed.mode = "preview_all"
-			ed.field_i = 0
+			sub_preview_all.Activate( ed, data, sprite )
 		End If
 
 	ElseIf ed.program_mode = "variant"
