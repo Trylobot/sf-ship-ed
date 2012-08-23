@@ -6,6 +6,12 @@ When opening a ship file:
 When opening an image:
 	clear all data, but use names derived from the image name
 
+fighter wing csv data in mode 4
+- the fighter image should always be sourced from the variant referenced
+  by the currently active CSV Wing data. check the variant for the hull id,
+  check the hull for the image, try and load it, etc.
+  if not found, use 'error.png'
+
 BUG: Editing weapon groups with no assigned weapons
   G, right arrow
   causes crash
@@ -14,7 +20,6 @@ BUG: Editing weapon groups with no assigned weapons
   set the otherwise-unused "contrailSize" field to 128 to flag the engines as hidden
   They'll be activated by any system that modifies the engine glow.
 
-fighter wing csv data in mode 4
 
 enhance rjson.parse() and rjson.stringify()
 - allow specifying a transform-set-id (or an array of them) as an argument
