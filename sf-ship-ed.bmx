@@ -64,7 +64,7 @@ Include "src/modal_set_shield_radius.bmx"
 'Include "src/modal_set_built_in_weapons.bmx"
 'Include "src/modal_set_engine_slots.bmx"
 'Include "src/modal_preview_all.bmx"
-Include "src/modal_set_variant.bmx" 'TODO: Convert to use TSubroutine
+'Include "src/modal_set_variant.bmx"
 Include "src/TModalPreviewAll.type.bmx"
 Include "src/TModalSetBounds.type.bmx"
 Include "src/TModalSetWeaponSlots.type.bmx"
@@ -72,6 +72,7 @@ Include "src/TModalSetBuiltInWeapons.type.bmx"
 Include "src/TModalSetEngineSlots.type.bmx"
 Include "src/TModalSetStringData.type.bmx"
 Include "src/TModalLaunchBays.type.bmx"
+Include "src/TModalSetVariant.type.bmx"
 Include "src/TModalSetShipCSV.type.bmx"
 Include "src/TModalSetWingCSV.type.bmx"
 Include "src/Application.type.bmx"
@@ -200,6 +201,7 @@ Global sub_set_built_in_weapons:TModalSetBuiltInWeapons = New TModalSetBuiltInWe
 Global sub_set_engine_slots:TModalSetEngineSlots = New TModalSetEngineSlots
 Global sub_string_data:TModalSetStringData = New TModalSetStringData
 Global sub_launchbays:TModalLaunchBays = New TModalLaunchBays
+Global sub_set_variant:TModalSetVariant = New TModalSetVariant
 Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
 Global sub_wing_csv:TModalSetWingCSV = New TModalSetWingCSV
 
@@ -268,7 +270,7 @@ Repeat
 		Case "variant"
 			Select ed.mode
 				Case "normal"
-					modal_update_set_variant( ed, data, sprite )
+					sub_set_variant.Update( ed, data, sprite )
 				Case "string_data"
 					'performed above, instead of any other keyboard updates
 			EndSelect
@@ -314,7 +316,7 @@ Repeat
 		Case "variant"
 			Select ed.mode
 				Case "normal"
-					modal_draw_set_variant( ed, data, sprite )
+					sub_set_variant.Draw( ed, data, sprite )
 				Case "string_data"
 					'performed below, after nearly every other mode
 			EndSelect
@@ -362,14 +364,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 		ed.field_i = 0
 	EndIf
 	If KeyHit( KEY_2 )
-		ed.program_mode = "variant"
-		ed.last_mode = "normal"
-		ed.mode = "normal"
-		ed.weapon_lock_i = -1
-		ed.variant_hullMod_i = -1
-		ed.group_field_i = -1
-		'clear key queues
-		MouseHit( MOUSE_LEFT )
+		sub_set_variant.Activate( ed, data, sprite )
 	EndIf
 	If KeyHit( KEY_3 )
 		ed.program_mode = "csv"
@@ -427,7 +422,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 		EndIf
 	EndIf
 
-	'context-sensitive sub-object string data editor
+	'STRING data editor, context-sensitive (has sub-object target)
 	If ed.program_mode = "ship" ..
 	Or ed.program_mode = "variant"
 		If KeyHit( KEY_T )
