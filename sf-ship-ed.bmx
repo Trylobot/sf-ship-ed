@@ -224,7 +224,7 @@ Repeat
 		'these functions conflict with string editing
 		check_mode( ed, data, sprite )
 		check_open_ship_image( ed, data, sprite )
-		'check_new_ship_data( data ) ' this function is not terribly useful; disabled for now
+		check_new_ship_data( data )
 		check_open_ship_data( ed, data, sprite )
 		check_save_ship_data( ed, data, sprite )
 		check_load_mod( ed, data )
@@ -817,14 +817,11 @@ Function check_load_mod( ed:TEditor, data:TData )
 	EndIF
 EndFunction
 
-Rem
 Function check_new_ship_data( data:TData )
-	If KeyHit( KEY_N )
-		data.ship = New TStarfarerShip
-		data.update()
+	If KeyHit( KEY_N ) And CTRL And ALT
+		load_ship_data( ed, data, sprite, True )
 	End If
 End Function
-EndRem
 
 Function check_open_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 	If KeyHit( KEY_D )
@@ -978,22 +975,22 @@ Function load_ship_image__driver( ed:TEditor, data:TData, sprite:TSprite, image_
 	End If
 EndFunction
 
-Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite )
-	Local data_path$ = RequestFile( "LOAD Ship Data", "ship", False, APP.data_dir )
-	FlushKeys()
-	If FileType( data_path ) = FILETYPE_FILE
+Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite, use_new%=False )
+	'SHIP data
+	If Not use_new
+		'user picks a file to load
+		Local data_path$ = RequestFile( "LOAD Ship Data", "ship", False, APP.data_dir )
+		FlushKeys()
+		If FileType( data_path ) <> FILETYPE_FILE Then Return
 		APP.data_dir = ExtractDir( data_path )+"/"
 		APP.save()
 		data.decode( LoadString( data_path ))
 		data.update()
-		'update variant references to ship's built-in weapons
-		data.update_variant_enforce_builtin_weapons()
-		'update variant references to ship
-		data.variant.hullId = data.ship.hullId
-		If data.variant.variantId = "new_hull_variant_id"
-			data.variant.variantId = data.ship.hullId + "_variant"
-		EndIf
+		'VARIANT data
+		''try to find variant
+		data.variant = ed.get_default_variant( data.ship.hullId )
 		data.update_variant()
+		'CSV/STATS data
 		'update csv row data that references to ship
 		If ed.stock_ship_stats.Contains( data.ship.hullId )
 			data.set_csv_data( TMap( ed.stock_ship_stats.ValueForKey( data.ship.hullId )), sub_ship_csv.default_filename )
@@ -1001,6 +998,7 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 				sub_ship_csv.initialize_csv_editor( ed, data )
 			EndIf
 		EndIf
+		'IMAGE (implied)
 		'try to load the associated image, if one can be found
 		Local found% = False
 		'search mod directories
@@ -1023,7 +1021,14 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 				EndIf
 			Next
 		EndIf
-	End If
+	Else ' use_new
+		'new data is loaded
+		data.ship = New TStarfarerShip
+		data.update()
+		data.variant = New TStarfarerVariant
+		data.variant.hullId = data.ship.hullId
+		data.variant.variantId = data.ship.hullId+"_variant"
+	EndIf
 End Function
 
 Function load_variant_data( data:TData )

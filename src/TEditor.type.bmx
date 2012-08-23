@@ -53,6 +53,7 @@ Type TEditor
 	'stock data
 	Field stock_ships:TMap 'String (hullId) --> TStarfarerShip
 	Field stock_variants:TMap 'String (variantId) --> TStarfarerVariant
+	Field stock_hull_variants_assoc:TMap 'String (TList) --> List of variant_id's asssociated with the hullid
 	Field stock_weapons:TMap 'String(id) --> TStarfarerWeapon
 	Field stock_engine_styles:TMap'<String,TStarfarerCustomEngineStyleSpec>  'CUSTOM Engine styleId --> engine data object
 	Field stock_ship_stats:TMap 'String (id:hullId) --> TMap (csv stats keys --> values)
@@ -74,6 +75,7 @@ Type TEditor
 		'object data
 		stock_ships = CreateMap()
 		stock_variants = CreateMap()
+		stock_hull_variants_assoc = CreateMap()
 		stock_weapons = CreateMap()
 		stock_engine_styles = CreateMap()
 		stock_engine_styles.Insert( "", "" ) 'NULL engine style means "use the included styleSpec data"
@@ -119,7 +121,18 @@ Type TEditor
 		Try
 			Local input_json_str$ = LoadString( dir+file )
 			Local variant:TStarfarerVariant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
+			'save variant data
 			stock_variants.Insert( variant.variantId, variant )
+			'save association to hull that it references
+			Local assoc:TList = TList( stock_hull_variants_assoc.ValueForKey( variant.hullId ))
+			If Not assoc
+				assoc = CreateList()
+				assoc.AddLast( variant.variantId )
+				stock_hull_variants_assoc.Insert( variant.hullId, assoc )
+			Else
+				assoc.AddLast( variant.variantId )
+			EndIf
+			'scan for multiselect values
 			For Local weapongroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
 				load_multiselect_value( "variant.weaponGroup.mode", weapongroup.mode )
 			Next
@@ -130,6 +143,19 @@ Type TEditor
 			Return Null
 		EndTry
 	End Method
+
+	Method get_default_variant:TStarfarerVariant( hullId$ )
+		Local assoc:TList = TList( stock_hull_variants_assoc.ValueForKey( hullId ))
+		Local variant:TStarfarerVariant = New TStarfarerVariant
+		If assoc And assoc.Count() > 0
+			variant = TStarfarerVariant( assoc.First() )
+		Else
+			variant New TStarfarerVariant
+			variant.hullId = hullId
+			variant.variantId = hullId+"_variant"
+		EndIf
+		Return variant
+	EndMethod
 
 	Method load_stock_weapon:TStarfarerWeapon( dir$, file$ )
 		Try
