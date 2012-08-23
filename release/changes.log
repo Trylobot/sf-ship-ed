@@ -1,4 +1,8 @@
 ______________________________________________________________________________
+editor version 2.4 (starfarer 0.53.1a RC5)
+- added support for fighter wings (wing_data.csv) editing: mode [4]
+  with graphical formation preview!
+______________________________________________________________________________
 editor version 2.3 (starfarer 0.53.1a RC5)
 - added support for BUILT_IN and SYSTEM weapons
   includes being able to set the weapon from *.SHIP mode
