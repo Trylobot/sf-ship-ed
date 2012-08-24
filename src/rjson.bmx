@@ -1353,9 +1353,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, new_val )
 								ElseIf result.container_TArray
-									cursor = result_container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TObject.elements.FindLink( result.matched )
 									If cursor
-										result_container_TObject.elements.InsertAfterLink( new_val, cursor )
+										result.container_TObject.elements.InsertAfterLink( new_val, cursor )
 									EndIf
 								EndIf
 							'/////////
@@ -1365,9 +1365,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, val )
 								ElseIf result.container_TArray
-									cursor = result_container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TObject.elements.FindLink( result.matched )
 									If cursor
-										result_container_TObject.elements.InsertAfterLink( val, cursor )
+										result.container_TObject.elements.InsertAfterLink( val, cursor )
 									EndIf
 								EndIf
 							'/////////
@@ -1377,9 +1377,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, val )
 								ElseIf result.container_TArray
-									cursor = result_container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TObject.elements.FindLink( result.matched )
 									If cursor
-										result_container_TObject.elements.InsertAfterLink( val, cursor )
+										result.container_TObject.elements.InsertAfterLink( val, cursor )
 									EndIf
 								EndIf
 							'/////////
@@ -1389,9 +1389,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, val )
 								ElseIf result.container_TArray
-									cursor = result_container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TObject.elements.FindLink( result.matched )
 									If cursor
-										result_container_TObject.elements.InsertAfterLink( val, cursor )
+										result.container_TObject.elements.InsertAfterLink( val, cursor )
 									EndIf
 								EndIf
 							'/////////
@@ -1401,9 +1401,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, val )
 								ElseIf result.container_TArray
-									cursor = result_container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TObject.elements.FindLink( result.matched )
 									If cursor
-										result_container_TObject.elements.InsertAfterLink( val, cursor )
+										result.container_TObject.elements.InsertAfterLink( val, cursor )
 									EndIf
 								EndIf
 							'/////////
@@ -1413,9 +1413,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, val )
 								ElseIf result.container_TArray
-									cursor = result_container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TObject.elements.FindLink( result.matched )
 									If cursor
-										result_container_TObject.elements.InsertAfterLink( val, cursor )
+										result.container_TObject.elements.InsertAfterLink( val, cursor )
 									EndIf
 								EndIf
 						EndSelect
