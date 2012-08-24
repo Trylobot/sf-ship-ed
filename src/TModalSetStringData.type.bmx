@@ -184,6 +184,9 @@ Type TModalSetStringData Extends TSubroutine
 			'////////////////////////////////////////
 			Case MODE_SHIP
 				i = 0
+				If line_i = 0 'hullId modified
+					data.on_hullId_modified( TStarfarerShip(target).hullId, values.lines[line_i] )
+				EndIf
 				TStarfarerShip(target).hullId = values.lines[i]; i:+1
 				TStarfarerShip(target).hullName = values.lines[i]; i:+1
 				TStarfarerShip(target).hullSize = values.lines[i]; i:+1
@@ -220,6 +223,8 @@ Type TModalSetStringData Extends TSubroutine
 				'	data.ship.builtInWeapons.Insert( TStarfarerShipWeapon(target).id, values.lines[i] ); i:+1
 				'EndIf
 				data.update()
+				data.update_variant_enforce_hull_compatibility( ed )
+				data.update_variant()
 			'//////////////////////////////////////
 			Case MODE_VARIANT 
 				i = 0

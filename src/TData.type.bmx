@@ -96,6 +96,17 @@ Type TData
 		Next
 	EndMethod
 
+	'requires subsequent call to update_variant()
+	Method on_hullId_modified( old_hullId$, hullId$ )
+		'variant
+		variant.variantId = variant.variantId.Replace( old_hullId, hullId )
+		update_variant()
+		'ship csv
+		csv_row.Insert( "id", String( csv_row.ValueForKey("id")).Replace( old_hullId, hullId ))
+		'wing csv
+		csv_row_wing.Insert( "id", String( csv_row_wing.ValueForKey("id")).Replace( old_hullId, hullId ))
+	EndMethod
+
 	'/////// 
 
 	'must be used when csv data is re-initialized by a file load process

@@ -34,12 +34,13 @@ Type TModalSetWeaponSlots Extends TSubroutine
 			If ni <> -1
 				source_weapon = data.ship.weaponSlots[ni]
 			End If
-			'TODO: handle weapon slots with multiple locations
 			data.add_weapon_slot( img_x, img_y, source_weapon )
 			if( ed.bounds_symmetrical )
 				data.add_weapon_slot( img_x, img_y, source_weapon, TRUE )
 			endif
-			data.Update()
+			data.update()
+			data.update_variant_enforce_hull_compatibility( ed )
+			data.update_variant()
 		End If
 		'mouse locks and methods
 		If MouseDown( 1 )
@@ -91,6 +92,7 @@ Type TModalSetWeaponSlots Extends TSubroutine
 		If KeyHit( KEY_BACKSPACE )
 			data.remove_weapon_slot( ni, ed.bounds_symmetrical )
 			data.update()
+			data.update_variant_enforce_hull_compatibility( ed )
 			data.update_variant()
 		End If
 	EndMethod

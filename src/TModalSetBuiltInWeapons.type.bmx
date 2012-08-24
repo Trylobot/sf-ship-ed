@@ -61,6 +61,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 				data.unassign_builtin_weapon_from_slot( weapon_slot.id )
 				data.assign_builtin_weapon_to_slot( weapon_slot.id, weapon_list[ed.select_weapon_i] )
 				data.update()
+				data.update_variant_enforce_hull_compatibility( ed )
 				data.update_variant()
 				ed.weapon_lock_i = -1
 			EndIf
@@ -70,6 +71,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 			If KeyHIT( KEY_BACKSPACE )
 				data.unassign_builtin_weapon_from_slot( weapon_slot.id )
 				data.update()
+				data.update_variant_enforce_hull_compatibility( ed )
 				data.update_variant()
 				ed.weapon_lock_i = -1
 			EndIf
@@ -94,6 +96,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 				data.unassign_builtin_weapon_from_slot( weapon_slot.id )
 				data.assign_builtin_weapon_to_slot( weapon_slot.id, weapon_list[ed.select_weapon_i] )
 				data.update()
+				data.update_variant_enforce_hull_compatibility( ed )
 				data.update_variant()
 			EndIf
 
@@ -123,6 +126,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 				If KeyHIT( KEY_BACKSPACE )
 					data.unassign_builtin_weapon_from_slot( weapon_slot.id )
 					data.update()
+					data.update_variant_enforce_hull_compatibility( ed )
 					data.update_variant()
 				EndIf
 			EndIf
