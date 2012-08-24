@@ -1,4 +1,13 @@
 ______________________________________________________________________________
+editor version 2.4.1a (starfarer 0.53.1a RC5)
+PRE-RELEASE: more bugfixes coming soon!
+- fixed: can't set weapons for newly-added built-in ship weapon slots
+- fixed: variant weapon list stays open after assigning a weapon
+- enhanced: in mode 1, when loading existing ship data, all other modes
+  are automatically populated with data associated with the loaded hull
+- feature: in mode 1, press CTRL+ALT+[N] to clear out all JSON/CSV data
+- some other misc. bug fixes
+______________________________________________________________________________
 editor version 2.4 (starfarer 0.53.1a RC5)
 - added support for fighter wings (wing_data.csv) editing: mode [4]
   with graphical formation preview!
