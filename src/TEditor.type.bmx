@@ -97,6 +97,7 @@ Type TEditor
 		Try
 			Local input_json_str$ = LoadString( dir+file )
 			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip" ))
+			Fix_Map_TStrings( ship.builtInWeapons ) 'TEMPORARY
 			stock_ships.Insert( ship.hullId, ship )
 			load_multiselect_value( "ship.hullSize", ship.hullSize )
 			load_multiselect_value( "ship.style", ship.style )
@@ -123,6 +124,9 @@ Type TEditor
 		Try
 			Local input_json_str$ = LoadString( dir+file )
 			Local variant:TStarfarerVariant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
+			For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
+				Fix_Map_TStrings( weaponGroup.weapons ) 'TEMPORARY
+			Next
 			'save variant data
 			stock_variants.Insert( variant.variantId, variant )
 			'save association to hull that it references

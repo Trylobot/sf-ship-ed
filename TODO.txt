@@ -7,12 +7,11 @@ BUG:  If you've defined a .ship that has BUILT_IN weapons and assign said weapon
 
 BUG: If you build a ship, then its variant, then you go back to ship editor and remove a gun, back to the variant editor, save both (all slots are correctly filled with guns), it seems everything's ok but that variant is actually broken because it still count the removed weapon as existing.
 
-BUG: In the ship variant screen, when I press H for hull mods, nothing happens any more.
 
 BUG: unable to use the escape key to exit out of any of the interface options such as weapon editing or hull editing, I am stuck on those screens
 
 
-  
+
 
 Provide a way to clear out data in each of the 4 modes (probably '/')
   and a way to clear out ALL data to 'new' status CTRL+ALT+'N' maybe?

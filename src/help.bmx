@@ -1,30 +1,25 @@
+
+Const ICON_KB% = 10
+Const ICON_MS_LEFT% = 20
+Const ICON_MS_RIGHT% = 21
+Const ICON_MS_MIDDLE% = 22
+Const ICON_SHIFT_CLICK% = 30
+Const ICON_CTRL_CLICK% = 31
+Const ICON_ALT_CLICK% = 32
+Const ICON_SPACEBAR% = 33
+Const ICON_CTRL_ALT_RIGHT_CLICK% = 34
+Const ICON_CTRL_ALT_KB% = 35
+
 Global HELP_WIDGETS:TList
 Global HELP_LINE_HEIGHT%
-Global ICON_KB%
-Global ICON_MS_LEFT%
-Global ICON_MS_RIGHT%
-Global ICON_MS_MIDDLE%
-Global ICON_SHIFT_CLICK%
-Global ICON_CTRL_CLICK%
-Global ICON_ALT_CLICK%
-Global ICON_SPACEBAR%
-Global ICON_CTRL_ALT_RIGHT_CLICK%
 Global CONTEXT_HELP:TMap
+
 Global mouse_str$
 
 Function load_help()
 
 	HELP_WIDGETS = CreateList()
 	HELP_LINE_HEIGHT = APP.font_size + Int((Float(APP.font_size)/7.0))
-	ICON_KB = 10
-	ICON_MS_LEFT = 20
-	ICON_MS_RIGHT = 21
-	ICON_MS_MIDDLE = 22
-	ICON_SHIFT_CLICK = 30
-	ICON_CTRL_CLICK = 31
-	ICON_ALT_CLICK = 32
-	ICON_SPACEBAR = 33
-	ICON_CTRL_ALT_RIGHT_CLICK = 34
 	'/////////////////////////////////////////////  ( key, description,         icon,    enable, space_after, program modes, sub-modes )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "1", "Hull Mode         ", ICON_KB, True,   0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "2", "Variant Mode      ", ICON_KB, True,   0 ))
@@ -40,7 +35,8 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "M", "Load Custom Mod Data", ICON_KB, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "I", "Load Image", ICON_KB, True, 0, "ship" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "D", "Open *.ship", ICON_KB, True, 0, "ship" ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", "Save *.ship", ICON_KB, True, 1, "ship" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", "Save *.ship", ICON_KB, True, 0, "ship" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", "Clear Data", ICON_CTRL_ALT_KB, True, 1, "ship" ))
 	'////////////
 	'HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "X", "Choose Existing", ICON_KB, True, 0, "variant" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "D", "Open *.variant", ICON_KB, True, 0, "variant" ))
@@ -117,7 +113,7 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F1", "Toggle This Help", 0, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F2", "Toggle Raw Data", 0, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F3", "Toggle Guides", 0, True, 0 ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "Esc", "Quit (Hold)", 0, True, 1 ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "ESC","Quit (Hold)", 0, True, 1 ))
 	'/////////////////////////////////////////////'
 
 	'none, center, bounds, collision_radius, engine_slots, shield_center, shield_radius, weapon_slots, preview_all

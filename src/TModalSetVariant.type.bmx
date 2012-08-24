@@ -195,6 +195,7 @@ Type TModalSetVariant Extends TSubroutine
 				'allow to select a hullmod
 				If KeyHIT( KEY_H )
 					ed.variant_hullMod_i = 0
+					initialize_hullmods_list( ed, data )
 				EndIf
 			EndIf
 
