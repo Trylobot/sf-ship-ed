@@ -998,38 +998,40 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite, use_new%=False 
 				sub_ship_csv.initialize_csv_editor( ed, data )
 			EndIf
 		EndIf
+		'FIGHTER WING CSV/STATS data'
+		'  TODO
 		'IMAGE (implied)
 		'try to load the associated image, if one can be found
-		Local found% = False
-		'search mod directories
-		For Local i% = 0 Until APP.mod_dirs.length
-			Local img$ = APP.mod_dirs[i]+data.ship.spriteName
-			If FILETYPE_FILE = FileType( img )
-				load_ship_image__driver( ed, data, sprite, img )
+		autoload_ship_image( ed, data, sprite )
+	Else ' use_new
+		'all data is reset to fresh
+		data.New()
+	EndIf
+End Function
+
+Function autoload_ship_image( ed:TEditor, data:TData, sprite:TSprite )
+	Local found% = False
+	'search mod directories
+	For Local i% = 0 Until APP.mod_dirs.length
+		Local img_path$ = APP.mod_dirs[i]+data.ship.spriteName
+		If FILETYPE_FILE = FileType( img_path )
+			load_ship_image__driver( ed, data, sprite, img_path )
+			found = True
+			Exit
+		EndIf
+	Next
+	'search vanilla directories
+	If Not found
+		For Local j% = 0 Until STARFARER_CORE_DIR.length
+			Local img_path$ = APP.starfarer_base_dir+STARFARER_CORE_DIR[j]+"/"+data.ship.spriteName
+			If FILETYPE_FILE = FileType( img_path )
+				load_ship_image__driver( ed, data, sprite, img_path )
 				found = True
 				Exit
 			EndIf
 		Next
-		'search vanilla directories
-		If Not found
-			For Local j% = 0 Until STARFARER_CORE_DIR.length
-				Local img$ = APP.starfarer_base_dir+STARFARER_CORE_DIR[j]+"/"+data.ship.spriteName
-				If FILETYPE_FILE = FileType( img )
-					load_ship_image__driver( ed, data, sprite, img )
-					found = True
-					Exit
-				EndIf
-			Next
-		EndIf
-	Else ' use_new
-		'new data is loaded
-		data.ship = New TStarfarerShip
-		data.update()
-		data.variant = New TStarfarerVariant
-		data.variant.hullId = data.ship.hullId
-		data.variant.variantId = data.ship.hullId+"_variant"
 	EndIf
-End Function
+EndFunction
 
 Function load_variant_data( data:TData )
 	Local variant_path$ = RequestFile( "LOAD Variant Data", "variant", False, APP.variant_dir )

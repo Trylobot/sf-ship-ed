@@ -58,6 +58,7 @@ Type TEditor
 	Field stock_engine_styles:TMap'<String,TStarfarerCustomEngineStyleSpec>  'CUSTOM Engine styleId --> engine data object
 	Field stock_ship_stats:TMap 'String (id:hullId) --> TMap (csv stats keys --> values)
 	Field stock_wing_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
+	Field stock_variant_wing_stats_assoc:TMap 'String (TList) --> List of wing_id's associated with the variantId
 	Field stock_weapon_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
 	Field stock_hullmod_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
 	Field stock_ship_stats_field_order:TList'<String> 'column names
@@ -82,6 +83,7 @@ Type TEditor
 		'csv data
 		stock_ship_stats = CreateMap()
 		stock_wing_stats = CreateMap()
+		stock_variant_wing_stats_assoc = CreateMap()
 		stock_weapon_stats = CreateMap()
 		stock_hullmod_stats = CreateMap()
 		'csv field order
@@ -127,11 +129,9 @@ Type TEditor
 			Local assoc:TList = TList( stock_hull_variants_assoc.ValueForKey( variant.hullId ))
 			If Not assoc
 				assoc = CreateList()
-				assoc.AddLast( variant.variantId )
 				stock_hull_variants_assoc.Insert( variant.hullId, assoc )
-			Else
-				assoc.AddLast( variant.variantId )
 			EndIf
+			assoc.AddLast( variant.variantId )
 			'scan for multiselect values
 			For Local weapongroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
 				load_multiselect_value( "variant.weaponGroup.mode", weapongroup.mode )
@@ -146,7 +146,7 @@ Type TEditor
 
 	Method get_default_variant:TStarfarerVariant( hullId$ )
 		Local assoc:TList = TList( stock_hull_variants_assoc.ValueForKey( hullId ))
-		Local variant:TStarfarerVariant = New TStarfarerVariant
+		Local variant:TStarfarerVariant
 		If assoc And assoc.Count() > 0
 			variant = TStarfarerVariant( assoc.First() )
 		Else
@@ -196,9 +196,9 @@ Type TEditor
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_ship_stats )
 			EndIf
-			'scan all rows for multiselect values
 			For Local row:TMap = EachIn stock_ship_stats
-				load_multiselect_value( "ship_csv.shield type", String(stock_ship_stats.ValueForKey( "shield type" )))
+				'scan all rows for multiselect values
+				load_multiselect_value( "ship_csv.shield type", row.ValueForKey( "shield type" ))
 			Next
 			DebugLogFile " LOADED "+file
 		Catch ex$ 'ignore parsing errors and continue
@@ -214,11 +214,35 @@ Type TEditor
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_wing_stats )
 			EndIf
+			For Local row:TMap = EachIn stock_wing_stats
+				'scan all rows for multiselect values and save association to variant
+				load_multiselect_value( "wing_csv.formation", row.ValueForKey( "formation" ))
+				load_multiselect_value( "wing_csv.role",      row.ValueForKey( "role" ))
+				'save association to variant that it references
+				Local assoc:TList = TList( stock_variant_wing_stats_assoc.ValueForKey( row.ValueForKey( "variant" )))
+				If Not assoc
+					assoc = CreateList()
+					stock_variant_wing_stats_assoc.Insert( row.ValueForKey( "variant" ), assoc )
+				EndIf
+				assoc.AddLast( row.ValueForKey( "id" )) 'wing id
+			Next
 			DebugLogFile " LOADED "+file
 		Catch ex$ 'ignore parsing errors and continue
 			DebugLogFile " Error: "+file+" "+ex
 		EndTry
 	End Method
+
+	Method get_default_wing:TMap( variantId$ )
+		Local assoc:TList = TList( stock_variant_wing_stats_assoc.ValueForKey( variantId ))
+		Local wing:TMap
+		If assoc And assoc.Count() > 0
+			variant = TStarfarerVariant( assoc.First() )
+		Else
+			wing = wing_data_csv_field_template.Copy()
+			wing.Insert( "variant", variantId+"_wing_id" )
+		EndIf
+		Return wing
+	EndMethod
 
 	Method load_stock_weapon_stats( dir$, file$, save_field_order%=FALSE )
 		Try

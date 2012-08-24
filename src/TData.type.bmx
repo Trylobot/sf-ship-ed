@@ -14,6 +14,7 @@ Type TData
 	Field csv_row_wing:TMap'<String,String>  'column name --> value
 
 	'requires subsequent call to update()
+	'requires subsequent call to update_variant()
 	Method New()
 		ship = New TStarfarerShip
 		variant = New TStarfarerVariant
