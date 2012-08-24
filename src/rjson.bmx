@@ -618,7 +618,7 @@ Type TValue
 
 	Method Equals%( val:Object ) Abstract
 
-	Method Create:TValue( other:TValue ) Abstract
+	Function Create:TValue( other:TValue ) Abstract
 
 	'////////////////////////////////////////////////////////////////////////////
 
@@ -732,9 +732,9 @@ Type TNull Extends TValue
 		Return (TNull(other) <> Null And TNull(other).value_type = JSONTYPE_NULL)
 	EndMethod
 
-	Method Create:TValue( other:TValue )
+	Function Create:TValue( other:TValue )
 		Return New TNull
-	EndMethod
+	EndFunction
 
 EndType
 
@@ -770,7 +770,7 @@ Type TBoolean Extends TValue
 		Return (TBoolean(other) <> Null And TBoolean(other).value_type = JSONTYPE_BOOLEAN And TBoolean(other).value = Self.value)
 	EndMethod
 
-	Method Create:TValue( other:TValue )
+	Function Create:TValue( other:TValue )
 		Local val:TBoolean = New TBoolean
 		Select other.value_type
 			Case JSONTYPE_NULL
@@ -787,7 +787,7 @@ Type TBoolean Extends TValue
 				val.value = (Not TObject(other).fields.IsEmpty())
 		EndSelect
 		Return val
-	EndMethod
+	EndFunction
 
 EndType
 
@@ -834,7 +834,7 @@ Type TNumber Extends TValue
 		Return (TNumber(other) <> Null And TNumber(other).value_type = JSONTYPE_NUMBER And TNumber(other).value = Self.value)
 	EndMethod
 
-	Method Create:TValue( other:TValue )
+	Function Create:TValue( other:TValue )
 		Local val:TNumber = New TNumber
 		Select other.value_type
 			Case JSONTYPE_NULL
@@ -851,7 +851,7 @@ Type TNumber Extends TValue
 				val.value = (Not TObject(other).fields.IsEmpty())
 		EndSelect
 		Return val
-	EndMethod
+	EndFunction
 
 EndType
 
@@ -951,9 +951,9 @@ Type TString Extends TValue
 		Return (TString(other) <> Null And TString(other).value_type = JSONTYPE_STRING And TString(other).value = Self.value)
 	EndMethod
 
-	Method Create:TValue( other:TValue )
+	Function Create:TValue( other:TValue )
 		Return New TNull
-	EndMethod
+	EndFunction
 
 EndType
 
@@ -1065,9 +1065,9 @@ Type TArray Extends TValue
 		Return True
 	EndMethod
 
-	Method Create:TValue( other:TValue )
+	Function Create:TValue( other:TValue )
 		Return New TNull
-	EndMethod
+	EndFunction
 
 EndType
 
@@ -1183,9 +1183,9 @@ Type TObject Extends TValue
 		Return True
 	EndMethod
 
-	Method Create:TValue( other:TValue )
+	Function Create:TValue( other:TValue )
 		Return New TNull
-	EndMethod
+	EndFunction
 
 EndType
 
@@ -1353,9 +1353,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, new_val )
 								ElseIf result.container_TArray
-									cursor = result.container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TArray.elements.FindLink( result.matched )
 									If cursor
-										result.container_TObject.elements.InsertAfterLink( new_val, cursor )
+										result.container_TArray.elements.InsertAfterLink( new_val, cursor )
 									EndIf
 								EndIf
 							'/////////
@@ -1365,9 +1365,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, val )
 								ElseIf result.container_TArray
-									cursor = result.container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TArray.elements.FindLink( result.matched )
 									If cursor
-										result.container_TObject.elements.InsertAfterLink( val, cursor )
+										result.container_TArray.elements.InsertAfterLink( val, cursor )
 									EndIf
 								EndIf
 							'/////////
@@ -1377,9 +1377,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, val )
 								ElseIf result.container_TArray
-									cursor = result.container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TArray.elements.FindLink( result.matched )
 									If cursor
-										result.container_TObject.elements.InsertAfterLink( val, cursor )
+										result.container_TArray.elements.InsertAfterLink( val, cursor )
 									EndIf
 								EndIf
 							'/////////
@@ -1389,9 +1389,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, val )
 								ElseIf result.container_TArray
-									cursor = result.container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TArray.elements.FindLink( result.matched )
 									If cursor
-										result.container_TObject.elements.InsertAfterLink( val, cursor )
+										result.container_TArray.elements.InsertAfterLink( val, cursor )
 									EndIf
 								EndIf
 							'/////////
@@ -1401,9 +1401,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, val )
 								ElseIf result.container_TArray
-									cursor = result.container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TArray.elements.FindLink( result.matched )
 									If cursor
-										result.container_TObject.elements.InsertAfterLink( val, cursor )
+										result.container_TArray.elements.InsertAfterLink( val, cursor )
 									EndIf
 								EndIf
 							'/////////
@@ -1413,9 +1413,9 @@ Type TValue_Transformation
 								If result.container_TObject
 									result.container_TObject.fields.Insert( result.object_field_name, val )
 								ElseIf result.container_TArray
-									cursor = result.container_TObject.elements.FindLink( result.matched )
+									cursor = result.container_TArray.elements.FindLink( result.matched )
 									If cursor
-										result.container_TObject.elements.InsertAfterLink( val, cursor )
+										result.container_TArray.elements.InsertAfterLink( val, cursor )
 									EndIf
 								EndIf
 						EndSelect
