@@ -1,11 +1,11 @@
 
 Function coord_string$( x!, y! )
 	Return "("+json.FormatDouble(x,1)+","+json.FormatDouble(y,1)+")"
-End Function
+EndFunction
 
 Function nearest_half#( x# )
 	Return Floor((x*2.0) + 0.5)/2.0
-End Function
+EndFunction
 
 Function remove_pair#[]( arr#[], i% )
 	If i >= 0 And i < arr.Length-1
@@ -21,21 +21,21 @@ Function remove_pair#[]( arr#[], i% )
 	Else
 		Return arr
 	End If
-End Function
+EndFunction
 
 Function calc_distance#( x1#, y1#, x2#, y2# )
 	Local diff_x#, diff_y#
 	diff_x = x2 - x1
 	diff_y = y2 - y1
 	Return Sqr( diff_x*diff_x + diff_y*diff_y )
-End Function
+EndFunction
 
 Function calc_angle#( x1#, y1#, x2#, y2# )
 	Local diff_x#, diff_y#
 	diff_x = x2 - x1
 	diff_y = y2 - y1
 	Return ATan2( diff_y, diff_x )
-End Function
+EndFunction
 
 Function ang_wrap#( a# ) 'forces the angle into the range [-180,180]
 	If a < -180
@@ -46,17 +46,17 @@ Function ang_wrap#( a# ) 'forces the angle into the range [-180,180]
 		a :- mult * 360
 	End If
 	Return a
-End Function
+EndFunction
 
 Function cartesian_to_polar( x#, y#, r# Var, a# Var )
 	r = Sqr( x*x + y*y )
 	a = ATan2( y, x )
-End Function
+EndFunction
 
 Function polar_to_cartesian( r#, a#, x# Var, y# Var )
 	x = r*Cos( a )
 	y = r*Sin( a )
-End Function
+EndFunction
 
 Function count_keys%( map:TMap )
 	If not map Then return 0
@@ -74,4 +74,14 @@ Function zero_pad$( num%, length% )
 		str = "0" + str
 	EndWhile
 	Return str
-endfunction
+EndFunction
+
+Function in_str_array%( val$, arr$[] )
+	If Not arr Then Return False
+	For Local i% = 0 Until arr.Length
+		If arr[i] = val Then Return True
+	Next
+	Return False
+EndFunction
+
+

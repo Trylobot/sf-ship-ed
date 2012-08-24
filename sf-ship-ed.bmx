@@ -95,6 +95,11 @@ Const ZOOM_UPDATE_FACTOR# = 0.175 'per frame
 
 '////////////////////////////////////////////////
 
+Const MAX_VARIANT_WEAPON_GROUPS% = 5 
+Const ENGINE_MANEUVERING_JETS_CONTRAIL_SIZE% = 128 'hack: makes a custom engine style into a "maneuvering jet"
+
+'////////////////////////////////////////////////
+
 Graphics( W_MAX, H_MAX )
 
 SetClsColor( 0, 0, 0 )
@@ -413,7 +418,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 
 	ElseIf ed.program_mode = "variant"
 		If KeyHit( KEY_SLASH )
-			new_variant_data( data )
+			load_variant_data( ed, data, sprite, TRUE )
 		EndIf
 	EndIf
 
@@ -841,7 +846,7 @@ Function check_open_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 			Case "ship"
 				load_ship_data( ed, data, sprite )
 			Case "variant"
-				load_variant_data( data )
+				load_variant_data( ed, data, sprite )
 			Case "csv"
 				sub_ship_csv.Load( ed, data, sprite )
 			Case "csv_wing"
@@ -1011,15 +1016,21 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite, use_new%=False 
 		Local ship_data_json$ = LoadString( data_path )
 		data.decode( ship_data_json )
 		data.update()
-		'VARIANT data
-		''try to find variant
-		data.variant = ed.get_default_variant( data.ship.hullId )
-		data.update_variant()
 		'CSV/STATS data
 		'update csv row data that (hopefully) references the above hull
 		data.csv_row = ed.get_ship_stats( data.ship.hullId )
+		'VARIANT data
+		'if the currently loaded variant doesn't reference the loaded hull, load one that does if possible
+		If Not ed.verify_variant_association( data.ship.hullId, data.variant.variantId )
+			data.variant = ed.get_default_variant( data.ship.hullId )
+		EndIf
+		data.update_variant_enforce_hull_compatibility( ed )
+		data.update_variant()
 		'FIGHTER WING CSV/STATS data'
-		data.csv_row_wing = ed.get_default_wing( data.variant.variantId )
+		'if the current wing data doesn't reference the loaded variant, load one that does if possible
+		If Not ed.verify_wing_data_association( data.variant.variantId, String(data.csv_row_wing.ValueForKey("id")))
+			data.csv_row_wing = ed.get_default_wing( data.variant.variantId )
+		EndIf
 		'IMAGE (implied)
 		'try to load the associated image, if one can be found
 		autoload_ship_image( ed, data, sprite )
@@ -1053,23 +1064,29 @@ Function autoload_ship_image( ed:TEditor, data:TData, sprite:TSprite )
 	EndIf
 EndFunction
 
-Function load_variant_data( data:TData )
-	Local variant_path$ = RequestFile( "LOAD Variant Data", "variant", False, APP.variant_dir )
-	FlushKeys()
-	If FileType( variant_path ) = FILETYPE_FILE
+Function load_variant_data( ed:TEditor, data:TData, sprite:TSprite, use_new%=False )
+	'VARIANT data
+	If Not use_new
+		Local variant_path$ = RequestFile( "LOAD Variant Data", "variant", False, APP.variant_dir )
+		FlushKeys()
+		If FileType( variant_path ) <> FILETYPE_FILE Then Return
 		APP.variant_dir = ExtractDir( variant_path )+"/"
 		APP.save()
 		data.decode_variant( LoadString( variant_path ))
-		data.update_variant_enforce_builtin_weapons()
+		data.update_variant_enforce_hull_compatibility( ed )
 		data.update_variant()
-	End If
-End Function
-
-Function new_variant_data( data:TData )
-	data.variant = New TStarfarerVariant
-	data.variant.hullId = data.ship.hullId
-	data.update_variant_enforce_builtin_weapons()
-	data.update_variant()
+	Else
+		data.variant = New TStarfarerVariant
+		data.variant.hullId = data.ship.hullId
+		data.variant.variantId = data.ship.hullId+"_variant"
+		data.update_variant_enforce_hull_compatibility( ed )
+		data.update_variant()
+	EndIf
+	'FIGHTER WING CSV/STATS data'
+	'if the current wing data doesn't reference the loaded variant, load one that does if possible
+	If Not ed.verify_wing_data_association( data.variant.variantId, String(data.csv_row_wing.ValueForKey("id")))
+		data.csv_row_wing = ed.get_default_wing( data.variant.variantId )
+	EndIf
 End Function
 
 Function load_mod( ed:TEditor, data:TData )

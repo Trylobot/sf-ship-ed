@@ -54,6 +54,49 @@ Type TData
 		json_view_variant = columnize_text( json_str_variant )
 	End Method
 
+	'requires subsequent call to update_variant()
+	Method update_variant_enforce_hull_compatibility( ed:TEditor )
+		'Enforce max variant weapon groups count
+		If variant.weaponGroups And variant.weaponGroups.Length > MAX_VARIANT_WEAPON_GROUPS
+			variant.weaponGroups = variant.weaponGroups[..MAX_VARIANT_WEAPON_GROUPS]
+		EndIf
+		'Visit every weapon slot defined in the hull
+		For Local weapon_slot:TStarfarerShipWeapon = EachIn ship.weaponSlots
+			If weapon_slot.is_builtin()
+				'Ensure that any BUILT_IN slots are set to match in the VARIANT
+				Local weapon_id$ = String( ship.builtInWeapons.ValueForKey( weapon_slot.id ))
+				If weapon_id <> Null
+					assign_weapon_to_slot( weapon_slot.id, weapon_id )
+				Else 'weapon_id == Null
+					unassign_weapon_from_slot( weapon_slot.id )
+				EndIf
+			ElseIf Not weapon_slot.is_visible_to_variant()
+				'Ensure that any SYSTEM and LAUNCH_BAY slots are not referenced at all
+				unassign_weapon_from_slot( weapon_slot.id )
+			EndIf
+		Next
+		'Visit every weapon referenced in the variant
+		For Local group:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
+			For Local weapon_slot_id$ = EachIn group.weapons.Keys()
+				'Ensure that the weapon slot is defined in the hull
+				'And that the slot actually supports the currently assigned weapon
+				If weapon_slot_id_exists( weapon_slot_id )
+					Local weapon_slot:TStarfarerShipWeapon = find_weapon_slot_by_id( weapon_slot_id )
+					Local valid_weapons$[] = ed.select_weapons( weapon_slot.type_, weapon_slot.size )
+					Local weapon_id$ = String( group.weapons.ValueForKey( weapon_slot_id ))
+					If Not in_str_array( weapon_id, valid_weapons ) 
+						'Not valid
+						unassign_weapon_from_slot( weapon_slot_id )	
+					EndIf
+				Else 
+					'Not found
+					unassign_weapon_from_slot( weapon_slot_id )
+				EndIf
+			Next
+		Next
+	EndMethod
+
+	'/////// 
 
 	'must be used when csv data is re-initialized by a file load process
 	Method set_csv_data( data_row:TMap, which$ )
@@ -403,20 +446,6 @@ Type TData
 	'////////////
 	
 	'requires subsequent call to update_variant()
-	Method update_variant_enforce_builtin_weapons()
-		For Local weaponSlot:TStarfarerShipWeapon = EachIn ship.weaponSlots
-			If weaponSlot.is_builtin()
-				Local weapon_id$ = String(ship.builtInWeapons.ValueForKey( weaponSlot.id ))
-				If weapon_id <> Null
-					assign_weapon_to_slot( weaponSlot.id, weapon_id )
-				Else 'weapon_id == Null
-					unassign_weapon_from_slot( weaponSlot.id )
-				EndIf
-			EndIf
-		Next
-	EndMethod
-
-	'requires subsequent call to update_variant()
 	Method assign_weapon_to_slot( ship_weapon_slot_id$, weapon_id$, group_i%=0 )
 		Local found% = False
 		If variant.weaponGroups
@@ -602,6 +631,14 @@ Type TData
 			if weapon_slot.id = id_str Then return true
 		Next
 		return false
+	EndMethod
+
+	Method find_weapon_slot_by_id:TStarfarerShipWeapon( id_str$ )
+		If Not ship Or Not ship.weaponSlots Or ship.weaponSlots.length = 0 Then Return Null
+		For Local weapon_slot:TStarfarerShipWeapon = EachIn ship.weaponSlots
+			If weapon_slot.id = id_str Then Return weapon_slot
+		Next
+		Return Null
 	EndMethod
 
 	Method find_nearest_bound%( img_x#, img_y# )

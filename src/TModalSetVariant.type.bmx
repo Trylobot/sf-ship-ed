@@ -1,8 +1,5 @@
 
 Type TModalSetVariant Extends TSubroutine
-	Const MAX_WEAPON_GROUPS% = 5
-	Field MAX_GROUP_OFFSET% = (MAX_WEAPON_GROUPS - 1) '[ 0, 1, 2, 3, 4 ]
-	'///
 	Field i%,g%
 	Field ni%
 	Field wi%
@@ -221,7 +218,7 @@ Type TModalSetVariant Extends TSubroutine
 				EndIf
 				modified = False
 				If KeyHit( KEY_RIGHT )
-					If group_offsets[ed.group_field_i] < MAX_GROUP_OFFSET
+					If group_offsets[ed.group_field_i] < (MAX_VARIANT_WEAPON_GROUPS - 1)
 						data.unassign_weapon_from_slot( weapon_slot_ids[ed.group_field_i] )
 						data.assign_weapon_to_slot( weapon_slot_ids[ed.group_field_i], weapon_ids[ed.group_field_i], group_offsets[ed.group_field_i] + 1 )
 						data.update_variant()
@@ -400,7 +397,7 @@ Type TModalSetVariant Extends TSubroutine
 		'Local wep_g$ = "1 2 3 4 5~n"
 		wep_g_a = ""
 		wep_g_i = ""
-		For g = 0 Until MAX_WEAPON_GROUPS
+		For g = 0 Until MAX_VARIANT_WEAPON_GROUPS
 			If g < data.variant.weaponGroups.length And data.variant.weaponGroups[g].autofire.value
 				wep_g_a :+ "a "
 			Else

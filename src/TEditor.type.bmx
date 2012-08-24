@@ -161,6 +161,11 @@ Type TEditor
 		Return variant
 	EndMethod
 
+	Method verify_variant_association%( hullId$, variantId$ )
+		Local assoc:TList = TList( stock_hull_variants_assoc.ValueForKey( hullId ))
+		Return (assoc And assoc.Contains( variantId ))
+	EndMethod
+
 	Method load_stock_weapon:TStarfarerWeapon( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir+file )
@@ -258,6 +263,11 @@ Type TEditor
 			wing.Insert( "variant", variantId+"_wing_id" )
 		EndIf
 		Return wing
+	EndMethod
+
+	Method verify_wing_data_association%( variantId$, wing_id$ )
+		Local assoc:TList = TList( stock_variant_wing_stats_assoc.ValueForKey( variantId ))
+		Return (assoc And assoc.Contains( wing_id ))
 	EndMethod
 
 	Method load_stock_weapon_stats( dir$, file$, save_field_order%=False )
