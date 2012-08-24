@@ -121,6 +121,11 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		i = 0 'column iterator
 		widget_str = ""
 		For line_str = EachIn stock_stats_field_order
+			If line_str.StartsWith( TCSVLoader.EXPLICIT_NULL_PREFIX )
+				'skip these
+				csv_columns_count :- 1
+				Continue
+			EndIf
 			If widget_str <> "" Then widget_str :+ "~n"
 			widget_str :+ line_str
 			If recognized_data_types.Contains( line_str )
@@ -165,7 +170,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		Next
 		csv_row_fields = TextWidget.Create( widget_str )
 		widget_str = ""
-		For line_str = EachIn stock_stats_field_order
+		For line_str = EachIn csv_row_fields.lines
 			If widget_str <> "" Then widget_str :+ "~n"
 			widget_str :+ String( data_csv_row.ValueForKey( line_str ))
 		Next

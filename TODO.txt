@@ -1,10 +1,18 @@
 
+
+BUG: if a variant is created with out any weapons assigned this is generated "weaponGroups": null rather than "weaponGroups": [] the null crashes Starfarer with
+  org.json.JSONException: JSONObject["weaponGroups"] is not a JSONArray.
+
 BUG:  If you've defined a .ship that has BUILT_IN weapons and assign said weapons, the next .ship you build will have the BUILT_IN weapons assigned, even if you've wiped out all of the weapon slots.  
 
 BUG: If you build a ship, then its variant, then you go back to ship editor and remove a gun, back to the variant editor, save both (all slots are correctly filled with guns), it seems everything's ok but that variant is actually broken because it still count the removed weapon as existing.
 
-BUG: Trylobot - In the ship variant screen, when I press H for hull mods, nothing happens any more.
+BUG: In the ship variant screen, when I press H for hull mods, nothing happens any more.
 
+BUG: unable to use the escape key to exit out of any of the interface options such as weapon editing or hull editing, I am stuck on those screens
+
+
+  
 
 Provide a way to clear out data in each of the 4 modes (probably '/')
   and a way to clear out ALL data to 'new' status CTRL+ALT+'N' maybe?

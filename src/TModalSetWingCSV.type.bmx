@@ -72,6 +72,10 @@ Type TModalSetWingCSV Extends TGenericCSVSubroutine
 		csv_row_column_data_types_wing = New Int[csv_columns_count]
 		i = 0 'column iterator
 		For line_str = EachIn stock_stats_field_order
+			If line_str.StartsWith( TCSVLoader.EXPLICIT_NULL_PREFIX )
+				'skip these
+				Continue
+			EndIf
 			If recognized_data_types_wing.Contains( line_str )
 				csv_row_column_data_types_wing[i] = (Int[]( recognized_data_types_wing.ValueForKey( line_str )))[0]
 			EndIf

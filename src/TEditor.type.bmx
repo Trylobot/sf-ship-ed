@@ -147,10 +147,10 @@ Type TEditor
 	Method get_default_variant:TStarfarerVariant( hullId$ )
 		Local assoc:TList = TList( stock_hull_variants_assoc.ValueForKey( hullId ))
 		Local variant:TStarfarerVariant
-		If assoc And assoc.Count() > 0
-			variant = TStarfarerVariant( assoc.First() )
+		If assoc And Not assoc.IsEmpty()
+			variant = TStarfarerVariant( stock_variants.ValueForKey( assoc.First() ))
 		Else
-			variant New TStarfarerVariant
+			variant = New TStarfarerVariant
 			variant.hullId = hullId
 			variant.variantId = hullId+"_variant"
 		EndIf
@@ -186,9 +186,9 @@ Type TEditor
 		Catch ex$ 'ignore parsing errors and continue
 			DebugLogFile " Error: "+file+" "+ex
 		EndTry
-	EndMEthod
+	EndMethod
 
-	Method load_stock_ship_stats( dir$, file$, save_field_order%=FALSE )
+	Method load_stock_ship_stats( dir$, file$, save_field_order%=False )
 		Try
 			If save_field_order
 				stock_ship_stats_field_order = CreateList()
@@ -196,9 +196,11 @@ Type TEditor
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_ship_stats )
 			EndIf
-			For Local row:TMap = EachIn stock_ship_stats
+			Local row:TMap
+			For Local id$ = EachIn stock_ship_stats.Keys()
 				'scan all rows for multiselect values
-				load_multiselect_value( "ship_csv.shield type", row.ValueForKey( "shield type" ))
+				row = TMap( stock_ship_stats.ValueForKey( id ))
+				load_multiselect_value( "ship_csv.shield type", String( row.ValueForKey( "shield type" )))
 			Next
 			DebugLogFile " LOADED "+file
 		Catch ex$ 'ignore parsing errors and continue
@@ -206,7 +208,15 @@ Type TEditor
 		EndTry
 	End Method
 
-	Method load_stock_wing_stats( dir$, file$, save_field_order%=FALSE )
+	Method get_ship_stats:TMap( hullId$ )
+		If stock_ship_stats.Contains( hullId )
+			Return TMap( stock_ship_stats.ValueForKey( hullId ))
+		Else
+			Return ship_data_csv_field_template.Copy()
+		EndIf
+	EndMethod
+
+	Method load_stock_wing_stats( dir$, file$, save_field_order%=False )
 		Try
 			If save_field_order
 				stock_wing_stats_field_order = CreateList()
@@ -214,10 +224,12 @@ Type TEditor
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_wing_stats )
 			EndIf
-			For Local row:TMap = EachIn stock_wing_stats
+			Local row:TMap
+			For Local id$ = EachIn stock_wing_stats.Keys()
 				'scan all rows for multiselect values and save association to variant
-				load_multiselect_value( "wing_csv.formation", row.ValueForKey( "formation" ))
-				load_multiselect_value( "wing_csv.role",      row.ValueForKey( "role" ))
+				row = TMap( stock_wing_stats.ValueForKey( id ))
+				load_multiselect_value( "wing_csv.formation", String( row.ValueForKey( "formation" )))
+				load_multiselect_value( "wing_csv.role",      String( row.ValueForKey( "role" )))
 				'save association to variant that it references
 				Local assoc:TList = TList( stock_variant_wing_stats_assoc.ValueForKey( row.ValueForKey( "variant" )))
 				If Not assoc
@@ -235,8 +247,8 @@ Type TEditor
 	Method get_default_wing:TMap( variantId$ )
 		Local assoc:TList = TList( stock_variant_wing_stats_assoc.ValueForKey( variantId ))
 		Local wing:TMap
-		If assoc And assoc.Count() > 0
-			variant = TStarfarerVariant( assoc.First() )
+		If assoc And Not assoc.IsEmpty()
+			wing = TMap( stock_wing_stats.ValueForKey( assoc.First() ))
 		Else
 			wing = wing_data_csv_field_template.Copy()
 			wing.Insert( "variant", variantId+"_wing_id" )
@@ -244,7 +256,7 @@ Type TEditor
 		Return wing
 	EndMethod
 
-	Method load_stock_weapon_stats( dir$, file$, save_field_order%=FALSE )
+	Method load_stock_weapon_stats( dir$, file$, save_field_order%=False )
 		Try
 			If save_field_order
 				'stock_weapon_stats_field_order = CreateList()
@@ -258,7 +270,7 @@ Type TEditor
 		EndTry
 	End Method
 
-	Method load_stock_hullmod_stats( dir$, file$, save_field_order%=FALSE )
+	Method load_stock_hullmod_stats( dir$, file$, save_field_order%=False )
 		Try
 			TCSVLoader.Load( dir+file, "id", stock_hullmod_stats )
 			DebugLogFile " LOADED "+file
@@ -271,7 +283,7 @@ Type TEditor
 
 	Method select_weapons$[]( slot_type$, slot_size$ )
 		Local matches$[] = New String[0]
-		For Local weapon_id$ = Eachin stock_weapons.Keys()
+		For Local weapon_id$ = EachIn stock_weapons.Keys()
 			Local weapon:TStarfarerWeapon = TStarfarerWeapon( stock_weapons.ValueForKey( weapon_id ))
 			Local size_diff% = (weapon_size_value( slot_size ) - weapon_size_value( weapon.size ))
 			'slot type match and same size or bigger by one step
@@ -281,7 +293,7 @@ Type TEditor
 			Or ( slot_type = weapon.type_ And size_diff >= 0 And size_diff <= 1 )
 				matches = matches[..(matches.length + 1)]
 				matches[matches.length - 1] = weapon.id
-			Endif
+			EndIf
 		Next
 		Return matches
 	EndMethod

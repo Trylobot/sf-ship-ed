@@ -16,11 +16,15 @@ Type TData
 	'requires subsequent call to update()
 	'requires subsequent call to update_variant()
 	Method New()
+		Clear()
+	End Method
+
+	Method Clear()
 		ship = New TStarfarerShip
 		variant = New TStarfarerVariant
 		csv_row = ship_data_csv_field_template.Copy()
 		csv_row_wing = wing_data_csv_field_template.Copy()
-	End Method
+	endMethod
 	
 	'requires subsequent call to update()
 	Method decode( input_json_str$ )

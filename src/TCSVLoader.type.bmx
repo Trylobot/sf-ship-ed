@@ -1,5 +1,6 @@
 
 Type TCSVLoader
+	Global EXPLICIT_NULL_PREFIX$ = "___NULL___"
 	
 	'loads a CSV into a map
 	Function Load:TMap( file$, key_field$, csv_rows:TMap=Null, field_order:TList=Null, row_order:TList=Null )
@@ -9,7 +10,10 @@ Type TCSVLoader
 		Local fields$[] = csv_split( lines[0] )
 		For Local f% = 0 Until fields.length
 			fields[f] = Trim( fields[f] )
-			If field_order And fields[f] <> Null And fields[f] <> ""
+			If fields[f] = Null
+				fields[f] = EXPLICIT_NULL_PREFIX + f
+			EndIf
+			If field_order
 				field_order.AddLast( fields[f] )
 			EndIf
 		Next
@@ -48,7 +52,9 @@ Type TCSVLoader
 			i = 0
 			For csv_field = EachIn field_order
 				If i > 0 Then file_str :+ ","
-				file_str :+ csv_conservative_escape( csv_field )
+				If Not csv_field.StartsWith( EXPLICIT_NULL_PREFIX )
+					file_str :+ csv_conservative_escape( csv_field ) ' skip these
+				EndIf
 				i :+ 1
 			Next
 			file_str :+ "~n"
@@ -78,7 +84,9 @@ Type TCSVLoader
 			i = 0
 			For csv_field = EachIn field_order
 				If i > 0 Then file_str :+ ","
-				file_str :+ csv_conservative_escape( csv_field )
+				If Not csv_field.StartsWith( EXPLICIT_NULL_PREFIX )
+					file_str :+ csv_conservative_escape( csv_field )
+				EndIf
 				i :+ 1
 			Next
 			file_str :+ "~n"

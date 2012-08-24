@@ -224,7 +224,7 @@ Repeat
 		'these functions conflict with string editing
 		check_mode( ed, data, sprite )
 		check_open_ship_image( ed, data, sprite )
-		check_new_ship_data( data )
+		check_new_ship_data( ed, data, sprite )
 		check_open_ship_data( ed, data, sprite )
 		check_save_ship_data( ed, data, sprite )
 		check_load_mod( ed, data )
@@ -817,8 +817,8 @@ Function check_load_mod( ed:TEditor, data:TData )
 	EndIF
 EndFunction
 
-Function check_new_ship_data( data:TData )
-	If KeyHit( KEY_N ) And CTRL And ALT
+Function check_new_ship_data( ed:TEditor, data:TData, sprite:TSprite )
+	If KeyHit( KEY_N ) And CONTROL And ALT
 		load_ship_data( ed, data, sprite, True )
 	End If
 End Function
@@ -892,6 +892,8 @@ End Function
 Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla%=FALSE )
 	Local stock_ships_dir$ =    data_dir+"data/hulls/"
 	Local stock_variants_dir$ = data_dir+"data/variants/"
+	Local stock_variants_fighters_dir$ = data_dir+"data/variants/fighters/"
+	Local stock_variants_drones_dir$ = data_dir+"data/variants/drones/"
 	Local stock_weapons_dir$ =  data_dir+"data/weapons/"
 	Local stock_hullmods_dir$ = data_dir+"data/hullmods/"
 	Local stock_config_dir$ =   data_dir+"data/config/"
@@ -905,6 +907,16 @@ Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla%=FALSE )
 	For Local stock_variant_file$ = EachIn stock_variants_files
 		If ExtractExt( stock_variant_file ) <> "variant" Then Continue
 		ed.load_stock_variant( stock_variants_dir, stock_variant_file )
+	Next
+	Local stock_variants_fighters_files$[] = LoadDir( stock_variants_fighters_dir )
+	For Local stock_variant_file$ = EachIn stock_variants_fighters_files
+		If ExtractExt( stock_variant_file ) <> "variant" Then Continue
+		ed.load_stock_variant( stock_variants_fighters_dir, stock_variant_file )
+	Next
+	Local stock_variants_drones_files$[] = LoadDir( stock_variants_drones_dir )
+	For Local stock_variant_file$ = EachIn stock_variants_drones_files
+		If ExtractExt( stock_variant_file ) <> "variant" Then Continue
+		ed.load_stock_variant( stock_variants_drones_dir, stock_variant_file )
 	Next
 	Local stock_weapons_files$[] = LoadDir( stock_weapons_dir )
 	For Local stock_weapon_file$ = EachIn stock_weapons_files
@@ -984,28 +996,24 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite, use_new%=False 
 		If FileType( data_path ) <> FILETYPE_FILE Then Return
 		APP.data_dir = ExtractDir( data_path )+"/"
 		APP.save()
-		data.decode( LoadString( data_path ))
+		Local ship_data_json$ = LoadString( data_path )
+		data.decode( ship_data_json )
 		data.update()
 		'VARIANT data
 		''try to find variant
 		data.variant = ed.get_default_variant( data.ship.hullId )
 		data.update_variant()
 		'CSV/STATS data
-		'update csv row data that references to ship
-		If ed.stock_ship_stats.Contains( data.ship.hullId )
-			data.set_csv_data( TMap( ed.stock_ship_stats.ValueForKey( data.ship.hullId )), sub_ship_csv.default_filename )
-			If sub_ship_csv.data_csv_row
-				sub_ship_csv.initialize_csv_editor( ed, data )
-			EndIf
-		EndIf
+		'update csv row data that (hopefully) references the above hull
+		data.csv_row = ed.get_ship_stats( data.ship.hullId )
 		'FIGHTER WING CSV/STATS data'
-		'  TODO
+		data.csv_row_wing = ed.get_default_wing( data.variant.variantId )
 		'IMAGE (implied)
 		'try to load the associated image, if one can be found
 		autoload_ship_image( ed, data, sprite )
 	Else ' use_new
 		'all data is reset to fresh
-		data.New()
+		data.Clear()
 	EndIf
 End Function
 
