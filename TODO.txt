@@ -1,38 +1,4 @@
 
-
-BUG: if a variant is created with out any weapons assigned this is generated "weaponGroups": null rather than "weaponGroups": [] the null crashes Starfarer with
-  org.json.JSONException: JSONObject["weaponGroups"] is not a JSONArray.
-
-BUG:  If you've defined a .ship that has BUILT_IN weapons and assign said weapons, the next .ship you build will have the BUILT_IN weapons assigned, even if you've wiped out all of the weapon slots.  
-
-BUG: If you build a ship, then its variant, then you go back to ship editor and remove a gun, back to the variant editor, save both (all slots are correctly filled with guns), it seems everything's ok but that variant is actually broken because it still count the removed weapon as existing.
-
-
-BUG: unable to use the escape key to exit out of any of the interface options such as weapon editing or hull editing, I am stuck on those screens
-
-
-
-
-Provide a way to clear out data in each of the 4 modes (probably '/')
-  and a way to clear out ALL data to 'new' status CTRL+ALT+'N' maybe?
-
-Variant: Improve workflow for multiple weapon groups / linked / alternating / autofire.
-
-fighter wing csv data in mode 4
-- the fighter image should always be sourced from the variant referenced
-  by the currently active CSV Wing data. check the variant for the hull id,
-  check the hull for the image, try and load it, etc.
-  if not found, use 'error.png'
-
-BUG: Editing weapon groups with no assigned weapons
-  G, right arrow
-  causes crash
-
-- To create "maneuvering jets"
-  set the otherwise-unused "contrailSize" field to 128 to flag the engines as hidden
-  They'll be activated by any system that modifies the engine glow.
-
-
 enhance rjson.parse() and rjson.stringify()
 - allow specifying a transform-set-id (or an array of them) as an argument
 - this determines what transforms to use for the operation
@@ -40,6 +6,32 @@ enhance rjson.parse() and rjson.stringify()
 - allow clearing of all transforms, or specifically those in a set
 - allow setting of number precision by specifying a transform
 - allow setting of override type by specifying a transform (parse only)
+
+
+BUG: if a variant is created with out any weapons assigned 
+  this is generated "weaponGroups": null rather than "weaponGroups": [] the null crashes Starfarer with
+  org.json.JSONException: JSONObject["weaponGroups"] is not a JSONArray.
+
+BUG:  If you've defined a .ship that has BUILT_IN weapons and assign said weapons, 
+  the next .ship you build will have the BUILT_IN weapons assigned, even if you've wiped out all of the weapon slots.  
+
+BUG: If you build a ship, then its variant, then you go back to ship editor and remove a gun, 
+  back to the variant editor, save both (all slots are correctly filled with guns),
+  it seems everything's ok but that variant is actually broken because it still count the removed weapon as existing.
+
+
+BUG: unable to use the escape key to exit out of any of the interface options
+  such as weapon editing or hull editing, I am stuck on those screens
+
+
+BUG: Editing weapon groups with no assigned weapons
+  G, right arrow
+  causes crash
+
+
+
+Variant: Improve workflow for multiple weapon groups / linked / alternating / autofire.
+
 
 load all shipsystems
 - propagate system ID's to enum "system.id" and use in CSV mode
@@ -77,3 +69,6 @@ add zoom-out effect to CSV row id list (it's too long), (dirty hacks ftw)
 
 Load new graphic (I): request permission from user to clear out (new) all data. ship hull, variant, csv.
 
+- To create "maneuvering jets"
+  set the otherwise-unused "contrailSize" field to 128 to flag the engines as hidden
+  They'll be activated by any system that modifies the engine glow.

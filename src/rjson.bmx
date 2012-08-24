@@ -73,7 +73,8 @@ Type json
 	Global error_level% = 2 'legend   2: as strict as possible   1: ignore warnings   0: ignore errors & warnings
 
 	'Encode settings
-	Global formatted% = True 'false: compact, true: indented; global setting
+	Global formatted% = True 'false: compact,   true: indented; global setting
+	Global empty_container_as_null% = False 'false: [] {},   true: null
 	Global indent_size% = 2 'spaces per indent level, if formatted is true; global setting
 	Global precision% = 6 'default floating-point precision, can be overridden per field/object/instance/item/value
 	
@@ -913,7 +914,10 @@ Type TArray Extends TValue
 	EndMethod
 
 	Method Encode:String( indent%, precision% )
-		If elements = Null Or elements.IsEmpty() Then Return VALUE_NULL
+		If json.empty_container_as_null ..
+		And elements = Null Or elements.IsEmpty() 
+			Return VALUE_NULL
+		EndIf
 		Local encoded$ = ""
 		encoded :+ ARRAY_BEGIN
 		If json.formatted Then encoded :+ "~n"
@@ -1020,7 +1024,10 @@ Type TObject Extends TValue
 	EndMethod
 
 	Method Encode:String( indent%, precision% )
-		If fields = Null Or fields.IsEmpty() Then Return VALUE_NULL
+		If json.empty_container_as_null ..
+		And fields = Null Or fields.IsEmpty() 
+			Return VALUE_NULL
+		EndIf
 		Local encoded$ = ""
 		encoded :+ OBJECT_BEGIN
 		Local iter:TNodeEnumerator = fields.Keys().ObjectEnumerator()

@@ -114,6 +114,7 @@ Flip( 1 )
 'json
 json.error_level = 1
 json.formatted = True
+json.empty_container_as_null = False
 json.precision = 6
 'TStarfarerShipWeapon
 json.add_parse_transform( "$weaponSlots:array/:object/$type:string", json.XJ_RENAME, "type_" )
@@ -788,27 +789,30 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
 	DrawImage( ed.ico_mirr, Int(4.2*Float(W_MAX)/5.0)+20,        H_MAX - ico_h - 4 )
 	draw_string( mirr_w,    Int(4.2*Float(W_MAX)/5.0)+20+ico_w+4,H_MAX - LINE_HEIGHT - 4 )
 	SetAlpha( 1 )
-	'  From Left to Right along top:
-	Local title_w:TextWidget
-	Select ed.program_mode
-		Case "ship"
-			title_w = TextWidget.Create( data.ship.hullId + ".ship" )
-		Case "variant"
-			title_w = TextWidget.Create( data.variant.variantId + ".variant" )
-		Case "csv"
-			If data.csv_row
-				title_w = TextWidget.Create( "ship_data.csv : " + String( data.csv_row.ValueForKey( "id" )))
-			Else
-				title_w = TextWidget.Create( "ship_data.csv" )
-			EndIf
-		Case "csv_wing"
-			If data.csv_row
-				title_w = TextWidget.Create( "wing_data.csv : " + String( data.csv_row_wing.ValueForKey( "id" )))
-			Else
-				title_w = TextWidget.Create( "wing_data.csv" )
-			EndIf
-	EndSelect
-	draw_string( title_w, 4,4 )
+	'if not showing the json data (which would be obscured):
+	If Not ed.show_data
+		'  From Left to Right along top:
+		Local title_w:TextWidget
+		Select ed.program_mode
+			Case "ship"
+				title_w = TextWidget.Create( data.ship.hullId + ".ship" )
+			Case "variant"
+				title_w = TextWidget.Create( data.variant.variantId + ".variant" )
+			Case "csv"
+				If data.csv_row
+					title_w = TextWidget.Create( "ship_data.csv : " + String( data.csv_row.ValueForKey( "id" )))
+				Else
+					title_w = TextWidget.Create( "ship_data.csv" )
+				EndIf
+			Case "csv_wing"
+				If data.csv_row
+					title_w = TextWidget.Create( "wing_data.csv : " + String( data.csv_row_wing.ValueForKey( "id" )))
+				Else
+					title_w = TextWidget.Create( "wing_data.csv" )
+				EndIf
+		EndSelect
+		draw_string( title_w, 4,4 )
+	EndIf
 Endfunction
 
 '-----------------------
