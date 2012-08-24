@@ -1,4 +1,10 @@
 
+BUG:  If you've defined a .ship that has BUILT_IN weapons and assign said weapons, 
+  the next .ship you build will have the BUILT_IN weapons assigned, even if you've wiped out all of the weapon slots.  
+*** when changing weapon slot ID's in ship mode or deleting slots
+- propagate changes to built-in weapon assignments AND to the loaded variant
+
+
 enhance rjson.parse() and rjson.stringify()
 - allow specifying a transform-set-id (or an array of them) as an argument
 - this determines what transforms to use for the operation
@@ -11,9 +17,6 @@ enhance rjson.parse() and rjson.stringify()
 BUG: if a variant is created with out any weapons assigned 
   this is generated "weaponGroups": null rather than "weaponGroups": [] the null crashes Starfarer with
   org.json.JSONException: JSONObject["weaponGroups"] is not a JSONArray.
-
-BUG:  If you've defined a .ship that has BUILT_IN weapons and assign said weapons, 
-  the next .ship you build will have the BUILT_IN weapons assigned, even if you've wiped out all of the weapon slots.  
 
 BUG: If you build a ship, then its variant, then you go back to ship editor and remove a gun, 
   back to the variant editor, save both (all slots are correctly filled with guns),
@@ -43,10 +46,6 @@ support weapons in mode 5
 support weapon csv data in mode 6
 
 projectiles in mode 7
-
-when changing weapon slot ID's in ship mode
-- propagate changes to built-in weapon assignments
-  and to the loaded variant as well
 
 fix shitty performance in complex non-TSubroutine modal functions
 - use static memory allocation and stateful transitions
