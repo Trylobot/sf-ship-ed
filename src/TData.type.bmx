@@ -28,23 +28,23 @@ Type TData
 	
 	'requires subsequent call to update()
 	Method decode( input_json_str$ )
-		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip" ))
+		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ))
 		Fix_Map_TStrings( ship.builtInWeapons ) 'TEMPORARY
 	End Method
 	
+	Method update()
+		json.formatted = true
+		'encode ship object as json data
+		json_str = json.stringify( ship, "stringify_ship" )
+		json_view = columnize_text( json_str )
+	End Method
+
 	'requires subsequent call to update_variant()
 	Method decode_variant( input_json_str$ )
 		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
 		For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
 			Fix_Map_TStrings( weaponGroup.weapons ) 'TEMPORARY
 		Next
-	End Method
-	
-	Method update()
-		json.formatted = true
-		'encode ship object as json data
-		json_str = json.stringify( ship )
-		json_view = columnize_text( json_str )
 	End Method
 	
 	Method update_variant()

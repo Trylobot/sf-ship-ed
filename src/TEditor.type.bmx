@@ -96,7 +96,7 @@ Type TEditor
 	Method load_stock_ship:TStarfarerShip( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir+file )
-			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip" ))
+			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ))
 			Fix_Map_TStrings( ship.builtInWeapons ) 'TEMPORARY
 			stock_ships.Insert( ship.hullId, ship )
 			load_multiselect_value( "ship.hullSize", ship.hullSize )
@@ -169,7 +169,7 @@ Type TEditor
 	Method load_stock_weapon:TStarfarerWeapon( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir+file )
-			Local weapon:TStarfarerWeapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon" ))
+			Local weapon:TStarfarerWeapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon", "parse_weapon" ))
 			stock_weapons.Insert( weapon.id, weapon )
 			'load_multiselect_value( "ship.builtInWeapons.id", weapon.id )
 			load_multiselect_value( "weapon.specClass", weapon.specClass )

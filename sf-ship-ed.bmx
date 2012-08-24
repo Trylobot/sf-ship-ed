@@ -120,17 +120,17 @@ json.formatted = True
 json.empty_container_as_null = False
 json.precision = 6
 'TStarfarerShipWeapon
-json.add_parse_transform( "$weaponSlots:array/:object/$type:string", json.XJ_RENAME, "type_" )
-json.add_stringify_transform( "$weaponSlots:array/:object/$type_:string", json.XJ_RENAME, "type"  )
-json.add_stringify_transform( "$builtInWeapons:object", json.XJ_DELETE,, predicate_TStarfarerShip_omit_builtInWeapons )
+json.add_transform( "parse_ship",     "$weaponSlots:array/:object/$type:string", json.XJ_RENAME, "type_" )
+json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$type_:string", json.XJ_RENAME, "type"  )
+json.add_transform( "stringify_ship", "$builtInWeapons:object", json.XJ_DELETE,, predicate_TStarfarerShip_omit_builtInWeapons )
 'TStarfarerCustomEngineStyleSpec
-json.add_parse_transform( "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
-json.add_stringify_transform( "$engineSlots:array/:object/$styleSpec:object/$type_:string", json.XJ_RENAME, "type"  )
-json.add_stringify_transform( "$engineSlots:array/:object/$styleSpec:object", json.XJ_DELETE,, predicate_TStarfarerShipEngine_omit_styleSpec )
-json.add_stringify_transform( "$engineSlots:array/:object/$styleId:string", json.XJ_DELETE,, predicate_TStarfarerShipEngine_omit_styleId )
+json.add_transform( "parse_ship",     "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
+json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:object/$type_:string", json.XJ_RENAME, "type"  )
+json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:object", json.XJ_DELETE,, predicate_TStarfarerShipEngine_omit_styleSpec )
+json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleId:string", json.XJ_DELETE,, predicate_TStarfarerShipEngine_omit_styleId )
 'TStarfarerWeapon
-json.add_parse_transform( "$type:string", json.XJ_RENAME, "type_" )
-json.add_stringify_transform( "$type_:string", json.XJ_RENAME, "type"  )
+json.add_transform( "parse_weapon",     "$type:string", json.XJ_RENAME, "type_" )
+json.add_transform( "stringify_weapon", "$type_:string", json.XJ_RENAME, "type"  )
 
 '////////////////////////////////////////////////
 

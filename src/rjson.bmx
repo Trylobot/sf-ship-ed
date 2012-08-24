@@ -53,8 +53,8 @@ Transformations can optionally specify a condition function that determines at r
 
 Supported transformation imperatives:
 * XJ_DELETE 
-* XJ_RENAME ( new_field_name )
-* XJ_CONVERT( new_type )
+* XJ_RENAME( new_field_name )
+* XJ_CONVERT( new_json_type_code ) 
 
 
 EndRem
@@ -78,28 +78,27 @@ Type json
 	Global indent_size% = 2 'spaces per indent level, if formatted is true; global setting
 	Global precision% = 6 'default floating-point precision, can be overridden per field/object/instance/item/value
 	
+	'Transformations
+	Global transformations:TMap = CreateMap()
+	
 	'Generate a JSON-Encoded String from an arbitrary Object
-	Function stringify:String( source_object:Object )
+	Function stringify:String( source_object:Object, transforms_set$=Null )
 		If Not source_object Then Return TValue.VALUE_NULL ' --> "null"
 		Local source_object_converted:TValue = reflect_to_TValue( source_object )
-		For Local xform:TValue_Transformation = EachIn transforms_stringify
-			xform.Execute( source_object_converted ) 'Execute any available transformations
-		Next
+		execute_transforms( transforms_set, source_object_converted )
 		Return source_object_converted.Encode( 0, precision )
 	EndFunction
 	
 	'Generate an Object of the given type name from a JSON-Encoded String
-	Function parse:Object( encoded$, type_id$="" )
-		If encoded = "" Then Return Null
+	Function parse:Object( encoded$, type_id$=Null, transforms_set$=Null )
+		If encoded = Null Then Return Null
 		Local cursor% = 0
 		Local intermediate_object:TValue = allocate_TValue( encoded, cursor )
 		If intermediate_object = Null Then Return Null
 		intermediate_object.Decode( encoded, cursor )
 		CheckLeftovers( encoded, cursor )
-		For Local xform:TValue_Transformation = EachIn transforms_parse
-			xform.Execute( intermediate_object ) 'Execute any available transformations
-		Next
-		If type_id <> ""
+		execute_transforms( transforms_set, intermediate_object )
+		If type_id <> Null
 			Local destination_type_id:TTypeId = TTypeId.ForName( type_id )
 			If destination_type_id
 				Local destination_object:Object = initialize_object( intermediate_object, destination_type_id )
@@ -112,26 +111,33 @@ Type json
 		EndIf
 	EndFunction
 
-
-	'Transformations
-	Global transforms_stringify:TList = CreateList()
-	Global transforms_parse:TList = CreateList()
-	
-	Function add_stringify_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue )=Null )
-		transforms_stringify.AddLast( ..
-			TValue_Transformation.Create( ..
-				selector, imperative_id, argument, condition_func ))
+	Function add_transform( set_name$, selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue )=Null )
+		Local xform:TValue_Transformation
+		xform = TValue_Transformation.Create( selector, imperative_id, argument, condition_func )
+		Local set:TList = TList( transformations.ValueForKey( set_name ))
+		If Not set
+			set = CreateList()
+			transformations.Insert( set_name, set )
+		EndIf
+		set.AddLast( xform )
 	EndFunction
 
-	Function add_parse_transform( selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue )=Null )
-		transforms_parse.AddLast( ..
-			TValue_Transformation.Create( ..
-				selector, imperative_id, argument, condition_func ))
+	Function execute_transforms( set_name$, val:TValue )
+		If set_name
+			For Local xform:TValue_Transformation = EachIn TList( transformations.ValueForKey( set_name ))
+				If xform
+					xform.Execute( val ) 'Execute any available transformations
+				EndIf
+			Next
+		EndIf
 	EndFunction
 
-	Function clear_transforms()
-		transforms_stringify.Clear()
-		transforms_parse.Clear()
+	Function clear_transforms( set_name$=Null )
+		If set_name = Null
+			transformations.Clear()
+		Else
+			transformations.Remove( set_name )
+		EndIf
 	EndFunction
 
 	'transformations ////////////////////////////////////////////////////////////
@@ -612,6 +618,8 @@ Type TValue
 
 	Method Equals%( val:Object ) Abstract
 
+	Method Create:TValue( other:TValue ) Abstract
+
 	'////////////////////////////////////////////////////////////////////////////
 
 	Method ToString:String()
@@ -724,6 +732,10 @@ Type TNull Extends TValue
 		Return (TNull(other) <> Null And TNull(other).value_type = JSONTYPE_NULL)
 	EndMethod
 
+	Method Create:TValue( other:TValue )
+		Return New TNull
+	EndMethod
+
 EndType
 
 
@@ -756,6 +768,25 @@ Type TBoolean Extends TValue
 
 	Method Equals%( other:Object )
 		Return (TBoolean(other) <> Null And TBoolean(other).value_type = JSONTYPE_BOOLEAN And TBoolean(other).value = Self.value)
+	EndMethod
+
+	Method Create:TValue( other:TValue )
+		Local val:TBoolean = New TBoolean
+		Select other.value_type
+			Case JSONTYPE_NULL
+				val.value = False
+			Case JSONTYPE_BOOLEAN
+				val.value = TBoolean(other).value
+			Case JSONTYPE_NUMBER
+				val.value = (TNumber(other).value <> 0)
+			Case JSONTYPE_STRING
+				val.value = (TString(other).value <> "")
+			Case JSONTYPE_ARRAY
+				val.value = (Not TArray(other).elements.IsEmpty())
+			Case JSONTYPE_OBJECT
+				val.value = (Not TObject(other).fields.IsEmpty())
+		EndSelect
+		Return val
 	EndMethod
 
 EndType
@@ -801,6 +832,25 @@ Type TNumber Extends TValue
 
 	Method Equals%( other:Object )
 		Return (TNumber(other) <> Null And TNumber(other).value_type = JSONTYPE_NUMBER And TNumber(other).value = Self.value)
+	EndMethod
+
+	Method Create:TValue( other:TValue )
+		Local val:TNumber = New TNumber
+		Select other.value_type
+			Case JSONTYPE_NULL
+				val.value = 0
+			Case JSONTYPE_BOOLEAN
+				val.value = Double(TBoolean(other).value)
+			Case JSONTYPE_NUMBER
+				val.value = TNumber(other).value
+			Case JSONTYPE_STRING
+				val.value = (TString(other).value <> "")
+			Case JSONTYPE_ARRAY
+				val.value = (Not TArray(other).elements.IsEmpty())
+			Case JSONTYPE_OBJECT
+				val.value = (Not TObject(other).fields.IsEmpty())
+		EndSelect
+		Return val
 	EndMethod
 
 EndType
@@ -899,6 +949,10 @@ Type TString Extends TValue
 
 	Method Equals%( other:Object )
 		Return (TString(other) <> Null And TString(other).value_type = JSONTYPE_STRING And TString(other).value = Self.value)
+	EndMethod
+
+	Method Create:TValue( other:TValue )
+		Return New TNull
 	EndMethod
 
 EndType
@@ -1009,6 +1063,10 @@ Type TArray Extends TValue
 			EndWhile
 		EndIf
 		Return True
+	EndMethod
+
+	Method Create:TValue( other:TValue )
+		Return New TNull
 	EndMethod
 
 EndType
@@ -1123,6 +1181,10 @@ Type TObject Extends TValue
 			EndIf
 		Next
 		Return True
+	EndMethod
+
+	Method Create:TValue( other:TValue )
+		Return New TNull
 	EndMethod
 
 EndType
@@ -1265,19 +1327,99 @@ Type TValue_Transformation
 		For Local result:TValue_Search_Result = EachIn matches
 			If (condition_func = Null) Or (condition_func( result.matched ) = True)
 				Select imperative_id
+					
 					Case json.XJ_DELETE
 						If result.container_TObject
 							result.container_TObject.fields.Remove( result.object_field_name )
 						ElseIf result.container_TArray
 							result.container_TArray.elements.Remove( result )
 						EndIf
+					
 					Case json.XJ_RENAME
 						If result.container_TObject
 							result.container_TObject.fields.Insert( String(argument), result.matched )
 							result.container_TObject.fields.Remove( result.object_field_name )
 						EndIf
+					
 					Case json.XJ_CONVERT
-						'???
+						Local old_val:TValue
+						Local new_val:TValue
+						Local cursor:TLink
+						Select String(argument) 'desired target type
+							'/////////
+							Case json.SEL_NULL
+								old_val = result.matched
+								new_val = New TNull
+								If result.container_TObject
+									result.container_TObject.fields.Insert( result.object_field_name, new_val )
+								ElseIf result.container_TArray
+									cursor = result_container_TObject.elements.FindLink( result.matched )
+									If cursor
+										result_container_TObject.elements.InsertAfterLink( new_val, cursor )
+									EndIf
+								EndIf
+							'/////////
+							Case json.SEL_BOOLEAN
+								old_val = result.matched
+								new_val = TBoolean.Create( old_val )
+								If result.container_TObject
+									result.container_TObject.fields.Insert( result.object_field_name, val )
+								ElseIf result.container_TArray
+									cursor = result_container_TObject.elements.FindLink( result.matched )
+									If cursor
+										result_container_TObject.elements.InsertAfterLink( val, cursor )
+									EndIf
+								EndIf
+							'/////////
+							Case json.SEL_NUMBER
+								old_val = result.matched
+								new_val = TNumber.Create( old_val )
+								If result.container_TObject
+									result.container_TObject.fields.Insert( result.object_field_name, val )
+								ElseIf result.container_TArray
+									cursor = result_container_TObject.elements.FindLink( result.matched )
+									If cursor
+										result_container_TObject.elements.InsertAfterLink( val, cursor )
+									EndIf
+								EndIf
+							'/////////
+							Case json.SEL_STRING
+								old_val = result.matched
+								new_val = TString.Create( old_val )
+								If result.container_TObject
+									result.container_TObject.fields.Insert( result.object_field_name, val )
+								ElseIf result.container_TArray
+									cursor = result_container_TObject.elements.FindLink( result.matched )
+									If cursor
+										result_container_TObject.elements.InsertAfterLink( val, cursor )
+									EndIf
+								EndIf
+							'/////////
+							Case json.SEL_ARRAY
+								old_val = result.matched
+								new_val = TArray.Create( old_val )
+								If result.container_TObject
+									result.container_TObject.fields.Insert( result.object_field_name, val )
+								ElseIf result.container_TArray
+									cursor = result_container_TObject.elements.FindLink( result.matched )
+									If cursor
+										result_container_TObject.elements.InsertAfterLink( val, cursor )
+									EndIf
+								EndIf
+							'/////////
+							Case json.SEL_OBJECT
+								old_val = result.matched
+								new_val = TObject.Create( old_val )
+								If result.container_TObject
+									result.container_TObject.fields.Insert( result.object_field_name, val )
+								ElseIf result.container_TArray
+									cursor = result_container_TObject.elements.FindLink( result.matched )
+									If cursor
+										result_container_TObject.elements.InsertAfterLink( val, cursor )
+									EndIf
+								EndIf
+						EndSelect
+
 				EndSelect
 			EndIf
 		Next

@@ -572,16 +572,13 @@ EndFunction
 Function test_tvalue_transformation_conditional_delete()
 	Print "*** test_tvalue_transformation_conditional_delete"
 	Local json_str$ = LoadString( test_dir + "/passes/xf2_in.json" )
-	json.add_parse_transform( ":object/$ALPHA:string", json.XJ_DELETE )
-	json.add_parse_transform( "@4:number", json.XJ_DELETE )
-	json.add_parse_transform( "@5:boolean", json.XJ_DELETE )
-	json.add_parse_transform( ":object/:boolean", json.XJ_DELETE,, __TBoolean_NOT )
-	Local val:TValue = TValue( json.parse( json_str ))
+	json.add_transform( "parse", ":object/$ALPHA:string", json.XJ_DELETE )
+	json.add_transform( "parse", "@4:number", json.XJ_DELETE )
+	json.add_transform( "parse", "@5:boolean", json.XJ_DELETE )
+	json.add_transform( "parse", ":object/:boolean", json.XJ_DELETE,, __TBoolean_NOT )
+	Local val:TValue = TValue( json.parse( json_str,, "parse" ))
+	verify( TObject(TArray( val ).elements.ValueAtIndex(8)).fields.Contains("ALPHA") = False, "value should not be found" )
 	json.clear_transforms()
-	verify( TObject(TArray(val).elements.ValueAtIndex(8)).fields.Contains("ALPHA") = False, "value should not be found" )
-	For Local xf:TValue_Transformation = EachIn json.transforms_parse
-		verify( xf.Search( val ).IsEmpty(), "all specified fields should have been deleted" )
-	Next
 EndFunction
 Function __TBoolean_NOT%( val:TValue )
 	If TBoolean(val) Then Return (Not TBoolean(val).value) ..
