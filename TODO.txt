@@ -4,6 +4,18 @@ BUG:  If you've defined a .ship that has BUILT_IN weapons and assign said weapon
 *** when changing weapon slot ID's in ship mode or deleting slots
 - propagate changes to built-in weapon assignments AND to the loaded variant
 
+BUG: if a variant is created with out any weapons assigned 
+  this is generated "weaponGroups": null rather than "weaponGroups": [] the null crashes Starfarer with
+  org.json.JSONException: JSONObject["weaponGroups"] is not a JSONArray.
+RELATED: The editor now doesn't deal well with extra weapon groups / modified weapon groups on older variants, 
+  and once you've saved said corrupt .variant, you will not be able to open it back up in the editor to fix, 
+  you'll need to maunally edit said file to get it back working. A weapon group without a weapon produces 
+  the Null and this can be if a weapon group previously had a weapon but the weapon is moved into another group, 
+  the old group will still remain but with the crash inducing null.
+
+
+Linux: does not load the vanilla data. (There is no starfarer-core directory apparently)
+
 
 enhance rjson.parse() and rjson.stringify()
 - allow specifying a transform-set-id (or an array of them) as an argument
@@ -14,9 +26,7 @@ enhance rjson.parse() and rjson.stringify()
 - allow setting of override type by specifying a transform (parse only)
 
 
-BUG: if a variant is created with out any weapons assigned 
-  this is generated "weaponGroups": null rather than "weaponGroups": [] the null crashes Starfarer with
-  org.json.JSONException: JSONObject["weaponGroups"] is not a JSONArray.
+BUG: can't set hull mods if there are no weapon slots in the ship. (what the fuck)
 
 BUG: If you build a ship, then its variant, then you go back to ship editor and remove a gun, 
   back to the variant editor, save both (all slots are correctly filled with guns),
