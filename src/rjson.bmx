@@ -74,7 +74,7 @@ Type json
 
 	'Encode settings
 	Global formatted% = True 'false: compact,   true: indented; global setting
-	Global empty_container_as_null% = False 'false: [] {},   true: null
+	Global empty_container_as_null% = False 'false: [] {} "",   true: null
 	Global indent_size% = 2 'spaces per indent level, if formatted is true; global setting
 	Global precision% = 6 'default floating-point precision, can be overridden per field/object/instance/item/value
 	
@@ -178,22 +178,34 @@ Type json
 
 	'Nested Array Types (e.g.: Int[][][] ) ARE supported
 	'Single Arrays with Multiple Dimensions (e.g.: Int[4,3,5] ) are NOT supported
-	Function reflect_to_TValue:TValue( source_object:Object )
-		If source_object = Null Then Return New TNull
+	Function reflect_to_TValue:TValue( source_object:Object, explicit_source_object_type_id:TTypeId=Null )
+		If source_object = Null ..
+		And (json.empty_container_as_null = True Or explicit_source_object_type_id = Null)
+			Return New TNull
+		EndIf
 		Local converted_object:TValue = TValue( source_object )
 		If Not converted_object 'requires reflection-based conversion
-			Local source_object_type_id:TTypeId = TTypeId.ForObject( source_object )
+			Local source_object_type_id:TTypeId
+			If explicit_source_object_type_id
+				source_object_type_id = explicit_source_object_type_id
+			Else
+				source_object_type_id = TTypeId.ForObject( source_object )
+			EndIf
 			'Check for cyclic built-in types; process them in a special way for convenience
 			If source_object_type_id = TMap_TTypeId
 				converted_object = New TObject
-				For Local key$ = EachIn TMap(source_object).Keys()
-					TObject(converted_object).fields.Insert( key, reflect_to_TValue( TMap(source_object).ValueForKey( key )))
-				Next
+				If source_object <> Null
+					For Local key$ = EachIn TMap(source_object).Keys()
+						TObject(converted_object).fields.Insert( key, reflect_to_TValue( TMap(source_object).ValueForKey( key )))
+					Next
+				EndIf
 			ElseIf source_object_type_id = TList_TTypeId
 				converted_object = New TArray
-				For Local item:Object = EachIn TList(source_object)
-					TArray(converted_object).elements.AddLast( reflect_to_TValue( item ))
-				Next
+				If source_object <> Null
+					For Local item:Object = EachIn TList(source_object)
+						TArray(converted_object).elements.AddLast( reflect_to_TValue( item ))
+					Next
+				EndIf
 			Else
 				If source_object_type_id.ElementType() = Null
 					'Not Array
@@ -209,6 +221,7 @@ Type json
 						Local field_count% = source_object_fields.Count()
 						If field_count > 0
 							Local field_value:TValue
+							'For every field of the SOURCE OJBECT:
 							For Local source_object_field:TField = EachIn source_object_fields
 								Select source_object_field.TypeId()
 									Case IntTypeId, ShortTypeId, ByteTypeId
@@ -224,7 +237,7 @@ Type json
 										field_value = New TNumber
 										TNumber(field_value).value = source_object_field.GetDouble( source_object )
 									Default
-										field_value = reflect_to_TValue( source_object_field.Get( source_object ))
+										field_value = reflect_to_TValue( source_object_field.Get( source_object ), source_object_field.TypeId() )
 								EndSelect
 								TObject(converted_object).fields.Insert( source_object_field.Name(), field_value )
 							Next
@@ -238,6 +251,7 @@ Type json
 						Local element:Object
 						Local element_value:TValue
 						Local source_object_element_type_id:TTypeId = source_object_type_id.ElementType()
+						'For every element of the SOURCE ARRAY:
 						For Local i% = 0 Until array_length
 							element = source_object_type_id.GetArrayElement( source_object, i )
 							Select source_object_element_type_id
@@ -615,6 +629,8 @@ Type TValue
 	Method Encode:String( indent%, precision% ) Abstract
 
 	Method Decode( encoded$, cursor% Var ) Abstract
+	
+	Method Copy:TValue() Abstract
 
 	Method Equals%( val:Object ) Abstract
 
@@ -728,6 +744,10 @@ Type TNull Extends TValue
 		EndIf
 	EndMethod
 
+	Method Copy:TValue()
+		Return New TNull
+	EndMethod
+
 	Method Equals%( other:Object )
 		Return (TNull(other) <> Null And TNull(other).value_type = JSONTYPE_NULL)
 	EndMethod
@@ -764,6 +784,12 @@ Type TBoolean Extends TValue
 			value = True
 			cursor :+ VALUE_TRUE.Length
 		EndIf
+	EndMethod
+
+	Method Copy:TValue()
+		Local val:TBoolean = New TBoolean
+		val.value = value
+		Return val
 	EndMethod
 
 	Method Equals%( other:Object )
@@ -830,6 +856,12 @@ Type TNumber Extends TValue
 		End If
 	EndMethod
 
+	Method Copy:TValue()
+		Local val:TNumber = New TNumber
+		val.value = value
+		Return val
+	EndMethod
+
 	Method Equals%( other:Object )
 		Return (TNumber(other) <> Null And TNumber(other).value_type = JSONTYPE_NUMBER And TNumber(other).value = Self.value)
 	EndMethod
@@ -844,11 +876,11 @@ Type TNumber Extends TValue
 			Case JSONTYPE_NUMBER
 				val.value = TNumber(other).value
 			Case JSONTYPE_STRING
-				val.value = (TString(other).value <> "")
+				val.value = TString(other).value.ToDouble()
 			Case JSONTYPE_ARRAY
-				val.value = (Not TArray(other).elements.IsEmpty())
+				val.value = 0
 			Case JSONTYPE_OBJECT
-				val.value = (Not TObject(other).fields.IsEmpty())
+				val.value = 0
 		EndSelect
 		Return val
 	EndFunction
@@ -947,12 +979,33 @@ Type TString Extends TValue
 		value = decoded_value
 	EndMethod
 
+	Method Copy:TValue()
+		Local val:TString = New TString
+		val.value = value
+		Return val
+	EndMethod
+
 	Method Equals%( other:Object )
 		Return (TString(other) <> Null And TString(other).value_type = JSONTYPE_STRING And TString(other).value = Self.value)
 	EndMethod
 
 	Function Create:TValue( other:TValue )
-		Return New TNull
+		Local val:TString = New TString
+		Select other.value_type
+			Case JSONTYPE_NULL
+				val.value = other.Encode( 0, json.precision )
+			Case JSONTYPE_BOOLEAN
+				val.value = other.Encode( 0, json.precision )
+			Case JSONTYPE_NUMBER
+				val.value = other.Encode( 0, json.precision )
+			Case JSONTYPE_STRING
+				val.value = TString(other).value
+			Case JSONTYPE_ARRAY
+				val.value = ""
+			Case JSONTYPE_OBJECT
+				val.value = ""
+		EndSelect
+		Return val
 	EndFunction
 
 EndType
@@ -1043,6 +1096,14 @@ Type TArray Extends TValue
 		elements = decoded_elements
 	EndMethod
 
+	Method Copy:TValue()
+		Local val:TArray = New TArray
+		For Local element:TValue = EachIn elements
+			val.elements.AddLast( element.Copy() )
+		Next
+		Return val
+	EndMethod
+
 	Method Equals%( other:Object )
 		If Not (TArray(other) <> Null And TArray(other).value_type = JSONTYPE_ARRAY And TArray(other).elements.Count() = Self.elements.Count())
 			Return False
@@ -1066,7 +1127,25 @@ Type TArray Extends TValue
 	EndMethod
 
 	Function Create:TValue( other:TValue )
-		Return New TNull
+		Local val:TArray
+		Select other.value_type
+			Case JSONTYPE_NULL
+				val = New TArray
+			Case JSONTYPE_BOOLEAN
+				val = New TArray
+			Case JSONTYPE_NUMBER
+				val = New TArray
+			Case JSONTYPE_STRING
+				val = New TArray
+			Case JSONTYPE_ARRAY
+				val = TArray(other.Copy())
+			Case JSONTYPE_OBJECT
+				val = New TArray
+				For Local field_name$ = EachIn TObject(other).fields.Keys()
+					val.elements.AddLast( TValue(TObject(other).fields.ValueForKey( field_name )).Copy() )
+				Next
+		EndSelect
+		Return val
 	EndFunction
 
 EndType
@@ -1167,6 +1246,14 @@ Type TObject Extends TValue
 		fields = decoded_fields
 	EndMethod
 
+	Method Copy:TValue()
+		Local val:TObject = New TObject
+		For Local field_name$ = EachIn fields.Keys()
+			val.fields.Insert( field_name, TValue( fields.ValueForKey( field_name )).Copy() )
+		Next
+		Return val
+	EndMethod
+
 	Method Equals%( other:Object )
 		If Not (TObject(other) <> Null ..
 			 And TObject(other).value_type = JSONTYPE_OBJECT) ..
@@ -1184,7 +1271,27 @@ Type TObject Extends TValue
 	EndMethod
 
 	Function Create:TValue( other:TValue )
-		Return New TNull
+		Local val:TObject
+		Select other.value_type
+			Case JSONTYPE_NULL
+				val = New TObject
+			Case JSONTYPE_BOOLEAN
+				val = New TObject
+			Case JSONTYPE_NUMBER
+				val = New TObject
+			Case JSONTYPE_STRING
+				val = New TObject
+			Case JSONTYPE_ARRAY
+				val = New TObject
+				Local idx% = 0
+				For Local element:TValue = EachIn TArray(other).elements
+					val.fields.Insert( String.FromInt( idx ), element.Copy() )
+					idx :+ 1
+				Next
+			Case JSONTYPE_OBJECT
+				val = TObject(other.Copy())
+		EndSelect
+		Return val
 	EndFunction
 
 EndType
@@ -1342,83 +1449,29 @@ Type TValue_Transformation
 						EndIf
 					
 					Case json.XJ_CONVERT
-						Local old_val:TValue
+						Local old_val:TValue = result.matched
 						Local new_val:TValue
-						Local cursor:TLink
 						Select String(argument) 'desired target type
-							'/////////
 							Case json.SEL_NULL
-								old_val = result.matched
-								new_val = New TNull
-								If result.container_TObject
-									result.container_TObject.fields.Insert( result.object_field_name, new_val )
-								ElseIf result.container_TArray
-									cursor = result.container_TArray.elements.FindLink( result.matched )
-									If cursor
-										result.container_TArray.elements.InsertAfterLink( new_val, cursor )
-									EndIf
-								EndIf
-							'/////////
+								new_val = TNull.Create( old_val )
 							Case json.SEL_BOOLEAN
-								old_val = result.matched
 								new_val = TBoolean.Create( old_val )
-								If result.container_TObject
-									result.container_TObject.fields.Insert( result.object_field_name, val )
-								ElseIf result.container_TArray
-									cursor = result.container_TArray.elements.FindLink( result.matched )
-									If cursor
-										result.container_TArray.elements.InsertAfterLink( val, cursor )
-									EndIf
-								EndIf
-							'/////////
 							Case json.SEL_NUMBER
-								old_val = result.matched
 								new_val = TNumber.Create( old_val )
-								If result.container_TObject
-									result.container_TObject.fields.Insert( result.object_field_name, val )
-								ElseIf result.container_TArray
-									cursor = result.container_TArray.elements.FindLink( result.matched )
-									If cursor
-										result.container_TArray.elements.InsertAfterLink( val, cursor )
-									EndIf
-								EndIf
-							'/////////
 							Case json.SEL_STRING
-								old_val = result.matched
 								new_val = TString.Create( old_val )
-								If result.container_TObject
-									result.container_TObject.fields.Insert( result.object_field_name, val )
-								ElseIf result.container_TArray
-									cursor = result.container_TArray.elements.FindLink( result.matched )
-									If cursor
-										result.container_TArray.elements.InsertAfterLink( val, cursor )
-									EndIf
-								EndIf
-							'/////////
 							Case json.SEL_ARRAY
-								old_val = result.matched
 								new_val = TArray.Create( old_val )
-								If result.container_TObject
-									result.container_TObject.fields.Insert( result.object_field_name, val )
-								ElseIf result.container_TArray
-									cursor = result.container_TArray.elements.FindLink( result.matched )
-									If cursor
-										result.container_TArray.elements.InsertAfterLink( val, cursor )
-									EndIf
-								EndIf
-							'/////////
 							Case json.SEL_OBJECT
-								old_val = result.matched
 								new_val = TObject.Create( old_val )
-								If result.container_TObject
-									result.container_TObject.fields.Insert( result.object_field_name, val )
-								ElseIf result.container_TArray
-									cursor = result.container_TArray.elements.FindLink( result.matched )
-									If cursor
-										result.container_TArray.elements.InsertAfterLink( val, cursor )
-									EndIf
-								EndIf
 						EndSelect
+						If result.container_TObject
+							result.container_TObject.fields.Insert( result.object_field_name, new_val )
+						ElseIf result.container_TArray
+							Local cursor:TLink = result.container_TArray.elements.FindLink( result.matched )
+							result.container_TArray.elements.InsertAfterLink( new_val, cursor )
+							cursor.Remove()
+						EndIf
 
 				EndSelect
 			EndIf
