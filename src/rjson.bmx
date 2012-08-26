@@ -212,57 +212,63 @@ Type json
 					If source_object_type_id = StringTypeId
 						'String
 						converted_object = New TString
-						TString(converted_object).value = String(source_object)
+						If source_object <> Null
+							TString(converted_object).value = String(source_object)
+						EndIf
 					Else
 						'Non-array Non-string: User Defined Object
 						'Get list of fields in type hierarchy
 						converted_object = New TObject
-						Local source_object_fields:TList = enumerate_fields( source_object_type_id )
-						Local field_count% = source_object_fields.Count()
-						If field_count > 0
-							Local field_value:TValue
-							'For every field of the SOURCE OJBECT:
-							For Local source_object_field:TField = EachIn source_object_fields
-								Select source_object_field.TypeId()
-									Case IntTypeId, ShortTypeId, ByteTypeId
-										field_value = New TNumber
-										TNumber(field_value).value = source_object_field.GetInt( source_object )
-									Case LongTypeId
-										field_value = New TNumber
-										TNumber(field_value).value = source_object_field.GetLong( source_object )
-									Case FloatTypeId
-										field_value = New TNumber
-										TNumber(field_value).value = source_object_field.GetFloat( source_object )
-									Case DoubleTypeId
-										field_value = New TNumber
-										TNumber(field_value).value = source_object_field.GetDouble( source_object )
-									Default
-										field_value = reflect_to_TValue( source_object_field.Get( source_object ), source_object_field.TypeId() )
-								EndSelect
-								TObject(converted_object).fields.Insert( source_object_field.Name(), field_value )
-							Next
+						If source_object <> Null
+							Local source_object_fields:TList = enumerate_fields( source_object_type_id )
+							Local field_count% = source_object_fields.Count()
+							If field_count > 0
+								Local field_value:TValue
+								'For every field of the SOURCE OJBECT:
+								For Local source_object_field:TField = EachIn source_object_fields
+									Select source_object_field.TypeId()
+										Case IntTypeId, ShortTypeId, ByteTypeId
+											field_value = New TNumber
+											TNumber(field_value).value = source_object_field.GetInt( source_object )
+										Case LongTypeId
+											field_value = New TNumber
+											TNumber(field_value).value = source_object_field.GetLong( source_object )
+										Case FloatTypeId
+											field_value = New TNumber
+											TNumber(field_value).value = source_object_field.GetFloat( source_object )
+										Case DoubleTypeId
+											field_value = New TNumber
+											TNumber(field_value).value = source_object_field.GetDouble( source_object )
+										Default
+											field_value = reflect_to_TValue( source_object_field.Get( source_object ), source_object_field.TypeId() )
+									EndSelect
+									TObject(converted_object).fields.Insert( source_object_field.Name(), field_value )
+								Next
+							EndIf
 						EndIf
 					EndIf
 				Else ' source_object_type_id.ElementType() <> Null
 					'Is Array
 					converted_object = New TArray
-					Local array_length% = source_object_type_id.ArrayLength( source_object )
-					If array_length > 0
-						Local element:Object
-						Local element_value:TValue
-						Local source_object_element_type_id:TTypeId = source_object_type_id.ElementType()
-						'For every element of the SOURCE ARRAY:
-						For Local i% = 0 Until array_length
-							element = source_object_type_id.GetArrayElement( source_object, i )
-							Select source_object_element_type_id
-								Case IntTypeId, ShortTypeId, ByteTypeId, LongTypeId, FloatTypeId, DoubleTypeId
-									element_value = New TNumber
-									TNumber(element_value).value = String( element ).ToDouble()
-								Default
-									element_value = reflect_to_TValue( element )
-							EndSelect
-							TArray(converted_object).elements.AddLast( element_value )
-						Next
+					If source_object <> Null
+						Local array_length% = source_object_type_id.ArrayLength( source_object )
+						If array_length > 0
+							Local element:Object
+							Local element_value:TValue
+							Local source_object_element_type_id:TTypeId = source_object_type_id.ElementType()
+							'For every element of the SOURCE ARRAY:
+							For Local i% = 0 Until array_length
+								element = source_object_type_id.GetArrayElement( source_object, i )
+								Select source_object_element_type_id
+									Case IntTypeId, ShortTypeId, ByteTypeId, LongTypeId, FloatTypeId, DoubleTypeId
+										element_value = New TNumber
+										TNumber(element_value).value = String( element ).ToDouble()
+									Default
+										element_value = reflect_to_TValue( element, source_object_element_type_id )
+								EndSelect
+								TArray(converted_object).elements.AddLast( element_value )
+							Next
+						EndIf
 					EndIf
 				EndIf
 			EndIf
@@ -897,8 +903,11 @@ Type TString Extends TValue
 	EndMethod
 
 	Method Encode:String( indent%, precision% )
-		If value = "" Then Return VALUE_NULL
-		Return STRING_BEGIN + json.Escape( value ) + STRING_END
+		If value = Null And json.empty_container_as_null
+			Return VALUE_NULL
+		Else
+			Return STRING_BEGIN + json.Escape( value ) + STRING_END
+		EndIf
 	EndMethod
 
 	Method Decode( encoded$, cursor% Var )
@@ -1021,35 +1030,39 @@ Type TArray Extends TValue
 	EndMethod
 
 	Method Encode:String( indent%, precision% )
-		If json.empty_container_as_null ..
-		And elements = Null Or elements.IsEmpty() 
-			Return VALUE_NULL
-		EndIf
 		Local encoded$ = ""
-		encoded :+ ARRAY_BEGIN
-		If json.formatted Then encoded :+ "~n"
-		If json.formatted Then indent :+ 1
-		If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
-		Local size% = elements.Count()
-		Local index% = 0
-		For Local element:TValue = EachIn elements
-			If element <> Null
-				encoded :+ element.Encode( indent, precision )
-			Else
+		If (elements = Null Or elements.IsEmpty())
+			If json.empty_container_as_null
 				encoded :+ VALUE_NULL
+			Else
+				encoded :+ ARRAY_BEGIN + ARRAY_END
 			EndIf
-			index :+ 1
-			If index < size
-				encoded :+ VALUE_SEPARATOR
-				If json.formatted Then encoded :+ "~n"
-				If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
-			Else 'index >= size
-				If json.formatted Then encoded :+ "~n"
-				If json.formatted Then indent :- 1
-				If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
-			EndIf
-		Next
-		encoded :+ ARRAY_END
+		Else
+			encoded :+ ARRAY_BEGIN
+			If json.formatted Then encoded :+ "~n"
+			If json.formatted Then indent :+ 1
+			If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
+			Local size% = elements.Count()
+			Local index% = 0
+			For Local element:TValue = EachIn elements
+				If element <> Null
+					encoded :+ element.Encode( indent, precision )
+				Else
+					encoded :+ VALUE_NULL
+				EndIf
+				index :+ 1
+				If index < size
+					encoded :+ VALUE_SEPARATOR
+					If json.formatted Then encoded :+ "~n"
+					If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
+				Else 'index >= size
+					If json.formatted Then encoded :+ "~n"
+					If json.formatted Then indent :- 1
+					If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
+				EndIf
+			Next
+			encoded :+ ARRAY_END
+		EndIf
 		Return encoded
 	EndMethod
 
@@ -1161,38 +1174,42 @@ Type TObject Extends TValue
 	EndMethod
 
 	Method Encode:String( indent%, precision% )
-		If json.empty_container_as_null ..
-		And fields = Null Or fields.IsEmpty() 
-			Return VALUE_NULL
-		EndIf
 		Local encoded$ = ""
-		encoded :+ OBJECT_BEGIN
-		Local iter:TNodeEnumerator = fields.Keys().ObjectEnumerator()
-		If iter.HasNext()
-			If json.formatted Then encoded :+ "~n"
-			If json.formatted Then indent :+ 1
-			If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
-			While iter.HasNext()
-				Local field_name:String = String( iter.NextObject() )
-				encoded :+ STRING_BEGIN
-				encoded :+ field_name
-				encoded :+ STRING_END
-				encoded :+ PAIR_SEPARATOR
-				If json.formatted Then encoded :+ " "
-				Local field_value:TValue = TValue( fields.ValueForKey( field_name ))
-				encoded :+ field_value.Encode( indent, precision )
-				If iter.HasNext()
-					encoded :+ VALUE_SEPARATOR
-					If json.formatted Then encoded :+ "~n"
-					If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
-				Else 'last element
-					If json.formatted Then encoded :+ "~n"
-					If json.formatted Then indent :- 1
-					If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
-				End If
-			End While
-		End If
-		encoded :+ OBJECT_END
+		If fields = Null Or fields.IsEmpty()
+			If json.empty_container_as_null
+				encoded :+ VALUE_NULL
+			Else
+				encoded :+ OBJECT_BEGIN + OBJECT_END
+			EndIf
+		Else
+			encoded :+ OBJECT_BEGIN
+			Local iter:TNodeEnumerator = fields.Keys().ObjectEnumerator()
+			If iter.HasNext()
+				If json.formatted Then encoded :+ "~n"
+				If json.formatted Then indent :+ 1
+				If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
+				While iter.HasNext()
+					Local field_name:String = String( iter.NextObject() )
+					encoded :+ STRING_BEGIN
+					encoded :+ field_name
+					encoded :+ STRING_END
+					encoded :+ PAIR_SEPARATOR
+					If json.formatted Then encoded :+ " "
+					Local field_value:TValue = TValue( fields.ValueForKey( field_name ))
+					encoded :+ field_value.Encode( indent, precision )
+					If iter.HasNext()
+						encoded :+ VALUE_SEPARATOR
+						If json.formatted Then encoded :+ "~n"
+						If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
+					Else 'last element
+						If json.formatted Then encoded :+ "~n"
+						If json.formatted Then indent :- 1
+						If json.formatted Then encoded :+ json.RepeatSpace( indent*json.indent_size )
+					End If
+				End While
+			End If
+			encoded :+ OBJECT_END
+		EndIf
 		Return encoded
 	EndMethod
 

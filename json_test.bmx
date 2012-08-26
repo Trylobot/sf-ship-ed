@@ -10,6 +10,7 @@ Global test_dir$ = "test"
 ''    parser = require("../lib/jsonlint").parser;
 
 json.formatted = False
+json.empty_container_as_null = True
 
 Function test_object()
 	Print "*** test_object"
@@ -599,6 +600,28 @@ Function test_pass_sf_2()
 EndFunction
 
 
+Type type_3_containers
+	Field str$
+	Field arr%[]
+	Field obj:type_3_containers
+EndType
+
+Function test_encode_empty_objects_instead_of_nulls()
+	Print "*** test_encode_empty_objects_instead_of_nulls"
+	Local obj:type_3_containers = New type_3_containers
+	Local json_str$
+	Local test_str$
+	json.empty_container_as_null = False
+	json_str = json.stringify( obj )
+	test_str = "{~qarr~q:[],~qobj~q:{},~qstr~q:~q~q}"
+	verify( test_str = json_str, "   EXPECTED:~n"+test_str+"~n   ACTUAL:~n"+json_str )
+	json.empty_container_as_null = True
+	json_str = json.stringify( obj )
+	test_str = "{~qarr~q:null,~qobj~q:null,~qstr~q:null}"
+	verify( test_str = json_str, "   EXPECTED:~n"+test_str+"~n   ACTUAL:~n"+json_str )
+EndFunction
+
+
 '/////////////////////////////////////////////////////////////////
 
 Function calc_hash%(s:String)
@@ -680,6 +703,7 @@ Function Main()
 	run_test( test_tvalue_transformation_conditional_delete )
 	run_test( test_pass_sf_1 )
 	run_test( test_pass_sf_2 )
+	run_test( test_encode_empty_objects_instead_of_nulls )
 EndFunction
 
 Main()

@@ -1035,6 +1035,8 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite, use_new%=False 
 	Else ' use_new
 		'all data is reset to fresh
 		data.Clear()
+		data.update()
+		data.update_variant()
 	EndIf
 End Function
 
