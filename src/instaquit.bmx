@@ -15,7 +15,7 @@ Function escape_key_update()
 		FLAG_instaquit_plz = True
 	End If
 	'escape key state
-	If (KeyDown( KEY_ESCAPE ) Or KeyDown( KEY_HOME )
+	If (KeyDown( KEY_ESCAPE ) Or KeyDown( KEY_HOME ))
 		If Not esc_held
 			esc_press_ts = MilliSecs()
 		End If

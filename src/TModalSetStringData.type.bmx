@@ -219,6 +219,8 @@ Type TModalSetStringData Extends TSubroutine
 				TStarfarerShipWeapon(target).mount = values.lines[i]; i:+1
 				TStarfarerShipWeapon(target).size = values.lines[i]; i:+1
 				TStarfarerShipWeapon(target).type_ = values.lines[i]; i:+1
+				TStarfarerShipWeapon(target).angle = values.lines[i].ToDouble(); i:+1
+				TStarfarerShipWeapon(target).arc = values.lines[i].ToDouble(); i:+1
 				'If values.lines.length >= i + 1 And TStarfarerShipWeapon(target).type_ = "BUILT_IN"
 				'	data.ship.builtInWeapons.Insert( TStarfarerShipWeapon(target).id, values.lines[i] ); i:+1
 				'EndIf
@@ -292,18 +294,16 @@ Type TModalSetStringData Extends TSubroutine
 					"ship.weapon.id" +"~n"+..
 					"ship.weapon.mount" +"~n"+..
 					"ship.weapon.size" +"~n"+..
-					"ship.weapon.type" )
+					"ship.weapon.type" +"~n"+..
+					"ship.weapon.angle" +"~n"+..
+					"ship.weapon.arc" )
 				values = TextWidget.Create( ..
 					TStarfarerShipWeapon(target).id +"~n"+..
 					TStarfarerShipWeapon(target).mount +"~n"+..
 					TStarfarerShipWeapon(target).size +"~n"+..
-					TStarfarerShipWeapon(target).type_ )
-				'If TStarfarerShipWeapon(target).type_ = "BUILT_IN"
-				'	labels.append( TextWidget.Create( ..
-				'		"ship.builtInWeapons.id" ))
-				'	values.append( TextWidget.Create( ..
-				'		String( data.ship.builtInWeapons.ValueForKey( TStarfarerShipWeapon(target).id ))))
-				'EndIf
+					TStarfarerShipWeapon(target).type_ +"~n"+..
+					json.FormatDouble( TStarfarerShipWeapon(target).angle, 6 ) +"~n"+..
+					json.FormatDouble( TStarfarerShipWeapon(target).arc, 6 ) )
 			'//////////////////////////////////////
 			Case MODE_VARIANT 
 				labels = TextWidget.Create( ..

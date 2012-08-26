@@ -7,8 +7,6 @@ projectiles in mode 7
 
 zoom-to-cursor (UGH)
 
-Allow to Type in values for the angle & firing arcs on weapons
-
 CSV - preserve blank lines
 
 ship-mounted engine graphic previews
