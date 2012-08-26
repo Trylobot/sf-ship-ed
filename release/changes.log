@@ -1,4 +1,13 @@
 ______________________________________________________________________________
+editor version 2.4.1 (starfarer 0.53.1a RC5)
+- fixed: variant data incompatible with ship data if certain ship data changed
+- fixed: empty JSON containers  {} [] ""  always being encoded as null
+- fixed: cannot load vanilla data in Linux (probably)
+- fixed: quoted newlines in CSV data
+- fixed: can't set hullmods in variant if ship has no weapon slots
+- misc: HOME key is now equivalent to ESCAPE key 
+- feature: direct value entry for weapon arcs and angles (press T on a weapon)
+______________________________________________________________________________
 editor version 2.4.1a (starfarer 0.53.1a RC5)
 PRE-RELEASE: more bugfixes coming soon!
 - fixed: can't set weapons for newly-added built-in ship weapon slots
