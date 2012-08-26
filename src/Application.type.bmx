@@ -1,7 +1,8 @@
 
 Global STARFARER_CORE_DIR$[] = [ ..
 	"starfarer-core", ..
-	"Contents/Resources/Java" ]
+	"Contents/Resources/Java", ..
+	"" ]
 
 Type Application
 	Field width%
@@ -37,11 +38,13 @@ Type Application
 	'///////////
 	Method get_starfarer_dir()
 		If  0 = FileType( starfarer_base_dir+STARFARER_CORE_DIR[0] ) ..
-		And 0 = FileType( starfarer_base_dir+STARFARER_CORE_DIR[1] )
+		And 0 = FileType( starfarer_base_dir+STARFARER_CORE_DIR[1] ) ..
+		And 0 = FileType( starfarer_base_dir+STARFARER_CORE_DIR[2] )
 			starfarer_base_dir = RequestDir( "Starfarer Install Directory" )+"/"
 			FlushKeys()
 			If  0 = FileType( starfarer_base_dir+STARFARER_CORE_DIR[0] ) ..
-			And 0 = FileType( starfarer_base_dir+STARFARER_CORE_DIR[1] )
+			And 0 = FileType( starfarer_base_dir+STARFARER_CORE_DIR[1] ) ..
+			And 0 = FileType( starfarer_base_dir+STARFARER_CORE_DIR[2] )
 				Notify( "Starfarer does not appear to be found at ~n"+starfarer_base_dir+"~n~nHowever, the program will continue anyway as best it can." )
 			Else
 				Save()

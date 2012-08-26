@@ -167,14 +167,15 @@ load_ui( ed )
 
 '////////////////////////////////////////////////
 
-DebugLogFile( " Loading STARFARER-CORE Data (Vanilla)" )
 load_known_multiselect_values( ed )
 'go load the rest of it if able
-If 0 <> FileType( APP.starfarer_base_dir+STARFARER_CORE_DIR[0] ) 
-	load_stock_data( ed, data, APP.starfarer_base_dir+STARFARER_CORE_DIR[0]+"/", TRUE )
-ElseIf 0 <> FileType( APP.starfarer_base_dir+STARFARER_CORE_DIR[1] ) 
-	load_stock_data( ed, data, APP.starfarer_base_dir+STARFARER_CORE_DIR[1]+"/", TRUE )
-EndIf
+For Local j% = 0 Until STARFARER_CORE_DIR.length
+	If 0 <> FileType( APP.starfarer_base_dir+STARFARER_CORE_DIR[j] )
+		DebugLogFile( " Loading STARFARER-CORE Data (Vanilla)" )
+		load_stock_data( ed, data, APP.starfarer_base_dir+STARFARER_CORE_DIR[j]+"/", TRUE )
+		Exit
+	EndIf
+Next
 If APP.mod_dirs And APP.mod_dirs.length > 0
 	For Local mod_dir$ = EachIn APP.mod_dirs
 		DebugLogFile " Loading MOD Data: "+mod_dir
