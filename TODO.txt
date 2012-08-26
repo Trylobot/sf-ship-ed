@@ -1,8 +1,4 @@
 
-BUG: If you build a ship, then its variant, then you go back to ship editor and remove a gun, 
-  back to the variant editor, save both (all slots are correctly filled with guns),
-  it seems everything's ok but that variant is actually broken because it still count the removed weapon as existing.
-
 
 BUG: unable to use the escape key to exit out of any of the interface options
   such as weapon editing or hull editing, I am stuck on those screens

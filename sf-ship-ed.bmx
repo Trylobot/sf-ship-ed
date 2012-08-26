@@ -381,7 +381,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 	If ed.program_mode = "ship"
 		'If not selecting a weapon for a built-in slot, check ESCAPE key
 		If Not( ed.mode = "built_in_weapons" And ed.weapon_lock_i <> -1 ) ..
-		And KeyHit( KEY_ESCAPE )
+		And (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			ed.last_mode = ed.mode
 			ed.mode = "none"
 			ed.field_i = 0

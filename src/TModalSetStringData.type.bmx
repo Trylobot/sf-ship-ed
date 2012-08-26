@@ -51,7 +51,7 @@ Type TModalSetStringData Extends TSubroutine
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		'back out (old way)
-		If KeyHit( KEY_ESCAPE )
+		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			ed.mode = ed.last_mode
 			Return
 		End If

@@ -245,7 +245,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 					update_numeric_dataset( csv_row_column_i, csv_row_values.lines[csv_row_column_i].ToFloat() )
 				EndIf
 		EndSelect
-		If KeyHit( KEY_ESCAPE )
+		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			csv_row_values = Null
 			csv_row_column_i = -1
 			update_csv_row_column_cursor( data )

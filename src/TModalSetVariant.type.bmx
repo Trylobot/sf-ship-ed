@@ -331,7 +331,7 @@ Type TModalSetVariant Extends TSubroutine
 			data.update_variant()
 			ed.weapon_lock_i = -1
 		EndIf
-		If KeyHit( KEY_ESCAPE )
+		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			ed.weapon_lock_i = -1
 		EndIf
 		If KeyHIT( KEY_BACKSPACE ) And ed.variant_hullMod_i = -1
@@ -402,7 +402,7 @@ Type TModalSetVariant Extends TSubroutine
 		ElseIf ed.variant_hullMod_i < 0
 			ed.variant_hullMod_i = 0
 		EndIf
-		If KeyHit( KEY_ESCAPE )
+		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			ed.variant_hullMod_i = -1
 		EndIf
 		If KeyHIT( KEY_H )
@@ -464,7 +464,7 @@ Type TModalSetVariant Extends TSubroutine
 				Next
 			Next
 		EndIf
-		If KeyHit( KEY_ESCAPE )
+		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			ed.group_field_i = -1
 		EndIf
 		If KeyHit( KEY_G )

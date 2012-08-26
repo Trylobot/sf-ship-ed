@@ -15,7 +15,7 @@ Function escape_key_update()
 		FLAG_instaquit_plz = True
 	End If
 	'escape key state
-	If KeyDown( KEY_ESCAPE )
+	If (KeyDown( KEY_ESCAPE ) Or KeyDown( KEY_HOME )
 		If Not esc_held
 			esc_press_ts = MilliSecs()
 		End If
@@ -26,7 +26,7 @@ Function escape_key_update()
 End Function
 
 Function escape_key_release%()
-	Return (esc_held And Not KeyDown( KEY_ESCAPE ))
+	Return (esc_held And (Not KeyDown( KEY_ESCAPE ) And Not KeyDown( KEY_HOME )))
 End Function
 
 Function time_alpha_pct#( ts%, time%, in% = True ) 'either fading IN or OUT
@@ -47,7 +47,8 @@ Function time_alpha_pct#( ts%, time%, in% = True ) 'either fading IN or OUT
 End Function
 
 Function draw_instaquit_progress( scr_w%, scr_h% )
-	If KeyDown( KEY_ESCAPE ) And esc_held And (MilliSecs() - esc_press_ts) >= esc_held_progress_bar_show_time_required
+	If (KeyDown( KEY_ESCAPE ) Or KeyDown( KEY_HOME )) ..
+	And esc_held And (MilliSecs() - esc_press_ts) >= esc_held_progress_bar_show_time_required
 		'draw black transparent screen overlay
 		SetOrigin( 0, 0 )
 		SetRotation( 0 )

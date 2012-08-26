@@ -65,7 +65,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 				data.update_variant()
 				ed.weapon_lock_i = -1
 			EndIf
-			If KeyHit( KEY_ESCAPE )
+			If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 				ed.weapon_lock_i = -1
 			EndIf
 			If KeyHIT( KEY_BACKSPACE )
