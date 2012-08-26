@@ -6,8 +6,8 @@ Type TCSVLoader
 	Function Load:TMap( file$, key_field$, csv_rows:TMap=Null, field_order:TList=Null, row_order:TList=Null )
 		If Not csv_rows Then csv_rows = CreateMap()
 		Local input$ = LoadString( file )
-		Local lines$[] = input.Split( "~n" )
-		Local fields$[] = csv_split( lines[0] )
+		Local csv_data$[][] = csv_parse( input )
+		Local fields$[] = csv_data[0]
 		For Local f% = 0 Until fields.length
 			fields[f] = Trim( fields[f] )
 			If fields[f] = Null
@@ -17,9 +17,9 @@ Type TCSVLoader
 				field_order.AddLast( fields[f] )
 			EndIf
 		Next
-		For Local i% = 1 Until lines.length
+		For Local i% = 1 Until csv_data.length
 			Local row:TMap = CreateMap()
-			Local values$[] = csv_split( lines[i] )
+			Local values$[] = csv_data[i]
 			For Local j% = 0 Until fields.length
 				If fields[j] = Null Or fields[j] = "" Then Continue
 				If j < values.length
@@ -104,37 +104,51 @@ Type TCSVLoader
 		EndIf
 	End function
 
-	'like String.Split(",") but ignores commas that are quoted, like so: [0,1,2,"3,,,,",4,5]
-	Function csv_split$[]( record$ )
-		If record = "" Then Return Null
-		Local fields$[] = New String[1]
-		Local in_field% = False
-		Local cursor% = 0
-		Local field_i% = 0
-		While cursor < record.Length
+	Function csv_parse$[][]( data$ )
+		If data = "" Then Return Null
+		Local records$[][] = New String[][1]
+		records[0] = New String[1]
+		Local r% = 0 ' record/row counter
+		Local f% = 0 ' field/value counter
+		Local c% = 0 ' data string cursor
+		Local char$ ' current character string
+		Local in_quotes% = False ' current quoted/escaped state
+		While c < data.Length
 			'parse char
-			Local char$ = Chr(record[cursor])
+			char = Chr(data[c])
 			If char = "~q"
 				'field escape char
-				in_field = Not in_field
-			ElseIf char = "," And Not in_field
-				'unquoted field separator char
-				fields = fields[..(fields.Length + 1)]
-				'advance field cursor and data length
-				field_i :+ 1
+				in_quotes = Not in_quotes
+			ElseIf char = "," And Not in_quotes
+				'advance field counter
+				f :+ 1
+				records[r] = records[r][..(f + 1)]
+			ElseIf char = "~r" Or char = "~n" And Not in_quotes
+				'unquoted record separator char
+				If char = "~r" And (c + 1) < data.Length And Chr(data[c + 1]) = "~n"
+					'ignore "~r~n" (windows)
+					c :+ 1
+				EndIf
+				'advance record counter
+				r :+ 1
+				records = records[..(r + 1)]
+				records[r] = New String[1]
+				f = 0
 			Else
 				'field data
-				fields[field_i] :+ char
+				records[r][f] :+ char
 			EndIf
 			'advance data cursor
-			cursor :+ 1
+			c :+ 1
 		EndWhile
-		Return fields
+		Return records
 	End Function
 
-	'escapes string data if it contains one or more commas
+	'escapes string data if it contains one or more field-separators or record-separators
 	Function csv_conservative_escape$( field_data$ )
-		If Not field_data.Contains(",")
+		If  Not field_data.Contains(",") ..
+		And Not field_data.Contains("~r") ..
+		And Not field_data.Contains("~n")
 			Return field_data
 		Else
 			Return "~q"+field_data+"~q"

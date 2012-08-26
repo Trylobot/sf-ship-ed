@@ -69,226 +69,28 @@ Type TModalSetVariant Extends TSubroutine
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
-		fluxMods_max = ed.get_max_fluxMods( data.ship.hullSize )
-		hullMods_count = count_keys( ed.stock_hullmod_stats )
-		'get input
-		left_click = MouseHit( 1 )
-		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
-		'locate nearest entity
-		ni = data.find_nearest_variant_weapon_slot( img_x, img_y )
-		
-		'after clicking a weapon slot (enabling a "LOCK" on it)
-		' show a list of weapons that are suitable for that slot
-		' and allow user to select one, after which the list is
-		' again hidden and the lock disengaged
 		If ed.weapon_lock_i <> -1
-			'load valid weapons list for the slot (already done when lock was made)
-			'initialize_weapon_assignment_list( ed, data )
-			'bounds enforce (extra check)
-			If ed.select_weapon_i > (weapon_list.length - 1)
-				ed.select_weapon_i = (weapon_list.length - 1)
-			ElseIf ed.select_weapon_i < 0
-				ed.select_weapon_i = 0
-			EndIf
-			'process input
-			If KeyHit( KEY_ENTER )
-				data.unassign_weapon_from_slot( weapon_slot.id )
-				data.assign_weapon_to_slot( weapon_slot.id, weapon_list[ed.select_weapon_i], 0 )
-				data.update_variant()
-				ed.weapon_lock_i = -1
-			EndIf
-			If KeyHit( KEY_ESCAPE )
-				ed.weapon_lock_i = -1
-			EndIf
-			If KeyHIT( KEY_BACKSPACE ) And ed.variant_hullMod_i = -1
-				data.unassign_weapon_from_slot( weapon_slot.id )
-				data.update_variant()
-				ed.weapon_lock_i = -1
-			EndIf
-			modified = False
-			If KeyHit( KEY_DOWN )
-				ed.select_weapon_i :+ 1
-				update_weapon_assignment_list_cursor( ed )
-				If ed.select_weapon_i > (weapon_list.length - 1)
-					ed.select_weapon_i = (weapon_list.length - 1)
-				Else
-					modified = True
-				EndIf
-			EndIf
-			If KeyHit( KEY_UP )
-				ed.select_weapon_i :- 1
-				update_weapon_assignment_list_cursor( ed )
-				If ed.select_weapon_i < 0
-					ed.select_weapon_i = 0
-				Else
-					modified = True
-				EndIf
-			EndIf
-			If modified
-				data.unassign_weapon_from_slot( weapon_slot.id )
-				data.assign_weapon_to_slot( weapon_slot.id, weapon_list[ed.select_weapon_i], 0 )
-				data.update_variant()
-			EndIf
-		
-		'left-click to choose a weapon slot; it will lock to that weapon
-		' while the user chooses a weapon from a filtered list
-		Else 'ed.weapon_lock_i = -1
-			If ni <> -1
-				weapon_slot = data.ship.weaponSlots[ni]
-				'select weapon slot to assign weapon to (not for built-in weapons)
-				If left_click And Not weapon_slot.is_builtin()
-					ed.weapon_lock_i = ni
-					initialize_weapon_assignment_list( ed, data )
-				EndIf
-				'can't let user strip built-in weapon slots either
-				If KeyHIT( KEY_BACKSPACE ) And Not weapon_slot.is_builtin()
-					data.unassign_weapon_from_slot( weapon_slot.id )
-					data.update_variant()
-				EndIf
-			EndIf
-			If KeyHit( KEY_F )
-				data.modify_fluxVents( fluxMods_max, SHIFT Or CONTROL Or ALT )
-				data.update_variant()
-			EndIf
-			If KeyHit( KEY_C )
-				data.modify_fluxCapacitors( fluxMods_max, SHIFT Or CONTROL Or ALT )
-				data.update_variant()
-			EndIf
-			
-			'select a hullmod from the master list of hullmods
-			If ed.variant_hullMod_i <> -1
-				initialize_hullmods_list( ed, data )
-				'bounds enforce (extra check)
-				If ed.variant_hullMod_i > (hullMods_count - 1)
-					ed.variant_hullMod_i = (hullMods_count - 1)
-				ElseIf ed.select_weapon_i < 0
-					ed.variant_hullMod_i = 0
-				EndIf
-				'process input
-				If KeyHit( KEY_ENTER )
-					'add/remove hullmod
-					data.toggle_hullmod( String( selected_hullMod.ValueForKey("id")) )
-					data.update_variant()
-				EndIf
-				If KeyHit( KEY_DOWN )
-					ed.variant_hullMod_i :+ 1
-				EndIf
-				If KeyHit( KEY_UP )
-					ed.variant_hullMod_i :- 1
-				EndIf
-				'bounds enforce
-				If ed.variant_hullMod_i > (hullMods_count - 1)
-					ed.variant_hullMod_i = (hullMods_count - 1)
-				ElseIf ed.variant_hullMod_i < 0
-					ed.variant_hullMod_i = 0
-				EndIf
-				If KeyHit( KEY_ESCAPE )
-					ed.variant_hullMod_i = -1
-				EndIf
-				If KeyHIT( KEY_H )
-					ed.variant_hullMod_i = -1
-				EndIf
-			Else
-				'allow to select a hullmod
-				If KeyHIT( KEY_H )
-					ed.variant_hullMod_i = 0
-					initialize_hullmods_list( ed, data )
-				EndIf
-			EndIf
-
-			'Show all weapon slots that have weapons assigned
-			' and which group they belong to
-			If ed.group_field_i <> -1
-				initialize_weapon_groups_list( ed, data )
-				If KeyHit( KEY_DOWN )
-					ed.group_field_i :+ 1
-					If ed.group_field_i > (count - 1)
-						ed.group_field_i = (count - 1)
-					Else
-						reset_cursor_color_period()
-					EndIf
-				EndIf
-				If KeyHit( KEY_UP )
-					ed.group_field_i :- 1
-					If ed.group_field_i < 0
-						ed.group_field_i = 0
-					Else
-						reset_cursor_color_period()
-					EndIf
-				EndIf
-				modified = False
-				If KeyHit( KEY_RIGHT )
-					If group_offsets[ed.group_field_i] < (MAX_VARIANT_WEAPON_GROUPS - 1)
-						data.unassign_weapon_from_slot( weapon_slot_ids[ed.group_field_i] )
-						data.assign_weapon_to_slot( weapon_slot_ids[ed.group_field_i], weapon_ids[ed.group_field_i], group_offsets[ed.group_field_i] + 1 )
-						data.update_variant()
-						modified = True
-						reset_cursor_color_period()
-					EndIf
-				EndIf
-				If KeyHit( KEY_LEFT )
-					If group_offsets[ed.group_field_i] > 0
-						data.unassign_weapon_from_slot( weapon_slot_ids[ed.group_field_i] )
-						data.assign_weapon_to_slot( weapon_slot_ids[ed.group_field_i], weapon_ids[ed.group_field_i], group_offsets[ed.group_field_i] - 1 )
-						data.update_variant()
-						modified = True
-						reset_cursor_color_period()
-					EndIf
-				EndIf
-				If KeyHit( KEY_A )
-					data.toggle_weapon_group_autofire( group_offsets[ed.group_field_i] )
-					data.update_variant()
-				EndIf
-				If modified
-					reset_cursor_color_period()
-					'locate slot again
-					wep_i = 0
-					For group = EachIn data.variant.weaponGroups
-						For weapon_slot_id = EachIn group.weapons.Keys()
-							If weapon_slot_id = weapon_slot_ids[ed.group_field_i]
-								ed.group_field_i = wep_i
-								Exit
-							EndIf
-							wep_i :+ 1
-						Next
-					Next
-				EndIf
-				If KeyHit( KEY_ESCAPE )
-					ed.group_field_i = -1
-				EndIf
-				'editing groups
-				If KeyHit( KEY_G )
-					ed.group_field_i = -1
-				EndIf
-			Else
-				'allow to edit groups
-				If KeyHit( KEY_G )
-					ed.group_field_i = 0
-				EndIf
-			EndIf
+			update_weapon_assignment_list( ed, data ) 
+		ElseIf ed.variant_hullMod_i <> -1
+			update_hullmods_list( ed, data )
+		ElseIf ed.group_field_i <> -1
+			update_weapon_groups_list( ed, data )
+		Else
+			update_default_mode( ed, data, sprite )
 		EndIf
 	End Method
 
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite ) 
 		If Not data.ship.center Then Return
 		draw_hud( ed, data )
-		'Not editing weapon groups; valid for locked & unlocked modes
-		If ed.group_field_i = -1
-			draw_all_weapon_slots( ed, data, sprite )
-			'If any weapons exist
-			If ni <> -1
-				'If currently displaying a list of weapons
-				If  ed.weapon_lock_i <> -1 ..
-				And weapon_list_widget
-					draw_weapon_assignment_list()
-				'Else If currently displaying a list of hull mods
-				ElseIf ed.variant_hullMod_i <> -1
-					draw_hullmods_list()
-				EndIf
-			EndIf
-		'If currently displaying the weapons in their groups
-		Else 'ed.group_field_i <> -1
+		If ed.weapon_lock_i <> -1
+			draw_weapon_assignment_list()
+		ElseIf ed.variant_hullMod_i <> -1
+			draw_hullmods_list()
+		ElseIf ed.group_field_i <> -1
 			draw_weapon_groups_list( ed, data, sprite )
+		Else
+			draw_all_weapon_slots( ed, data, sprite )
 		EndIf
 		SetAlpha( 1 )
 	EndMethod
@@ -479,17 +281,6 @@ Type TModalSetVariant Extends TSubroutine
 		update_weapon_assignment_list_cursor( ed )
 	EndMethod
 
-	Method update_weapon_assignment_list_cursor( ed:TEditor )
-		cursor_widget = TextWidget.Create( weapon_list_display[..] )
-		For i = 0 Until cursor_widget.lines.length
-			If i <> ed.select_weapon_i
-				cursor_widget.lines[i] = ""
-			Else 'is current
-				'do nothing
-			EndIf
-		Next
-	EndMethod
-
 	Method initialize_hullmods_list( ed:TEditor, data:TData )
 		hullMods = New TMap[hullMods_count]
 		i = 0
@@ -524,6 +315,204 @@ Type TModalSetVariant Extends TSubroutine
 		hullMods_widget = TextWidget.create( hullMods_lines )
 		hullMods_cursor = TextWidget.create( hullMods_c )
 		hullMods_cursor.w = hullMods_widget.w
+	EndMethod
+
+	Method update_weapon_assignment_list( ed:TEditor, data:TData )
+		'bounds check
+		If ed.select_weapon_i > (weapon_list.length - 1)
+			ed.select_weapon_i = (weapon_list.length - 1)
+		ElseIf ed.select_weapon_i < 0
+			ed.select_weapon_i = 0
+		EndIf
+		'process input
+		If KeyHit( KEY_ENTER )
+			data.unassign_weapon_from_slot( weapon_slot.id )
+			data.assign_weapon_to_slot( weapon_slot.id, weapon_list[ed.select_weapon_i], 0 )
+			data.update_variant()
+			ed.weapon_lock_i = -1
+		EndIf
+		If KeyHit( KEY_ESCAPE )
+			ed.weapon_lock_i = -1
+		EndIf
+		If KeyHIT( KEY_BACKSPACE ) And ed.variant_hullMod_i = -1
+			data.unassign_weapon_from_slot( weapon_slot.id )
+			data.update_variant()
+			ed.weapon_lock_i = -1
+		EndIf
+		modified = False
+		If KeyHit( KEY_DOWN )
+			ed.select_weapon_i :+ 1
+			update_weapon_assignment_list_cursor( ed )
+			If ed.select_weapon_i > (weapon_list.length - 1)
+				ed.select_weapon_i = (weapon_list.length - 1)
+			Else
+				modified = True
+			EndIf
+		EndIf
+		If KeyHit( KEY_UP )
+			ed.select_weapon_i :- 1
+			update_weapon_assignment_list_cursor( ed )
+			If ed.select_weapon_i < 0
+				ed.select_weapon_i = 0
+			Else
+				modified = True
+			EndIf
+		EndIf
+		If modified
+			data.unassign_weapon_from_slot( weapon_slot.id )
+			data.assign_weapon_to_slot( weapon_slot.id, weapon_list[ed.select_weapon_i], 0 )
+			data.update_variant()
+		EndIf
+	EndMethod
+
+	Method update_weapon_assignment_list_cursor( ed:TEditor )
+		cursor_widget = TextWidget.Create( weapon_list_display[..] )
+		For i = 0 Until cursor_widget.lines.length
+			If i <> ed.select_weapon_i
+				cursor_widget.lines[i] = ""
+			Else 'is current
+				'do nothing
+			EndIf
+		Next
+	EndMethod
+
+	Method update_hullmods_list( ed:TEditor, data:TData )
+		initialize_hullmods_list( ed, data )
+		'bounds enforce (extra check)
+		If ed.variant_hullMod_i > (hullMods_count - 1)
+			ed.variant_hullMod_i = (hullMods_count - 1)
+		ElseIf ed.select_weapon_i < 0
+			ed.variant_hullMod_i = 0
+		EndIf
+		'process input
+		If KeyHit( KEY_ENTER )
+			'add/remove hullmod
+			data.toggle_hullmod( String( selected_hullMod.ValueForKey("id")) )
+			data.update_variant()
+		EndIf
+		If KeyHit( KEY_DOWN )
+			ed.variant_hullMod_i :+ 1
+		EndIf
+		If KeyHit( KEY_UP )
+			ed.variant_hullMod_i :- 1
+		EndIf
+		'bounds enforce
+		If ed.variant_hullMod_i > (hullMods_count - 1)
+			ed.variant_hullMod_i = (hullMods_count - 1)
+		ElseIf ed.variant_hullMod_i < 0
+			ed.variant_hullMod_i = 0
+		EndIf
+		If KeyHit( KEY_ESCAPE )
+			ed.variant_hullMod_i = -1
+		EndIf
+		If KeyHIT( KEY_H )
+			ed.variant_hullMod_i = -1
+		EndIf
+	EndMethod
+
+	Method update_weapon_groups_list( ed:TEditor, data:TData )
+		If KeyHit( KEY_DOWN )
+			ed.group_field_i :+ 1
+			If ed.group_field_i > (count - 1)
+				ed.group_field_i = (count - 1)
+			Else
+				reset_cursor_color_period()
+			EndIf
+		EndIf
+		If KeyHit( KEY_UP )
+			ed.group_field_i :- 1
+			If ed.group_field_i < 0
+				ed.group_field_i = 0
+			Else
+				reset_cursor_color_period()
+			EndIf
+		EndIf
+		modified = False
+		If KeyHit( KEY_RIGHT )
+			If group_offsets[ed.group_field_i] < (MAX_VARIANT_WEAPON_GROUPS - 1)
+				data.unassign_weapon_from_slot( weapon_slot_ids[ed.group_field_i] )
+				data.assign_weapon_to_slot( weapon_slot_ids[ed.group_field_i], weapon_ids[ed.group_field_i], group_offsets[ed.group_field_i] + 1 )
+				data.update_variant()
+				modified = True
+				reset_cursor_color_period()
+			EndIf
+		EndIf
+		If KeyHit( KEY_LEFT )
+			If group_offsets[ed.group_field_i] > 0
+				data.unassign_weapon_from_slot( weapon_slot_ids[ed.group_field_i] )
+				data.assign_weapon_to_slot( weapon_slot_ids[ed.group_field_i], weapon_ids[ed.group_field_i], group_offsets[ed.group_field_i] - 1 )
+				data.update_variant()
+				modified = True
+				reset_cursor_color_period()
+			EndIf
+		EndIf
+		If KeyHit( KEY_A )
+			data.toggle_weapon_group_autofire( group_offsets[ed.group_field_i] )
+			data.update_variant()
+		EndIf
+		If modified
+			reset_cursor_color_period()
+			'locate slot again
+			wep_i = 0
+			For group = EachIn data.variant.weaponGroups
+				For weapon_slot_id = EachIn group.weapons.Keys()
+					If weapon_slot_id = weapon_slot_ids[ed.group_field_i]
+						ed.group_field_i = wep_i
+						Exit
+					EndIf
+					wep_i :+ 1
+				Next
+			Next
+		EndIf
+		If KeyHit( KEY_ESCAPE )
+			ed.group_field_i = -1
+		EndIf
+		If KeyHit( KEY_G )
+			ed.group_field_i = -1
+		EndIf
+	EndMethod
+
+	Method update_default_mode( ed:TEditor, data:TData, sprite:TSprite )
+		fluxMods_max = ed.get_max_fluxMods( data.ship.hullSize )
+		hullMods_count = count_keys( ed.stock_hullmod_stats )
+		'get input
+		left_click = MouseHit( 1 )
+		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
+		'locate nearest entity
+		ni = data.find_nearest_variant_weapon_slot( img_x, img_y )
+		If ni <> -1
+			weapon_slot = data.ship.weaponSlots[ni]
+			'CLICK to select weapon slot to assign weapon to (not for built-in weapons)
+			If left_click And Not weapon_slot.is_builtin()
+				'enter WEAPON LOCK mode
+				ed.weapon_lock_i = ni
+				initialize_weapon_assignment_list( ed, data )
+			EndIf
+			'can't let user strip built-in weapon slots either
+			If KeyHIT( KEY_BACKSPACE ) And Not weapon_slot.is_builtin()
+				data.unassign_weapon_from_slot( weapon_slot.id )
+				data.update_variant()
+			EndIf
+		EndIf
+		If KeyHit( KEY_F )
+			data.modify_fluxVents( fluxMods_max, SHIFT Or CONTROL Or ALT )
+			data.update_variant()
+		EndIf
+		If KeyHit( KEY_C )
+			data.modify_fluxCapacitors( fluxMods_max, SHIFT Or CONTROL Or ALT )
+			data.update_variant()
+		EndIf
+		If KeyHIT( KEY_H ) 
+			'enter HULLMODS mode
+			ed.variant_hullMod_i = 0
+			initialize_hullmods_list( ed, data )
+		EndIf
+		If KeyHit( KEY_G ) ..
+		And data.ship.weaponSlots And data.ship.weaponSlots.Length > 0
+			'enter WEAPON GROUPS mode
+			ed.group_field_i = 0
+			initialize_weapon_groups_list( ed, data )
+		EndIf
 	EndMethod
 
 	Method draw_hud( ed:TEditor, data:TData )

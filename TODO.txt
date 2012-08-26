@@ -1,9 +1,4 @@
 
-Linux: does not load the vanilla data. (There is no starfarer-core directory apparently)
-
-
-BUG: can't set hull mods if there are no weapon slots in the ship. (what the fuck)
-
 BUG: If you build a ship, then its variant, then you go back to ship editor and remove a gun, 
   back to the variant editor, save both (all slots are correctly filled with guns),
   it seems everything's ok but that variant is actually broken because it still count the removed weapon as existing.
