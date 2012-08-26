@@ -1,4 +1,7 @@
 ______________________________________________________________________________
+editor version 2.4.2 (starfarer 0.53.1a RC5)
+- fixed: weapon groups list misbehaving
+______________________________________________________________________________
 editor version 2.4.1 (starfarer 0.53.1a RC5)
 - fixed: variant data incompatible with ship data if certain ship data changed
 - fixed: empty JSON containers  {} [] ""  always being encoded as null

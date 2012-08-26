@@ -176,22 +176,24 @@ Type TModalSetVariant Extends TSubroutine
 	'/////////////////////
 
 	Method initialize_weapon_groups_list( ed:TEditor, data:TData )
+		count = 0
+		Local all_assigned_weapon_slot_ids:TMap = CreateMap()
 		For g = 0 Until data.variant.weaponGroups.length
-			count :+ count_keys( data.variant.weaponGroups[g].weapons )
+			group = data.variant.weaponGroups[g]
+			For weapon_slot_id = EachIn group.weapons.Keys()
+				all_assigned_weapon_slot_ids.Insert( weapon_slot_id, String( group.weapons.ValueForKey( weapon_slot_id )) )
+				count :+ 1
+			Next
 		Next
 		weapon_slot_ids = new String[count]
 		weapon_ids = new String[count]
 		group_offsets = new Int[count]
-		group_i = 0
 		wep_i = 0
-		For group = EachIn data.variant.weaponGroups
-			For weapon_slot_id = EachIn group.weapons.Keys()
-				weapon_slot_ids[wep_i] = weapon_slot_id
-				weapon_ids[wep_i] = String( group.weapons.ValueForKey( weapon_slot_id ))
-				group_offsets[wep_i] = group_i
-				wep_i :+ 1
-			Next
-			group_i :+ 1
+		For weapon_slot_id = EachIn all_assigned_weapon_slot_ids.Keys()
+			weapon_slot_ids[wep_i] = weapon_slot_id 'should be alphabetical
+			weapon_ids[wep_i] = String( all_assigned_weapon_slot_ids.ValueForKey( weapon_slot_id ))
+			group_offsets[wep_i] = data.find_assigned_slot_parent_group_index( weapon_slot_id )
+			wep_i :+ 1
 		Next
 		'////
 		wep_names = "~n~n"
@@ -209,27 +211,25 @@ Type TModalSetVariant Extends TSubroutine
 		Next
 		wep_g = wep_g_a+"~n"+wep_g_i+"~n"
 		line_i = 0
-		For g = 0 Until data.variant.weaponGroups.length
-			group = data.variant.weaponGroups[g]
-			For weapon_slot_id = EachIn group.weapons.Keys()
-				'add its name and group to the text edit widget
-				weapon_id = String( group.weapons.ValueForKey( weapon_slot_id ))
-				weapon_stats = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
-				If weapon_stats
-					weapon_name = String( weapon_stats.ValueForKey("name"))
-					If weapon_name
-						wep_names :+ weapon_name
-					Else
-						wep_names :+ weapon_id
-					EndIf
+		For wep_i = 0 Until weapon_slot_ids.length
+			'add its name and group to the text edit widget
+			weapon_id = weapon_ids[wep_i]
+			g = group_offsets[wep_i]
+			weapon_stats = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
+			If weapon_stats
+				weapon_name = String( weapon_stats.ValueForKey("name"))
+				If weapon_name
+					wep_names :+ weapon_name
 				Else
 					wep_names :+ weapon_id
 				EndIf
-				wep_names :+ "  ~n"
-				If g > 0 Then wep_g :+ RSet("",2*g)
-				wep_g :+ Chr(9679)+"~n"
-				line_i :+ 1
-			Next
+			Else
+				wep_names :+ weapon_id
+			EndIf
+			wep_names :+ "  ~n"
+			If g > 0 Then wep_g :+ RSet("",2*g)
+			wep_g :+ Chr(9679)+"~n"
+			line_i :+ 1
 		Next
 		wep_names_tw = TextWidget.Create( wep_names )
 		wep_g_tw = TextWidget.Create( wep_g )
@@ -418,6 +418,7 @@ Type TModalSetVariant Extends TSubroutine
 			Else
 				reset_cursor_color_period()
 			EndIf
+			initialize_weapon_groups_list( ed, data )
 		EndIf
 		If KeyHit( KEY_UP )
 			ed.group_field_i :- 1
@@ -426,6 +427,7 @@ Type TModalSetVariant Extends TSubroutine
 			Else
 				reset_cursor_color_period()
 			EndIf
+			initialize_weapon_groups_list( ed, data )
 		EndIf
 		modified = False
 		If KeyHit( KEY_RIGHT )
@@ -446,23 +448,15 @@ Type TModalSetVariant Extends TSubroutine
 				reset_cursor_color_period()
 			EndIf
 		EndIf
+		If modified
+			reset_cursor_color_period()
+			initialize_weapon_groups_list( ed, data )
+		EndIf
 		If KeyHit( KEY_A )
 			data.toggle_weapon_group_autofire( group_offsets[ed.group_field_i] )
 			data.update_variant()
-		EndIf
-		If modified
 			reset_cursor_color_period()
-			'locate slot again
-			wep_i = 0
-			For group = EachIn data.variant.weaponGroups
-				For weapon_slot_id = EachIn group.weapons.Keys()
-					If weapon_slot_id = weapon_slot_ids[ed.group_field_i]
-						ed.group_field_i = wep_i
-						Exit
-					EndIf
-					wep_i :+ 1
-				Next
-			Next
+			initialize_weapon_groups_list( ed, data )
 		EndIf
 		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			ed.group_field_i = -1
@@ -510,8 +504,10 @@ Type TModalSetVariant Extends TSubroutine
 		If KeyHit( KEY_G ) ..
 		And data.ship.weaponSlots And data.ship.weaponSlots.Length > 0
 			'enter WEAPON GROUPS mode
-			ed.group_field_i = 0
 			initialize_weapon_groups_list( ed, data )
+			If weapon_slot_ids.length > 0
+				ed.group_field_i = 0
+			EndIf
 		EndIf
 	EndMethod
 

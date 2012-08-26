@@ -625,6 +625,20 @@ Type TData
 		Return Null
 	EndMethod
 
+	Method find_assigned_slot_parent_group_index%( ship_weapon_slot_id$ )
+		For Local i% = 0 Until variant.weaponGroups.length
+			Local group:TStarfarerVariantWeaponGroup = variant.weaponGroups[i]
+			If group
+				For Local assigned_slot_id$ = EachIn group.weapons.Keys()
+					If assigned_slot_id = ship_weapon_slot_id
+						Return i
+					EndIf
+				Next
+			EndIf
+		Next
+		Return -1
+	EndMethod
+
 	Method find_assigned_slot_weapon$( ship_weapon_slot_id$ )
 		For Local group:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
 			For Local assigned_slot_id$ = EachIn group.weapons.Keys()
