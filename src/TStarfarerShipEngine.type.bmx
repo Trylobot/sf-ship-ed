@@ -38,12 +38,12 @@ Type TStarfarerShipEngine
 End Type
 
 
-Function predicate_TStarfarerShipEngine_omit_styleSpec%( val:TValue )
-	Return (TNull(val) <> Null)
+Function predicate_omit_styleSpec%( val:TValue )
+	Return (TNull(val) <> Null Or TObject(val).fields.IsEmpty())
 EndFunction
 
-Function predicate_TStarfarerShipEngine_omit_styleId%( val:TValue )
-	Return (TString(val).value = "")
+Function predicate_omit_styleId%( val:TValue )
+	Return (TString(val).value = Null)
 EndFunction
 
 
@@ -67,17 +67,4 @@ Function remove_TStarfarerShipEngine:TStarfarerShipEngine[]( arr:TStarfarerShipE
 		Return arr
 	End If
 End Function
-
-
-'Function TStarfarerShipEngine_ToJSON$( source_object:Object, settings:TJSONEncodeSettings, override_type:TTypeId, indent% )
-'	If source_object = Null Then Return ""
-'	Local instance_settings:TJSONEncodeSettings = settings.Clone()
-'	Local this_type:TTypeId = TTypeId.ForName( "TStarfarerShipEngine" )
-'	Local styleSpec_field:TField = this_type.FindField( "styleSpec" )
-'	If TStarfarerShipEngine(source_object).styleSpec = Null
-'		instance_settings.IgnoreField( this_type, styleSpec_field )
-'	EndIf
-'	Return JSON._EncodeObject( source_object, instance_settings, this_type, indent )
-'EndFunction
-
 

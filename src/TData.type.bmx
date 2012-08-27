@@ -29,7 +29,17 @@ Type TData
 	'requires subsequent call to update()
 	Method decode( input_json_str$ )
 		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ))
-		Fix_Map_TStrings( ship.builtInWeapons ) 'TEMPORARY
+		'TEMPORARY fix for not properly initializing this data
+		Fix_Map_TStrings( ship.builtInWeapons )
+		'Ensure engine data is internally consistent
+		For Local engine:TStarfarerShipEngine = EachIn ship.engineSlots
+			If engine.style <> "CUSTOM"
+				engine.styleId = Null
+				engine.styleSpec = Null
+			ElseIf engine.styleId <> Null
+				engine.styleSpec = Null
+			EndIf
+		Next
 	End Method
 	
 	Method update()
@@ -42,8 +52,9 @@ Type TData
 	'requires subsequent call to update_variant()
 	Method decode_variant( input_json_str$ )
 		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
+		'TEMPORARY fix for not properly initializing this data
 		For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
-			Fix_Map_TStrings( weaponGroup.weapons ) 'TEMPORARY
+			Fix_Map_TStrings( weaponGroup.weapons )
 		Next
 	End Method
 	
