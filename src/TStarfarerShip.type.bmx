@@ -29,6 +29,7 @@ Type TStarfarerShip
 		style = "HIGH_TECH"
 		builtInWeapons = CreateMap()
 	End Method
+
 End Type
 
 

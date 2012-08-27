@@ -15,6 +15,7 @@ Type TStarfarerVariant
 		fluxCapacitors = 0
 		hullMods = New String[0]
 		weaponGroups = New TStarfarerVariantWeaponGroup[0]
-	End Method
+	EndMethod
+
 End Type
 

@@ -13,33 +13,29 @@ Type TData
 	Field csv_row:TMap'<String,String>  'column name --> value
 	Field csv_row_wing:TMap'<String,String>  'column name --> value
 
-	'requires subsequent call to update()
-	'requires subsequent call to update_variant()
+	Field weapon:TStarfarerWeapon
+	Field json_str_weapon$
+	Field json_view_weapon:TList'<TextWidget>
+
 	Method New()
 		Clear()
 	End Method
 
+	'requires subsequent call to update()
+	'requires subsequent call to update_variant()
+	'requires subsequent call to update_weapon()
 	Method Clear()
 		ship = New TStarfarerShip
 		variant = New TStarfarerVariant
 		csv_row = ship_data_csv_field_template.Copy()
 		csv_row_wing = wing_data_csv_field_template.Copy()
+		weapon = New TStarfarerWeapon
 	endMethod
 	
 	'requires subsequent call to update()
 	Method decode( input_json_str$ )
 		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ))
-		'TEMPORARY fix for not properly initializing this data
-		Fix_Map_TStrings( ship.builtInWeapons )
-		'Ensure engine data is internally consistent
-		For Local engine:TStarfarerShipEngine = EachIn ship.engineSlots
-			If engine.style <> "CUSTOM"
-				engine.styleId = Null
-				engine.styleSpec = Null
-			ElseIf engine.styleId <> Null
-				engine.styleSpec = Null
-			EndIf
-		Next
+		enforce_ship_internal_consistency()
 	End Method
 	
 	Method update()
@@ -49,21 +45,50 @@ Type TData
 		json_view = columnize_text( json_str )
 	End Method
 
+	'requires subsequent call to update()
+	Method enforce_ship_internal_consistency()
+		'TEMPORARY fix for not properly initializing this data
+		Fix_Map_TStrings( ship.builtInWeapons )
+		'Ensure built-in weapons data is internally consistent
+		For Local weapon_slot_id$ = EachIn ship.builtInWeapons.Keys()
+			'to do
+		Next
+		For Local weapon_slot:TStarfarerShipWeapon = EachIn ship.weaponSlots
+			If weapon_slot.type_ <> "BUILT_IN"
+				ship.builtInWeapons.Remove( weapon_slot.id )
+			EndIf
+		Next
+		'Ensure engine data is internally consistent
+		For Local engine:TStarfarerShipEngine = EachIn ship.engineSlots
+			If engine.style <> "CUSTOM"
+				engine.styleId = Null
+				engine.styleSpec = Null
+			ElseIf engine.styleId <> Null
+				engine.styleSpec = Null
+			EndIf
+		Next
+	EndMethod
+
 	'requires subsequent call to update_variant()
 	Method decode_variant( input_json_str$ )
 		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
-		'TEMPORARY fix for not properly initializing this data
-		For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
-			Fix_Map_TStrings( weaponGroup.weapons )
-		Next
+		enforce_variant_internal_consistency()
 	End Method
 	
 	Method update_variant()
 		json.formatted = true
 		'encode ship object as json data
-		json_str_variant = json.stringify( variant )
+		json_str_variant = json.stringify( variant, "stringify_variant" )
 		json_view_variant = columnize_text( json_str_variant )
 	End Method
+
+	'requires subsequent call to update_variant()
+	Method enforce_variant_internal_consistency()
+		'TEMPORARY fix for not properly initializing this data
+		For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
+			Fix_Map_TStrings( weaponGroup.weapons )
+		Next
+	EndMethod
 
 	'requires subsequent call to update_variant()
 	Method update_variant_enforce_hull_compatibility( ed:TEditor )
@@ -105,6 +130,16 @@ Type TData
 				EndIf
 			Next
 		Next
+	EndMethod
+
+	Method decode_weapon( input_json_str$ )
+		weapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon" ))
+	EndMethod
+
+	Method update_weapon()
+		json.formatted = true
+		json_str_weapon = json.stringify( weapon, "stringify_weapon" )
+		json_view_weapon = columnize_text( json_str_weapon )
 	EndMethod
 
 	'requires subsequent call to update_variant()
@@ -873,17 +908,4 @@ Type TData
 	EndMethod
 
 End Type
-
-'Temporary Fix to address not being able to override types with transforms
-' That functionality should also address forcing null arrays to [] and null objects to {}
-Function Fix_Map_TStrings( map:TMap )
-	If map And Not map.IsEmpty()
-		For Local key$ = EachIn map.Keys()
-			Local val:TString = TString( map.ValueForKey( key ))
-			If val
-				map.Insert( key, val.value )
-			EndIf
-		Next
-	EndIf
-EndFunction
 

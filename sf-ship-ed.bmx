@@ -69,6 +69,7 @@ Include "src/TModalLaunchBays.type.bmx"
 Include "src/TModalSetVariant.type.bmx"
 Include "src/TModalSetShipCSV.type.bmx"
 Include "src/TModalSetWingCSV.type.bmx"
+Include "src/TModalWeapon.type.bmx"
 Include "src/Application.type.bmx"
 Include "src/help.bmx"
 Include "src/multiselect_values.bmx"
@@ -145,6 +146,7 @@ ed.target_sprite_scale = sprite.scale
 Local data:TData = New TData
 data.update()
 data.update_variant()
+data.update_weapon()
 
 '////////////////////////////////////////////////
 
@@ -204,6 +206,7 @@ Global sub_launchbays:TModalLaunchBays = New TModalLaunchBays
 Global sub_set_variant:TModalSetVariant = New TModalSetVariant
 Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
 Global sub_wing_csv:TModalSetWingCSV = New TModalSetWingCSV
+Global sub_weapon:TModalWeapon = New TModalWeapon
 
 '//////////////////////////////////////////////////////////////////////////////
 '//////////////////////////////////////////////////////////////////////////////
@@ -240,7 +243,9 @@ Repeat
 	update_flags( ed )
 	update_pan( ed, sprite )
 	sprite.update()
+	
 	Select ed.program_mode
+		
 		Case "ship"
 			Select ed.mode
 				Case "center"
@@ -281,12 +286,17 @@ Repeat
 		Case "csv_wing"
 			sub_wing_csv.Update( ed, data, sprite )
 
+		Case "weapon"
+			sub_weapon.Update( ed, data, sprite )
+
 	End Select
 
 	'draw
 	draw_bg( ed )
 	draw_ship( ed, sprite )
+	
 	Select ed.program_mode
+		
 		Case "ship"
 			Select ed.mode
 				Case "center"
@@ -326,6 +336,9 @@ Repeat
 
 		Case "csv_wing"
 			sub_wing_csv.Draw( ed, data, sprite )
+
+		Case "weapon"
+			sub_weapon.Draw( ed, data, sprite )
 			
 	End Select
 	draw_help( ed )
@@ -373,6 +386,10 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 	If KeyHit( KEY_4 )
 		ed.program_mode = "csv_wing"
 		sub_wing_csv.Activate( ed, data, sprite )
+	EndIf
+	If KeyHit( KEY_5 )
+		ed.program_mode = "weapon"
+		sub_weapon.Activate( ed, data, sprite )
 	EndIf
 
 	If KeyHit( KEY_SPACE )
@@ -545,6 +562,9 @@ Function draw_bg( ed:TEditor )
 End Function
 
 Function draw_ship( ed:TEditor, sprite:TSprite )
+	If ed.program_mode = "weapon"
+		Return
+	EndIf
 	If ed.program_mode = "csv_wing" ..
 	And sub_wing_csv.hide_main_ship
 		Return
@@ -851,6 +871,8 @@ Function check_open_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 				sub_ship_csv.Load( ed, data, sprite )
 			Case "csv_wing"
 				sub_wing_csv.Load( ed, data, sprite )
+			Case "weapon"
+				sub_weapon.Load( ed, data, sprite )
 		EndSelect
 	End If
 End Function
@@ -878,6 +900,8 @@ Function check_save_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 				sub_ship_csv.Save( ed, data, sprite )
 			Case "csv_wing"	
 				sub_wing_csv.Save( ed, data, sprite )
+			Case "weapon"
+				sub_weapon.Save( ed, data, sprite )
 		EndSelect
 	End If
 End Function
@@ -1043,27 +1067,29 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite, use_new%=False 
 End Function
 
 Function autoload_ship_image( ed:TEditor, data:TData, sprite:TSprite )
-	Local found% = False
-	'search mod directories
-	For Local i% = 0 Until APP.mod_dirs.length
-		Local img_path$ = APP.mod_dirs[i]+data.ship.spriteName
-		If FILETYPE_FILE = FileType( img_path )
-			load_ship_image__driver( ed, data, sprite, img_path )
-			found = True
-			Exit
+	Local img_path$ = resource_search( data.ship.spriteName )
+	If img_path <> Null
+		load_ship_image__driver( ed, data, sprite, img_path )
+	EndIf
+EndFunction
+
+Function resource_search$( relative_path$ )
+	Local i%, path$
+	'search known mod directories first
+	For i = 0 Until APP.mod_dirs.length
+		path = APP.mod_dirs[i] + relative_path
+		If FILETYPE_FILE = FileType( path )
+			Return path
 		EndIf
 	Next
-	'search vanilla directories
-	If Not found
-		For Local j% = 0 Until STARFARER_CORE_DIR.length
-			Local img_path$ = APP.starfarer_base_dir+STARFARER_CORE_DIR[j]+"/"+data.ship.spriteName
-			If FILETYPE_FILE = FileType( img_path )
-				load_ship_image__driver( ed, data, sprite, img_path )
-				found = True
-				Exit
-			EndIf
-		Next
-	EndIf
+	'fall back to searching vanilla data
+	For i = 0 Until STARFARER_CORE_DIR.length
+		path = APP.starfarer_base_dir + STARFARER_CORE_DIR[i]+"/" + relative_path
+		If FILETYPE_FILE = FileType( path )
+			Return path
+		EndIf
+	Next
+	Return Null
 EndFunction
 
 Function load_variant_data( ed:TEditor, data:TData, sprite:TSprite, use_new%=False )

@@ -85,3 +85,17 @@ Function in_str_array%( val$, arr$[] )
 EndFunction
 
 
+'Temporary Fix to address not being able to override types with transforms
+' That functionality should also address forcing null arrays to [] and null objects to {}
+Function Fix_Map_TStrings( map:TMap )
+	If map And Not map.IsEmpty()
+		For Local key$ = EachIn map.Keys()
+			Local val:TString = TString( map.ValueForKey( key ))
+			If val
+				map.Insert( key, val.value )
+			EndIf
+		Next
+	EndIf
+EndFunction
+
+
