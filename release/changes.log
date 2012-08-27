@@ -1,4 +1,7 @@
 ______________________________________________________________________________
+editor version 2.4.3 (starfarer 0.53.1a RC5)
+- fixed: incorrectly encoding weapon slots (fatal error)
+______________________________________________________________________________
 editor version 2.4.2 (starfarer 0.53.1a RC5)
 - fixed: weapon groups list misbehaving
 ______________________________________________________________________________

@@ -122,6 +122,7 @@ json.precision = 6
 'TStarfarerShipWeapon
 json.add_transform( "parse_ship",     "$weaponSlots:array/:object/$type:string", json.XJ_RENAME, "type_" )
 json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$type_:string", json.XJ_RENAME, "type"  )
+json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$position:array", json.XJ_DELETE,, predicate_omit_position )
 json.add_transform( "stringify_ship", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_builtInWeapons )
 'TStarfarerCustomEngineStyleSpec
 json.add_transform( "parse_ship",     "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )

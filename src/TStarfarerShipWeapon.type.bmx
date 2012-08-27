@@ -51,6 +51,11 @@ Type TStarfarerShipWeapon
 	End Method
 End Type
 
+
+Function predicate_omit_position%( val:TValue )
+	Return (TNull(val) <> Null Or TArray(val).elements.IsEmpty())
+EndFunction
+
 Function remove_TStarfarerShipWeapon:TStarfarerShipWeapon[]( arr:TStarfarerShipWeapon[], w:TStarfarerShipWeapon )
 	Local i%
 	For i = 0 Until arr.length
