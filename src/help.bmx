@@ -25,7 +25,7 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "2", "Variant Mode      ", ICON_KB, True,   0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "3", "Ship Stats Mode   ", ICON_KB, True,   0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "4", "Fighter Wing Mode ", ICON_KB, True,   0 ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "5", "Weapon Mode       ", ICON_KB, False,  0 ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "5", "Weapon Mode       ", ICON_KB, True,   0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "6", "Weapon Stats Mode ", ICON_KB, False,  0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "7", "Projectile Mode   ", ICON_KB, False,  1 ))
 	'////////////

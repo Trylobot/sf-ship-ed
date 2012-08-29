@@ -10,6 +10,7 @@ Type Application
 	Field images_dir$
 	Field data_dir$
 	Field variant_dir$
+	Field weapon_dir$
 	Field font_size%
 	Field data_font_size%
 	Field starfarer_base_dir$

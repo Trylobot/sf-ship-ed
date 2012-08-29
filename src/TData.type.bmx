@@ -133,7 +133,7 @@ Type TData
 	EndMethod
 
 	Method decode_weapon( input_json_str$ )
-		weapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon" ))
+		weapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon", "parse_weapon" ))
 	EndMethod
 
 	Method update_weapon()
