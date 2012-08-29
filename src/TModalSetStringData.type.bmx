@@ -184,10 +184,10 @@ Type TModalSetStringData Extends TSubroutine
 			'////////////////////////////////////////
 			Case MODE_SHIP
 				i = 0
-				If line_i = 0 'hullId modified
-					data.on_hullId_modified( TStarfarerShip(target).hullId, values.lines[line_i] )
+				'TStarfarerShip(target).hullId = values.lines[i]; i:+1
+				If line_i = i
+					data.set_hullId( TStarfarerShip(target).hullId, values.lines[i] ); i:+1
 				EndIf
-				TStarfarerShip(target).hullId = values.lines[i]; i:+1
 				TStarfarerShip(target).hullName = values.lines[i]; i:+1
 				TStarfarerShip(target).hullSize = values.lines[i]; i:+1
 				TStarfarerShip(target).style = values.lines[i]; i:+1
@@ -230,8 +230,14 @@ Type TModalSetStringData Extends TSubroutine
 			'//////////////////////////////////////
 			Case MODE_VARIANT 
 				i = 0
-				TStarfarerVariant(target).hullId = values.lines[i]; i:+1
-				TStarfarerVariant(target).variantId = values.lines[i]; i:+1
+				'TStarfarerVariant(target).hullId = values.lines[i]; i:+1
+				If line_i = i
+					data.set_hullId( TStarfarerVariant(target).hullId, values.lines[i] ); i:+1
+				EndIf
+				'TStarfarerVariant(target).variantId = values.lines[i]; i:+1
+				If line_i = i
+					data.set_variantId( TStarfarerVariant(target).variantId, values.lines[i] ); i:+1
+				EndIf
 				TStarfarerVariant(target).displayName = values.lines[i]; i:+1
 				For j = 0 Until TStarfarerVariant(target).weaponGroups.length
 					TStarfarerVariant(target).weaponGroups[j].mode = values.lines[i]; i:+1

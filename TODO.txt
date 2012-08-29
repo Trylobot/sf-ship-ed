@@ -1,6 +1,4 @@
 
-When saving fighter/drone variants, default to the appropriate variant subdirectory.
-
 support weapons in mode 5
 
 support weapon csv data in mode 6

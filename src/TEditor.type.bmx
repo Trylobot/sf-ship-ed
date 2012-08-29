@@ -260,7 +260,7 @@ Type TEditor
 			wing = TMap( stock_wing_stats.ValueForKey( assoc.First() ))
 		Else
 			wing = wing_data_csv_field_template.Copy()
-			wing.Insert( "variant", variantId+"_wing_id" )
+			wing.Insert( "variant", variantId+"_wing" )
 		EndIf
 		Return wing
 	EndMethod

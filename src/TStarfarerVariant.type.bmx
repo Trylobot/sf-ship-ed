@@ -9,8 +9,8 @@ Type TStarfarerVariant
 	
 	Method New()
 		displayName = "New Variant"
-		hullId = "new_hull_id"
-		variantId = "new_hull_variant_id"
+		hullId = "new_hull"
+		variantId = "new_hull_variant"
 		fluxVents = 0
 		fluxCapacitors = 0
 		hullMods = New String[0]

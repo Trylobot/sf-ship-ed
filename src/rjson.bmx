@@ -124,11 +124,14 @@ Type json
 
 	Function execute_transforms( set_name$, val:TValue )
 		If set_name
-			For Local xform:TValue_Transformation = EachIn TList( transformations.ValueForKey( set_name ))
-				If xform
-					xform.Execute( val ) 'Execute any available transformations
-				EndIf
-			Next
+			Local xform_set:TList = TList( transformations.ValueForKey( set_name ))
+			If xform_set
+				For Local xform:TValue_Transformation = EachIn xform_set
+					If xform
+						xform.Execute( val ) 'Execute any available transformations
+					EndIf
+				Next
+			EndIf
 		EndIf
 	EndFunction
 

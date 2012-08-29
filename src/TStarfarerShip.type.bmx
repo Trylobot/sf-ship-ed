@@ -22,11 +22,11 @@ Type TStarfarerShip
 		shieldCenter = [ 0.0, 0.0 ]
 		engineSlots = New TStarfarerShipEngine[0]
 		weaponSlots = New TStarfarerShipWeapon[0]
-		hullId = "new_hull_id"
+		hullId = "new_hull"
 		hullName = "New Hull"
-		hullSize = "CAPITAL_SHIP"
-		spriteName = "graphics/ships/sprite.png"
-		style = "HIGH_TECH"
+		hullSize = "FRIGATE"
+		spriteName = "graphics/ships/new_hull.png"
+		style = "LOW_TECH"
 		builtInWeapons = CreateMap()
 	End Method
 

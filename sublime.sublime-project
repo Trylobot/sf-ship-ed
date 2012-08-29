@@ -2,7 +2,9 @@
 	"folders":
 	[
 		{
-			"path": "."
+			"path": ".",
+			"folder_exclude_patterns": [".bmx", ".git"],
+			"file_exclude_patterns": [".gitignore", ".gitattributes"]
 		}
 	]
 }

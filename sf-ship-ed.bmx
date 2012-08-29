@@ -881,7 +881,7 @@ Function check_save_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 	If KeyHit( KEY_V )
 		Select ed.program_mode
 			Case "ship"
-				Local data_path$ = RequestFile( "SAVE Ship Data", "ship", True, APP.data_dir+data.ship.hullID+".ship" )
+				Local data_path$ = RequestFile( "SAVE Ship Data", "ship", True, APP.data_dir + data.ship.hullID+".ship" )
 				FlushKeys()
 				If data_path
 					APP.data_dir = ExtractDir( data_path )+"/"
@@ -889,7 +889,7 @@ Function check_save_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 					SaveString( data.json_str, data_path )
 				End If
 			Case "variant"
-				Local variant_path$ = RequestFile( "SAVE Variant Data", "variant", True, APP.variant_dir+data.variant.variantID+".variant" )
+				Local variant_path$ = RequestFile( "SAVE Variant Data", "variant", True, APP.variant_dir + data.variant.variantID+".variant" )
 				FlushKeys()
 				If variant_path
 					APP.variant_dir = ExtractDir( variant_path )+"/"
