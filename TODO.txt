@@ -1,4 +1,10 @@
 
+- weapon groups visualizations
+  when in 2/G mode, make all the weapon slots blink that belong to the same group
+  as the one selected in the text box.
+- BUG: the cursor doesn't appear to be anywhere upon initialization of the G mode
+
+
 support weapons in mode 5
 
 support weapon csv data in mode 6
