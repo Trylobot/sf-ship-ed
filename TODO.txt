@@ -1,4 +1,6 @@
 
+- BUG: +/- key doesn't work for zooming anymore apparently
+
 - weapon groups visualizations
   when in 2/G mode, make all the weapon slots blink that belong to the same group
   as the one selected in the text box.

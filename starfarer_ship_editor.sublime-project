@@ -1,0 +1,18 @@
+{
+	"folders":
+	[
+		{
+			"file_exclude_patterns":
+			[
+				".gitignore",
+				".gitattributes"
+			],
+			"folder_exclude_patterns":
+			[
+				".bmx",
+				".git"
+			],
+			"path": "/C/Dev/BlitzMax/sf-ship-ed"
+		}
+	]
+}
