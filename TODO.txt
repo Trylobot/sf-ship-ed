@@ -6,6 +6,10 @@
   as the one selected in the text box.
 - BUG: the cursor doesn't appear to be anywhere upon initialization of the G mode
 
+- enhancement: string filtering for weapons list
+  mouse control?
+
+- maybe bring in menu/gui objects from other project
 
 support weapons in mode 5
 
