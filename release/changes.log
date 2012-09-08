@@ -1,4 +1,8 @@
 ______________________________________________________________________________
+editor version 2.4.4 (starfarer 0.53.1a RC5)
+- fixed: +/- keys not working
+- fixed: synchronization of hull/variant/csv names
+______________________________________________________________________________
 editor version 2.4.3 (starfarer 0.53.1a RC5)
 - fixed: incorrectly encoding weapon slots (fatal error)
 ______________________________________________________________________________
