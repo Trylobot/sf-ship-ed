@@ -504,9 +504,10 @@ Type TModalSetVariant Extends TSubroutine
 		If KeyHit( KEY_G ) ..
 		And data.ship.weaponSlots And data.ship.weaponSlots.Length > 0
 			'enter WEAPON GROUPS mode
+			ed.group_field_i = 0
 			initialize_weapon_groups_list( ed, data )
-			If weapon_slot_ids.length > 0
-				ed.group_field_i = 0
+			If weapon_slot_ids.length <= 0
+				ed.group_field_i = -1
 			EndIf
 		EndIf
 	EndMethod
