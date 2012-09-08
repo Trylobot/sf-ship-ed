@@ -50,7 +50,7 @@ Type TModalWeapon Extends TSubroutine
 	EndMethod
 
 	Method Save( ed:TEditor, data:TData, sprite:TSprite )
-		Local path$ = RequestFile( "SAVE Ship Data", "ship", True, APP.weapon_dir + data.weapon.id+".weapon" )
+		Local path$ = RequestFile( "SAVE Weapon Data", "wpn", True, APP.weapon_dir + data.weapon.id+".weapon" )
 		FlushKeys()
 		If path
 			APP.weapon_dir = ExtractDir( path )+"/"
@@ -60,7 +60,7 @@ Type TModalWeapon Extends TSubroutine
 	EndMethod
 
 	Method Load( ed:TEditor, data:TData, sprite:TSprite )
-		Local path$ = RequestFile( "LOAD Ship Data", "ship", False, APP.weapon_dir )
+		Local path$ = RequestFile( "LOAD Weapon Data", "wpn", False, APP.weapon_dir )
 		FlushKeys()
 		If FileType( path ) <> FILETYPE_FILE Then Return
 		APP.weapon_dir = ExtractDir( path )+"/"

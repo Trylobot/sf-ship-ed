@@ -391,8 +391,9 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 		sub_wing_csv.Activate( ed, data, sprite )
 	EndIf
 	If KeyHit( KEY_5 )
-		ed.program_mode = "weapon"
-		sub_weapon.Activate( ed, data, sprite )
+		'not ready for prime time
+		'ed.program_mode = "weapon"
+		'sub_weapon.Activate( ed, data, sprite )
 	EndIf
 
 	If KeyHit( KEY_SPACE )
