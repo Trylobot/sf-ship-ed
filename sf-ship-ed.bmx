@@ -225,10 +225,13 @@ Repeat
 	'update
 	If ed.mode = "string_data"
 		sub_string_data.Update( ed, data, sprite )
+		update_zoom( ed, data, sprite, True )
 	ElseIf ed.program_mode = "csv" And sub_ship_csv.csv_row_values
 		sub_ship_csv.Update( ed, data, sprite )
+		update_zoom( ed, data, sprite, True )
 	ElseIf ed.program_mode = "csv_wing" And sub_wing_csv.csv_row_values
 		sub_wing_csv.Update( ed, data, sprite )
+		update_zoom( ed, data, sprite, True )
 	Else
 		'these functions conflict with string editing
 		check_mode( ed, data, sprite )
@@ -238,8 +241,8 @@ Repeat
 		check_save_ship_data( ed, data, sprite )
 		check_load_mod( ed, data )
 		escape_key_update()
+		update_zoom( ed, data, sprite, False )
 	EndIf
-	update_zoom( ed, data, sprite, True )
 	update_flags( ed )
 	update_pan( ed, sprite )
 	sprite.update()
