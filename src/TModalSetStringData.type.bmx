@@ -185,9 +185,8 @@ Type TModalSetStringData Extends TSubroutine
 			Case MODE_SHIP
 				i = 0
 				'TStarfarerShip(target).hullId = values.lines[i]; i:+1
-				If line_i = i
-					data.set_hullId( TStarfarerShip(target).hullId, values.lines[i] ); i:+1
-				EndIf
+				If line_i = i Then data.set_hullId( TStarfarerShip(target).hullId, values.lines[i] )
+				i:+1
 				TStarfarerShip(target).hullName = values.lines[i]; i:+1
 				TStarfarerShip(target).hullSize = values.lines[i]; i:+1
 				TStarfarerShip(target).style = values.lines[i]; i:+1
@@ -197,9 +196,11 @@ Type TModalSetStringData Extends TSubroutine
 			Case MODE_ENGINE
 				i = 0
 				TStarfarerShipEngine(target).style = values.lines[i]; i:+1
+				'conditional chunk 1
 				If values.lines.length >= i + 1 And TStarfarerShipEngine(target).style = "CUSTOM"
 					TStarfarerShipEngine(target).styleId = values.lines[i]; i:+1
 				EndIf
+				'conditional chunk 2
 				If values.lines.length >= i + 7 And TStarfarerShipEngine(target).styleSpec <> Null
 					TStarfarerShipEngine(target).styleSpec.type_ = values.lines[i]; i:+1
 					json.error_level = 0
@@ -230,15 +231,12 @@ Type TModalSetStringData Extends TSubroutine
 			'//////////////////////////////////////
 			Case MODE_VARIANT 
 				i = 0
-				'TStarfarerVariant(target).hullId = values.lines[i]; i:+1
-				If line_i = i
-					data.set_hullId( TStarfarerVariant(target).hullId, values.lines[i] ); i:+1
-				EndIf
-				'TStarfarerVariant(target).variantId = values.lines[i]; i:+1
-				If line_i = i
-					data.set_variantId( TStarfarerVariant(target).variantId, values.lines[i] ); i:+1
-				EndIf
+				If line_i = i Then data.set_hullId( TStarfarerVariant(target).hullId, values.lines[i] )
+				i:+1
+				If line_i = i Then data.set_variantId( TStarfarerVariant(target).variantId, values.lines[i] )
+				i:+1
 				TStarfarerVariant(target).displayName = values.lines[i]; i:+1
+				'variable-length chunk 1
 				For j = 0 Until TStarfarerVariant(target).weaponGroups.length
 					TStarfarerVariant(target).weaponGroups[j].mode = values.lines[i]; i:+1
 				Next

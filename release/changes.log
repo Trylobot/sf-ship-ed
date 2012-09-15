@@ -1,4 +1,7 @@
 ______________________________________________________________________________
+editor version 2.4.5 (starfarer 0.53.1a RC5)
+- fixed: strange data corruption bugs on main ship and variant string editors
+______________________________________________________________________________
 editor version 2.4.4 (starfarer 0.53.1a RC5)
 - fixed: +/- keys not working
 - fixed: synchronization of hull/variant/csv names

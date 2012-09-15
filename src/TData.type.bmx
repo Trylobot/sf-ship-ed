@@ -147,28 +147,14 @@ Type TData
 		ship.hullId = hullId
 		update()
 		'VARIANT
-		Local old_variantId$ = variant.variantId
 		variant.hullId = hullId
-		If old_hullId <> Null And variant.variantId.StartsWith( old_hullId ) 
-			'Starfarer standard naming conventions
-			variant.variantId = hullId+variant.variantId[..old_hullId.length]
-		Else 'empty, unrelated or unpredictable; 
-			'come up with something reasonable
-			variant.variantId = hullId+"_variant"
-		EndIf
+		variant.variantId = hullId+"_variant"
 		update_variant()
 		'SHIP CSV
 		csv_row.Insert( "id", ship.hullId )
 		'WING CSV
 		csv_row_wing.Insert( "variant", variant.variantId )
-		Local old_wing_id$ = String( csv_row_wing.ValueForKey( "id" ))
-		If old_variantId <> Null And old_wing_id.StartsWith( old_variantId )
-			'Starfarer standard naming conventions
-			csv_row_wing.Insert( "id", variant.variantId+old_wing_id[..old_variantId.length] )
-		Else 'empty, unrelated or unpredictable; 
-			'come up with something reasonable
-			csv_row_wing.Insert( "id", variant.variantId+"_wing" )
-		EndIf
+		csv_row_wing.Insert( "id", variant.variantId+"_wing" )
 	EndMethod
 
 	Method set_variantId( old_variantId$, variantId$ )
@@ -177,14 +163,7 @@ Type TData
 		update_variant()
 		'WING CSV
 		csv_row_wing.Insert( "variant", variant.variantId )
-		Local old_wing_id$ = String( csv_row_wing.ValueForKey( "id" ))
-		If old_variantId <> Null And old_wing_id.StartsWith( old_variantId )
-			'Starfarer standard naming conventions
-			csv_row_wing.Insert( "id", variant.variantId+old_wing_id[..old_variantId.length] )
-		Else 'empty, unrelated or unpredictable; 
-			'come up with something reasonable
-			csv_row_wing.Insert( "id", variant.variantId+"_wing" )
-		EndIf
+		csv_row_wing.Insert( "id", variant.variantId+"_wing" )
 	EndMethod
 	
 	'/////// 
