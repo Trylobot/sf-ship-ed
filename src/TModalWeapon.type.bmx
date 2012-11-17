@@ -10,41 +10,78 @@ Type TModalWeapon Extends TSubroutine
 	Field hardpointGun_img:TImage
 	Field hardpointGlow_img:TImage
 	Field display_mode$
+	Field draw_barrels%
+	Field draw_glow%
 	'animated images
 	Field turret_img_seq:TImage[]
 	Field hardpoint_img_seq:TImage[]
 	Field img_seq_i%
 	Field img_seq_i_ts%
+	'housekeeping
+	Field sprite_img_buffer:TImage
 
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
+		ed.program_mode = "weapon"
+		'save the current sprite img to be restored later
+		sprite_img_buffer = sprite.img
 		data.update_weapon()
 		display_mode = "turret"
-		load_weapon_images( data )
+		draw_glow = false
+		draw_barrels = false
+		load_weapon_images( data, sprite )
+	EndMethod
+
+	Method Deactivate( ed:TEditor, data:TData, sprite:TSprite )
+		sprite.img = sprite_img_buffer
 	EndMethod
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
-		' multi-frame framecounter advance
+		'multi-frame framecounter advance
 		If  data.weapon.numFrames > 1 ..
 		And (millisecs() - img_seq_i_ts) > Int(Double(1000)/data.weapon.frameRate)
 			img_seq_i :+ 1
 			If img_seq_i >= data.weapon.numFrames Then img_seq_i = 0
 			img_seq_i_ts = millisecs()
 		EndIf
+		'input
+		'If <Key> 'switch display_modes between turret & hardpoint
+		'	display_mode = new_display_mode
+		'	update_sprite_img( sprite )
+		'EndIf
+		'need a way to toggle glow
+		' preview projectile firing?
+		' play sound?
+		'need a way to adjust recoil
+		'need a way to add/remove barrels + offsets
+		'need a button to FIRE!
+		'  use weapon.visualRecoil to determine distance
+		'  use barrelMode to determine which barrels to fire from; track barrel sequence
+		'  use weapon data CSV, if possible, to determine a reasonable reload speed (complicated)
+		'  create a Projectile object and launch it (complicated as fuck)
+	EndMethod
+
+	Method update_sprite_img( sprite:TSprite )
+		Select display_mode
+			Case "turret"
+				sprite.img = turret_img
+			Case "hardpoint"
+				sprite.img = hardpoint_img
+		EndSelect
 	EndMethod
 
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
 		Select display_mode
 			Case "turret"
 				If data.weapon.numFrames <= 1
-					draw_weapon( turret_img, turretUnder_img, turretGun_img, turretGlow_img, sprite )
+					draw_weapon( turret_img,                turretUnder_img, turretGun_img, turretGlow_img, data.weapon.turretOffsets, sprite )
 				Else ' data.weapon.numFrames > 1
-					draw_weapon( turret_img_seq[img_seq_i], turretUnder_img, turretGun_img, turretGlow_img, sprite )
+					draw_weapon( turret_img_seq[img_seq_i], turretUnder_img, turretGun_img, turretGlow_img, data.weapon.turretOffsets, sprite )
 				EndIf
 			Case "hardpoint"
 				If data.weapon.numFrames <= 1
-					draw_weapon( hardpoint_img, hardpointUnder_img, hardpointGun_img, hardpointGlow_img, sprite )
+					draw_weapon( hardpoint_img,                hardpointUnder_img, hardpointGun_img, hardpointGlow_img, data.weapon.hardpointOffsets, sprite )
 				Else ' data.weapon.numFrames > 1
-					draw_weapon( hardpoint_img_seq[img_seq_i], hardpointUnder_img, hardpointGun_img, hardpointGlow_img, sprite )
+					draw_weapon( hardpoint_img_seq[img_seq_i], hardpointUnder_img, hardpointGun_img, hardpointGlow_img, data.weapon.hardpointOffsets, sprite )
 				EndIf
 		EndSelect
 	EndMethod
@@ -68,23 +105,52 @@ Type TModalWeapon Extends TSubroutine
 		Local json_str_weapon$ = LoadString( path )
 		data.decode_weapon( json_str_weapon )
 		data.update_weapon()
+		draw_barrels = (data.weapon.visualRecoil <> 0)
+		load_weapon_images( data, sprite )
 	EndMethod
 
 
-	Method draw_weapon( main_img:TImage, under_img:TImage, gun_img:TImage, glow_img:TImage, sprite:TSprite )
+	Method draw_weapon( main_img:TImage, under_img:TImage, gun_img:TImage, glow_img:TImage, gun_offsets#[], sprite:TSprite )
 		SetRotation( 90 )
 		SetScale( sprite.scale, sprite.scale )
 		SetAlpha( 1 )
 		SetColor( 255, 255, 255 )
 		'///
-		If main_img  Then DrawImage( main_img,  W_MID + sprite.pan_x + sprite.zpan_x, H_MID + sprite.pan_y + sprite.zpan_y )
-		If under_img Then DrawImage( under_img, W_MID + sprite.pan_x + sprite.zpan_x, H_MID + sprite.pan_y + sprite.zpan_y )
-		If gun_img   Then DrawImage( gun_img,   W_MID + sprite.pan_x + sprite.zpan_x, H_MID + sprite.pan_y + sprite.zpan_y )
-		If glow_img  Then DrawImage( glow_img,  W_MID + sprite.pan_x + sprite.zpan_x, H_MID + sprite.pan_y + sprite.zpan_y )
+		If under_img Then DrawImage( under_img, ..
+			W_MID + sprite.pan_x + sprite.zpan_x, ..
+			H_MID + sprite.pan_y + sprite.zpan_y )
+		
+		If main_img Then DrawImage( main_img, ..
+			W_MID + sprite.pan_x + sprite.zpan_x, ..
+			H_MID + sprite.pan_y + sprite.zpan_y )
+		
+		If draw_barrels
+			If gun_img Then DrawImage( gun_img, ..
+				W_MID + sprite.pan_x + sprite.zpan_x, ..
+				H_MID + sprite.pan_y + sprite.zpan_y )
+		EndIf
+				
+		If draw_glow And glow_img Then DrawImage( glow_img, ..
+			W_MID + sprite.pan_x + sprite.zpan_x, ..
+			H_MID + sprite.pan_y + sprite.zpan_y )
 	EndMethod
 
-	Method load_weapon_images( data:TData )
+	Method load_weapon_images( data:TData, sprite:TSprite )
+		'clear out stale data
+		turret_img = Null
+		turretUnder_img = Null
+		turretGun_img = Null
+		turretGlow_img = Null
+		hardpoint_img = Null
+		hardpointUnder_img = Null
+		hardpointGun_img = Null
+		hardpointGlow_img = Null
+		turret_img_seq = Null
+		hardpoint_img_seq = Null
+		img_seq_i = 0
+		img_seq_i_ts = millisecs()
 		Local img_path$ = Null
+		'load new imgs
 		If data.weapon.numFrames <= 1
 			'Single-frame turret/hardpoint
 			If data.weapon.turretSprite
@@ -131,6 +197,8 @@ Type TModalWeapon Extends TSubroutine
 			img_path = resource_search( data.weapon.hardpointGlowSprite )
 			If img_path Then hardpointGlow_img = LoadImage( img_path, 0 )
 		EndIf
+		'Update active sprite
+		update_sprite_img( sprite )
 	EndMethod
 
 	Method load_image_sequence:TImage[]( img_0_path$, count% )

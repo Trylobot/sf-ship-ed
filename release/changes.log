@@ -1,4 +1,9 @@
 ______________________________________________________________________________
+editor version 2.5 (starfarer 0.53.1a RC5)
+- added weapon editor prototype (incomplete)
+- added more detailed logging in sf-ship-ed.log
+- fixed: custom engines output with incorrect field name 'type_'
+______________________________________________________________________________
 editor version 2.4.5 (starfarer 0.53.1a RC5)
 - fixed: strange data corruption bugs on main ship and variant string editors
 ______________________________________________________________________________

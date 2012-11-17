@@ -1,11 +1,28 @@
 
-Function coord_string$( x!, y! )
-	Return "("+json.FormatDouble(x,1)+","+json.FormatDouble(y,1)+")"
+Function find_rect_verts( x_o#, y_o#, r_w#, r_h#, s#, p_x#, p_y#, zp_x#, zp_y#, ix# var, iy# var, iw# var, ih# var )
+	ix = x_o - 0.5*s*r_w + p_x + zp_x
+	iy = y_o - 0.5*s*r_h + p_y + zp_y
+	iw = s*r_w
+	ih = s*r_h
+EndFunction
+
+Function map_xy( x_in#, y_in#, x_out# Var, y_out# Var, translate_x#, translate_y#, scale#, round_to_half% = True )
+	x_out = (x_in - translate_x) / scale
+	y_out = (y_in - translate_y) / scale
+	If round_to_half
+		x_out = nearest_half( x_out )
+		y_out = nearest_half( y_out )
+	End If
 EndFunction
 
 Function nearest_half#( x# )
 	Return Floor((x*2.0) + 0.5)/2.0
 EndFunction
+
+Function coord_string$( x!, y! )
+	Return "("+json.FormatDouble(x,1)+","+json.FormatDouble(y,1)+")"
+EndFunction
+
 
 Function remove_pair#[]( arr#[], i% )
 	If i >= 0 And i < arr.Length-1

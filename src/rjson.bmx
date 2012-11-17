@@ -71,6 +71,7 @@ Type json
 	
 	'Global settings
 	Global error_level% = 2 'legend   2: as strict as possible   1: ignore warnings   0: ignore errors & warnings
+	Global ext_logging_fn( msg$ ) 'function that can be externalized for logging
 
 	'Encode settings
 	Global formatted% = True 'false: compact,   true: indented; global setting
@@ -571,8 +572,8 @@ Type json
 	EndFunction
 
 	'logging/exceptions /////////////////////////////////////////////////////////
-	Const LOG_WARN$ = "[WARN]"
-	Const LOG_ERROR$ = "[ERROR]"
+	Const LOG_WARN$ = " [WARN]"
+	Const LOG_ERROR$ = " [ERROR]"
 
 	'supported built-in cyclic data types ///////////////////////////////////////
 	Global TMap_TTypeId:TTypeId = TTypeId.ForName("TMap")
@@ -618,10 +619,14 @@ Function json_error( message$ )
 			If message.StartsWith( json.LOG_ERROR )
 				Throw message
 			Else
-				DebugLog message
+				If json.ext_logging_fn
+					json.ext_logging_fn( message )
+				EndIf
 			EndIf
 		Case 0 ' ignore all
-			DebugLog message
+			If json.ext_logging_fn
+				json.ext_logging_fn( message )
+			EndIf
 	EndSelect
 EndFunction
 

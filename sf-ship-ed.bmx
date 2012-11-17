@@ -117,6 +117,7 @@ Flip( 1 )
 '////////////////////////////////////////////////
 'json
 json.error_level = 1
+json.ext_logging_fn = DebugLogFile
 json.formatted = True
 json.empty_container_as_null = False
 json.precision = 6
@@ -348,7 +349,7 @@ Repeat
 	draw_data( ed, data )
 	draw_status( ed, data, sprite )
 	draw_mouse_str()
-	draw_debug( ed, sprite )
+	draw_debug( ed, data, sprite )
 
 	If ed.mode = "string_data"
 		sub_string_data.Draw( ed, data, sprite )
@@ -368,6 +369,9 @@ End
 
 Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 	If KeyHit( KEY_1 )
+		If ed.program_mode = "weapon"
+			sub_weapon.Deactivate( ed, data, sprite ) ' refactor: repetition
+		EndIf
 		'if coming from variant editing, go right into weapons mode editing
 		If ed.program_mode = "variant"
 			ed.mode = "weapon_slots"
@@ -380,20 +384,25 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 		ed.field_i = 0
 	EndIf
 	If KeyHit( KEY_2 )
+		If ed.program_mode = "weapon"
+			sub_weapon.Deactivate( ed, data, sprite ) ' refactor: repetition
+		EndIf
 		sub_set_variant.Activate( ed, data, sprite )
 	EndIf
 	If KeyHit( KEY_3 )
-		ed.program_mode = "csv"
+		If ed.program_mode = "weapon"
+			sub_weapon.Deactivate( ed, data, sprite ) ' refactor: repetition
+		EndIf
 		sub_ship_csv.Activate( ed, data, sprite )
 	EndIf
 	If KeyHit( KEY_4 )
-		ed.program_mode = "csv_wing"
+		If ed.program_mode = "weapon"
+			sub_weapon.Deactivate( ed, data, sprite ) ' refactor: repetition
+		EndIf
 		sub_wing_csv.Activate( ed, data, sprite )
 	EndIf
 	If KeyHit( KEY_5 )
-		'not ready for prime time
-		'ed.program_mode = "weapon"
-		'sub_weapon.Activate( ed, data, sprite )
+		sub_weapon.Activate( ed, data, sprite )
 	EndIf
 
 	If KeyHit( KEY_SPACE )
@@ -692,6 +701,8 @@ Function draw_data( ed:TEditor, data:TData )
 			view = data.json_view
 		ElseIf ed.program_mode = "variant"
 			view = data.json_view_variant
+		ElseIf ed.program_mode = "weapon"
+			view = data.json_view_weapon
 		Else
 			Return
 		EndIf
@@ -716,8 +727,8 @@ Function draw_data( ed:TEditor, data:TData )
 	End If
 End Function
 
-Function draw_debug( ed:TEditor, sprite:TSprite )
-	If ed.show_debug And sprite
+Function draw_debug( ed:TEditor, data:TData, sprite:TSprite )
+	If ed.show_debug And sprite And sprite.img
 		Local img_x#, img_y#
 		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y, False )
 		Local col% = Int(img_x)
@@ -839,6 +850,8 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
 				Else
 					title_w = TextWidget.Create( "wing_data.csv" )
 				EndIf
+			Case "weapon"
+				title_w = TextWidget.Create( data.weapon.id + ".wpn" )
 		EndSelect
 		draw_string( title_w, 4,4 )
 	EndIf
@@ -848,7 +861,18 @@ Endfunction
 
 Function check_open_ship_image( ed:TEditor, data:TData, sprite:TSprite )
 	If KeyHit( KEY_I )
-		load_ship_image( ed, data, sprite )
+		Select ed.program_mode
+			Case "ship"
+				load_ship_image( ed, data, sprite )
+			Case "variant"
+				load_ship_image( ed, data, sprite )
+			Case "csv"
+				load_ship_image( ed, data, sprite )
+			Case "csv_wing"
+				load_ship_image( ed, data, sprite )
+			Case "weapon"
+				'load_weapon_image( ed, data, sprite ) '??? which one :/
+		EndSelect
 	End If
 End Function
 
@@ -860,7 +884,18 @@ EndFunction
 
 Function check_new_ship_data( ed:TEditor, data:TData, sprite:TSprite )
 	If KeyHit( KEY_N ) And CONTROL And ALT
-		load_ship_data( ed, data, sprite, True )
+		Select ed.program_mode
+			Case "ship"
+				load_ship_data( ed, data, sprite, True )
+			Case "variant"
+				load_ship_data( ed, data, sprite, True )
+			Case "csv"
+				load_ship_data( ed, data, sprite, True )
+			Case "csv_wing"
+				load_ship_data( ed, data, sprite, True )
+			Case "weapon"
+				'reset_weapon_data( ... ) '???
+		EndSelect
 	End If
 End Function
 
@@ -1137,9 +1172,10 @@ EndFunction
 
 Function DebugLogFile( msg$ )
 	DebugLog( msg )
-	If DEBUG_LOG_FILE
-		WriteLine( DEBUG_LOG_FILE, millisecs()+msg )
-	EndIf	
+	Try
+		WriteLine( DEBUG_LOG_FILE, millisecs() + msg )
+	Catch ex$
+	EndTry
 EndFunction
 
 

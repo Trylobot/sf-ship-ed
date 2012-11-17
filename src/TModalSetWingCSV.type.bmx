@@ -34,6 +34,7 @@ Type TModalSetWingCSV Extends TGenericCSVSubroutine
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		Super.Activate( ed, data, sprite )
 		'////
+		ed.program_mode = "csv_wing"
 		row_load_identifier = data.variant.variantId
 		stock_stats = ed.stock_wing_stats
 		stock_stats_field_order = ed.stock_wing_stats_field_order

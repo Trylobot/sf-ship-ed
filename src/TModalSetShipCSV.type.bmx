@@ -21,6 +21,7 @@ Type TModalSetShipCSV Extends TGenericCSVSubroutine
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		Super.Activate( ed, data, sprite )
 		'////
+		ed.program_mode = "csv"
 		row_load_identifier = data.ship.hullId
 		stock_stats = ed.stock_ship_stats
 		stock_stats_field_order = ed.stock_ship_stats_field_order
