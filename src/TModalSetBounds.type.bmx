@@ -54,6 +54,7 @@ Type TModalSetBounds Extends TSubroutine
 						data.modify_bound( ed.drag_counterpart_i, img_x, img_y, True )
 					End If
 					update_bounds_coords( data, sprite )
+					data.update()
 				End If
 				ed.mouse_1 = False
 			End If

@@ -73,6 +73,10 @@ Type TEditor
 		edit_strings_weapon_i = -1
 		edit_strings_engine_i = -1
 		selected_zoom_level = 3 '=1.0
+		initialize_stock_data_containers()
+	End Method
+
+	Method initialize_stock_data_containers()
 		'object data
 		stock_ships = CreateMap()
 		stock_variants = CreateMap()
@@ -91,7 +95,7 @@ Type TEditor
 		stock_wing_stats_field_order = wing_data_csv_field_order_template.Copy()
 		'scraped enum values
 		multiselect_values = CreateMap()
-	End Method
+	EndMethod
 
 	Method load_stock_ship:TStarfarerShip( dir$, file$ )
 		Try

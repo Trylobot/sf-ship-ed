@@ -270,7 +270,26 @@ Type TData
 			End If
 		End If
 	End Method
-	
+
+	'requires subsequent call to update_weapon()	
+	Method modify_weapon_offset( i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$ )
+		If Not weapon Then Return
+		Local offsets#[]
+		Select weapon_display_mode
+			Case "turret"
+				offsets = weapon.turretOffsets
+				img_x = img_x - (spr_w / 2.0)
+				img_y = img_y - (spr_h / 2.0)
+			Case "hardpoint"
+				offsets = weapon.hardpointOffsets
+				img_x = img_x - (spr_w / 2.0)
+				img_y = img_y - (spr_h)
+		EndSelect
+		If Not offsets Then Return
+		offsets[i] =   img_x
+		offsets[i+1] = img_y
+	EndMethod
+
 	'requires subsequent call to update()
 	Method add_weapon_slot( img_x#, img_y#, existing:TStarfarerShipWeapon, reflect_over_y_axis%=false )
 		If Not ship.weaponSlots
@@ -734,6 +753,33 @@ Type TData
 		Local dist#
 		For Local i% = 0 Until ship.bounds.length-1 Step 2
 			dist = calc_distance( img_x, img_y, ship.bounds[i], ship.bounds[i+1] )
+			If nearest_i = -1 Or dist < nearest_dist
+				nearest_dist = dist
+				nearest_i = i
+			End If
+		Next
+		Return nearest_i
+	End Method
+
+	Method find_nearest_weapon_offset%( img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$ )
+		If Not weapon Then Return -1
+		Local offsets#[]
+		Select weapon_display_mode
+			Case "turret"
+				offsets = weapon.turretOffsets
+				img_x = img_x - (spr_w / 2.0)
+				img_y = img_y - (spr_h / 2.0)
+			Case "hardpoint"
+				offsets = weapon.hardpointOffsets
+				img_x = img_x - (spr_w / 2.0)
+				img_y = img_y - (spr_h)
+		EndSelect
+		If Not offsets Then Return -1
+		Local nearest_i% = -1
+		Local nearest_dist# = -1
+		Local dist#
+		For Local i% = 0 Until offsets.length Step 2
+			dist = calc_distance( img_x,img_y, offsets[i],offsets[i+1] )
 			If nearest_i = -1 Or dist < nearest_dist
 				nearest_dist = dist
 				nearest_i = i

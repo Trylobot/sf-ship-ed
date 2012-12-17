@@ -1,4 +1,9 @@
 ______________________________________________________________________________
+editor version 2.5.1 (starfarer 0.54a)
+- weapon editor can modify offsets
+- switch between turret/hardpoint mode
+- force reload of all vanilla and modded data with tilde [~]
+______________________________________________________________________________
 editor version 2.5 (starfarer 0.53.1a RC5)
 - added weapon editor prototype (incomplete)
 - added more detailed logging in sf-ship-ed.log

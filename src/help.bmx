@@ -113,6 +113,11 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "D", "Open *.wpn", ICON_KB, True, 0, "weapon" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", "Save *.wpn", ICON_KB, True, 0, "weapon" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", "Clear Data", ICON_CTRL_ALT_KB, True, 1, "weapon" ))
+	'////////////
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "H", "Turret/Hardpoint", ICON_KB, True, 0, "weapon" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "O", "Offsets", ICON_KB, True, 0, "weapon" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "A", "Angle Offsets", ICON_KB, True, 0, "weapon" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "I", "Images", ICON_KB, True, 1, "weapon" ))
 	'/////////////////////////////////////////////'
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F1", "Toggle This Help", 0, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F2", "Toggle Raw Data", 0, True, 0 ))

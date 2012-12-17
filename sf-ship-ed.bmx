@@ -160,7 +160,6 @@ Global SHIFT% = False
 Global CONTROL% = False
 Global ALT% = False
 
-
 Global TEXT_W:TextWidget = TextWidget.Create( "W" )
 Global TEXT_E:TextWidget = TextWidget.Create( "E" )
 Global TEXT_L:TextWidget = TextWidget.Create( "L" )
@@ -169,31 +168,7 @@ Global TEXT_L:TextWidget = TextWidget.Create( "L" )
 
 load_ui( ed )
 
-'////////////////////////////////////////////////
-
-load_known_multiselect_values( ed )
-'go load the rest of it if able
-For Local j% = 0 Until STARFARER_CORE_DIR.length
-	If 0 <> FileType( APP.starfarer_base_dir+STARFARER_CORE_DIR[j] )
-		DebugLogFile( " Loading STARFARER-CORE Data (Vanilla)" )
-		load_stock_data( ed, data, APP.starfarer_base_dir+STARFARER_CORE_DIR[j]+"/", TRUE )
-		Exit
-	EndIf
-Next
-If APP.mod_dirs And APP.mod_dirs.length > 0
-	For Local mod_dir$ = EachIn APP.mod_dirs
-		DebugLogFile " Loading MOD Data: "+mod_dir
-		load_stock_data( ed, data, mod_dir )
-	Next
-EndIf
-Rem 'for initial data mining
-For Local set$ = EachIn ed.multiselect_values.Keys()
-	For Local val$ = EachIn TMap(ed.multiselect_values.ValueForKey(set)).Keys()
-		DebugLogFile( "~q"+set+"~q, ~q"+val+"~q")
-	Next
-Next
-End
-EndRem
+load_starfarer_data( ed, data )
 
 '////////////////////////////////////////////////
 
@@ -368,6 +343,9 @@ End
 '////////////////////////////////////////////////
 
 Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
+	If KeyHit( KEY_TILDE )
+		load_starfarer_data( ed, data )
+	EndIf
 	If KeyHit( KEY_1 )
 		If ed.program_mode = "weapon"
 			sub_weapon.Deactivate( ed, data, sprite ) ' refactor: repetition
@@ -967,6 +945,33 @@ Function load_ui( ed:TEditor )
 	ed.ico_exit = LoadImage( "incbin::assets/ico_exit.png", 0 )
 	AutoMidHandle( true )
 End Function
+
+Function load_starfarer_data( ed:TEditor, data:TData )
+	ed.initialize_stock_data_containers()
+	load_known_multiselect_values( ed )
+	'go load the rest of it if able
+	For Local j% = 0 Until STARFARER_CORE_DIR.length
+		If 0 <> FileType( APP.starfarer_base_dir+STARFARER_CORE_DIR[j] )
+			DebugLogFile( " Loading STARFARER-CORE Data (Vanilla)" )
+			load_stock_data( ed, data, APP.starfarer_base_dir+STARFARER_CORE_DIR[j]+"/", TRUE )
+			Exit
+		EndIf
+	Next
+	If APP.mod_dirs And APP.mod_dirs.length > 0
+		For Local mod_dir$ = EachIn APP.mod_dirs
+			DebugLogFile " Loading MOD Data: "+mod_dir
+			load_stock_data( ed, data, mod_dir )
+		Next
+	EndIf
+	Rem 'for initial data mining
+	For Local set$ = EachIn ed.multiselect_values.Keys()
+		For Local val$ = EachIn TMap(ed.multiselect_values.ValueForKey(set)).Keys()
+			DebugLogFile( "~q"+set+"~q, ~q"+val+"~q")
+		Next
+	Next
+	End
+	EndRem
+EndFunction
 
 'data_dir$ should be either "starfarer-core/" or "mods/{ModDirectory}/"
 Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla%=FALSE )
