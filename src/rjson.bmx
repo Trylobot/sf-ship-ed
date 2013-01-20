@@ -51,6 +51,15 @@ Transformations can optionally specify a condition function that determines at r
   imperative for a selected object should actually run; in this way they can vary based on arbitrary
   user-defined conditions.
 
+Supported transformation type selectors:
+	null
+	boolean
+	number
+	string
+	array
+	object
+
+
 Supported transformation imperatives:
 * XJ_DELETE 
 * XJ_RENAME( new_field_name )
@@ -112,7 +121,7 @@ Type json
 		EndIf
 	EndFunction
 
-	Function add_transform( set_name$, selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue )=Null )
+	Function add_transform( set_name$, selector$, imperative_id%, argument:Object=Null, condition_func%( val:TValue, root:TValue )=Null )
 		Local xform:TValue_Transformation
 		xform = TValue_Transformation.Create( selector, imperative_id, argument, condition_func )
 		Local set:TList = TList( transformations.ValueForKey( set_name ))
@@ -1147,6 +1156,14 @@ Type TArray Extends TValue
 		Return True
 	EndMethod
 
+	Method Get:TValue( idx% )
+		If idx >= 0 And idx < elements.Count()
+			Return TValue( elements.ValueAtIndex( idx ))
+		Else
+			Return Null
+		EndIf
+	EndMethod
+
 	Function Create:TValue( other:TValue )
 		Local val:TArray
 		Select other.value_type
@@ -1293,6 +1310,10 @@ Type TObject Extends TValue
 			EndIf
 		Next
 		Return True
+	EndMethod
+
+	Method Get:TValue( key$ )
+		Return TValue( fields.ValueForKey( key ))
 	EndMethod
 
 	Function Create:TValue( other:TValue )
@@ -1443,9 +1464,9 @@ Type TValue_Transformation
 	Field selector:TValue_Selector_Token[]
 	Field imperative_id%
 	Field argument:Object
-	Field condition_func%( val:TValue )
+	Field condition_func%( val:TValue, root:TValue )
 
-	Function Create:TValue_Transformation( selector$, imperative_id%, argument:Object, condition_func%( val:TValue ) )
+	Function Create:TValue_Transformation( selector$, imperative_id%, argument:Object, condition_func%( val:TValue, root:TValue ))
 		Local xf:TValue_Transformation = New TValue_Transformation
 		xf.selector = ParseSelectorString( selector )
 		xf.imperative_id = imperative_id
@@ -1457,7 +1478,7 @@ Type TValue_Transformation
 	Method Execute( val:TValue )
 		Local matches:TList = Search( val )
 		For Local result:TValue_Search_Result = EachIn matches
-			If (condition_func = Null) Or (condition_func( result.matched ) = True)
+			If (condition_func = Null) Or (condition_func( result.matched, val ) = True)
 				Select imperative_id
 					
 					Case json.XJ_DELETE
@@ -1530,7 +1551,7 @@ Type TValue_Transformation
 					path[path.Length - 1] = New TValue_Selector_Token
 					path[path.Length - 1].type_name = field_value.GetSelectorCode()
 					path[path.Length - 1].object_field_name = field_name
-					Search( field_value, this, matches, path )
+					Search( field_value, this, matches, path ) 'RECURSIVE CALL
 				Next
 			ElseIf TArray(this)
 				'search all elements of arrays
@@ -1539,7 +1560,7 @@ Type TValue_Transformation
 					path[path.Length - 1] = New TValue_Selector_Token
 					path[path.Length - 1].type_name = array_element.GetSelectorCode()
 					path[path.Length - 1].array_element_index = element_index
-					Search( array_element, this, matches, path )
+					Search( array_element, this, matches, path ) 'RECURSIVE CALL
 					element_index :+ 1
 				Next
 			EndIf

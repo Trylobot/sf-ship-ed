@@ -133,7 +133,29 @@ json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:obj
 json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleId:string", json.XJ_DELETE,, predicate_omit_styleId )
 'TStarfarerWeapon
 json.add_transform( "parse_weapon",     "$type:string", json.XJ_RENAME, "type_" )
-json.add_transform( "stringify_weapon", "$type_:string", json.XJ_RENAME, "type"  )
+json.add_transform( "stringify_weapon", "$type_:string", json.XJ_RENAME, "type" )
+json.add_transform( "stringify_weapon", "$turretSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$turretUnderSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$turretGunSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$turretGlowSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$hardpointSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$hardpointUnderSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$hardpointGunSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$hardpointGlowSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$projectileSpecId:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$numFrames:number", json.XJ_DELETE,, predicate_omit_if_single_frame )
+json.add_transform( "stringify_weapon", "$frameRate:number", json.XJ_DELETE,, predicate_omit_if_single_frame )
+json.add_transform( "stringify_weapon", "$muzzleFlashSpec:object", json.XJ_DELETE,, predicate_omit_if_not_muzzle_flash )
+json.add_transform( "stringify_weapon", "$fringeColor:array", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
+json.add_transform( "stringify_weapon", "$coreColor:array", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
+json.add_transform( "stringify_weapon", "$glowColor:array", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
+json.add_transform( "stringify_weapon", "$darkCore:number", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
+json.add_transform( "stringify_weapon", "$autocharge:number", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
+json.add_transform( "stringify_weapon", "$requiresFullCharge:number", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
+json.add_transform( "stringify_weapon", "$textureType", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
+json.add_transform( "stringify_weapon", "$textureScrollSpeed:number", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
+json.add_transform( "stringify_weapon", "$pixelsPerTexel:number", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
+json.add_transform( "stringify_weapon", "$convergeOnPoint:boolean", json.XJ_DELETE,, predicate_omit_if_single_barrel )
 
 '////////////////////////////////////////////////
 
@@ -576,99 +598,6 @@ Function draw_ship( ed:TEditor, sprite:TSprite )
 			SetColor( 127, 127, 127 )
 		EndIf
 		DrawImage( sprite.img, W_MID + sprite.pan_x + sprite.zpan_x, H_MID + sprite.pan_y + sprite.zpan_y )
-	End If
-End Function
-
-Function draw_help( ed:TEditor )
-	If ed.show_help
-		Local help_str$
-		help_str = ""
-		For Local help:TKeyboardHelpWidget = EachIn HELP_WIDGETS
-			If  help.program_mode And help.program_mode <> ed.program_mode ..
-			Or  help.sub_mode     And help.sub_mode <> ed.mode Then Continue
-			help_str :+ LSet( help.key, 4 ) + help.desc + "~n"
-			If help.margin_bottom Then help_str :+ "~n"
-		Next
-		Local HELP_TEXT:TextWidget = TextWidget.Create( help_str, HELP_LINE_HEIGHT )
-		'-------------------------
-		SetRotation( 0 )
-		SetScale( 1, 1 )
-		SetAlpha( 1 )
-		'text
-		draw_string( HELP_TEXT, W_MAX, H_MID,,, 1.0, 0.5, HELP_LINE_HEIGHT )
-		'icons
-		Local x% = W_MAX - HELP_TEXT.w
-		Local y% = H_MID - 0.5*Float(HELP_TEXT.h)
-		For Local help:TKeyboardHelpWidget = EachIn HELP_WIDGETS
-			If  help.program_mode And help.program_mode <> ed.program_mode ..
-			Or  help.sub_mode     And help.sub_mode <> ed.mode Then Continue
-			If help.show_key_as_icon
-				Local bg_color%
-				If help.enabled
-					SetColor( 255, 255, 255 )
-					bg_color = $FFFFFF
-				Else
-					SetColor( 64, 64, 64 )
-					bg_color = $404040
-				End If
-				Select help.show_key_as_icon
-					Case ICON_KB
-						DrawImage( ed.kb_key_image, x - 4, y - 3 )
-					Case ICON_MS_LEFT
-						DrawImage( ed.mouse_left_image, x - 4, y - 3 )
-					Case ICON_MS_RIGHT
-						DrawImage( ed.mouse_right_image, x - 4, y - 3 )
-					Case ICON_MS_MIDDLE
-						DrawImage( ed.mouse_middle_image, x - 4, y - 3 )
-					Case ICON_SHIFT_CLICK
-						DrawImage( ed.mouse_left_image, x - 4, y - 3 )
-						DrawImage( ed.kb_key_wide_image, x-18-18-4 - 4, y - 3 )
-						SetImageFont( DATA_FONT )
-						draw_string( "SHIFT", x-18-18-4,y - 1, $000000,bg_color,,,, True )
-						SetImageFont( FONT )
-					Case ICON_CTRL_CLICK
-						DrawImage( ed.mouse_left_image, x - 4, y - 3 )
-						DrawImage( ed.kb_key_wide_image, x-18-18-4 - 4, y - 3 )
-						SetImageFont( DATA_FONT )
-						draw_string( "CTRL", x-18-18-4,y - 1, $000000,bg_color,,,, True )
-						SetImageFont( FONT )
-					Case ICON_ALT_CLICK
-						DrawImage( ed.mouse_left_image, x - 4, y - 3 )
-						DrawImage( ed.kb_key_wide_image, x-18-18-4 - 4, y - 3 )
-						SetImageFont( DATA_FONT )
-						draw_string( "ALT", x-18-18-4,y - 1, $000000,bg_color,,,, True )
-						SetImageFont( FONT )
-					Case ICON_SPACEBAR
-						DrawImage( ed.kb_key_space_image, x-18 - 4, y - 3 )
-					Case ICON_CTRL_ALT_RIGHT_CLICK
-						DrawImage( ed.mouse_right_image, x - 4, y - 3 )
-						DrawImage( ed.kb_key_wide_image, x-30-30-4 - 4, y - 3 )
-						DrawImage( ed.kb_key_wide_image, x-18-18-4 - 4, y - 3 )
-						SetImageFont( DATA_FONT )
-						draw_string( "CTRL", x-30-30-4,y - 1, $000000,bg_color,,,, True )
-						draw_string( "ALT",  x-18-18-4,y - 1, $000000,bg_color,,,, True )
-						SetImageFont( FONT )
-					Case ICON_CTRL_ALT_KB
-						DrawImage( ed.kb_key_image, x - 4, y - 3 )
-						DrawImage( ed.kb_key_wide_image, x-30-30-4 - 4, y - 3 )
-						DrawImage( ed.kb_key_wide_image, x-18-18-4 - 4, y - 3 )
-						SetImageFont( DATA_FONT )
-						draw_string( "CTRL", x-30-30-4,y - 1, $000000,bg_color,,,, True )
-						draw_string( "ALT",  x-18-18-4,y - 1, $000000,bg_color,,,, True )
-						SetImageFont( FONT )
-				EndSelect
-				draw_string( help.key, x+1,     y - 1, $000000,bg_color,,,, True )
-				draw_string( help.key, x+1 + 1, y - 1, $000000,bg_color,,,, False )
-			End If
-			y :+ HELP_LINE_HEIGHT
-			If help.margin_bottom
-				y :+ HELP_LINE_HEIGHT
-			End If
-		Next
-		'contextually specific help
-		If CONTEXT_HELP.Contains( ed.program_mode+"."+ed.mode )
-			mouse_str :+ String( CONTEXT_HELP.ValueForKey( ed.program_mode+"."+ed.mode )) + "~n"
-		End If
 	End If
 End Function
 

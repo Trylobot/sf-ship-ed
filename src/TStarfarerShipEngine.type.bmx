@@ -38,11 +38,11 @@ Type TStarfarerShipEngine
 End Type
 
 
-Function predicate_omit_styleSpec%( val:TValue )
+Function predicate_omit_styleSpec%( val:TValue, root:TValue )
 	Return (TNull(val) <> Null Or TObject(val).fields.IsEmpty())
 EndFunction
 
-Function predicate_omit_styleId%( val:TValue )
+Function predicate_omit_styleId%( val:TValue, root:TValue )
 	Return (TString(val).value = Null)
 EndFunction
 

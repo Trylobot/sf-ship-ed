@@ -33,7 +33,7 @@ Type TStarfarerShip
 End Type
 
 
-Function predicate_omit_builtInWeapons%( val:TValue )
+Function predicate_omit_builtInWeapons%( val:TValue, root:TValue )
 	Return TObject(val).fields.IsEmpty()
 EndFunction
 

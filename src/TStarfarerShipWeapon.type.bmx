@@ -52,7 +52,7 @@ Type TStarfarerShipWeapon
 End Type
 
 
-Function predicate_omit_position%( val:TValue )
+Function predicate_omit_position%( val:TValue, root:TValue )
 	Return (TNull(val) <> Null Or TArray(val).elements.IsEmpty())
 EndFunction
 
