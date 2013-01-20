@@ -77,7 +77,7 @@ Include "src/multiselect_values.bmx"
 '/////////////////////////////////////////////
 Global DEBUG_LOG_FILE:TStream = WriteStream( "sf-ship-ed.log" )
 SetGraphicsDriver GLMax2DDriver()
-AppTitle = "Trylobot's STARFARER ship editor"
+AppTitle = "Trylobot's STARSECTOR ship editor"
 
 Global APP:Application = Application.Load()
 

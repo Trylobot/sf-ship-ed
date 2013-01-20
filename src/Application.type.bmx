@@ -1,6 +1,7 @@
 
 Global STARFARER_CORE_DIR$[] = [ ..
 	"starfarer-core", ..
+	"starsector-core", ..
 	"Contents/Resources/Java", ..
 	"" ]
 
