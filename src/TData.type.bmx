@@ -320,7 +320,22 @@ Type TData
 
 	'requires subsequent call to update_weapon()
 	Method append_weapon_offset( img_x#,img_y#, spr_w#,spr_h#, reflect_over_y_axis% = False )
-
+		If Not weapon Then Return
+		Local L%
+		If weapon.turretOffsets Then L = weapon.turretOffsets.Length Else L = 0
+		weapon.turretOffsets = weapon.turretOffsets[..L+2]
+		weapon.turretOffsets[weapon.turretOffsets.Length-2] = img_x - (spr_w/2.0)
+		weapon.turretOffsets[weapon.turretOffsets.Length-1] = img_y - (spr_h/2.0)
+		If weapon.turretAngleOffsets Then L = weapon.turretAngleOffsets.Length Else L = 0
+		weapon.turretAngleOffsets = weapon.turretAngleOffsets[..L+1]
+		weapon.turretAngleOffsets[weapon.turretAngleOffsets.Length-1] = 0
+		If weapon.hardpointOffsets Then L = weapon.hardpointOffsets.Length Else L = 0
+		weapon.hardpointOffsets = weapon.hardpointOffsets[..L+2]
+		weapon.hardpointOffsets[weapon.hardpointOffsets.Length-2] = img_x - (spr_w/2.0)
+		weapon.hardpointOffsets[weapon.hardpointOffsets.Length-1] = img_y - (spr_h)
+		If weapon.hardpointAngleOffsets Then L = weapon.hardpointAngleOffsets.Length Else L = 0
+		weapon.hardpointAngleOffsets = weapon.hardpointAngleOffsets[..L+1]
+		weapon.hardpointAngleOffsets[weapon.hardpointAngleOffsets.Length-1] = 0
 	EndMethod
 
 	'requires subsequent call to update_weapon()	
