@@ -186,13 +186,9 @@ Type TModalWeapon Extends TSubroutine
 			End If
 			ed.mouse_1 = True
 		Else 'Not MouseDown( 1 )
-			If ed.mouse_1 'finishing drag
-				data.modify_weapon_offset( ed.drag_nearest_i, img_x,img_y, spr_w,spr_h, weapon_display_mode )
-				If ed.drag_mirrored
-					data.modify_weapon_offset( ed.drag_counterpart_i, img_x,img_y, spr_w,spr_h, weapon_display_mode, True )
-				End If
-			End If
 			ed.mouse_1 = False
+			ed.drag_nearest_i = -1
+			ed.drag_counterpart_i = -1
 		End If
 		data.update_weapon()
 	EndMethod
@@ -269,12 +265,20 @@ Type TModalWeapon Extends TSubroutine
 		Else
 			Return
 		EndIf
-		SetAlpha( 0.5 )
 		For Local i% = 0 Until offsetsArray.length Step 2
-			draw_pointer( ..
-				W_MID + sprite.pan_x+sprite.zpan_x + sprite.scale*offsetsArray[i+0], ..
-				H_MID + sprite.pan_y+sprite.zpan_y + sprite.scale*offsetsArray[i+1], ..
-				0, false, 8, 16, $FFFFFF, $000000 )
+			If i <> ed.drag_nearest_i
+				SetAlpha( 0.5 )
+				draw_pointer( ..
+					W_MID + sprite.pan_x+sprite.zpan_x + sprite.scale*offsetsArray[i+0], ..
+					H_MID + sprite.pan_y+sprite.zpan_y + sprite.scale*offsetsArray[i+1], ..
+					0, false, 8, 16, $FFFFFF, $000000 )
+			Else
+				SetAlpha( 1.0 )
+				draw_pointer( ..
+					W_MID + sprite.pan_x+sprite.zpan_x + sprite.scale*offsetsArray[i+0], ..
+					H_MID + sprite.pan_y+sprite.zpan_y + sprite.scale*offsetsArray[i+1], ..
+					0, false, 10, 20, $FFFFFF, $000000 )
+			EndIf
 		Next
 		SetAlpha( 1 )
 	EndMethod
