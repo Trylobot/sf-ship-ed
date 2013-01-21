@@ -19,9 +19,10 @@ Type TModalSetStringData Extends TSubroutine
 	Field enum_defs$[][]
 
 	Field MODE_SHIP%    = 0
-	Field MODE_WEAPON%  = 1
-	Field MODE_ENGINE%  = 2
+	Field MODE_SHIP_WEAPON%  = 1
+	Field MODE_SHIP_ENGINE%  = 2
 	Field MODE_VARIANT% = 3
+	Field MODE_WEAPON% = 4
 	Field subroutine_mode%
 
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
@@ -32,10 +33,10 @@ Type TModalSetStringData Extends TSubroutine
 		modified = false
 		If ed.program_mode = "ship"
 			If ed.edit_strings_weapon_i <> -1
-				subroutine_mode = MODE_WEAPON
+				subroutine_mode = MODE_SHIP_WEAPON
 				target = data.ship.weaponSlots[ed.edit_strings_weapon_i]
 			ElseIf ed.edit_strings_engine_i <> -1
-				subroutine_mode = MODE_ENGINE
+				subroutine_mode = MODE_SHIP_ENGINE
 				target = data.ship.engineSlots[ed.edit_strings_engine_i]
 			Else
 				subroutine_mode = MODE_SHIP
@@ -44,6 +45,9 @@ Type TModalSetStringData Extends TSubroutine
 		Else If ed.program_mode = "variant"
 			subroutine_mode = MODE_VARIANT
 			target = data.variant
+		Else If ed.program_mode = "weapon"
+			subroutine_mode = MODE_WEAPON
+			target = data.weapon
 		EndIf
 		'load data from appropriate source
 		Load( ed,data,sprite )
@@ -109,7 +113,7 @@ Type TModalSetStringData Extends TSubroutine
 					reset_cursor_color_period()
 					'///////////////////////
 					'Custom Engines check
-					If subroutine_mode = MODE_ENGINE ..
+					If subroutine_mode = MODE_SHIP_ENGINE ..
 					And labels.lines[line_i] = "ship.engine.style"
 						If TStarfarerShipEngine(target).style <> "CUSTOM"
 							TStarfarerShipEngine(target).styleId = ""
@@ -124,7 +128,7 @@ Type TModalSetStringData Extends TSubroutine
 						EndIf
 						Load( ed,data,sprite ) 're-create string-editing window
 						Save( ed,data,sprite )
-					ElseIf subroutine_mode = MODE_ENGINE ..
+					ElseIf subroutine_mode = MODE_SHIP_ENGINE ..
 					And TStarfarerShipEngine(target).style = "CUSTOM" ..
 					And labels.lines[line_i] = "ship.engine.styleId"
 						If TStarfarerShipEngine(target).styleId <> ""
@@ -137,7 +141,7 @@ Type TModalSetStringData Extends TSubroutine
 					EndIf
 					''///////////////////////
 					''Built-In Weapons check
-					'If subroutine_mode = MODE_WEAPON ..
+					'If subroutine_mode = MODE_SHIP_WEAPON ..
 					'And labels.lines[line_i] = "ship.builtInWeapons.id"
 					'	If TStarfarerShipWeapon(target).type_ = "BUILT_IN"
 					'		data.ship.builtInWeapons.Insert( TStarfarerShipWeapon(target).id, ed.get_default_multiselect_value( "ship.builtInWeapons.id" ))
@@ -193,7 +197,7 @@ Type TModalSetStringData Extends TSubroutine
 				TStarfarerShip(target).spriteName = values.lines[i]; i:+1
 				data.update()
 			'//////////////////////////////////////
-			Case MODE_ENGINE
+			Case MODE_SHIP_ENGINE
 				i = 0
 				TStarfarerShipEngine(target).style = values.lines[i]; i:+1
 				'conditional chunk 1
@@ -214,7 +218,7 @@ Type TModalSetStringData Extends TSubroutine
 				EndIf
 				data.update()
 			'///////////////////////////////////////
-			Case MODE_WEAPON 
+			Case MODE_SHIP_WEAPON 
 				i = 0
 				TStarfarerShipWeapon(target).id = values.lines[i]; i:+1
 				TStarfarerShipWeapon(target).mount = values.lines[i]; i:+1
@@ -241,6 +245,16 @@ Type TModalSetStringData Extends TSubroutine
 					TStarfarerVariant(target).weaponGroups[j].mode = values.lines[i]; i:+1
 				Next
 				data.update_variant()
+			'//////////////////////////////////////
+			Case MODE_WEAPON
+				i = 0
+				TStarfarerWeapon(target).id = values.lines[i]; i:+1
+				TStarfarerWeapon(target).size = values.lines[i]; i:+1
+				TStarfarerWeapon(target).type_ = values.lines[i]; i:+1
+				TStarfarerWeapon(target).specClass = values.lines[i]; i:+1
+				TStarfarerWeapon(target).barrelMode = values.lines[i]; i:+1
+				TStarfarerWeapon(target).animationType = values.lines[i]; i:+1
+				data.update_weapon()
 		EndSelect
 	EndMethod
 
@@ -263,7 +277,7 @@ Type TModalSetStringData Extends TSubroutine
 					TStarfarerShip(target).style +"~n"+..
 					TStarfarerShip(target).spriteName )
 			'//////////////////////////////////////
-			Case MODE_ENGINE
+			Case MODE_SHIP_ENGINE
 				labels = TextWidget.Create( ..
 					"ship.engine.style" )
 				values = TextWidget.Create( ..
@@ -293,7 +307,7 @@ Type TModalSetStringData Extends TSubroutine
 						json.FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailAngularVelocityMult, 3 ) ))
 				EndIf
 			'///////////////////////////////////////
-			Case MODE_WEAPON 
+			Case MODE_SHIP_WEAPON 
 				labels = TextWidget.Create( ..
 					"ship.weapon.id" +"~n"+..
 					"ship.weapon.mount" +"~n"+..
@@ -324,7 +338,22 @@ Type TModalSetStringData Extends TSubroutine
 					values.append( TextWidget.Create( ..
 						TStarfarerVariant(target).weaponGroups[i].mode ))
 				Next
-		EndSelect
+			'//////////////////////////////////////
+			Case MODE_WEAPON
+				labels = TextWidget.Create( ..
+					"weapon.id" +"~n"+..
+					"weapon.size" +"~n"+..
+					"weapon.type" +"~n"+..
+					"weapon.specClass" +"~n"+..
+					"weapon.barrelMode" +"~n"+..
+					"weapon.animationType" )
+				values = TextWidget.Create( ..
+					TStarfarerWeapon(target).id +"~n"+..
+					TStarfarerWeapon(target).size +"~n"+..
+					TStarfarerWeapon(target).type_ +"~n"+..
+					TStarfarerWeapon(target).specClass +"~n"+..
+					TStarfarerWeapon(target).barrelMode +"~n"+..
+					TStarfarerWeapon(target).animationType )
 		labels.update_size()
 		values.update_size()
 		''add all weapons to the known enums

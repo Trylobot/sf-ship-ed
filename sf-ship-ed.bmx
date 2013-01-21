@@ -456,17 +456,17 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 	'STRING data editor, context-sensitive (has sub-object target)
 	'TODO: move this to TSubroutines
 	If ed.program_mode = "ship" ..
-	Or ed.program_mode = "variant"
+	Or ed.program_mode = "variant" ..
+	Or ed.program_mode = "weapon"
 		If KeyHit( KEY_T )
 			ed.last_mode = ed.mode
 			ed.mode = "string_data"
 			FlushKeys()
 			ed.edit_strings_weapon_i = -1
 			ed.edit_strings_engine_i = -1
-			If sprite
+			If sprite 'context-sensitive editing
 				Local img_x#, img_y#
 				sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
-				'context-sensitive editing
 				If ed.last_mode = "weapon_slots"
 					ed.edit_strings_weapon_i = data.find_nearest_weapon_slot( img_x, img_y )
 				ElseIf ed.last_mode = "engine_slots"
