@@ -59,12 +59,29 @@ Type TModalWeapon Extends TSubroutine
 			If weapon_display_mode = "turret" Then weapon_display_mode = "hardpoint" Else weapon_display_mode = "turret"
 			update_sprite_img( data, sprite )
 		EndIf
+		'IMAGES
+		If KeyHit( KEY_A ) And ed.mode = "images"
+			try_load_sprite( ed, data, sprite, weapon_display_mode, "main" )
+			load_weapon_images( data, sprite )
+		EndIf
+		If KeyHit( KEY_G ) And ed.mode = "images"
+			try_load_sprite( ed, data, sprite, weapon_display_mode, "gun" )
+			load_weapon_images( data, sprite )
+		EndIf
+		If KeyHit( KEY_U ) And ed.mode = "images"
+			try_load_sprite( ed, data, sprite, weapon_display_mode, "under" )
+			load_weapon_images( data, sprite )
+		EndIf
+		If KeyHit( KEY_L ) And ed.mode = "images"
+			try_load_sprite( ed, data, sprite, weapon_display_mode, "glow" )
+			load_weapon_images( data, sprite )
+		EndIf
 		'MODE-SPECIFIC UPDATE CALL
 		Select ed.mode
 			Case "offsets"
 				update_offsets( ed, data, sprite )
-			Case "angle_offsets"
 			Case "images"
+
 		EndSelect
 		'need a way to toggle glow
 		' preview projectile firing?
@@ -178,6 +195,50 @@ Type TModalWeapon Extends TSubroutine
 			ed.mouse_1 = False
 		End If
 		data.update_weapon()
+	EndMethod
+
+	Method try_load_sprite( ed:TEditor, data:TData, sprite:TSprite, weapon_display_mode$, sprite_name$ )
+		Local image_path$ = RequestFile( "LOAD Weapon Image", "png", False, APP.images_dir )
+		FlushKeys()
+		If FILETYPE_FILE = FileType( image_path )
+			image_path = image_path.replace( "\", "/" )
+			Local scan$ = image_path
+			While scan.length > "graphics".length
+				scan = ExtractDir( scan )
+				If scan.EndsWith( "graphics" )
+					Local to_remove$ = ExtractDir( scan )+"/"
+					image_path = image_path.Replace( to_remove, "" )
+					If image_path.StartsWith( "graphics" )
+						Select weapon_display_mode
+							Case "turret"
+								Select sprite_name
+									Case "main"
+										data.weapon.turretSprite = image_path
+									Case "gun"
+										data.weapon.turretGunSprite = image_path
+									Case "under"
+										data.weapon.turretUnderSprite = image_path
+									Case "glow"
+										data.weapon.turretGlowSprite = image_path
+								EndSelect
+							Case "hardpoint"
+								Select sprite_name
+									Case "main"
+										data.weapon.hardpointSprite = image_path
+									Case "gun"
+										data.weapon.hardpointGunSprite = image_path
+									Case "under"
+										data.weapon.hardpointUnderSprite = image_path
+									Case "glow"
+										data.weapon.hardpointGlowSprite = image_path
+								EndSelect
+						EndSelect
+						data.update_weapon()
+					EndIf
+					Exit
+				EndIf
+			EndWhile
+		EndIf
 	EndMethod
 
 	Method draw_weapon( main_img:TImage, under_img:TImage, gun_img:TImage, glow_img:TImage, gun_offsets#[], sprite:TSprite )

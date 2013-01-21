@@ -125,6 +125,11 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "",  "Set Facing Angle", ICON_CTRL_CLICK, True, 0, "weapon", "offsets" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190),  "Remove Nearest", ICON_KB, True, 0, "weapon", "offsets" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "",  "Toggle Mirrored", ICON_SPACEBAR, True, 1, "weapon", "offsets" ))
+	'////////////
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "U",  "Set Under", ICON_KB, True, 0, "weapon", "images" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "G",  "Set Gun", ICON_KB, True, 0, "weapon", "images" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "A",  "Set Main", ICON_KB, True, 0, "weapon", "images" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "L",  "Set Glow", ICON_KB, True, 1, "weapon", "images" ))
 	'/////////////////////////////////////////////'
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F1", "Toggle This Help", 0, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F2", "Toggle Raw Data", 0, True, 0 ))
