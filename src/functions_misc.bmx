@@ -54,6 +54,19 @@ Function calc_angle#( x1#, y1#, x2#, y2# )
 	Return ATan2( diff_y, diff_x )
 EndFunction
 
+Function calc_dist_from_point_to_segment( px#,py#, s1x#,s1y#, s2x#,s2y# )
+	Local len# = calc_distance( s1x,s1y, s2x,s2y )
+	If len = 0 Then Return calc_distance( px,py, s1x,s1y )
+	Local t# = ((px - s1x)*(s2x - s1x) + (py - s1y)*(s2y - s1y)) / len
+	If t < 0 
+		Return calc_distance( px,py, s1x,s1y )
+	Else If t > 0
+		Return calc_distance( px,py, s2x,s2y )
+	Else
+		Return calc_distance( px,py, (s1x + t*(s2x - s1x)),(s1y + t*(s2y - s1y)) )
+	EndIf
+EndFunction
+
 Function ang_wrap#( a# ) 'forces the angle into the range [-180,180]
 	If a < -180
 		Local mult% = Abs( (a-180) / 360 )

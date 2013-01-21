@@ -28,6 +28,10 @@ Type TModalSetBounds Extends TSubroutine
 			If ed.bounds_symmetrical
 				data.prepend_bound( img_x, img_y, True )
 			End If
+			'TODO: find distance (dot product) to each line segment composing the bounds polygon.
+			'  Insert the new bound 'between' the vertices at either end of the closest line segment.
+			'  If there is a mirrored line segment, Insert a mirrored bound into that segment as well.
+			'data.insert_bound( img_x, img_y, ed.bounds_symmetrical )
 			data.update()
 			update_bounds_coords( data, sprite )
 		End If
@@ -116,6 +120,7 @@ Type TModalSetBounds Extends TSubroutine
 			End If
 			SetAlpha( 1 )
 			'draw bg's of lines and dots
+			'TODO: show "nearest" line segment
 			SetColor( 0, 0, 0 )
 			SetLineWidth( 4 )
 			For i = 0 Until xy.length Step 2

@@ -115,7 +115,6 @@ Type TModalWeapon Extends TSubroutine
 		Select ed.mode
 			Case "offsets"
 				draw_barrel_offsets( data, sprite )
-			Case "angle_offsets"
 			Case "images"
 		EndSelect
 	EndMethod
@@ -171,26 +170,47 @@ Type TModalWeapon Extends TSubroutine
 
 	Method update_offsets( ed:TEditor, data:TData, sprite:TSprite )
 		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
-		If MouseDown( 1 )
-			If Not ed.mouse_1 'starting drag
-				ed.drag_nearest_i = data.find_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
-				ed.drag_mirrored = ed.bounds_symmetrical
-				If( ed.drag_mirrored )
-					ed.drag_counterpart_i = data.find_symmetrical_weapon_offset_counterpart( ed.drag_nearest_i, weapon_display_mode )
-				End If
-			Else 'mouse_down_1 'continuing drag
-				data.modify_weapon_offset( ed.drag_nearest_i, img_x,img_y, spr_w,spr_h, weapon_display_mode )
-				If ed.drag_mirrored
-					data.modify_weapon_offset( ed.drag_counterpart_i, img_x,img_y, spr_w,spr_h, weapon_display_mode, True )
-				End If
-			End If
-			ed.mouse_1 = True
-		Else 'Not MouseDown( 1 )
-			ed.mouse_1 = False
-			ed.drag_nearest_i = -1
-			ed.drag_counterpart_i = -1
+		If MouseHit( 1 ) And SHIFT
+			'add
+			data.append_weapon_offset( img_x,img_y, spr_w,spr_h, False )
+			If ed.bounds_symmetrical
+				data.append_weapon_offset( img_x,img_y, spr_w,spr_h, True )
+			EndIf
+			data.update_weapon()
 		End If
-		data.update_weapon()
+		If Not SHIFT
+			'drag
+			If MouseDown( 1 )
+				If Not ed.mouse_1 'starting drag
+					ed.drag_nearest_i = data.find_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
+					ed.drag_mirrored = ed.bounds_symmetrical
+					If( ed.drag_mirrored )
+						ed.drag_counterpart_i = data.find_symmetrical_weapon_offset_counterpart( ed.drag_nearest_i, weapon_display_mode )
+					End If
+				Else 'mouse_down_1 'continuing drag
+					data.modify_weapon_offset( ed.drag_nearest_i, img_x,img_y, spr_w,spr_h, weapon_display_mode )
+					If ed.drag_mirrored
+						data.modify_weapon_offset( ed.drag_counterpart_i, img_x,img_y, spr_w,spr_h, weapon_display_mode, True )
+					End If
+				End If
+				ed.mouse_1 = True
+				data.update_weapon()
+			Else 'Not MouseDown( 1 )
+				ed.mouse_1 = False
+				ed.drag_nearest_i = -1
+				ed.drag_counterpart_i = -1
+			End If
+		End If
+		If CONTROL
+			'angle
+
+			data.update_weapon()
+		End If
+		If KeyHit( KEY_BACKSPACE )
+			'remove
+
+			data.update_weapon()
+		End If
 	EndMethod
 
 	Method try_load_sprite( ed:TEditor, data:TData, sprite:TSprite, weapon_display_mode$, sprite_name$ )
@@ -265,21 +285,22 @@ Type TModalWeapon Extends TSubroutine
 		Else
 			Return
 		EndIf
+		SetImageFont( DATA_FONT )
+		Local x#, y#
 		For Local i% = 0 Until offsetsArray.length Step 2
+			x = W_MID + sprite.pan_x+sprite.zpan_x + sprite.scale*offsetsArray[i+0]
+			y = H_MID + sprite.pan_y+sprite.zpan_y + sprite.scale*offsetsArray[i+1]
 			If i <> ed.drag_nearest_i
-				SetAlpha( 0.5 )
-				draw_pointer( ..
-					W_MID + sprite.pan_x+sprite.zpan_x + sprite.scale*offsetsArray[i+0], ..
-					H_MID + sprite.pan_y+sprite.zpan_y + sprite.scale*offsetsArray[i+1], ..
-					0, false, 8, 16, $FFFFFF, $000000 )
+				SetAlpha( 0.50 )
+				draw_pointer( x, y, 0, false, 8, 16, $FFFFFF, $000000 )
 			Else
-				SetAlpha( 1.0 )
-				draw_pointer( ..
-					W_MID + sprite.pan_x+sprite.zpan_x + sprite.scale*offsetsArray[i+0], ..
-					H_MID + sprite.pan_y+sprite.zpan_y + sprite.scale*offsetsArray[i+1], ..
-					0, false, 10, 20, $FFFFFF, $000000 )
+				SetAlpha( 0.80 )
+				draw_pointer( x, y, 0, false, 10, 20, $FFFFFF, $000000 )
 			EndIf
+			SetAlpha( 1 )
+			draw_string( ""+((i/2)+1), x,y )
 		Next
+		SetImageFont( FONT )
 		SetAlpha( 1 )
 	EndMethod
 

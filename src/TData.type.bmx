@@ -271,6 +271,58 @@ Type TData
 		End If
 	End Method
 
+
+	'requires subsequent call to update()
+	Method insert_bound( img_x#,img_y#, reflect_over_y_axis% = False )
+		If ship.bounds And ship.center
+			If ship.bounds.Length < 6 'there must be at least 3 points (a triangle) for this to make sense
+				append_bound( img_x, img_y, reflect_over_y_axis )
+				Return
+			EndIf
+			var x# = img_x - ship.center[1]
+			var y# = -( img_y - ship.center[0] )
+			If reflect_over_y_axis Then y :* -1
+			Local dist#, s1x#,s1y#, s2x#,s2y#
+			var nearest_i% = -1
+			var nearest_i_dist# = 0
+			For Local i% = 0 Until ship.bounds.Length Step 2
+				s1x = ship.bounds[i]
+				s1y = ship.bounds[i+1]
+				If i+2 < ship.bounds.Length
+					s2x = ship.bounds[i+2]
+					s2y = ship.bounds[i+3]
+				Else 'wrap around to first point
+					s2x = ship.bounds[0]
+					s2y = ship.bounds[1]
+				EndIf
+				dist = calc_dist_from_point_to_segment( x,y, s1x,s1y, s2x,s2y )
+				If nearest_i = -1 Or dist < nearest_i_dist
+					nearest_i = i
+					nearest_i_dist = dist
+				Else
+				EndIf
+			Next
+			If nearest_i = 0 'prepend; b0 -> b1
+				prepend_bound( img_x, img_y, reflect_over_y_axis )
+			ElseIf nearest_i = ship.bounds.Length-2 'append; bN -> b0
+				append_bound( img_x, img_y, reflect_over_y_axis )
+			Else 'insert middle; bV -> bW
+				ship.bounds = ship.bounds[..ship.bounds.Length+2]
+				For Local i% = nearest_i+2 Until ship.bounds.Length Step 2
+					ship.bounds[i]   = ship.bounds[i-2]
+					ship.bounds[i+1] = ship.bounds[i-1]
+				Next
+				ship.bounds[nearest_i]   = x
+				ship.bounds[nearest_i+1] = y
+			EndIf
+		EndIf
+	EndMethod
+
+	'requires subsequent call to update_weapon()
+	Method append_weapon_offset( img_x#,img_y#, spr_w#,spr_h#, reflect_over_y_axis% = False )
+
+	EndMethod
+
 	'requires subsequent call to update_weapon()	
 	Method modify_weapon_offset( i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$, reflect_over_y_axis%=false )
 		If Not weapon Then Return
