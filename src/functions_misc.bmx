@@ -40,6 +40,21 @@ Function remove_pair#[]( arr#[], i% )
 	End If
 EndFunction
 
+Function remove_at#[]( arr#[], i% )
+	If i >= 0 And i < arr.Length
+		If arr.Length = 1
+			Return Null
+		Else
+			For i = i Until arr.Length
+				arr[i] = arr[i+1]
+			Next
+			Return arr[..arr.length-1]
+		End If
+	Else
+		Return arr
+	End If
+EndFunction
+
 Function calc_distance#( x1#, y1#, x2#, y2# )
 	Local diff_x#, diff_y#
 	diff_x = x2 - x1

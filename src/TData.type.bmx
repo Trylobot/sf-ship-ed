@@ -347,24 +347,28 @@ Type TData
 				offsets = weapon.turretOffsets
 				If Not offsets Or i < 0 Or i > offsets.Length-2 Then Return
 				img_x = img_x - (spr_w / 2.0)
-				If Not reflect_over_y_axis
-					img_y = img_y - (spr_h / 2.0)
-				Else
-					img_y = -( img_y - (spr_h / 2.0))
-				EndIf
+				img_y = img_y - (spr_h / 2.0)
+				If reflect_over_y_axis Then img_y :* -1
 			Case "hardpoint"
 				offsets = weapon.hardpointOffsets
 				If Not offsets Or i < 0 Or i > offsets.Length-2 Then Return
 				img_x = img_x - (spr_w / 2.0)
-				If Not reflect_over_y_axis
-					img_y = img_y - (spr_h)
-				Else
-					img_y = -( img_y - (spr_h))
-				EndIf
+				img_y = img_y - (spr_h)
+				If reflect_over_y_axis Then img_y :* -1
 		EndSelect
 		If Not offsets Then Return
 		offsets[i] =   img_x
 		offsets[i+1] = img_y
+	EndMethod
+
+	Method remove_nearest_weapon_offset( img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$ )
+		Local nearest_i% = find_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
+		If nearest_i <> -1
+			weapon.turretOffsets = remove_pair( weapon.turretOffsets, nearest_i )
+			weapon.turretAngleOffsets = remove_at( weapon.turretAngleOffsets, nearest_i/2 )
+			weapon.hardpointOffsets = remove_pair( weapon.hardpointOffsets, nearest_i )
+			weapon.hardpointAngleOffsets = remove_at( weapon.hardpointAngleOffsets, nearest_i/2 )
+		EndIf
 	EndMethod
 
 	'requires subsequent call to update()
@@ -608,6 +612,31 @@ Type TData
 			ship.weaponSlots = remove_TStarfarerShipWeapon( ship.weaponSlots, launch_bay )
 		EndIf
 	EndMethod
+
+	'requires subsequent call to update()
+	Method set_weapon_offset_angle( slot_i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$, update_symmetrical_counterpart_if_any%=false )
+		If Not weapon Then Return
+		Local offsets#[], angleOffsets#[]
+		Local x#, y#
+		Select weapon_display_mode
+			Case "turret"
+				offsets = weapon.turretOffsets
+				angleOffsets = weapon.turretAngleOffsets
+				x = img_x - (spr_w / 2.0)
+				y = img_y - (spr_h / 2.0)
+			Case "hardpoint"
+				offsets = weapon.hardpointOffsets
+				angleOffsets = weapon.hardpointAngleOffsets
+				x = img_x - (spr_w / 2.0)
+				y = img_y - (spr_h)
+		EndSelect
+		Local new_ang# = calc_angle( offsets[slot_i],offsets[slot_i+1], x,y )
+		angleOffsets[slot_i/2] = new_ang
+		If update_symmetrical_counterpart_if_any
+			Local slot_i_cp% = find_symmetrical_weapon_offset_counterpart( slot_i, weapon_display_mode )
+			angleOffsets[slot_i_cp/2] = -new_ang
+		EndIf
+	End Method
 
 	'////////////
 	

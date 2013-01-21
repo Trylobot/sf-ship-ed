@@ -13,6 +13,7 @@ Type TModalWeapon Extends TSubroutine
 	Field img_x#,img_y# ' mouse position on image
 	Field spr_w#,spr_h#
 	Field weapon_display_mode$ ' turret, hardpoint
+	Field offset_lock_idx%
 	Field do_draw_barrels%
 	Field do_draw_glow%
 	'animated images
@@ -30,6 +31,7 @@ Type TModalWeapon Extends TSubroutine
 		'save the current sprite img to be restored later
 		sprite_img_buffer = sprite.img
 		data.update_weapon()
+		offset_lock_idx = -1
 		do_draw_glow = false
 		do_draw_barrels = false
 		load_weapon_images( data, sprite )
@@ -188,7 +190,7 @@ Type TModalWeapon Extends TSubroutine
 						ed.drag_counterpart_i = data.find_symmetrical_weapon_offset_counterpart( ed.drag_nearest_i, weapon_display_mode )
 					End If
 				Else 'mouse_down_1 'continuing drag
-					data.modify_weapon_offset( ed.drag_nearest_i, img_x,img_y, spr_w,spr_h, weapon_display_mode )
+					data.modify_weapon_offset( ed.drag_nearest_i, img_x,img_y, spr_w,spr_h, weapon_display_mode, False )
 					If ed.drag_mirrored
 						data.modify_weapon_offset( ed.drag_counterpart_i, img_x,img_y, spr_w,spr_h, weapon_display_mode, True )
 					End If
@@ -203,12 +205,17 @@ Type TModalWeapon Extends TSubroutine
 		End If
 		If CONTROL
 			'angle
-
-			data.update_weapon()
+			If MouseDown( 1 )
+				If Not ed.mouse_1 'starting operation
+					offset_lock_idx = data.find_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
+				EndIf
+				data.set_weapon_offset_angle( offset_lock_idx, img_x,img_y, spr_w,spr_h, weapon_display_mode, ed.drag_mirrored )
+				data.update_weapon()
+			EndIf
 		End If
 		If KeyHit( KEY_BACKSPACE )
 			'remove
-
+			data.remove_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
 			data.update_weapon()
 		End If
 	EndMethod
