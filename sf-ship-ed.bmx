@@ -155,6 +155,7 @@ json.add_transform( "stringify_weapon", "$requiresFullCharge:number", json.XJ_DE
 json.add_transform( "stringify_weapon", "$textureType", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
 json.add_transform( "stringify_weapon", "$textureScrollSpeed:number", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
 json.add_transform( "stringify_weapon", "$pixelsPerTexel:number", json.XJ_DELETE,, predicate_omit_if_not_type_energy )
+json.add_transform( "stringify_weapon", "$smokeSpec:object", json.XJ_DELETE,, predicate_omit_if_not_type_missile )
 json.add_transform( "stringify_weapon", "$convergeOnPoint:boolean", json.XJ_DELETE,, predicate_omit_if_single_barrel )
 
 '////////////////////////////////////////////////

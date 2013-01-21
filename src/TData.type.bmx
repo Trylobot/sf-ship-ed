@@ -272,18 +272,28 @@ Type TData
 	End Method
 
 	'requires subsequent call to update_weapon()	
-	Method modify_weapon_offset( i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$ )
+	Method modify_weapon_offset( i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$, reflect_over_y_axis%=false )
 		If Not weapon Then Return
 		Local offsets#[]
 		Select weapon_display_mode
 			Case "turret"
 				offsets = weapon.turretOffsets
+				If Not offsets Or i < 0 Or i > offsets.Length-2 Then Return
 				img_x = img_x - (spr_w / 2.0)
-				img_y = img_y - (spr_h / 2.0)
+				If Not reflect_over_y_axis
+					img_y = img_y - (spr_h / 2.0)
+				Else
+					img_y = -( img_y - (spr_h / 2.0))
+				EndIf
 			Case "hardpoint"
 				offsets = weapon.hardpointOffsets
+				If Not offsets Or i < 0 Or i > offsets.Length-2 Then Return
 				img_x = img_x - (spr_w / 2.0)
-				img_y = img_y - (spr_h)
+				If Not reflect_over_y_axis
+					img_y = img_y - (spr_h)
+				Else
+					img_y = -( img_y - (spr_h))
+				EndIf
 		EndSelect
 		If Not offsets Then Return
 		offsets[i] =   img_x
@@ -898,10 +908,29 @@ Type TData
 		Local x# = ship.bounds[i]
 		Local y# = ship.bounds[i+1]
 		For Local si% = 0 Until ship.bounds.length Step 2
-			If  ship.bounds[si] = x ..
+			If  ship.bounds[si]   = x ..
 			And ship.bounds[si+1] = -y
 				Return si
 			End If
+		Next
+		Return -1
+	End Method
+
+	Method find_symmetrical_weapon_offset_counterpart%( i%, weapon_display_mode$ )
+		Local offsets#[]
+		If weapon_display_mode = "turret"
+			offsets = weapon.turretOffsets
+		Else If weapon_display_mode = "hardpoint"
+			offsets = weapon.hardpointOffsets
+		EndIf
+		Local x# = offsets[i]
+		Local y# = offsets[i+1]
+		If Not offsets Or i Mod 2 <> 0 Or i < 0 Or i > offsets.length-2 Then Return -1
+		For Local si% = 0 Until offsets.length Step 2
+			If  offsets[si]   = x ..
+			And offsets[si+1] = -y
+				Return si
+			EndIf
 		Next
 		Return -1
 	End Method

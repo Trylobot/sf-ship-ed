@@ -64,6 +64,12 @@ Function predicate_omit_if_single_frame%( val:TValue, root:TValue )
 	EndIf
 EndFunction
 
+Function predicate_omit_if_single_barrel%( val:TValue, root:TValue )
+	'omit val if turretAngleOffsets.length <= 1
+	Local turretAngleOffsets:TArray = TArray(TObject(root).Get("turretAngleOffsets"))
+	Return turretAngleOffsets.elements.Count() <= 1
+EndFunction
+
 Function predicate_omit_if_not_muzzle_flash%( val:TValue, root:TValue )
 	'omit muzzleFlashSpec if animationType != MUZZLE_FLASH
 	Local animationType:TString = TString(TObject(root).Get("animationType"))
@@ -76,9 +82,15 @@ Function predicate_omit_if_not_type_energy%( val:TValue, root:TValue )
 	Return type_.value <> "ENERGY"
 EndFunction
 
-Function predicate_omit_if_single_barrel%( val:TValue, root:TValue )
-	'omit val if turretAngleOffsets.length <= 1
-	Local turretAngleOffsets:TArray = TArray(TObject(root).Get("turretAngleOffsets"))
-	Return turretAngleOffsets.elements.Count() <= 1
+Function predicate_omit_if_not_type_missile%( val:TValue, root:TValue )
+	'omit val if type != ENERGY
+	Local type_:TString = TString(TObject(root).Get("type"))
+	Return type_.value <> "MISSILE"
+EndFunction
+
+Function predicate_omit_if_not_type_ballistic%( val:TValue, root:TValue )
+	'omit val if type != ENERGY
+	Local type_:TString = TString(TObject(root).Get("type"))
+	Return type_.value <> "BALLISTIC"
 EndFunction
 

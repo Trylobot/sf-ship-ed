@@ -115,9 +115,16 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", "Save *.wpn", ICON_KB, True, 0, "weapon" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", "Clear Data", ICON_CTRL_ALT_KB, True, 1, "weapon" ))
 	'////////////
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "H", "Turret/Hardpoint", ICON_KB, True, 0, "weapon" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "O", "Offsets", ICON_KB, True, 0, "weapon" ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "I", "Images", ICON_KB, True, 1, "weapon" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "I", "Images", ICON_KB, True, 0, "weapon" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", "Weapon Details", ICON_KB, True, 0, "weapon" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "H", "Turret/Hardpoint", ICON_KB, True, 1, "weapon" ))
+	'////////////
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "",  "Add Offset", ICON_SHIFT_CLICK, True, 0, "weapon", "offsets" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "",  "Drag Nearest", ICON_MS_LEFT, True, 0, "weapon", "offsets" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "",  "Set Facing Angle", ICON_CTRL_CLICK, True, 0, "weapon", "offsets" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190),  "Remove Nearest", ICON_KB, True, 0, "weapon", "offsets" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "",  "Toggle Mirrored", ICON_SPACEBAR, True, 1, "weapon", "offsets" ))
 	'/////////////////////////////////////////////'
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F1", "Toggle This Help", 0, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F2", "Toggle Raw Data", 0, True, 0 ))

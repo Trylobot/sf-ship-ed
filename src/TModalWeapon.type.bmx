@@ -49,18 +49,15 @@ Type TModalWeapon Extends TSubroutine
 			img_seq_i_ts = millisecs()
 		EndIf
 		'MODE CHANGE
-		If KeyHit( KEY_H )
-			If weapon_display_mode = "turret" Then weapon_display_mode = "hardpoint" Else weapon_display_mode = "turret"
-			update_sprite_img( data, sprite )
-		EndIf
 		If KeyHit( KEY_O )
 			ed.mode = "offsets"
 		EndIf
-		If KeyHit( KEY_A )
-			ed.mode = "angle_offsets"
-		EndIf
 		If KeyHit( KEY_I )
 			ed.mode = "images"
+		EndIf
+		If KeyHit( KEY_H )
+			If weapon_display_mode = "turret" Then weapon_display_mode = "hardpoint" Else weapon_display_mode = "turret"
+			update_sprite_img( data, sprite )
 		EndIf
 		'MODE-SPECIFIC UPDATE CALL
 		Select ed.mode
@@ -160,23 +157,23 @@ Type TModalWeapon Extends TSubroutine
 		If MouseDown( 1 )
 			If Not ed.mouse_1 'starting drag
 				ed.drag_nearest_i = data.find_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
-				'ed.drag_mirrored = ed.bounds_symmetrical
-				'If( ed.drag_mirrored )
-				'	ed.drag_counterpart_i = data.find_symmetrical_counterpart( ed.drag_nearest_i )
-				'End If
+				ed.drag_mirrored = ed.bounds_symmetrical
+				If( ed.drag_mirrored )
+					ed.drag_counterpart_i = data.find_symmetrical_weapon_offset_counterpart( ed.drag_nearest_i, weapon_display_mode )
+				End If
 			Else 'mouse_down_1 'continuing drag
 				data.modify_weapon_offset( ed.drag_nearest_i, img_x,img_y, spr_w,spr_h, weapon_display_mode )
-				'If ed.drag_mirrored
-				'	data.modify_bound( ed.drag_counterpart_i, img_x, img_y, True )
-				'End If
+				If ed.drag_mirrored
+					data.modify_weapon_offset( ed.drag_counterpart_i, img_x,img_y, spr_w,spr_h, weapon_display_mode, True )
+				End If
 			End If
 			ed.mouse_1 = True
 		Else 'Not MouseDown( 1 )
 			If ed.mouse_1 'finishing drag
 				data.modify_weapon_offset( ed.drag_nearest_i, img_x,img_y, spr_w,spr_h, weapon_display_mode )
-				'If ed.drag_mirrored
-				'	data.modify_bound( ed.drag_counterpart_i, img_x, img_y, True )
-				'End If
+				If ed.drag_mirrored
+					data.modify_weapon_offset( ed.drag_counterpart_i, img_x,img_y, spr_w,spr_h, weapon_display_mode, True )
+				End If
 			End If
 			ed.mouse_1 = False
 		End If
@@ -192,7 +189,7 @@ Type TModalWeapon Extends TSubroutine
 		Local x# = W_MID + sprite.pan_x + sprite.zpan_x
 		Local y# = H_MID + sprite.pan_y + sprite.zpan_y
 		'hardpoint center point is the bottom of the turret image
-		If weapon_display_mode = "hardpoint"
+		If weapon_display_mode = "hardpoint" And sprite.img
 			x :+ float(sprite.img.height) / 2.0
 		EndIf
 		'draw
