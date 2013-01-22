@@ -322,18 +322,24 @@ Type TData
 	'requires subsequent call to update_weapon()
 	Method append_weapon_offset( img_x#,img_y#, spr_w#,spr_h#, reflect_over_y_axis% = False )
 		If Not weapon Then Return
-		Local L%
+		Local L%, x#,y#
 		If weapon.turretOffsets Then L = weapon.turretOffsets.Length Else L = 0
 		weapon.turretOffsets = weapon.turretOffsets[..L+2]
-		weapon.turretOffsets[weapon.turretOffsets.Length-2] = img_x - (spr_w/2.0)
-		weapon.turretOffsets[weapon.turretOffsets.Length-1] = img_y - (spr_h/2.0)
+		x = img_x - (spr_w/2.0)
+		y = img_y - (spr_h/2.0)
+		If reflect_over_y_axis Then y :* -1
+		weapon.turretOffsets[weapon.turretOffsets.Length-2] = x
+		weapon.turretOffsets[weapon.turretOffsets.Length-1] = y
 		If weapon.turretAngleOffsets Then L = weapon.turretAngleOffsets.Length Else L = 0
 		weapon.turretAngleOffsets = weapon.turretAngleOffsets[..L+1]
 		weapon.turretAngleOffsets[weapon.turretAngleOffsets.Length-1] = 0
 		If weapon.hardpointOffsets Then L = weapon.hardpointOffsets.Length Else L = 0
 		weapon.hardpointOffsets = weapon.hardpointOffsets[..L+2]
-		weapon.hardpointOffsets[weapon.hardpointOffsets.Length-2] = img_x - (spr_w/2.0)
-		weapon.hardpointOffsets[weapon.hardpointOffsets.Length-1] = img_y - (spr_h)
+		x = img_x - (spr_w/2.0)
+		y = img_y - (spr_h)
+		If reflect_over_y_axis Then y :* -1
+		weapon.hardpointOffsets[weapon.hardpointOffsets.Length-2] = x
+		weapon.hardpointOffsets[weapon.hardpointOffsets.Length-1] = y
 		If weapon.hardpointAngleOffsets Then L = weapon.hardpointAngleOffsets.Length Else L = 0
 		weapon.hardpointAngleOffsets = weapon.hardpointAngleOffsets[..L+1]
 		weapon.hardpointAngleOffsets[weapon.hardpointAngleOffsets.Length-1] = 0
@@ -1024,8 +1030,9 @@ Type TData
 		Local y# = offsets[i+1]
 		If Not offsets Or i Mod 2 <> 0 Or i < 0 Or i > offsets.length-2 Then Return -1
 		For Local si% = 0 Until offsets.length Step 2
-			If  offsets[si]   = x ..
-			And offsets[si+1] = -y
+			If  offsets[si]   = x  ..
+			And offsets[si+1] = -y ..
+			And i <> si
 				Return si
 			EndIf
 		Next

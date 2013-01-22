@@ -27,6 +27,7 @@ Type TModalWeapon Extends TSubroutine
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		ed.program_mode = "weapon"
 		ed.mode = "offsets"
+		ed.drag_mirrored = false
 		weapon_display_mode = "turret"
 		'save the current sprite img to be restored later
 		sprite_img_buffer = sprite.img
@@ -174,7 +175,13 @@ Type TModalWeapon Extends TSubroutine
 		If MouseHit( 1 ) And SHIFT
 			'add
 			data.append_weapon_offset( img_x,img_y, spr_w,spr_h, False )
-			If ed.bounds_symmetrical
+			Local predicted_y# = 0
+			If weapon_display_mode = "turret" 
+				predicted_y = img_y - (spr_h / 2.0)
+			ElseIf weapon_display_mode = "hardpoint"
+				predicted_y = img_y - (spr_h)
+			EndIf
+			If ed.bounds_symmetrical And predicted_y <> 0
 				data.append_weapon_offset( img_x,img_y, spr_w,spr_h, True )
 			EndIf
 			data.update_weapon()
@@ -262,6 +269,31 @@ Type TModalWeapon Extends TSubroutine
 					Exit
 				EndIf
 			EndWhile
+		Else
+			Select weapon_display_mode
+				Case "turret"
+					Select sprite_name
+						Case "main"
+							data.weapon.turretSprite = Null
+						Case "gun"
+							data.weapon.turretGunSprite = Null
+						Case "under"
+							data.weapon.turretUnderSprite = Null
+						Case "glow"
+							data.weapon.turretGlowSprite = Null
+					EndSelect
+				Case "hardpoint"
+					Select sprite_name
+						Case "main"
+							data.weapon.hardpointSprite = Null
+						Case "gun"
+							data.weapon.hardpointGunSprite = Null
+						Case "under"
+							data.weapon.hardpointUnderSprite = Null
+						Case "glow"
+							data.weapon.hardpointGlowSprite = Null
+					EndSelect
+			EndSelect
 		EndIf
 	EndMethod
 
@@ -295,10 +327,12 @@ Type TModalWeapon Extends TSubroutine
 		EndIf
 		SetImageFont( DATA_FONT )
 		Local x#, y#
+		Local nearest_i% = data.find_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
+		If ed.drag_nearest_i <> -1 Then nearest_i = ed.drag_nearest_i
 		For Local i% = 0 Until offsetsArray.length Step 2
 			x = W_MID + sprite.pan_x+sprite.zpan_x + sprite.scale*offsetsArray[i+0]
 			y = H_MID + sprite.pan_y+sprite.zpan_y + sprite.scale*offsetsArray[i+1]
-			If i <> ed.drag_nearest_i
+			If i <> nearest_i
 				SetAlpha( 0.50 )
 				draw_pointer( x, y, 0, false, 8, 16, $FFFFFF, $000000 )
 			Else
@@ -306,7 +340,7 @@ Type TModalWeapon Extends TSubroutine
 				draw_pointer( x, y, 0, false, 10, 20, $FFFFFF, $000000 )
 			EndIf
 			SetAlpha( 1 )
-			draw_string( ""+((i/2)+1), x,y )
+			draw_string( ""+((i/2)+1), x,y,,, 0.5,0.25 )
 		Next
 		SetImageFont( FONT )
 		SetAlpha( 1 )

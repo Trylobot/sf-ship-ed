@@ -45,7 +45,7 @@ Function remove_at#[]( arr#[], i% )
 		If arr.Length = 1
 			Return Null
 		Else
-			For i = i Until arr.Length
+			For i = i Until arr.Length-1
 				arr[i] = arr[i+1]
 			Next
 			Return arr[..arr.length-1]
