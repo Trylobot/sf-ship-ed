@@ -354,6 +354,7 @@ Type TModalSetStringData Extends TSubroutine
 					TStarfarerWeapon(target).specClass +"~n"+..
 					TStarfarerWeapon(target).barrelMode +"~n"+..
 					TStarfarerWeapon(target).animationType )
+		EndSelect
 		labels.update_size()
 		values.update_size()
 		''add all weapons to the known enums

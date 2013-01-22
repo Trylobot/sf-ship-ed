@@ -69,10 +69,10 @@ Function calc_angle#( x1#, y1#, x2#, y2# )
 	Return ATan2( diff_y, diff_x )
 EndFunction
 
-Function calc_dist_from_point_to_segment( px#,py#, s1x#,s1y#, s2x#,s2y# )
-	Local len# = calc_distance( s1x,s1y, s2x,s2y )
-	If len = 0 Then Return calc_distance( px,py, s1x,s1y )
-	Local t# = ((px - s1x)*(s2x - s1x) + (py - s1y)*(s2y - s1y)) / len
+Function calc_dist_from_point_to_segment#( px#,py#, s1x#,s1y#, s2x#,s2y# )
+	Local s_len# = calc_distance( s1x,s1y, s2x,s2y )
+	If s_len = 0 Then Return calc_distance( px,py, s1x,s1y )
+	Local t# = ((px - s1x)*(s2x - s1x) + (py - s1y)*(s2y - s1y)) / s_len
 	If t < 0 
 		Return calc_distance( px,py, s1x,s1y )
 	Else If t > 0

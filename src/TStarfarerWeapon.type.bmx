@@ -12,7 +12,7 @@ Type TStarfarerWeapon
 	Field hardpointUnderSprite$
 	Field hardpointGunSprite$
 	Field hardpointGlowSprite$
-	Field numFrames% '
+	Field numFrames% 
 	Field frameRate# 
 	Field visualRecoil#
 	Field renderHints$[]

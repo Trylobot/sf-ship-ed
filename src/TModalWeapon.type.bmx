@@ -116,7 +116,7 @@ Type TModalWeapon Extends TSubroutine
 		'DRAW MODE-SPECIFIC THINGS
 		Select ed.mode
 			Case "offsets"
-				draw_barrel_offsets( data, sprite )
+				draw_barrel_offsets( ed, data, sprite )
 			Case "images"
 		EndSelect
 	EndMethod
@@ -143,7 +143,6 @@ Type TModalWeapon Extends TSubroutine
 		do_draw_barrels = (data.weapon.visualRecoil <> 0)
 		load_weapon_images( data, sprite )
 	EndMethod
-
 
 	'this is for the sake of global maths that reference the sprite img for their calcs
 	Method update_sprite_img( data:TData, sprite:TSprite )
@@ -283,7 +282,7 @@ Type TModalWeapon Extends TSubroutine
 		If do_draw_glow And glow_img Then DrawImage( glow_img, x, y )
 	EndMethod
 
-	Method draw_barrel_offsets( data:TData, sprite:TSprite )
+	Method draw_barrel_offsets( ed:TEditor, data:TData, sprite:TSprite )
 		Local offsetsArray#[]
 		If weapon_display_mode = "turret"
 			offsetsArray = data.weapon.turretOffsets

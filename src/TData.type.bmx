@@ -279,12 +279,12 @@ Type TData
 				append_bound( img_x, img_y, reflect_over_y_axis )
 				Return
 			EndIf
-			var x# = img_x - ship.center[1]
-			var y# = -( img_y - ship.center[0] )
+			Local x# = img_x - ship.center[1]
+			Local y# = -( img_y - ship.center[0] )
 			If reflect_over_y_axis Then y :* -1
 			Local dist#, s1x#,s1y#, s2x#,s2y#
-			var nearest_i% = -1
-			var nearest_i_dist# = 0
+			Local nearest_i% = -1
+			Local nearest_i_dist# = 0
 			For Local i% = 0 Until ship.bounds.Length Step 2
 				s1x = ship.bounds[i]
 				s1y = ship.bounds[i+1]
