@@ -349,23 +349,24 @@ Type TData
 	Method modify_weapon_offset( i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$, reflect_over_y_axis%=False )
 		If Not weapon Then Return
 		Local offsets#[]
+		Local x#,y#
 		Select weapon_display_mode
 			Case "turret"
 				offsets = weapon.turretOffsets
 				If Not offsets Or i < 0 Or i > offsets.Length-2 Then Return
-				img_x = img_x - (spr_w / 2.0)
-				img_y = img_y - (spr_h / 2.0)
-				If reflect_over_y_axis Then img_y :* -1
+				x = img_x - (spr_w / 2.0)
+				y = img_y - (spr_h / 2.0)
+				If reflect_over_y_axis Then y :* -1
 			Case "hardpoint"
 				offsets = weapon.hardpointOffsets
 				If Not offsets Or i < 0 Or i > offsets.Length-2 Then Return
-				img_x = img_x - (spr_w / 2.0)
-				img_y = img_y - (spr_h)
-				If reflect_over_y_axis Then img_y :* -1
+				x = img_x - (spr_w / 2.0)
+				y = img_y - (spr_h)
+				If reflect_over_y_axis Then y :* -1
 		EndSelect
 		If Not offsets Then Return
-		offsets[i] =   img_x
-		offsets[i+1] = img_y
+		offsets[i] =   x
+		offsets[i+1] = y
 	EndMethod
 
 	Method remove_nearest_weapon_offset( img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$ )

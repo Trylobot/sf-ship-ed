@@ -1,9 +1,10 @@
 ______________________________________________________________________________
-editor version 2.5.1 (starsector 0.54.1a)
-- compatible with name change
-- weapon editor can modify offsets
-- switch between turret/hardpoint mode
-- force reload of all vanilla and modded data with tilde [~]
+editor version 2.6 (starsector 0.54.1a)
+- weapon editor can modify offsets (possibly buggy)
+- weapon editor can set images
+- weapon editor can switch between turret/hardpoint mode
+- tilde [~] now toggles vanilla data on/off and forces a reload of all data
+- compatible with "Starsector" name change
 ______________________________________________________________________________
 editor version 2.5 (starfarer 0.53.1a RC5)
 - added weapon editor prototype (incomplete)
