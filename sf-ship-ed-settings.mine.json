@@ -1,15 +1,13 @@
 {
-  "data_dir": "C:/Games/Starfarer/mods/sc2/data/hulls/",
-  "data_font_size": 9,
+  "starsector_base_dir": "K:/Games/Starsector/",
+  "data_dir": "K:/Games/Starsector/starsector-core/data/hulls/",
+  "variant_dir": "K:/Games/Starsector/starsector-core/data/variants/",
+  "images_dir": "K:/Games/Starsector/starsector-core/graphics/ships/",
+  "weapon_images_dir": "K:/Games/Starsector/starsector-core/graphics/weapons/",
+  "mod_dirs": [],
   "font_size": 14,
+  "data_font_size": 10,
+  "width": 1300,
   "height": 1000,
-  "images_dir": "C:/Games/Starfarer/mods/sc2/graphics/sc2/ships/",
-  "mod_dirs": [
-    "C:\\Games\\Starfarer\\mods\\nom/",
-    "C:\\Games\\Starfarer\\mods\\gsp/",
-    "C:\\Games\\Starfarer\\mods\\sc2/"
-  ],
-  "starfarer_base_dir": "C:\\Games\\Starfarer/",
-  "variant_dir": "C:/Games/Starfarer/starfarer-core/data/variants/",
-  "width": 1300
+  "hide_vanilla_data": 0
 }

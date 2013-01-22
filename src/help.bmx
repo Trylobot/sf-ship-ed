@@ -33,6 +33,7 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", "Pan View", ICON_MS_RIGHT, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", "Zoom +/-", ICON_MS_MIDDLE, True, 1 ))
 	'/////////////////////////////////////////////'
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "~~", "Toggle Vanilla Data", ICON_KB, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "M", "Load Custom Mod Data", ICON_KB, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "I", "Load Image", ICON_KB, True, 0, "ship" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "D", "Open *.ship", ICON_KB, True, 0, "ship" ))

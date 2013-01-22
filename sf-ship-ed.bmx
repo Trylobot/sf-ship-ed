@@ -121,6 +121,8 @@ json.ext_logging_fn = DebugLogFile
 json.formatted = True
 json.empty_container_as_null = False
 json.precision = 6
+'Application
+json.add_transform( "stringify_settings", "$hide_vanilla_data", json.XJ_CONVERT, "boolean" )
 'TStarfarerShipWeapon
 json.add_transform( "parse_ship",     "$weaponSlots:array/:object/$type:string", json.XJ_RENAME, "type_" )
 json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$type_:string", json.XJ_RENAME, "type"  )
@@ -367,6 +369,7 @@ End
 
 Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 	If KeyHit( KEY_TILDE )
+		APP.hide_vanilla_data = Not APP.hide_vanilla_data
 		load_starfarer_data( ed, data )
 	EndIf
 	If KeyHit( KEY_1 )
@@ -768,20 +771,24 @@ Endfunction
 '-----------------------
 
 Function check_open_ship_image( ed:TEditor, data:TData, sprite:TSprite )
-	If KeyHit( KEY_I )
-		Select ed.program_mode
-			Case "ship"
+	Select ed.program_mode
+		Case "ship"
+			If KeyHit( KEY_I )
 				load_ship_image( ed, data, sprite )
-			Case "variant"
+			EndIf
+		Case "variant"
+			If KeyHit( KEY_I )
 				load_ship_image( ed, data, sprite )
-			Case "csv"
+			EndIf
+		Case "csv"
+			If KeyHit( KEY_I )
 				load_ship_image( ed, data, sprite )
-			Case "csv_wing"
+			EndIf
+		Case "csv_wing"
+			If KeyHit( KEY_I )
 				load_ship_image( ed, data, sprite )
-			Case "weapon"
-				'load_weapon_image( ed, data, sprite ) '??? which one :/
-		EndSelect
-	End If
+			EndIf
+	EndSelect
 End Function
 
 Function check_load_mod( ed:TEditor, data:TData )
@@ -879,14 +886,15 @@ End Function
 Function load_starfarer_data( ed:TEditor, data:TData )
 	ed.initialize_stock_data_containers()
 	load_known_multiselect_values( ed )
-	'go load the rest of it if able
-	For Local j% = 0 Until STARFARER_CORE_DIR.length
-		If 0 <> FileType( APP.starfarer_base_dir+STARFARER_CORE_DIR[j] )
-			DebugLogFile( " Loading STARFARER-CORE Data (Vanilla)" )
-			load_stock_data( ed, data, APP.starfarer_base_dir+STARFARER_CORE_DIR[j]+"/", TRUE )
-			Exit
-		EndIf
-	Next
+	If Not APP.hide_vanilla_data
+		For Local j% = 0 Until STARFARER_CORE_DIR.length
+			If 0 <> FileType( APP.starsector_base_dir+STARFARER_CORE_DIR[j] )
+				DebugLogFile( " Loading STARFARER-CORE Data (Vanilla)" )
+				load_stock_data( ed, data, APP.starsector_base_dir+STARFARER_CORE_DIR[j]+"/", TRUE )
+				Exit
+			EndIf
+		Next
+	EndIf
 	If APP.mod_dirs And APP.mod_dirs.length > 0
 		For Local mod_dir$ = EachIn APP.mod_dirs
 			DebugLogFile " Loading MOD Data: "+mod_dir
@@ -1058,7 +1066,7 @@ Function resource_search$( relative_path$ )
 	Next
 	'fall back to searching vanilla data
 	For i = 0 Until STARFARER_CORE_DIR.length
-		path = APP.starfarer_base_dir + STARFARER_CORE_DIR[i]+"/" + relative_path
+		path = APP.starsector_base_dir + STARFARER_CORE_DIR[i]+"/" + relative_path
 		If FILETYPE_FILE = FileType( path )
 			Return path
 		EndIf
@@ -1092,7 +1100,7 @@ Function load_variant_data( ed:TEditor, data:TData, sprite:TSprite, use_new%=Fal
 End Function
 
 Function load_mod( ed:TEditor, data:TData )
-	Local mod_dir$ = RequestDir( "LOAD Mod Directory", APP.starfarer_base_dir )
+	Local mod_dir$ = RequestDir( "LOAD Mod Directory", APP.starsector_base_dir )
 	FlushKeys()
 	If FileType( mod_dir ) = FILETYPE_DIR
 		mod_dir :+ "/"

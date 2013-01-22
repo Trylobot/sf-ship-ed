@@ -220,9 +220,11 @@ Type TModalWeapon Extends TSubroutine
 	EndMethod
 
 	Method try_load_sprite( ed:TEditor, data:TData, sprite:TSprite, weapon_display_mode$, sprite_name$ )
-		Local image_path$ = RequestFile( "LOAD Weapon Image", "png", False, APP.images_dir )
+		Local image_path$ = RequestFile( "LOAD Weapon Image", "png", False, APP.weapon_images_dir )
 		FlushKeys()
 		If FILETYPE_FILE = FileType( image_path )
+			APP.weapon_images_dir = ExtractDir( image_path )+"/"
+			APP.save()
 			image_path = image_path.replace( "\", "/" )
 			Local scan$ = image_path
 			While scan.length > "graphics".length

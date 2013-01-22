@@ -30,7 +30,7 @@ Type TData
 		csv_row = ship_data_csv_field_template.Copy()
 		csv_row_wing = wing_data_csv_field_template.Copy()
 		weapon = New TStarfarerWeapon
-	endMethod
+	EndMethod
 	
 	'requires subsequent call to update()
 	Method decode( input_json_str$ )
@@ -39,7 +39,7 @@ Type TData
 	End Method
 	
 	Method update()
-		json.formatted = true
+		json.formatted = True
 		'encode ship object as json data
 		json_str = json.stringify( ship, "stringify_ship" )
 		json_view = columnize_text( json_str )
@@ -76,7 +76,7 @@ Type TData
 	End Method
 	
 	Method update_variant()
-		json.formatted = true
+		json.formatted = True
 		'encode ship object as json data
 		json_str_variant = json.stringify( variant, "stringify_variant" )
 		json_view_variant = columnize_text( json_str_variant )
@@ -137,7 +137,7 @@ Type TData
 	EndMethod
 
 	Method update_weapon()
-		json.formatted = true
+		json.formatted = True
 		json_str_weapon = json.stringify( weapon, "stringify_weapon" )
 		json_view_weapon = columnize_text( json_str_weapon )
 	EndMethod
@@ -273,6 +273,7 @@ Type TData
 
 
 	'requires subsequent call to update()
+	'this function is not yet ready for prime-time
 	Method insert_bound( img_x#,img_y#, reflect_over_y_axis% = False )
 		If ship.bounds And ship.center
 			If ship.bounds.Length < 6 'there must be at least 3 points (a triangle) for this to make sense
@@ -308,7 +309,7 @@ Type TData
 				append_bound( img_x, img_y, reflect_over_y_axis )
 			Else 'insert middle; bV -> bW
 				ship.bounds = ship.bounds[..ship.bounds.Length+2]
-				For Local i% = nearest_i+2 Until ship.bounds.Length Step 2
+				For Local i% = ship.bounds.Length-2 Until nearest_i Step -2
 					ship.bounds[i]   = ship.bounds[i-2]
 					ship.bounds[i+1] = ship.bounds[i-1]
 				Next
@@ -339,7 +340,7 @@ Type TData
 	EndMethod
 
 	'requires subsequent call to update_weapon()	
-	Method modify_weapon_offset( i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$, reflect_over_y_axis%=false )
+	Method modify_weapon_offset( i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$, reflect_over_y_axis%=False )
 		If Not weapon Then Return
 		Local offsets#[]
 		Select weapon_display_mode
@@ -372,7 +373,7 @@ Type TData
 	EndMethod
 
 	'requires subsequent call to update()
-	Method add_weapon_slot( img_x#, img_y#, existing:TStarfarerShipWeapon, reflect_over_y_axis%=false )
+	Method add_weapon_slot( img_x#, img_y#, existing:TStarfarerShipWeapon, reflect_over_y_axis%=False )
 		If Not ship.weaponSlots
 			ship.weaponSlots = New TStarfarerShipWeapon[1]
 		Else
@@ -385,12 +386,12 @@ Type TData
 			weapon = existing.Clone()
 		EndIf
 		weapon.locations[0] = img_x - ship.center[1]
-		if Not reflect_over_y_axis
+		If Not reflect_over_y_axis
 			weapon.locations[1] = -( img_y - ship.center[0] )
 		Else
 			weapon.locations[1] = img_y - ship.center[0]
 			weapon.angle = -weapon.angle
-		end if
+		End If
 		Local wsi% = 1
 		Local wsi_str$ = zero_pad( wsi, 4 )
 		weapon.id = "WS"+wsi_str
@@ -403,7 +404,7 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method set_weapon_slot_location( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=false )
+	Method set_weapon_slot_location( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=False )
 		If Not ship.weaponSlots Or Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
@@ -418,7 +419,7 @@ Type TData
 	End Method
 	
 	'requires subsequent call to update()
-	Method set_weapon_slot_direction( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=false )
+	Method set_weapon_slot_direction( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=False )
 		If Not ship.weaponSlots Or Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
@@ -431,7 +432,7 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method set_weapon_slot_angular_range( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=false )
+	Method set_weapon_slot_angular_range( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=False )
 		If Not ship.weaponSlots Or Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
@@ -461,7 +462,7 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method add_engine( img_x#, img_y#, existing:TStarfarerShipEngine, reflect_over_y_axis%=false )
+	Method add_engine( img_x#, img_y#, existing:TStarfarerShipEngine, reflect_over_y_axis%=False )
 		If Not ship.engineSlots
 			ship.engineSlots = New TStarfarerShipEngine[1]
 		Else
@@ -474,17 +475,17 @@ Type TData
 			engine = New TStarfarerShipEngine
 		EndIf
 		engine.location[0] = img_x - ship.center[1]
-		if not reflect_over_y_axis
+		If Not reflect_over_y_axis
 			engine.location[1] = -( img_y - ship.center[0] )
 		Else
 			engine.location[1] = img_y - ship.center[0]
 			engine.angle = -engine.angle
-		end if
+		End If
 		ship.engineSlots[ship.engineSlots.Length-1] = engine
 	End Method
 	
 	'requires subsequent call to update()
-	Method set_engine_location( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=FALSE )
+	Method set_engine_location( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=False )
 		If Not ship.engineSlots Or Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
@@ -499,7 +500,7 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method set_engine_angle( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=FALSE )
+	Method set_engine_angle( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=False )
 		If Not ship.engineSlots Or Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
@@ -512,24 +513,24 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method set_engine_size( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=FALSE )
+	Method set_engine_size( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=False )
 		If Not ship.engineSlots Or Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
 		Local engine:TStarfarerShipEngine = ship.engineSlots[slot_i]
 		Local cp_engine:TStarfarerShipEngine = find_symmetrical_engine_counterpart( engine )
 		'mouse relative to engine
-		Local mouse#[] = New float[2]
+		Local mouse#[] = New Float[2]
 		mouse[0] = img_x - engine.location[0]
 		mouse[1] = img_y - engine.location[1]
 		'get length via norm facing the direction of the engine
 		Local norm#[] = New Float[2]
-		norm[0] = cos( engine.angle )
-		norm[1] = sin( engine.angle )
+		norm[0] = Cos( engine.angle )
+		norm[1] = Sin( engine.angle )
 		engine.length = Max( 0, norm[0]*mouse[0] + norm[1]*mouse[1] )
 		'get width via norm facing perpendicular to the previous
-		norm[0] = cos( engine.angle + 90 )
-		norm[1] = sin( engine.angle + 90 )
+		norm[0] = Cos( engine.angle + 90 )
+		norm[1] = Sin( engine.angle + 90 )
 		engine.width = Abs( 2*(norm[0]*mouse[0] + norm[1]*mouse[1]) )
 		engine.contrailSize = engine.width
 		If update_symmetrical_counterpart_if_any And cp_engine
@@ -551,7 +552,7 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method set_launch_bay_port_location( slot_i%, loc_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=false )
+	Method set_launch_bay_port_location( slot_i%, loc_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=False )
 		If Not ship.weaponSlots Or Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
@@ -566,7 +567,7 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method add_launch_bay_port( img_x#, img_y#, selected_launch_bay_index%, reflect_over_y_axis%=false )
+	Method add_launch_bay_port( img_x#, img_y#, selected_launch_bay_index%, reflect_over_y_axis%=False )
 		If Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
@@ -601,10 +602,10 @@ Type TData
 		'set the requested location as a port of the launch bay
 		launch_bay.locations[launch_bay.locations.length-2] = img_x
 		launch_bay.locations[launch_bay.locations.length-1] = img_y
-	EndMEthod
+	EndMethod
 
 	'requires subsequent call to update()
-	Method remove_launch_bay_port( slot_i%, loc_i%, update_symmetrical_counterpart_if_any%=false )
+	Method remove_launch_bay_port( slot_i%, loc_i%, update_symmetrical_counterpart_if_any%=False )
 		If Not ship.weaponSlots Or Not ship.center Then Return
 		Local launch_bay:TStarfarerShipWeapon = ship.weaponSlots[slot_i]
 		launch_bay.locations = remove_pair( launch_bay.locations, loc_i )
@@ -614,7 +615,7 @@ Type TData
 	EndMethod
 
 	'requires subsequent call to update()
-	Method set_weapon_offset_angle( slot_i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$, update_symmetrical_counterpart_if_any%=false )
+	Method set_weapon_offset_angle( slot_i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$, update_symmetrical_counterpart_if_any%=False )
 		If Not weapon Then Return
 		Local offsets#[], angleOffsets#[]
 		Local x#, y#
@@ -667,7 +668,7 @@ Type TData
 				Else 'variant.weaponGroups.length > 0
 					Local L% = variant.weaponGroups.length
 					variant.weaponGroups = variant.weaponGroups[..(group_i + 1)]
-					For Local g% = L until variant.weaponGroups.length
+					For Local g% = L Until variant.weaponGroups.length
 						variant.weaponGroups[g] = New TStarfarerVariantWeaponGroup
 					Next
 					variant.weaponGroups[group_i] = group
@@ -835,11 +836,11 @@ Type TData
 	EndMethod
 
 	Method weapon_slot_id_exists%( id_str$ )
-		If not ship Or not ship.weaponslots or ship.weaponslots.length = 0 Then return false
+		If Not ship Or Not ship.weaponslots Or ship.weaponslots.length = 0 Then Return False
 		For Local weapon_slot:TStarfarerShipWeapon = EachIn ship.weaponSlots
-			if weapon_slot.id = id_str Then return true
+			If weapon_slot.id = id_str Then Return True
 		Next
-		return false
+		Return False
 	EndMethod
 
 	Method find_weapon_slot_by_id:TStarfarerShipWeapon( id_str$ )
@@ -980,7 +981,7 @@ Type TData
 	Method get_launch_bay_by_contextual_index:TStarfarerShipWeapon( LB_i% )
 		If Not ship.weaponSlots Then Return Null
 		Local c_i% = 0
-		For Local i% = 0 until ship.weaponSlots.length
+		For Local i% = 0 Until ship.weaponSlots.length
 			Local weapon:TStarfarerShipWeapon = ship.weaponSlots[i]
 			If weapon.is_launch_bay()
 				If c_i = LB_i Then Return weapon
@@ -991,7 +992,7 @@ Type TData
 	EndMethod
 
 	Method launch_bay_count%()
-		If Not ship.weaponSlots Then return 0
+		If Not ship.weaponSlots Then Return 0
 		Local count% = 0
 		For Local weapon:TStarfarerShipWeapon = EachIn ship.weaponSlots
 			If weapon.is_launch_bay() Then count :+ 1

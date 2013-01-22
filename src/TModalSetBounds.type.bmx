@@ -23,15 +23,12 @@ Type TModalSetBounds Extends TSubroutine
 		update_bounds_coords( data, sprite )
 		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
 		If MouseHit( 1 ) And SHIFT
-			'get input
 			data.append_bound( img_x, img_y, False )
+			'data.insert_bound( img_x, img_y, False )
 			If ed.bounds_symmetrical
 				data.prepend_bound( img_x, img_y, True )
+			'	data.insert_bound( img_x, img_y, True )
 			End If
-			'TODO: find distance (dot product) to each line segment composing the bounds polygon.
-			'  Insert the new bound 'between' the vertices at either end of the closest line segment.
-			'  If there is a mirrored line segment, Insert a mirrored bound into that segment as well.
-			'data.insert_bound( img_x, img_y, ed.bounds_symmetrical )
 			data.update()
 			update_bounds_coords( data, sprite )
 		End If
