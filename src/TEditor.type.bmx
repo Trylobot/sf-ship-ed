@@ -306,11 +306,20 @@ Type TEditor
 			Local size_diff% = (weapon_size_value( slot_size ) - weapon_size_value( weapon.size ))
 			'slot type match and same size or bigger by one step
 			'or universal/built-in type with same size
-			If ( slot_type = "UNIVERSAL" And size_diff = 0 ) ..
-			Or ( slot_type = "BUILT_IN" And size_diff = 0 ) ..
-			Or ( slot_type = weapon.type_ And size_diff >= 0 And size_diff <= 1 )
-				matches = matches[..(matches.length + 1)]
-				matches[matches.length - 1] = weapon.id
+			'or decorative weapons for decorative slots
+			If slot_type <> "DECORATIVE"
+				If ( slot_type = "UNIVERSAL" And size_diff = 0 ) ..
+				Or ( slot_type = "BUILT_IN" And size_diff = 0 ) ..
+				Or ( slot_type = weapon.type_ And size_diff >= 0 And size_diff <= 1 )
+					matches = matches[..(matches.length + 1)]
+					matches[matches.length - 1] = weapon.id
+				EndIf
+			Else
+				If  ( slot_type = "DECORATIVE" And size_diff = 0 ) ..
+				And ( weapon.type_ = "DECORATIVE" )
+					matches = matches[..(matches.length + 1)]
+					matches[matches.length - 1] = weapon.id
+				EndIf
 			EndIf
 		Next
 		Return matches

@@ -144,6 +144,7 @@ json.add_transform( "stringify_weapon", "$hardpointSprite:string", json.XJ_DELET
 json.add_transform( "stringify_weapon", "$hardpointUnderSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
 json.add_transform( "stringify_weapon", "$hardpointGunSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
 json.add_transform( "stringify_weapon", "$hardpointGlowSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$everyFrameEffect:string", json.XJ_DELETE,, predicate_omit_if_empty )
 json.add_transform( "stringify_weapon", "$projectileSpecId:string", json.XJ_DELETE,, predicate_omit_if_empty )
 json.add_transform( "stringify_weapon", "$numFrames:number", json.XJ_DELETE,, predicate_omit_if_single_frame )
 json.add_transform( "stringify_weapon", "$frameRate:number", json.XJ_DELETE,, predicate_omit_if_single_frame )

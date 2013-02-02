@@ -15,7 +15,7 @@ Type TStarfarerShipWeapon
 	EndMethod
 	'derived field
 	Method is_builtin%()
-		Return (type_ = "BUILT_IN")
+		Return (type_ = "BUILT_IN" Or type_ = "DECORATIVE")
 	EndMethod
 	'derived field
 	Method is_system%()

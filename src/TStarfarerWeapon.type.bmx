@@ -3,7 +3,6 @@ Type TStarfarerWeapon
 	Field specClass$
 	Field type_$
 	Field size$
-	Field displayArcRadius#
 	Field turretSprite$
 	Field turretUnderSprite$
 	Field turretGunSprite$
@@ -12,6 +11,8 @@ Type TStarfarerWeapon
 	Field hardpointUnderSprite$
 	Field hardpointGunSprite$
 	Field hardpointGlowSprite$
+	Field everyFrameEffect$
+	Field displayArcRadius#
 	Field numFrames% 
 	Field frameRate# 
 	Field visualRecoil#

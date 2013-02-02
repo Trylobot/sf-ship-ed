@@ -54,7 +54,8 @@ Type TData
 			'to do
 		Next
 		For Local weapon_slot:TStarfarerShipWeapon = EachIn ship.weaponSlots
-			If weapon_slot.type_ <> "BUILT_IN"
+			If weapon_slot.type_ <> "BUILT_IN" ..
+			And weapon_slot.type_ <> "DECORATIVE"
 				ship.builtInWeapons.Remove( weapon_slot.id )
 			EndIf
 		Next

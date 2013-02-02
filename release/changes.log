@@ -1,4 +1,7 @@
 ______________________________________________________________________________
+editor version 2.6.1 (starsector 0.54.1a)
+- added support for "DECORATIVE" weapon/slot types
+______________________________________________________________________________
 editor version 2.6 (starsector 0.54.1a)
 - weapon editor can modify offsets (possibly buggy)
 - weapon editor can set images
