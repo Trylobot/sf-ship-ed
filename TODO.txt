@@ -1,4 +1,25 @@
 
+- 0.6a compatibility update
+	- "alwaysAnimate" now works for beam weapons, too
+	- Rows starting with a '#' in .csv files will now be skipped
+	- Engine styles:
+			Can now be specified directly under "style" (i.e.: "style":"midlineFlare", as opposed to "style":"CUSTOM","styleId":"midlineFlare"). Old way still works.
+			All vanilla engine styles can be overridden using engine_styles.json
+			Styles for LOW_TECH, MIDLINE, and HIGH_TECH extracted to engine_styles.json (as examples)
+	- Made ship hull styles fully moddable (shield color, explosion color, etc)
+			Configured in data/config/hull_styles.json
+			Can add new, fully-custom styles
+			Can set custom engine/shield/etc sounds per style in sounds.json (see "engine_loop" for an example, can use custom style IDs there)
+	- Added PD_ONLY weapon hint
+			Must be used with PD hint
+			PD + PD_ONLY -> weapon will only target missiles
+			PD + PD_ONLY + ANTI_FTR -> weapon will only target missiles and fighters
+	- Hulls can now have built-in hullmods
+			"builtInMods" key in .ship file
+			see data/hulls/crig.ship for an example
+
+--------------------------------------------------
+
 - Uomoz's bug with saving stuff
 
 - weapon groups visualizations
