@@ -1,0 +1,11 @@
+{
+	"exigencyEngine":{
+		"engineColor":[241,234,207,100],
+		"contrailParticleSizeMult":0.5,
+		"contrailParticleDuration":0.1,
+		"contrailMaxSpeedMult":0.1f,
+		"contrailAngularVelocityMult":0.0f,
+		"contrailColor":[241,234,207,100],
+		"type":"SMOKE" # GLOW or SMOKE
+	}
+}

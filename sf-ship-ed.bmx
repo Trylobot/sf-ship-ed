@@ -6,7 +6,8 @@ by Trylobot
 EndRem
 
 SuperStrict
-Framework BRL.GLMax2D
+'Framework BRL.GLMax2D
+Import BRL.GLMax2D
 Import BRL.RamStream
 Import BRL.PNGLoader
 Import BRL.JPGLoader
