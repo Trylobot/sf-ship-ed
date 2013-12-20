@@ -108,22 +108,26 @@ Type TCSVLoader
 		If data = "" Then Return Null
 		Local records$[][] = New String[][1]
 		records[0] = New String[1]
+		Local c% = 0 ' data string cursor
+		Local l% = 0 ' data string cursor (reset each linebreak, for comments)
 		Local r% = 0 ' record/row counter
 		Local f% = 0 ' field/value counter
-		Local c% = 0 ' data string cursor
 		Local char$ ' current character string
 		Local in_quotes% = False ' current quoted/escaped state
+		Local in_comment% = False ' comment state
 		While c < data.Length
 			'parse char
 			char = Chr(data[c])
-			If char = "~q"
+			If char = "#" And l = 0 And Not in_quotes
+				in_comment = True
+			ElseIf char = "~q" And Not in_comment
 				'field escape char
 				in_quotes = Not in_quotes
-			ElseIf char = "," And Not in_quotes
+			ElseIf char = "," And Not in_quotes And Not in_comment
 				'advance field counter
 				f :+ 1
 				records[r] = records[r][..(f + 1)]
-			ElseIf char = "~r" Or char = "~n" And Not in_quotes
+			ElseIf char = "~r" Or char = "~n" And Not in_quotes And Not in_comment
 				'unquoted record separator char
 				If char = "~r" And (c + 1) < data.Length And Chr(data[c + 1]) = "~n"
 					'ignore "~r~n" (windows)
@@ -134,12 +138,15 @@ Type TCSVLoader
 				records = records[..(r + 1)]
 				records[r] = New String[1]
 				f = 0
-			Else
+				in_comment = False
+				l = 0
+			ElseIf Not in_comment
 				'field data
 				records[r][f] :+ char
 			EndIf
 			'advance data cursor
 			c :+ 1
+			l :+ 1
 		EndWhile
 		Return records
 	End Function
