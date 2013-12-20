@@ -15,6 +15,7 @@ Type TStarfarerShip
 	Field viewOffset#
 	Field weaponSlots:TStarfarerShipWeapon[]
 	Field builtInWeapons:TMap'<String,String>  weapon slot id --> weapon id
+	Field builtInMods$[]
 	
 	Method New()
 		bounds = New Float[0]
@@ -28,12 +29,8 @@ Type TStarfarerShip
 		spriteName = "graphics/ships/new_hull.png"
 		style = "LOW_TECH"
 		builtInWeapons = CreateMap()
+		builtInMods = New String[0]
 	End Method
 
 End Type
-
-
-Function predicate_omit_builtInWeapons%( val:TValue, root:TValue )
-	Return TObject(val).fields.IsEmpty()
-EndFunction
 

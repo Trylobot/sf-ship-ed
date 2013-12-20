@@ -301,7 +301,7 @@ Type TModalSetVariant Extends TSubroutine
 			display_str = String( hullMod.ValueForKey("name") )
 			hullmod_op = get_hullmod_csv_ordnance_points( ed, data, hullmod_id )
 			display_str = RSet( String.FromInt( hullmod_op ), 3 )+"  "+display_str
-			If data.has_hullmod( hullmod_id )
+			If data.has_builtin_hullmod( hullmod_id ) Or data.has_hullmod( hullmod_id )
 				display_str = Chr(9679)+" "+display_str 'BLACK CIRCLE
 			Else
 				display_str = "  "+display_str

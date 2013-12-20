@@ -805,6 +805,32 @@ Type TData
 		EndIf
 	EndMethod
 
+	'requires subsequent call to update()
+	Method toggle_builtin_hullmod( hullmod_id$ )
+		If ship.builtInMods.length > 0
+			Local found% = False
+			For Local i% = 0 Until ship.builtInMods.length
+				If ship.builtInMods[i] = hullmod_id
+					'Found, Remove
+					found = True
+					For i = i Until ship.builtInMods.Length-1
+						ship.builtInMods[i] = ship.builtInMods[i+1]
+					Next
+					ship.builtInMods = ship.builtInMods[..ship.builtInMods.length-1]
+				EndIf
+			Next
+			If Not found
+				'Non-Empty but Not Found, Add
+				ship.builtInMods = ship.builtInMods[..ship.builtInMods.length+1]
+				ship.builtInMods[ship.builtInMods.length-1] = hullmod_id
+			EndIf
+		Else
+			'Empty, Add
+			ship.builtInMods = New String[1]
+			ship.builtInMods[0] = hullmod_id
+		EndIf
+	EndMethod
+
 	'////////////////
 
 	Method find_assigned_slot_parent_group:TStarfarerVariantWeaponGroup( ship_weapon_slot_id$ )
@@ -1077,6 +1103,20 @@ Type TData
 			Local found% = False
 			For Local i% = 0 Until variant.hullMods.length
 				If variant.hullMods[i] = hullmod_id
+					Return True
+				EndIf
+			Next
+			Return False
+		Else
+			Return False
+		EndIf
+	EndMethod
+
+	Method has_builtin_hullmod%( hullmod_id$ )
+		If ship.builtInMods.length > 0
+			Local found% = False
+			For Local i% = 0 Until ship.builtInMods.length
+				If ship.builtInMods[i] = hullmod_id
 					Return True
 				EndIf
 			Next

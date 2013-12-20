@@ -64,6 +64,7 @@ Include "src/TModalPreviewAll.type.bmx"
 Include "src/TModalSetBounds.type.bmx"
 Include "src/TModalSetWeaponSlots.type.bmx"
 Include "src/TModalSetBuiltInWeapons.type.bmx"
+Include "src/TModalSetBuiltInHullMods.type.bmx"
 Include "src/TModalSetEngineSlots.type.bmx"
 Include "src/TModalSetStringData.type.bmx"
 Include "src/TModalLaunchBays.type.bmx"
@@ -128,7 +129,8 @@ json.add_transform( "stringify_settings", "$hide_vanilla_data", json.XJ_CONVERT,
 json.add_transform( "parse_ship",     "$weaponSlots:array/:object/$type:string", json.XJ_RENAME, "type_" )
 json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$type_:string", json.XJ_RENAME, "type"  )
 json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$position:array", json.XJ_DELETE,, predicate_omit_position )
-json.add_transform( "stringify_ship", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_builtInWeapons )
+json.add_transform( "stringify_ship", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
+json.add_transform( "stringify_ship", "$builtInMods:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
 'TStarfarerCustomEngineStyleSpec
 json.add_transform( "parse_ship",     "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
 json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:object/$type_:string", json.XJ_RENAME, "type"  )
@@ -137,16 +139,16 @@ json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleId:strin
 'TStarfarerWeapon
 json.add_transform( "parse_weapon",     "$type:string", json.XJ_RENAME, "type_" )
 json.add_transform( "stringify_weapon", "$type_:string", json.XJ_RENAME, "type" )
-json.add_transform( "stringify_weapon", "$turretSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
-json.add_transform( "stringify_weapon", "$turretUnderSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
-json.add_transform( "stringify_weapon", "$turretGunSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
-json.add_transform( "stringify_weapon", "$turretGlowSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
-json.add_transform( "stringify_weapon", "$hardpointSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
-json.add_transform( "stringify_weapon", "$hardpointUnderSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
-json.add_transform( "stringify_weapon", "$hardpointGunSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
-json.add_transform( "stringify_weapon", "$hardpointGlowSprite:string", json.XJ_DELETE,, predicate_omit_if_empty )
-json.add_transform( "stringify_weapon", "$everyFrameEffect:string", json.XJ_DELETE,, predicate_omit_if_empty )
-json.add_transform( "stringify_weapon", "$projectileSpecId:string", json.XJ_DELETE,, predicate_omit_if_empty )
+json.add_transform( "stringify_weapon", "$turretSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_weapon", "$turretUnderSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_weapon", "$turretGunSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_weapon", "$turretGlowSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_weapon", "$hardpointSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_weapon", "$hardpointUnderSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_weapon", "$hardpointGunSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_weapon", "$hardpointGlowSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_weapon", "$everyFrameEffect:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_weapon", "$projectileSpecId:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
 json.add_transform( "stringify_weapon", "$numFrames:number", json.XJ_DELETE,, predicate_omit_if_single_frame )
 json.add_transform( "stringify_weapon", "$frameRate:number", json.XJ_DELETE,, predicate_omit_if_single_frame )
 json.add_transform( "stringify_weapon", "$muzzleFlashSpec:object", json.XJ_DELETE,, predicate_omit_if_not_muzzle_flash )
@@ -203,6 +205,7 @@ Global sub_preview_all:TModalPreviewAll = New TModalPreviewAll
 Global sub_set_bounds:TModalSetBounds = New TModalSetBounds
 Global sub_set_weapon_slots:TModalSetWeaponSlots = New TModalSetWeaponSlots
 Global sub_set_built_in_weapons:TModalSetBuiltInWeapons = New TModalSetBuiltInWeapons
+Global sub_set_built_in_hullmods:TModalSetBuiltInHullMods = New TModalSetBuiltInHullMods
 Global sub_set_engine_slots:TModalSetEngineSlots = New TModalSetEngineSlots
 Global sub_string_data:TModalSetStringData = New TModalSetStringData
 Global sub_launchbays:TModalLaunchBays = New TModalLaunchBays
@@ -268,6 +271,8 @@ Repeat
 					sub_set_weapon_slots.Update( ed, data, sprite )
 				Case "built_in_weapons"
 					sub_set_built_in_weapons.Update( ed, data, sprite )
+				Case "built_in_hullmods"
+					sub_set_built_in_hullmods.Update( ed, data, sprite )
 				Case "engine_slots"
 					sub_set_engine_slots.Update( ed, data, sprite )
 				Case "launch_bays"
@@ -319,6 +324,8 @@ Repeat
 					sub_set_weapon_slots.Draw( ed, data, sprite )
 				Case "built_in_weapons"
 					sub_set_built_in_weapons.Draw( ed, data, sprite )
+				Case "built_in_hullmods"
+					sub_set_built_in_hullmods.Draw( ed, data, sprite )
 				Case "engine_slots"
 					sub_set_engine_slots.Draw( ed, data, sprite )
 				Case "launch_bays"
@@ -418,6 +425,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 	If ed.program_mode = "ship"
 		'If not selecting a weapon for a built-in slot, check ESCAPE key
 		If Not( ed.mode = "built_in_weapons" And ed.weapon_lock_i <> -1 ) ..
+		.. 'And Not(ed.mode = "built_in_hullmods" AND ed.builtIn_hullmod_i <> -1 ) ..
 		And (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			ed.last_mode = ed.mode
 			ed.mode = "none"
@@ -444,6 +452,9 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 		EndIf
 		If KeyHit( KEY_U )
 			sub_set_built_in_weapons.Activate( ed, data, sprite )
+		EndIf
+		If KeyHit( KEY_H )
+			sub_set_built_in_hullmods.Activate( ed, data, sprite )
 		EndIf
 		If KeyHit( KEY_L )
 			sub_launchbays.Activate( ed, data, sprite )
@@ -596,6 +607,7 @@ Function draw_ship( ed:TEditor, sprite:TSprite )
 		SetColor( 255, 255, 255 )
 		If ed.mode = "weapon_slots" ..
 		Or ed.mode = "built_in_weapons" ..
+		Or ed.mode = "built_in_hullmods" ..
 		Or ed.mode = "launch_bays" ..
 		Or ed.mode = "string_data" ..
 		Or ed.program_mode = "variant" ..

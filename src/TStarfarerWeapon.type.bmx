@@ -50,11 +50,6 @@ Type TStarfarerWeapon
 EndType
 
 
-Function predicate_omit_if_empty%( val:TValue, root:TValue )
-	'omit val if it is null/empty string
-	Return TString(val).value = ""
-EndFunction
-
 Function predicate_omit_if_single_frame%( val:TValue, root:TValue )
 	'omit val if numFrames <= 1 or does not exist
 	Local numFrames:TNumber = TNumber(TObject(root).Get("numFrames"))

@@ -1581,5 +1581,21 @@ Type TValue_Transformation
 
 EndType
 
+'////////////////////////////////
+
+Function predicate_omit_if_empty_string%( val:TValue, root:TValue )
+	'omit val if it is null/empty string
+	Return TString(val) And TString(val).value = ""
+EndFunction
+
+Function predicate_omit_if_empty_object%( val:TValue, root:TValue )
+	'omit val if it is null/empty string
+	Return TObject(val) And TObject(val).fields.IsEmpty()
+EndFunction
+
+Function predicate_omit_if_empty_array%( val:TValue, root:TValue )
+	'omit val if it is null/empty string
+	Return TArray(val) And TArray(val).elements.IsEmpty()
+EndFunction
 
 
