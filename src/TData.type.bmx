@@ -108,7 +108,7 @@ Type TData
 					unassign_weapon_from_slot( weapon_slot.id )
 				EndIf
 			ElseIf Not weapon_slot.is_visible_to_variant()
-				'Ensure that any SYSTEM and LAUNCH_BAY slots are not referenced at all
+				'Ensure that SYSTEM, DECORATIVE and LAUNCH_BAY slots never appear in the variant data
 				unassign_weapon_from_slot( weapon_slot.id )
 			EndIf
 		Next

@@ -181,8 +181,11 @@ Type TModalSetVariant Extends TSubroutine
 		For g = 0 Until data.variant.weaponGroups.length
 			group = data.variant.weaponGroups[g]
 			For weapon_slot_id = EachIn group.weapons.Keys()
-				all_assigned_weapon_slot_ids.Insert( weapon_slot_id, String( group.weapons.ValueForKey( weapon_slot_id )) )
-				count :+ 1
+				'Local weapon_slot:TStarfarerShipWeapon = data.find_weapon_slot_by_id( weapon_slot_id )
+				'If weapon_slot And weapon_slot.is_visible_to_variant()
+					all_assigned_weapon_slot_ids.Insert( weapon_slot_id, String( group.weapons.ValueForKey( weapon_slot_id )) )
+					count :+ 1
+				'EndIf
 			Next
 		Next
 		weapon_slot_ids = new String[count]
