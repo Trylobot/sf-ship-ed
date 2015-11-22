@@ -1,4 +1,7 @@
 ______________________________________________________________________________
+editor version 2.6.3 (starsector 0.7a RC1)
+- ship variants will no longer assign DECORATIVE, SYSTEM or LAUNCH_BAY weapons
+______________________________________________________________________________
 editor version 2.6.2 (starsector 0.6.1a)
 - full support for built-in hull mods
 - silently ignores trailing "f" in JSON floating-point number literals
