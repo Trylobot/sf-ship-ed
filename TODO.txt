@@ -1,3 +1,5 @@
+- 0.7a compatibility update
+    ?
 
 - 0.6a compatibility update
 	- silently ignore trailing "f" in floating-point number literals

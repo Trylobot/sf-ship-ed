@@ -12,7 +12,10 @@
 				".bmx",
 				".git"
 			],
-			"path": "."
+			"path": "/C/Dev/BlitzMax/sf-ship-ed"
+		},
+		{
+			"path": "/K/Games/Starsector"
 		}
 	]
 }

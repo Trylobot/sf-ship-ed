@@ -44,6 +44,13 @@ Type TStarfarerWeapon
 	Field fireSoundTwo$
 	Field specialWeaponGlowHeight#
 	Field specialWeaponGlowWidth#
+	Field alwaysAnimate$
+	Field renderBelowAllWeapons%
+	Field showDamageWhenDecorative%
+	Field collisionClass$
+	Field collisionClassByFighter$
+	Field beamFireOnlyOnFullCharge%
+	Field beamEffect$
 
 	Method New()
 	End Method

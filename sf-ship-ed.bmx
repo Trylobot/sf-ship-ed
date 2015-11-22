@@ -40,6 +40,7 @@ Include "src/instaquit.bmx"
 Include "src/TextWidget.type.bmx"
 Include "src/TKeyboardHelpWidget.type.bmx"
 Include "src/TStarfarerShip.type.bmx"
+Include "src/TStarfarerSkin.type.bmx"
 Include "src/TStarfarerShipWeapon.type.bmx"
 Include "src/TStarfarerCustomEngineStyleSpec.type.bmx"
 Include "src/TStarfarerShipEngine.type.bmx"
@@ -139,6 +140,9 @@ json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleId:strin
 'TStarfarerWeapon
 json.add_transform( "parse_weapon",     "$type:string", json.XJ_RENAME, "type_" )
 json.add_transform( "stringify_weapon", "$type_:string", json.XJ_RENAME, "type" )
+json.add_transform( "stringify_weapon", "$renderBelowAllWeapons", json.XJ_CONVERT, "boolean" )
+json.add_transform( "stringify_weapon", "$beamFireOnlyOnFullCharge", json.XJ_CONVERT, "boolean" )
+json.add_transform( "stringify_weapon", "$showDamageWhenDecorative", json.XJ_CONVERT, "boolean" )
 json.add_transform( "stringify_weapon", "$turretSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
 json.add_transform( "stringify_weapon", "$turretUnderSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
 json.add_transform( "stringify_weapon", "$turretGunSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )

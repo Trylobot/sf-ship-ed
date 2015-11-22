@@ -6,6 +6,7 @@ Type TStarfarerVariant
 	Field fluxCapacitors%
 	Field hullMods$[]
 	Field weaponGroups:TStarfarerVariantWeaponGroup[]
+	Field quality#
 	
 	Method New()
 		displayName = "New Variant"

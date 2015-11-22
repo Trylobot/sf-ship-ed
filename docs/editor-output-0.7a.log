@@ -1,0 +1,386 @@
+DebugLog: Enum  HIGH_TECH  (ship.engine.style)
+DebugLog: Enum  LOW_TECH  (ship.engine.style)
+DebugLog: Enum  LOW_TECH_FIGHTER  (ship.engine.style)
+DebugLog: Enum  MIDLINE  (ship.engine.style)
+DebugLog: Enum  CUSTOM  (ship.engine.style)
+DebugLog: Enum    (ship.engine.styleId)
+DebugLog: Enum  SMOKE  (ship.engine.styleSpec.type)
+DebugLog: Enum  GLOW  (ship.engine.styleSpec.type)
+DebugLog: Enum  CAPITAL_SHIP  (ship.hullSize)
+DebugLog: Enum  CRUISER  (ship.hullSize)
+DebugLog: Enum  DESTROYER  (ship.hullSize)
+DebugLog: Enum  FIGHTER  (ship.hullSize)
+DebugLog: Enum  FRIGATE  (ship.hullSize)
+DebugLog: Enum  HIGH_TECH  (ship.style)
+DebugLog: Enum  LOW_TECH  (ship.style)
+DebugLog: Enum  MIDLINE  (ship.style)
+DebugLog: Enum  HARDPOINT  (ship.weapon.mount)
+DebugLog: Enum  HIDDEN  (ship.weapon.mount)
+DebugLog: Enum  TURRET  (ship.weapon.mount)
+DebugLog: Enum  LARGE  (ship.weapon.size)
+DebugLog: Enum  MEDIUM  (ship.weapon.size)
+DebugLog: Enum  SMALL  (ship.weapon.size)
+DebugLog: Enum  BALLISTIC  (ship.weapon.type)
+DebugLog: Enum  ENERGY  (ship.weapon.type)
+DebugLog: Enum  LAUNCH_BAY  (ship.weapon.type)
+DebugLog: Enum  MISSILE  (ship.weapon.type)
+DebugLog: Enum  UNIVERSAL  (ship.weapon.type)
+DebugLog: Enum  BUILT_IN  (ship.weapon.type)
+DebugLog: Enum  SYSTEM  (ship.weapon.type)
+DebugLog: Enum  DECORATIVE  (ship.weapon.type)
+DebugLog: Enum  ALTERNATING  (variant.weaponGroup.mode)
+DebugLog: Enum  LINKED  (variant.weaponGroup.mode)
+DebugLog: Enum  NONE  (ship_csv.shield type)
+DebugLog: Enum  OMNI  (ship_csv.shield type)
+DebugLog: Enum  FRONT  (ship_csv.shield type)
+DebugLog: Enum  PHASE  (ship_csv.shield type)
+DebugLog: Enum    (ship_csv.defense id)
+DebugLog: Enum  phasecloak  (ship_csv.defense id)
+DebugLog: Enum  V  (wing_csv.formation)
+DebugLog: Enum  CLAW  (wing_csv.formation)
+DebugLog: Enum  BOX  (wing_csv.formation)
+DebugLog: Enum  FIGHTER  (wing_csv.role)
+DebugLog: Enum  ASSAULT  (wing_csv.role)
+DebugLog: Enum  INTERCEPTOR  (wing_csv.role)
+DebugLog: Enum  BOMBER  (wing_csv.role)
+DebugLog: Enum  SUPPORT  (wing_csv.role)
+DebugLog: Enum  GLOW  (weapon.animationType)
+DebugLog: Enum  GLOW_AND_FLASH  (weapon.animationType)
+DebugLog: Enum  MUZZLE_FLASH  (weapon.animationType)
+DebugLog: Enum  NONE  (weapon.animationType)
+DebugLog: Enum  SMOKE  (weapon.animationType)
+DebugLog: Enum  ALTERNATING  (weapon.barrelMode)
+DebugLog: Enum  ALTERNATING_BURST  (weapon.barrelMode)
+DebugLog: Enum  LINKED  (weapon.barrelMode)
+DebugLog: Enum  LARGE  (weapon.size)
+DebugLog: Enum  MEDIUM  (weapon.size)
+DebugLog: Enum  SMALL  (weapon.size)
+DebugLog: Enum  beam  (weapon.specClass)
+DebugLog: Enum  projectile  (weapon.specClass)
+DebugLog: Enum  BALLISTIC  (weapon.type)
+DebugLog: Enum  ENERGY  (weapon.type)
+DebugLog: Enum  MISSILE  (weapon.type)
+DebugLog: Enum  SYSTEM  (weapon.type)
+DebugLog: Enum  DECORATIVE  (weapon.type)
+DebugLog: Loading STARFARER-CORE Data (Vanilla)
+DebugLog: LOADED afflictor.ship
+DebugLog: LOADED apogee.ship
+DebugLog: LOADED astral.ship
+DebugLog: LOADED atlas.ship
+DebugLog: LOADED aurora.ship
+DebugLog: LOADED brawler.ship
+DebugLog: LOADED broadsword.ship
+DebugLog: LOADED buffalo.ship
+DebugLog: LOADED buffalo_mk2.ship
+DebugLog: LOADED condor.ship
+DebugLog: LOADED conquest.ship
+DebugLog: LOADED crig.ship
+DebugLog: LOADED dagger.ship
+DebugLog: LOADED dominator.ship
+DebugLog: LOADED doom.ship
+DebugLog: LOADED dram.ship
+DebugLog: LOADED drone_assault.ship
+DebugLog: LOADED drone_borer.ship
+DebugLog: LOADED drone_pd.ship
+DebugLog: LOADED drone_pd_midline.ship
+DebugLog: LOADED drone_sensor.ship
+DebugLog: LOADED drone_terminator.ship
+DebugLog: LOADED eagle.ship
+DebugLog: LOADED enforcer.ship
+DebugLog: LOADED falcon.ship
+DebugLog: LOADED gemini.ship
+DebugLog: LOADED gladius.ship
+DebugLog: LOADED gryphon.ship
+DebugLog: Enum  HYBRID  (ship.weapon.type)
+DebugLog: LOADED hammerhead.ship
+DebugLog: LOADED hermes.ship
+DebugLog: LOADED heron.ship
+DebugLog: LOADED hound.ship
+DebugLog: LOADED hyperion.ship
+DebugLog: LOADED kite.ship
+DebugLog: LOADED lasher.ship
+DebugLog: LOADED longbow.ship
+DebugLog: LOADED medusa.ship
+DebugLog: LOADED mercury.ship
+DebugLog: LOADED mining_drone.ship
+DebugLog: LOADED monitor.ship
+DebugLog: LOADED mudskipper.ship
+DebugLog: LOADED mule.ship
+DebugLog: LOADED nebula.ship
+DebugLog: LOADED odyssey.ship
+DebugLog: LOADED omen.ship
+DebugLog: LOADED onslaught.ship
+DebugLog: LOADED ox.ship
+DebugLog: LOADED paragon.ship
+DebugLog: LOADED phaeton.ship
+DebugLog: LOADED piranha.ship
+DebugLog: LOADED prometheus.ship
+DebugLog: LOADED shade.ship
+DebugLog: LOADED shepherd.ship
+DebugLog: LOADED shuttlepod.ship
+DebugLog: LOADED starliner.ship
+DebugLog: LOADED sunder.ship
+DebugLog: LOADED talon.ship
+DebugLog: LOADED tarsus.ship
+DebugLog: LOADED tempest.ship
+DebugLog: LOADED thunder.ship
+DebugLog: LOADED trident.ship
+DebugLog: LOADED valkyrie.ship
+DebugLog: LOADED venture.ship
+DebugLog: LOADED vigilance.ship
+DebugLog: LOADED warhound.ship
+DebugLog: LOADED warthog.ship
+DebugLog: LOADED wasp.ship
+DebugLog: LOADED wolf.ship
+DebugLog: LOADED xyphos.ship
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED afflictor_Strike.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED apogee_Balanced.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED astral_Elite.variant
+DebugLog: LOADED atlas_Standard.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED brawler_Assault.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED brawler_Elite.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED brawler_Starting.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED buffalo2_FS.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED condor_FS.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED condor_Support.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED crig_Standard.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED doom_Strike.variant
+DebugLog: LOADED dram_Light.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED gemini_Standard.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED heron_Standard.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED hyperion_Attack.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED hyperion_Strike.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED kite_Raider.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED medusa_Attack.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED medusa_CS.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED medusa_PD.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED medusa_Starting.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED monitor_Escort.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED monitor_Starting.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED mudskipper_Standard.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED nebula_Standard.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED odyssey_Balanced.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED omen_PD.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED ox_Standard.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED phaeton_Standard.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED prometheus_Super.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED shade_Assault.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED shepherd_Frontier.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED starliner_Standard.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED tempest_Attack.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED tempest_Balanced.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED tempest_Starting.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED valkyrie_Elite.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED vigilance_AP.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED vigilance_FS.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED vigilance_Standard.variant
+DebugLog: LOADED vigilance_Starting.variant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED vigilance_Strike.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED broadsword_Fighter.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED dagger_Bomber.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED gladius_Fighter.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED longbow_Support.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED mining_drone_Standard.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED piranha_Bomber.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED talon_Interceptor.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED thunder_Fighter.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED trident_Bomber.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED warthog_Fighter.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED wasp_Interceptor.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: [WARN] could not find field name quality in object of type TStarfarerVariant
+DebugLog: LOADED xyphos_Fighter.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_assault.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_borer.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_pd.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_pd_midline.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_sensor.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_terminator.variant
+DebugLog: LOADED amblaster.wpn
+DebugLog: LOADED annihilator.wpn
+DebugLog: LOADED annihilatorpod.wpn
+DebugLog: LOADED arbalest.wpn
+DebugLog: LOADED atropos.wpn
+DebugLog: LOADED atropos_single.wpn
+DebugLog: LOADED autopulse.wpn
+DebugLog: [WARN] could not find field name alwaysAnimate in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name renderBelowAllWeapons in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name showDamageWhenDecorative in object of type TStarfarerWeapon
+DebugLog: Enum    (weapon.barrelMode)
+DebugLog: Enum    (weapon.animationType)
+DebugLog: LOADED blinker_green.wpn
+DebugLog: [WARN] could not find field name alwaysAnimate in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name renderBelowAllWeapons in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name showDamageWhenDecorative in object of type TStarfarerWeapon
+DebugLog: LOADED blinker_red.wpn
+DebugLog: LOADED bomb.wpn
+DebugLog: LOADED chaingun.wpn
+DebugLog: LOADED clusterbomb.wpn
+DebugLog: LOADED cyclone.wpn
+DebugLog: LOADED dualflak.wpn
+DebugLog: LOADED flak.wpn
+DebugLog: LOADED fragbomb.wpn
+DebugLog: LOADED gauss.wpn
+DebugLog: LOADED gravitonbeam.wpn
+DebugLog: [WARN] could not find field name collisionClass in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name collisionClassByFighter in object of type TStarfarerWeapon
+DebugLog: LOADED guardian.wpn
+DebugLog: LOADED hammer.wpn
+DebugLog: LOADED harpoon.wpn
+DebugLog: LOADED harpoonpod.wpn
+DebugLog: LOADED harpoon_single.wpn
+DebugLog: LOADED heatseeker.wpn
+DebugLog: LOADED heavyac.wpn
+DebugLog: LOADED heavyblaster.wpn
+DebugLog: [WARN] could not find field name collisionClass in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name collisionClassByFighter in object of type TStarfarerWeapon
+DebugLog: LOADED heavyburst.wpn
+DebugLog: LOADED heavymauler.wpn
+DebugLog: LOADED heavymg.wpn
+DebugLog: LOADED heavyneedler.wpn
+DebugLog: LOADED hellbore.wpn
+DebugLog: LOADED hephag.wpn
+DebugLog: [WARN] could not find field name beamFireOnlyOnFullCharge in object of type TStarfarerWeapon
+DebugLog: LOADED hil.wpn
+DebugLog: LOADED hurricane.wpn
+DebugLog: LOADED hveldriver.wpn
+DebugLog: LOADED interdictorbeam.wpn
+DebugLog: LOADED ioncannon.wpn
+DebugLog: LOADED irpulse.wpn
+DebugLog: LOADED lightac.wpn
+DebugLog: LOADED lightag.wpn
+DebugLog: LOADED lightdualac.wpn
+DebugLog: LOADED lightdualmg.wpn
+DebugLog: LOADED lightmg.wpn
+DebugLog: LOADED lightmortar.wpn
+DebugLog: LOADED lightneedler.wpn
+DebugLog: [WARN] could not find field name renderBelowAllWeapons in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name showDamageWhenDecorative in object of type TStarfarerWeapon
+DebugLog: LOADED lights_buffalo.wpn
+DebugLog: [WARN] could not find field name renderBelowAllWeapons in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name showDamageWhenDecorative in object of type TStarfarerWeapon
+DebugLog: LOADED lights_hound.wpn
+DebugLog: LOADED locust.wpn
+DebugLog: [WARN] could not find field name collisionClass in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name collisionClassByFighter in object of type TStarfarerWeapon
+DebugLog: LOADED lrpdlaser.wpn
+DebugLog: LOADED mark9.wpn
+DebugLog: LOADED miningblaster.wpn
+DebugLog: [WARN] could not find field name collisionClass in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name collisionClassByFighter in object of type TStarfarerWeapon
+DebugLog: LOADED mininglaser.wpn
+DebugLog: LOADED mjolnir.wpn
+DebugLog: LOADED multineedler.wpn
+DebugLog: [WARN] could not find field name collisionClass in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name collisionClassByFighter in object of type TStarfarerWeapon
+DebugLog: LOADED pdburst.wpn
+DebugLog: [WARN] could not find field name collisionClass in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name collisionClassByFighter in object of type TStarfarerWeapon
+DebugLog: LOADED pdlaser.wpn
+DebugLog: LOADED phasebeam.wpn
+DebugLog: LOADED phasecl.wpn
+DebugLog: LOADED pilum.wpn
+DebugLog: LOADED plasma.wpn
+DebugLog: LOADED pulselaser.wpn
+DebugLog: LOADED railgun.wpn
+DebugLog: LOADED reaper.wpn
+DebugLog: LOADED sabot.wpn
+DebugLog: LOADED sabotpod.wpn
+DebugLog: LOADED sabot_single.wpn
+DebugLog: LOADED salamanderpod.wpn
+DebugLog: [WARN] could not find field name renderBelowAllWeapons in object of type TStarfarerWeapon
+DebugLog: [WARN] could not find field name showDamageWhenDecorative in object of type TStarfarerWeapon
+DebugLog: LOADED sensordish.wpn
+DebugLog: LOADED shredder.wpn
+DebugLog: LOADED squall.wpn
+DebugLog: LOADED swarmer.wpn
+DebugLog: LOADED swarmer_fighter.wpn
+DebugLog: [WARN] could not find field name beamEffect in object of type TStarfarerWeapon
+DebugLog: LOADED tachyonlance.wpn
+DebugLog: LOADED taclaser.wpn
+DebugLog: LOADED tpc.wpn
+DebugLog: LOADED typhoon.wpn
+DebugLog: LOADED vulcan.wpn
+DebugLog: Enum  HIGH_TECH  (ship.engine.styleId)
+DebugLog: Enum  LOW_TECH  (ship.engine.styleId)
+DebugLog: Enum  MIDLINE  (ship.engine.styleId)
+DebugLog: Enum  midlineFlare  (ship.engine.styleId)
+DebugLog: Enum    (ship_csv.shield type)
+DebugLog: LOADED ship_data.csv
+DebugLog: Enum    (wing_csv.formation)
+DebugLog: Enum    (wing_csv.role)
+DebugLog: LOADED wing_data.csv
+DebugLog: LOADED weapon_data.csv
+DebugLog: LOADED hull_mods.csv
+DebugLog: Loading MOD Data: K:\Games\Starsector\mods\nom/
+DebugLog: Loading MOD Data: K:\Games\Starsector\mods\sc2/
+DebugLog: Loading MOD Data: K:\Games\Starsector\mods\gsp/
+DebugLog: Loading MOD Data: K:\Games\Starsector\mods\ss-nom/

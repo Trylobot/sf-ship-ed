@@ -1,0 +1,93 @@
+
+DebugLog: Enum  HIGH_TECH  (ship.engine.style)
+DebugLog: Enum  LOW_TECH  (ship.engine.style)
+DebugLog: Enum  LOW_TECH_FIGHTER  (ship.engine.style)
+DebugLog: Enum  MIDLINE  (ship.engine.style)
+DebugLog: Enum  CUSTOM  (ship.engine.style)
+
+DebugLog: Enum    (ship.engine.styleId)
+DebugLog: Enum  HIGH_TECH  (ship.engine.styleId)
+DebugLog: Enum  LOW_TECH  (ship.engine.styleId)
+DebugLog: Enum  MIDLINE  (ship.engine.styleId)
+DebugLog: Enum  midlineFlare  (ship.engine.styleId)
+
+DebugLog: Enum  SMOKE  (ship.engine.styleSpec.type)
+DebugLog: Enum  GLOW  (ship.engine.styleSpec.type)
+
+DebugLog: Enum  CAPITAL_SHIP  (ship.hullSize)
+DebugLog: Enum  CRUISER  (ship.hullSize)
+DebugLog: Enum  DESTROYER  (ship.hullSize)
+DebugLog: Enum  FIGHTER  (ship.hullSize)
+DebugLog: Enum  FRIGATE  (ship.hullSize)
+
+DebugLog: Enum  HIGH_TECH  (ship.style)
+DebugLog: Enum  LOW_TECH  (ship.style)
+DebugLog: Enum  MIDLINE  (ship.style)
+
+DebugLog: Enum  HARDPOINT  (ship.weapon.mount)
+DebugLog: Enum  HIDDEN  (ship.weapon.mount)
+DebugLog: Enum  TURRET  (ship.weapon.mount)
+
+DebugLog: Enum  LARGE  (ship.weapon.size)
+DebugLog: Enum  MEDIUM  (ship.weapon.size)
+DebugLog: Enum  SMALL  (ship.weapon.size)
+
+DebugLog: Enum  BALLISTIC  (ship.weapon.type)
+DebugLog: Enum  ENERGY  (ship.weapon.type)
+DebugLog: Enum  LAUNCH_BAY  (ship.weapon.type)
+DebugLog: Enum  MISSILE  (ship.weapon.type)
+DebugLog: Enum  UNIVERSAL  (ship.weapon.type)
+DebugLog: Enum  BUILT_IN  (ship.weapon.type)
+DebugLog: Enum  SYSTEM  (ship.weapon.type)
+DebugLog: Enum  DECORATIVE  (ship.weapon.type)
+DebugLog: Enum  HYBRID  (ship.weapon.type)
+
+DebugLog: Enum  ALTERNATING  (variant.weaponGroup.mode)
+DebugLog: Enum  LINKED  (variant.weaponGroup.mode)
+
+DebugLog: Enum  NONE  (ship_csv.shield type)
+DebugLog: Enum  OMNI  (ship_csv.shield type)
+DebugLog: Enum  FRONT  (ship_csv.shield type)
+DebugLog: Enum  PHASE  (ship_csv.shield type)
+DebugLog: Enum    (ship_csv.shield type)
+
+DebugLog: Enum    (ship_csv.defense id)
+DebugLog: Enum  phasecloak  (ship_csv.defense id)
+
+DebugLog: Enum  V  (wing_csv.formation)
+DebugLog: Enum  CLAW  (wing_csv.formation)
+DebugLog: Enum  BOX  (wing_csv.formation)
+DebugLog: Enum    (wing_csv.formation)
+
+DebugLog: Enum  FIGHTER  (wing_csv.role)
+DebugLog: Enum  ASSAULT  (wing_csv.role)
+DebugLog: Enum  INTERCEPTOR  (wing_csv.role)
+DebugLog: Enum  BOMBER  (wing_csv.role)
+DebugLog: Enum  SUPPORT  (wing_csv.role)
+DebugLog: Enum    (wing_csv.role)
+
+DebugLog: Enum  GLOW  (weapon.animationType)
+DebugLog: Enum  GLOW_AND_FLASH  (weapon.animationType)
+DebugLog: Enum  MUZZLE_FLASH  (weapon.animationType)
+DebugLog: Enum  NONE  (weapon.animationType)
+DebugLog: Enum  SMOKE  (weapon.animationType)
+DebugLog: Enum    (weapon.animationType)
+
+DebugLog: Enum  ALTERNATING  (weapon.barrelMode)
+DebugLog: Enum  ALTERNATING_BURST  (weapon.barrelMode)
+DebugLog: Enum  LINKED  (weapon.barrelMode)
+DebugLog: Enum    (weapon.barrelMode)
+
+DebugLog: Enum  LARGE  (weapon.size)
+DebugLog: Enum  MEDIUM  (weapon.size)
+DebugLog: Enum  SMALL  (weapon.size)
+
+DebugLog: Enum  beam  (weapon.specClass)
+DebugLog: Enum  projectile  (weapon.specClass)
+
+DebugLog: Enum  BALLISTIC  (weapon.type)
+DebugLog: Enum  ENERGY  (weapon.type)
+DebugLog: Enum  MISSILE  (weapon.type)
+DebugLog: Enum  SYSTEM  (weapon.type)
+DebugLog: Enum  DECORATIVE  (weapon.type)
+
