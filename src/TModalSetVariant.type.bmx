@@ -188,9 +188,9 @@ Type TModalSetVariant Extends TSubroutine
 				'EndIf
 			Next
 		Next
-		weapon_slot_ids = new String[count]
-		weapon_ids = new String[count]
-		group_offsets = new Int[count]
+		weapon_slot_ids = New String[count]
+		weapon_ids = New String[count]
+		group_offsets = New Int[count]
 		wep_i = 0
 		For weapon_slot_id = EachIn all_assigned_weapon_slot_ids.Keys()
 			weapon_slot_ids[wep_i] = weapon_slot_id 'should be alphabetical
@@ -250,7 +250,7 @@ Type TModalSetVariant Extends TSubroutine
 		weapon_slot = data.ship.weaponSlots[ed.weapon_lock_i]
 		'try to find currently assigned weapon and select it in the list
 		weapon_list = ed.select_weapons( weapon_slot.type_, weapon_slot.size )
-		found = false
+		found = False
 		For group = EachIn data.variant.weaponGroups
 			For weapon_slot_id = EachIn group.weapons.Keys()
 				If weapon_slot.id = weapon_slot_id
@@ -258,7 +258,7 @@ Type TModalSetVariant Extends TSubroutine
 					For i = 0 Until weapon_list.length
 						If weapon_list[i] = weapon_id
 							ed.select_weapon_i = i
-							found = true
+							found = True
 							Exit
 						EndIf
 					Next
@@ -278,7 +278,7 @@ Type TModalSetVariant Extends TSubroutine
 				If weapon_name
 					weapon_list_display[wi] = RSet(wep_op_str,3)+"  "+weapon_name
 				EndIf
-			Endif
+			EndIf
 		Next
 		weapon_list_widget = TextWidget.Create( weapon_list_display )
 		update_weapon_assignment_list_cursor( ed )
@@ -289,9 +289,9 @@ Type TModalSetVariant Extends TSubroutine
 		i = 0
 		For hullMod = EachIn ed.stock_hullmod_stats.Values()
 			hullMods[i] = hullMod
-			if i = ed.variant_hullMod_i
+			If i = ed.variant_hullMod_i
 				selected_hullMod = hullMod
-			Endif
+			EndIf
 			i :+ 1
 		Next
 		'////
@@ -315,8 +315,8 @@ Type TModalSetVariant Extends TSubroutine
 			EndIf
 			i :+ 1
 		Next
-		hullMods_widget = TextWidget.create( hullMods_lines )
-		hullMods_cursor = TextWidget.create( hullMods_c )
+		hullMods_widget = TextWidget.Create( hullMods_lines )
+		hullMods_cursor = TextWidget.Create( hullMods_c )
 		hullMods_cursor.w = hullMods_widget.w
 	EndMethod
 
@@ -337,7 +337,7 @@ Type TModalSetVariant Extends TSubroutine
 		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			ed.weapon_lock_i = -1
 		EndIf
-		If KeyHIT( KEY_BACKSPACE ) And ed.variant_hullMod_i = -1
+		If KeyHit( KEY_BACKSPACE ) And ed.variant_hullMod_i = -1
 			data.unassign_weapon_from_slot( weapon_slot.id )
 			data.update_variant()
 			ed.weapon_lock_i = -1
@@ -345,21 +345,19 @@ Type TModalSetVariant Extends TSubroutine
 		modified = False
 		If KeyHit( KEY_DOWN )
 			ed.select_weapon_i :+ 1
-			update_weapon_assignment_list_cursor( ed )
 			If ed.select_weapon_i > (weapon_list.length - 1)
-				ed.select_weapon_i = (weapon_list.length - 1)
-			Else
-				modified = True
+				ed.select_weapon_i = 0
 			EndIf
+			update_weapon_assignment_list_cursor( ed )
+			modified = True
 		EndIf
 		If KeyHit( KEY_UP )
 			ed.select_weapon_i :- 1
-			update_weapon_assignment_list_cursor( ed )
 			If ed.select_weapon_i < 0
-				ed.select_weapon_i = 0
-			Else
-				modified = True
+				ed.select_weapon_i =  (weapon_list.length - 1)	
 			EndIf
+			update_weapon_assignment_list_cursor( ed )
+			modified = True
 		EndIf
 		If modified
 			data.unassign_weapon_from_slot( weapon_slot.id )
@@ -399,16 +397,16 @@ Type TModalSetVariant Extends TSubroutine
 		If KeyHit( KEY_UP )
 			ed.variant_hullMod_i :- 1
 		EndIf
-		'bounds enforce
+		'bounds enforce (wrap top/bottom)
 		If ed.variant_hullMod_i > (hullMods_count - 1)
-			ed.variant_hullMod_i = (hullMods_count - 1)
-		ElseIf ed.variant_hullMod_i < 0
 			ed.variant_hullMod_i = 0
+		ElseIf ed.variant_hullMod_i < 0
+			ed.variant_hullMod_i = (hullMods_count - 1)
 		EndIf
 		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			ed.variant_hullMod_i = -1
 		EndIf
-		If KeyHIT( KEY_H )
+		If KeyHit( KEY_H )
 			ed.variant_hullMod_i = -1
 		EndIf
 	EndMethod
@@ -417,7 +415,7 @@ Type TModalSetVariant Extends TSubroutine
 		If KeyHit( KEY_DOWN )
 			ed.group_field_i :+ 1
 			If ed.group_field_i > (count - 1)
-				ed.group_field_i = (count - 1)
+				ed.group_field_i = 0
 			Else
 				reset_cursor_color_period()
 			EndIf
@@ -426,7 +424,7 @@ Type TModalSetVariant Extends TSubroutine
 		If KeyHit( KEY_UP )
 			ed.group_field_i :- 1
 			If ed.group_field_i < 0
-				ed.group_field_i = 0
+				ed.group_field_i = (count - 1)
 			Else
 				reset_cursor_color_period()
 			EndIf
@@ -486,7 +484,7 @@ Type TModalSetVariant Extends TSubroutine
 				initialize_weapon_assignment_list( ed, data )
 			EndIf
 			'can't let user strip built-in weapon slots either
-			If KeyHIT( KEY_BACKSPACE ) And Not weapon_slot.is_builtin()
+			If KeyHit( KEY_BACKSPACE ) And Not weapon_slot.is_builtin()
 				data.unassign_weapon_from_slot( weapon_slot.id )
 				data.update_variant()
 			EndIf
@@ -499,7 +497,7 @@ Type TModalSetVariant Extends TSubroutine
 			data.modify_fluxCapacitors( fluxMods_max, SHIFT Or CONTROL Or ALT )
 			data.update_variant()
 		EndIf
-		If KeyHIT( KEY_H ) 
+		If KeyHit( KEY_H ) 
 			'enter HULLMODS mode
 			ed.variant_hullMod_i = 0
 			initialize_hullmods_list( ed, data )
@@ -532,7 +530,7 @@ Type TModalSetVariant Extends TSubroutine
 
 	Method draw_all_weapon_slots( ed:TEditor, data:TData, sprite:TSprite )
 		'draw pointers
-		nearest = false
+		nearest = False
 		
 		'FIRST PASS: draw text boxes but make "really faint" if zoomed out too far
 		For i = 0 Until data.ship.weaponSlots.Length
