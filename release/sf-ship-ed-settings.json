@@ -10,5 +10,7 @@
   "data_font_size": 10,
   "starsector_base_dir": "",
   "hide_vanilla_data": 0,
-  "mod_dirs": []
+  "mod_dirs": [],
+  "limit_fps": 0,
+  "fps_limit": 60,
 }

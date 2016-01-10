@@ -218,6 +218,12 @@ Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
 Global sub_wing_csv:TModalSetWingCSV = New TModalSetWingCSV
 Global sub_weapon:TModalWeapon = New TModalWeapon
 
+'////////////////////////////////////////////////
+Local lmt_FPS_Limiter_On:Int = APP.limit_fps
+Local Lmt_FPS:Float = APP.fps_limit
+Local Lmt_Frametime:Float = 1000.0/Lmt_Fps
+Local Lmt_Frame_begin:Float
+
 '//////////////////////////////////////////////////////////////////////////////
 '//////////////////////////////////////////////////////////////////////////////
 '///////   MAIN   /////////////////////////////////////////////////////////////
@@ -225,6 +231,8 @@ Global sub_weapon:TModalWeapon = New TModalWeapon
 '//////////////////////////////////////////////////////////////////////////////
 
 Repeat
+	Lmt_Frame_begin=MilliSecs()
+
 	'display string for mouse (usually context-help)
 	mouse_str = ""
 	'modifier key states, used globally
@@ -371,6 +379,12 @@ Repeat
 	draw_instaquit_progress( W_MAX, H_MAX ) 
 	
 	Flip( 1 )
+	
+	If (lmt_FPS_Limiter_On = 1)
+		If (MilliSecs()-Lmt_Frame_begin)<Lmt_Frametime
+			Delay Lmt_Frametime-(MilliSecs()-Lmt_frame_begin)
+		EndIf
+	End If
 
 Until AppTerminate() Or FLAG_instaquit_plz
 If DEBUG_LOG_FILE
@@ -469,7 +483,7 @@ Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
 
 	ElseIf ed.program_mode = "variant"
 		If KeyHit( KEY_SLASH )
-			load_variant_data( ed, data, sprite, TRUE )
+			load_variant_data( ed, data, sprite, True )
 		EndIf
 	EndIf
 
@@ -784,7 +798,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
 		EndSelect
 		draw_string( title_w, 4,4 )
 	EndIf
-Endfunction
+EndFunction
 
 '-----------------------
 
@@ -812,7 +826,7 @@ End Function
 Function check_load_mod( ed:TEditor, data:TData )
 	If KeyHit( KEY_M )
 		load_mod( ed, data )
-	EndIF
+	EndIf
 EndFunction
 
 Function check_new_ship_data( ed:TEditor, data:TData, sprite:TSprite )
@@ -882,10 +896,10 @@ End Function
 '-----------------------
 
 Function load_ui( ed:TEditor )
-	AutoMidHandle( true )
+	AutoMidHandle( True )
 	ed.bg_image = LoadImage( "incbin::assets/bg.jpg", FILTEREDIMAGE|MIPMAPPEDIMAGE )
 	ed.bg_scale = Max( W_MAX/Float(ed.bg_image.width), H_MAX/Float(ed.bg_image.height) )
-	AutoMidHandle( false )
+	AutoMidHandle( False )
 	ed.kb_key_image = LoadImage( "incbin::assets/kb_key.png", 0 )
 	ed.kb_key_wide_image = LoadImage( "incbin::assets/kb_key_wide.png", 0 )
 	ed.kb_key_space_image = LoadImage( "incbin::assets/kb_key_space.png", 0 )
@@ -898,7 +912,7 @@ Function load_ui( ed:TEditor )
 	ed.ico_zoom = LoadImage( "incbin::assets/ico_zoom.png", 0 )
 	ed.ico_mirr = LoadImage( "incbin::assets/ico_mirr.png", 0 )
 	ed.ico_exit = LoadImage( "incbin::assets/ico_exit.png", 0 )
-	AutoMidHandle( true )
+	AutoMidHandle( True )
 End Function
 
 Function load_starfarer_data( ed:TEditor, data:TData )
@@ -908,7 +922,7 @@ Function load_starfarer_data( ed:TEditor, data:TData )
 		For Local j% = 0 Until STARFARER_CORE_DIR.length
 			If 0 <> FileType( APP.starsector_base_dir+STARFARER_CORE_DIR[j] )
 				DebugLogFile( " Loading STARFARER-CORE Data (Vanilla)" )
-				load_stock_data( ed, data, APP.starsector_base_dir+STARFARER_CORE_DIR[j]+"/", TRUE )
+				load_stock_data( ed, data, APP.starsector_base_dir+STARFARER_CORE_DIR[j]+"/", True )
 				Exit
 			EndIf
 		Next
@@ -930,7 +944,7 @@ Function load_starfarer_data( ed:TEditor, data:TData )
 EndFunction
 
 'data_dir$ should be either "starfarer-core/" or "mods/{ModDirectory}/"
-Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla%=FALSE )
+Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla%=False )
 	Local stock_ships_dir$ =    data_dir+"data/hulls/"
 	Local stock_variants_dir$ = data_dir+"data/variants/"
 	Local stock_variants_fighters_dir$ = data_dir+"data/variants/fighters/"
@@ -1134,7 +1148,7 @@ EndFunction
 Function DebugLogFile( msg$ )
 	DebugLog( msg )
 	Try
-		WriteLine( DEBUG_LOG_FILE, millisecs() + msg )
+		WriteLine( DEBUG_LOG_FILE, MilliSecs() + msg )
 	Catch ex$
 	EndTry
 EndFunction
