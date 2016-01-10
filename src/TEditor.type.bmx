@@ -308,10 +308,12 @@ Type TEditor
 			'slot type match and same size or bigger by one step
 			'or universal/built-in type with same size
 			'or decorative weapons for decorative slots
+			'or energy/ballistic weapons for hybrid slots with same size
 			If slot_type <> "DECORATIVE"
 				If ( slot_type = "UNIVERSAL" And size_diff = 0 ) ..
 				Or ( slot_type = "BUILT_IN" And size_diff = 0 ) ..
-				Or ( slot_type = weapon.type_ And size_diff >= 0 And size_diff <= 1 )
+				Or ( slot_type = weapon.type_ And size_diff >= 0 And size_diff <= 1 ) ..
+				Or ( slot_type = "HYBRID" And size_diff = 0 And (weapon.type_ = "ENERGY" Or weapon.type_ = "BALLISTIC") ) 
 					matches = matches[..(matches.length + 1)]
 					matches[matches.length - 1] = weapon.id
 				EndIf
