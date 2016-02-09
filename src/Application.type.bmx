@@ -17,6 +17,9 @@ Type Application
 	Field starsector_base_dir$
 	Field hide_vanilla_data%
 	Field mod_dirs$[]
+	Field limit_fps%
+	Field fps_limit%
+
 
 	Function Load:Application()
 		Local settings_json$
@@ -35,7 +38,7 @@ Type Application
 	EndFunction
 	
 	Method Save()
-		Local settings_json$ = json.stringify( self )
+		Local settings_json$ = json.stringify( Self )
 		SaveString( settings_json, "sf-ship-ed-settings.json" )
 	End Method
 	

@@ -68,7 +68,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 			If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 				ed.weapon_lock_i = -1
 			EndIf
-			If KeyHIT( KEY_BACKSPACE )
+			If KeyHit( KEY_BACKSPACE )
 				data.unassign_builtin_weapon_from_slot( weapon_slot.id )
 				data.update()
 				data.update_variant_enforce_hull_compatibility( ed )
@@ -79,18 +79,16 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 			If KeyHit( KEY_DOWN )
 				ed.select_weapon_i :+ 1
 				If ed.select_weapon_i > (weapon_list.length - 1)
-					ed.select_weapon_i = (weapon_list.length - 1)
-				Else
-					modified = True
+					ed.select_weapon_i = 0
 				EndIf
+				modified = True
 			EndIf
 			If KeyHit( KEY_UP )
 				ed.select_weapon_i :- 1
 				If ed.select_weapon_i < 0
-					ed.select_weapon_i = 0
-				Else
-					modified = True
+					ed.select_weapon_i = (weapon_list.length - 1)
 				EndIf
+				modified = True
 			EndIf
 			If modified
 				data.unassign_builtin_weapon_from_slot( weapon_slot.id )
@@ -108,14 +106,14 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 					ed.weapon_lock_i = ni
 					'try to find currently assigned weapon and select it in the list
 					weapon_list = ed.select_weapons( weapon_slot.type_, weapon_slot.size )
-					found = false
+					found = False
 					For existing_weapon_slot_id = EachIn data.ship.builtInWeapons.Keys()
 						If weapon_slot.id = existing_weapon_slot_id
 							existing_weapon_id = String( data.ship.builtInWeapons.ValueForKey( existing_weapon_slot_id ))
 							For i = 0 Until weapon_list.length
 								If weapon_list[i] = existing_weapon_id
 									ed.select_weapon_i = i
-									found = true
+									found = True
 									Exit
 								EndIf
 							Next
@@ -123,7 +121,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 						EndIf
 					Next
 				EndIf
-				If KeyHIT( KEY_BACKSPACE )
+				If KeyHit( KEY_BACKSPACE )
 					data.unassign_builtin_weapon_from_slot( weapon_slot.id )
 					data.update()
 					data.update_variant_enforce_hull_compatibility( ed )
@@ -149,7 +147,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 					If wep_name
 						weapon_list[wi] = RSet(wep_op_str,3)+"  "+wep_name
 					EndIf
-				Endif
+				EndIf
 			Next
 			weapon_list_widget = TextWidget.Create( weapon_list )
 			cursor_widget = TextWidget.Create( weapon_list[..] )
@@ -163,7 +161,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 		EndIf
 		
 		'screen position of coordinate to be potentially added
-		nearest = false
+		nearest = False
 		
 		'FIRST PASS: draw text boxes but make "really faint" if zoomed out too far
 		For i = 0 Until data.ship.weaponSlots.Length

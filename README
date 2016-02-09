@@ -8,6 +8,10 @@ Alternatively, use the command line compiler (BMK) directly:
 bmk makeapp -a -r -t gui -o sf-ship-ed.exe sf-ship-ed.bmx
 
 
+May need the following environment variable set (Windows 10 x64):
+ - Name: BMK_LD_OPTS
+ - Value: -lmsvcrt -lgcc
+
 
 Prerequisites for Use
 =====================

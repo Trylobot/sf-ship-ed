@@ -75,9 +75,9 @@ Type TModalSetBuiltInHullMods Extends TSubroutine
 		i = 0
 		For hullMod = EachIn ed.stock_hullmod_stats.Values()
 			hullMods[i] = hullMod
-			if i = ed.builtIn_hullMod_i
+			If i = ed.builtIn_hullMod_i
 				selected_hullMod = hullMod
-			Endif
+			EndIf
 			i :+ 1
 		Next
 		'////
@@ -101,18 +101,18 @@ Type TModalSetBuiltInHullMods Extends TSubroutine
 			EndIf
 			i :+ 1
 		Next
-		hullMods_widget = TextWidget.create( hullMods_lines )
-		hullMods_cursor = TextWidget.create( hullMods_c )
+		hullMods_widget = TextWidget.Create( hullMods_lines )
+		hullMods_cursor = TextWidget.Create( hullMods_c )
 		hullMods_cursor.w = hullMods_widget.w
 	EndMethod
 
 	Method update_hullmods_list( ed:TEditor, data:TData )
 		initialize_hullmods_list( ed, data )
-		'bounds enforce (extra check)
+		'bounds enforce (extra check, wrap top/bottom)
 		If ed.builtIn_hullMod_i > (hullMods_count - 1)
-			ed.builtIn_hullMod_i = (hullMods_count - 1)
-		ElseIf ed.select_weapon_i < 0
 			ed.builtIn_hullMod_i = 0
+		ElseIf ed.select_weapon_i < 0
+			ed.builtIn_hullMod_i = (hullMods_count - 1)
 		EndIf
 		'process input
 		If KeyHit( KEY_ENTER )
@@ -126,16 +126,16 @@ Type TModalSetBuiltInHullMods Extends TSubroutine
 		If KeyHit( KEY_UP )
 			ed.builtIn_hullMod_i :- 1
 		EndIf
-		'bounds enforce
+		'bounds enforce (wrap top/bottom)
 		If ed.builtIn_hullMod_i > (hullMods_count - 1)
-			ed.builtIn_hullMod_i = (hullMods_count - 1)
-		ElseIf ed.builtIn_hullMod_i < 0
 			ed.builtIn_hullMod_i = 0
+		ElseIf ed.builtIn_hullMod_i < 0
+			ed.builtIn_hullMod_i = (hullMods_count - 1)
 		EndIf
 		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
 			ed.builtIn_hullMod_i = -1
 		EndIf
-		If KeyHIT( KEY_H )
+		If KeyHit( KEY_H )
 			ed.builtIn_hullMod_i = -1
 		EndIf
 	EndMethod
