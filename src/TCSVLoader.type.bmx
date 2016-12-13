@@ -3,13 +3,16 @@ Type TCSVLoader
 	Global EXPLICIT_NULL_PREFIX$ = "___NULL___"
 	
 	'loads a CSV into a map
-	Function Load:TMap( file$, key_field$, csv_rows:TMap=Null, field_order:TList=Null, row_order:TList=Null )
+	Function Load:TMap( file$, key_field$, csv_rows:TMap = Null, field_order:TList = Null, row_order:TList = Null )
 		If Not csv_rows Then csv_rows = CreateMap()
-		Local input$ = LoadString( file )
-		Local csv_data$[][] = csv_parse( input )
+		'Local Input$ = LoadString( file )
+		Local Input$ = LoadTextAs ( file , CODE_MODE)
+		Local csv_data$[][] = csv_parse( Input )
 		Local fields$[] = csv_data[0]
 		For Local f% = 0 Until fields.length
+			'DebugLog(fields[f])
 			fields[f] = Trim( fields[f] )
+			'DebugLog(fields[f])
 			If fields[f] = Null
 				fields[f] = EXPLICIT_NULL_PREFIX + f
 			EndIf
@@ -25,6 +28,7 @@ Type TCSVLoader
 				If j < values.length
 					values[j] = Trim( values[j] )
 					row.Insert( fields[j], values[j] )
+					'DebugLog(fields[j] + " " + values[j])					
 				Else
 					row.Insert( fields[j], "" )
 				EndIf
@@ -41,7 +45,7 @@ Type TCSVLoader
 	EndFunction
 
 	Function Save_Row( file$, row:TMap, key_field$, field_order:TList )
-		Local row_key$ = String( row.ValueForKey( key_field ))
+		Local row_key$ = String( row.ValueForKey( key_field ) )
 		If Not row_key Or row_key = "" Then Return
 		Local ftype% = FileType( file )
 		Local i%, csv_field$
@@ -65,7 +69,8 @@ Type TCSVLoader
 				i :+ 1
 			Next
 			file_str :+ "~n"
-			SaveString( file_str, file )
+			'SaveString( file_str, file )
+			SaveTextAs ( file_str, file, CODE_MODE)
 		
 		ElseIf ftype = FILETYPE_FILE
 			'else load the data at that location into a separate TMap
@@ -100,9 +105,9 @@ Type TCSVLoader
 				Next
 				file_str :+ "~n"
 			Next
-			SaveString( file_str, file )
+			SaveTextAs ( file_str, file, CODE_MODE)
 		EndIf
-	End function
+	End Function
 
 	Function csv_parse$[][]( data$ )
 		If data = "" Then Return Null
@@ -110,6 +115,7 @@ Type TCSVLoader
 		records[0] = New String[1]
 		Local c% = 0 ' data string cursor
 		Local l% = 0 ' data string cursor (reset each linebreak, for comments)
+		Local fl% = 0 ' field length counter
 		Local r% = 0 ' record/row counter
 		Local f% = 0 ' field/value counter
 		Local char$ ' current character string
@@ -118,38 +124,50 @@ Type TCSVLoader
 		While c < data.Length
 			'parse char
 			char = Chr(data[c])
+			'DebugLog(char)
+			'DebugLog(l + "")
 			If char = "#" And l = 0 And Not in_quotes
 				in_comment = True
+				'DebugStop
 			ElseIf char = "~q" And Not in_comment
 				'field escape char
 				in_quotes = Not in_quotes
 			ElseIf char = "," And Not in_quotes And Not in_comment
 				'advance field counter
+				records[r][f] = Mid(data, c - fl + 1, fl)
+				'DebugLog(f + " " + c + " " + fl + " " + records[r][f])
 				f :+ 1
 				records[r] = records[r][..(f + 1)]
-			ElseIf char = "~r" Or char = "~n" And Not in_quotes And Not in_comment
+				fl = - 1
+			ElseIf char = "~r" Or char = "~n" And Not in_quotes
+			'DebugStop
 				'unquoted record separator char
-				If char = "~r" And (c + 1) < data.Length And Chr(data[c + 1]) = "~n"
+				records[r][f] = Mid(data, c - fl + 1, fl)
+				If char = "~r" And (c + 1) < data.length And Chr(data[c + 1]) = "~n"
 					'ignore "~r~n" (windows)
 					c :+ 1
-				EndIf
+				EndIf				
 				'advance record counter
 				r :+ 1
 				records = records[..(r + 1)]
 				records[r] = New String[1]
 				f = 0
+				'If in_comment Then 	DebugStop
 				in_comment = False
-				l = 0
-			ElseIf Not in_comment
+				l = - 1
+				fl = - 1
+			'ElseIf Not in_comment
 				'field data
-				records[r][f] :+ char
+			'	records[r][f] :+ char
 			EndIf
 			'advance data cursor
 			c :+ 1
 			l :+ 1
+			fl :+ 1
 		EndWhile
 		Return records
 	End Function
+
 
 	'escapes string data if it contains one or more field-separators or record-separators
 	Function csv_conservative_escape$( field_data$ )

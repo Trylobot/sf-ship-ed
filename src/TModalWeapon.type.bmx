@@ -9,82 +9,81 @@ Type TModalWeapon Extends TSubroutine
 	Field hardpointUnder_img:TImage
 	Field hardpointGun_img:TImage
 	Field hardpointGlow_img:TImage
+	'I feel lazy so just fake a weapon slot and call in the weapon drawer.
+	Field ws:TStarfarerShipWeapon
+	Field xOffset#
+	Field ni%
+	Field si%
+	Field x#, y#
 	'internal state
 	Field img_x#,img_y# ' mouse position on image
-	Field spr_w#,spr_h#
+	Field spr_w#, spr_h#
 	Field weapon_display_mode$ ' turret, hardpoint
-	Field offset_lock_idx%
-	Field do_draw_barrels%
+	'Field offset_lock_idx%
+	'Field do_draw_barrels%
 	Field do_draw_glow%
 	'animated images
 	Field turret_img_seq:TImage[]
 	Field hardpoint_img_seq:TImage[]
-	Field img_seq_i%
-	Field img_seq_i_ts%
+'	Field img_seq_i%
+'	Field img_seq_i_ts%
 	'housekeeping
-	Field sprite_img_buffer:TImage
+	'Field sprite_img_buffer:TImage
 
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		ed.program_mode = "weapon"
 		ed.mode = "offsets"
 		ed.drag_mirrored = false
-		weapon_display_mode = "turret"
-		'save the current sprite img to be restored later
-		sprite_img_buffer = sprite.img
-		data.update_weapon()
-		offset_lock_idx = -1
-		do_draw_glow = false
-		do_draw_barrels = false
+		weapon_display_mode = "TURRET"
+		'data.update_weapon()
+		'offset_lock_idx = - 1
+		ed.drag_nearest_i = - 1
+		do_draw_glow = true
+		'do_draw_barrels = False
 		load_weapon_images( data, sprite )
-	EndMethod
-
-	Method Deactivate( ed:TEditor, data:TData, sprite:TSprite )
-		sprite.img = sprite_img_buffer
+		ws = New TStarfarerShipWeapon
+		ws.locations = [0.0 , 0.0]
+		ws.mount = "TURRET"
+		WD.weaponEditorAnime = Null
+		ni = si = - 1
+		DebugLogFile(" Activate Weapon Editor")
 	EndMethod
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
-		'EVERY FRAME
-		'multi-frame weapon framecounter advance
-		If  data.weapon.numFrames > 1 ..
-		And (millisecs() - img_seq_i_ts) > Int(Double(1000)/data.weapon.frameRate)
-			img_seq_i :+ 1
-			If img_seq_i >= data.weapon.numFrames Then img_seq_i = 0
-			img_seq_i_ts = millisecs()
-		EndIf
 		'MODE CHANGE
-		If KeyHit( KEY_O )
-			ed.mode = "offsets"
-		EndIf
-		If KeyHit( KEY_I )
-			ed.mode = "images"
-		EndIf
-		If KeyHit( KEY_H )
-			If weapon_display_mode = "turret" Then weapon_display_mode = "hardpoint" Else weapon_display_mode = "turret"
-			update_sprite_img( data, sprite )
-		EndIf
-		'IMAGES
-		If KeyHit( KEY_A ) And ed.mode = "images"
-			try_load_sprite( ed, data, sprite, weapon_display_mode, "main" )
-			load_weapon_images( data, sprite )
-		EndIf
-		If KeyHit( KEY_G ) And ed.mode = "images"
-			try_load_sprite( ed, data, sprite, weapon_display_mode, "gun" )
-			load_weapon_images( data, sprite )
-		EndIf
-		If KeyHit( KEY_U ) And ed.mode = "images"
-			try_load_sprite( ed, data, sprite, weapon_display_mode, "under" )
-			load_weapon_images( data, sprite )
-		EndIf
-		If KeyHit( KEY_L ) And ed.mode = "images"
-			try_load_sprite( ed, data, sprite, weapon_display_mode, "glow" )
-			load_weapon_images( data, sprite )
-		EndIf
+		'get input
+		Select EventID()
+		Case EVENT_GADGETACTION, EVENT_MENUACTION
+			Select EventSource()
+			Case functionMenuSub[4][0] 'offset mode Toggle
+				If ed.mode = "offsets" Then ed.mode = "images" Else ed.mode = "offsets"
+			Case functionMenuSub[4][1] 'TURRET/HARDPOINT Toggle
+				If weapon_display_mode = "TURRET" Then weapon_display_mode = "HARDPOINT" Else weapon_display_mode = "TURRET"
+				ws.mount = weapon_display_mode
+				WD.weaponEditorAnime = Null
+				update_sprite_img( data, sprite )
+			'IMAGES
+			Case functionMenuSub[4][2]
+				try_load_sprite( ed, data, sprite, weapon_display_mode, "main" )
+				load_weapon_images( data, sprite )
+			Case functionMenuSub[4][3]
+				try_load_sprite( ed, data, sprite, weapon_display_mode, "gun" )
+				load_weapon_images( data, sprite )	
+			Case functionMenuSub[4][4]
+				try_load_sprite( ed, data, sprite, weapon_display_mode, "under" )
+				load_weapon_images( data, sprite )
+			Case functionMenuSub[4][5]
+				try_load_sprite( ed, data, sprite, weapon_display_mode, "glow" )
+				load_weapon_images( data, sprite )
+			Case functionMenuSub[4][6]
+				do_draw_glow = Not do_draw_glow
+			EndSelect
+		EndSelect
 		'MODE-SPECIFIC UPDATE CALL
 		Select ed.mode
 			Case "offsets"
 				update_offsets( ed, data, sprite )
 			Case "images"
-
 		EndSelect
 		'need a way to toggle glow
 		' preview projectile firing?
@@ -99,71 +98,105 @@ Type TModalWeapon Extends TSubroutine
 	EndMethod
 
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
+		
 		'DRAW SPRITES
-		Select weapon_display_mode
-			Case "turret"
-				If data.weapon.numFrames <= 1
-					draw_weapon( turret_img,                turretUnder_img, turretGun_img, turretGlow_img, data.weapon.turretOffsets, sprite )
-				Else ' data.weapon.numFrames > 1
-					draw_weapon( turret_img_seq[img_seq_i], turretUnder_img, turretGun_img, turretGlow_img, data.weapon.turretOffsets, sprite )
+		If sprite.wpimg <> Null And weapon_display_mode = "HARDPOINT" Then xOffset = sprite.wpimg.height * - 0.25 Else xOffset = 0
+		If WD.show_weapon <> 0
+			If WD.show_weapon = 1 Then SetAlpha( 1 )
+			If WD.show_weapon = 2 Then SetAlpha( 0.5 )
+			WD.draw_weaponInSlot(ws, data.weapon, data, sprite)
+			SetAlpha( 1 )
+		EndIf
+		'DRAW GLOW
+		If do_draw_glow And (data.weapon.turretGlowSprite.length > 0 Or data.weapon.hardpointGlowSprite.length > 0)
+			If data.weapon.glowColor
+				SetColor(data.weapon.glowColor[0], data.weapon.glowColor[1], data.weapon.glowColor[2])
+				SetAlpha(data.weapon.glowColor[3] / 1275.0)
+			Else
+				SetColor(255, 255, 255)
+				SetAlpha(0.2)
+			EndIf
+			SetBlend(ALPHABLEND)
+			For Local i# = 0 Until 15
+				Local x# = 0
+				Local y# = 0
+				If i < 12
+					x = Rand( - 10, 10) / 10.0
+					y = Rand( - 10, 10) / 10.0
+				Else
+					x = Rand( - 10, 10) / 20.0
+					y = Rand( - 10, 10) / 20.0
+					SetBlend(LIGHTBLEND)
+					SetColor(255, 255, 255)
+					If data.weapon.glowColor
+						SetAlpha(data.weapon.glowColor[3] / 1020.0)
+					Else
+						SetAlpha(0.25)
+					EndIf
 				EndIf
-			Case "hardpoint"
-				If data.weapon.numFrames <= 1
-					draw_weapon( hardpoint_img,                hardpointUnder_img, hardpointGun_img, hardpointGlow_img, data.weapon.hardpointOffsets, sprite )
-				Else ' data.weapon.numFrames > 1
-					draw_weapon( hardpoint_img_seq[img_seq_i], hardpointUnder_img, hardpointGun_img, hardpointGlow_img, data.weapon.hardpointOffsets, sprite )
-				EndIf
-		EndSelect
+				Select weapon_display_mode
+				Case "TURRET"
+					If turretGlow_img Then DrawImage(turretGlow_img, W_MID + sprite.pan_x + x * sprite.scale, H_MID + sprite.pan_y + y * sprite.scale)
+				Case "HARDPOINT"
+					If hardpointGlow_img Then DrawImage(hardpointGlow_img, W_MID + sprite.pan_x + x * sprite.scale, H_MID + sprite.pan_y + y * sprite.scale)
+				End Select
+			Next			
+			SetBlend(ALPHABLEND)
+			SetColor(255, 255, 255)
+			SetAlpha(1)
+		EndIf	
 		'DRAW MODE-SPECIFIC THINGS
 		Select ed.mode
 			Case "offsets"
 				draw_barrel_offsets( ed, data, sprite )
 			Case "images"
 		EndSelect
+		draw_hud(ed, data)
 	EndMethod
 
 	Method Save( ed:TEditor, data:TData, sprite:TSprite )
-		Local path$ = RequestFile( "SAVE Weapon Data", "wpn", True, APP.weapon_dir + data.weapon.id+".weapon" )
-		FlushKeys()
+		Local path$ = RequestFile( LocalizeString("{{wt_save_weapon}}"), "wpn", True, APP.weapon_dir + data.weapon.id )
 		If path
 			APP.weapon_dir = ExtractDir( path )+"/"
-			APP.save()
-			SaveString( data.json_str_weapon, path )
+			APP.Save()
+			'SaveString(data.json_str_weapon, path)
+			SaveTextAs( data.json_str_weapon, path, CODE_MODE )
 		End If
+		FlushEvent()
 	EndMethod
 
 	Method Load( ed:TEditor, data:TData, sprite:TSprite )
-		Local path$ = RequestFile( "LOAD Weapon Data", "wpn", False, APP.weapon_dir )
-		FlushKeys()
+		Local path$ = RequestFile( LocalizeString("{{wt_load_weapon}}"), "wpn", False, APP.weapon_dir )
 		If FileType( path ) <> FILETYPE_FILE Then Return
-		APP.weapon_dir = ExtractDir( path )+"/"
-		APP.save()
-		Local json_str_weapon$ = LoadString( path )
+		APP.weapon_dir = ExtractDir( path ) + "/"
+		APP.Save()
+		Local json_str_weapon$ = LoadTextAs( path, CODE_MODE )
 		data.decode_weapon( json_str_weapon )
 		data.update_weapon()
-		do_draw_barrels = (data.weapon.visualRecoil <> 0)
+		'do_draw_barrels = (data.weapon.visualRecoil <> 0)
+		WD.weaponEditorAnime = Null
 		load_weapon_images( data, sprite )
 	EndMethod
 
 	'this is for the sake of global maths that reference the sprite img for their calcs
 	Method update_sprite_img( data:TData, sprite:TSprite )
 		Select weapon_display_mode
-			Case "turret"
+			Case "TURRET"
 				If data.weapon.numFrames <= 1
-					sprite.img = turret_img
+					sprite.wpimg = turret_img
 				Else ' data.weapon.numFrames > 1
-					sprite.img = turret_img_seq[0]
+					sprite.wpimg = turret_img_seq[0]
 				EndIf
-			Case "hardpoint"
+			Case "HARDPOINT"
 				If data.weapon.numFrames <= 1
-					sprite.img = hardpoint_img
+					sprite.wpimg = hardpoint_img
 				Else ' data.weapon.numFrames > 1
-					sprite.img = hardpoint_img_seq[0]
+					sprite.wpimg = hardpoint_img_seq[0]
 				EndIf
 		EndSelect
-		If sprite.img
-			spr_w = sprite.img.width
-			spr_h = sprite.img.height
+		If sprite.wpimg
+			spr_w = sprite.wpimg.width
+			spr_h = sprite.wpimg.height
 		Else
 			spr_w = 0
 			spr_h = 0
@@ -171,68 +204,72 @@ Type TModalWeapon Extends TSubroutine
 	EndMethod
 
 	Method update_offsets( ed:TEditor, data:TData, sprite:TSprite )
-		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
-		If MouseHit( 1 ) And SHIFT
-			'add
-			data.append_weapon_offset( img_x,img_y, spr_w,spr_h, False )
-			Local predicted_y# = 0
-			If weapon_display_mode = "turret" 
-				predicted_y = img_y - (spr_h / 2.0)
-			ElseIf weapon_display_mode = "hardpoint"
-				predicted_y = img_y - (spr_h)
-			EndIf
-			If ed.bounds_symmetrical And predicted_y <> 0
-				data.append_weapon_offset( img_x,img_y, spr_w,spr_h, True )
-			EndIf
-			data.update_weapon()
-		End If
-		If Not SHIFT
-			'drag
-			If MouseDown( 1 )
-				If Not ed.mouse_1 'starting drag
-					ed.drag_nearest_i = data.find_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
+		If Not sprite.wpimg Then Return
+		sprite.get_xy( MouseX, MouseY, img_x, img_y, False)
+		x = RoundFloat( img_x - xOffset, DO_ROUND)
+		y = RoundFloat( - img_y, DO_ROUND )
+		ni = data.find_nearest_weapon_offset( x, y, weapon_display_mode )
+		Select EventID()
+		Case EVENT_MOUSEDOWN, EVENT_MOUSEUP, EVENT_MOUSEMOVE
+			Select ModKeyAndMouseKey
+			Case 16 '(MODIFIER_LMOUSE)
+				Select EventID()				
+				Case EVENT_MOUSEDOWN
+					'drag nearset
+					ed.drag_nearest_i = ni
+					If ed.drag_nearest_i = - 1 Then Return
 					ed.drag_mirrored = ed.bounds_symmetrical
-					If( ed.drag_mirrored )
-						ed.drag_counterpart_i = data.find_symmetrical_weapon_offset_counterpart( ed.drag_nearest_i, weapon_display_mode )
-					End If
-				Else 'mouse_down_1 'continuing drag
-					data.modify_weapon_offset( ed.drag_nearest_i, img_x,img_y, spr_w,spr_h, weapon_display_mode, False )
-					If ed.drag_mirrored
-						data.modify_weapon_offset( ed.drag_counterpart_i, img_x,img_y, spr_w,spr_h, weapon_display_mode, True )
-					End If
-				End If
-				ed.mouse_1 = True
-				data.update_weapon()
-			Else 'Not MouseDown( 1 )
-				ed.mouse_1 = False
-				ed.drag_nearest_i = -1
-				ed.drag_counterpart_i = -1
-			End If
-		End If
-		If CONTROL
-			'angle
-			If MouseDown( 1 )
-				If Not ed.mouse_1 'starting operation
-					offset_lock_idx = data.find_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
+					If ed.drag_mirrored Then ed.drag_counterpart_i = data.find_symmetrical_weapon_offset_counterpart( ed.drag_nearest_i, weapon_display_mode )
+					data.modify_weapon_offset( ed.drag_nearest_i, x, y, spr_w, spr_h, weapon_display_mode, False )
+					If ed.drag_counterpart_i <> - 1 Then data.modify_weapon_offset( ed.drag_counterpart_i, x, y, spr_w, spr_h, weapon_display_mode, True )
+				Case EVENT_MOUSEMOVE
+					data.modify_weapon_offset( ed.drag_nearest_i, x, y, spr_w, spr_h, weapon_display_mode, False )
+					If ed.drag_mirrored And ed.drag_counterpart_i <> - 1 Then data.modify_weapon_offset( ed.drag_counterpart_i, x, y, spr_w, spr_h, weapon_display_mode, True )
+				Case EVENT_MOUSEUP
+					data.update_weapon()
+					ed.drag_nearest_i = - 1
+					ed.drag_counterpart_i = -1
+				EndSelect
+			Case 17 '(MODIFIER_SHIFT|MODIFIER_LMOUSE)
+				If EventID() = EVENT_MOUSEDOWN	
+					'add new											data.append_weapon_offset( x, y, weapon_display_mode, False )
+					Local predicted_y# = - y
+					If ed.bounds_symmetrical And predicted_y <> 0
+						data.append_weapon_offset( x, predicted_y, weapon_display_mode, True )
+					EndIf
+					data.update_weapon()
 				EndIf
-				data.set_weapon_offset_angle( offset_lock_idx, img_x,img_y, spr_w,spr_h, weapon_display_mode, ed.drag_mirrored )
+			Case 18 '(MODIFIER_CONTROL|MODIFIER_LMOUSE)
+				'set angle
+				Select EventID()
+				Case EVENT_MOUSEDOWN
+					ed.drag_nearest_i = ni
+					ed.drag_mirrored = ed.bounds_symmetrical
+					If ed.drag_nearest_i <> - 1 Then data.set_weapon_offset_angle( ed.drag_nearest_i, x, y, weapon_display_mode, ed.drag_mirrored )
+				Case EVENT_MOUSEMOVE
+					If ed.drag_nearest_i <> - 1 Then data.set_weapon_offset_angle( ed.drag_nearest_i, x, y, weapon_display_mode, ed.drag_mirrored )
+				Case EVENT_MOUSEUP
+					data.update_weapon()
+					ed.drag_nearest_i = ni
+				EndSelect
+			EndSelect
+		Case EVENT_GADGETACTION, EVENT_MENUACTION
+			Select EventSource()
+			Case functionMenu[4]
+				'remove
+				data.remove_nearest_weapon_offset( x, y, weapon_display_mode )
 				data.update_weapon()
-			EndIf
-		End If
-		If KeyHit( KEY_BACKSPACE )
-			'remove
-			data.remove_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
-			data.update_weapon()
-		End If
+			EndSelect
+		EndSelect		
 	EndMethod
 
 	Method try_load_sprite( ed:TEditor, data:TData, sprite:TSprite, weapon_display_mode$, sprite_name$ )
-		Local image_path$ = RequestFile( "LOAD Weapon Image", "png", False, APP.weapon_images_dir )
-		FlushKeys()
+		Local image_path$ = RequestFile( LocalizeString("{{wt_load_image_weapon}}"), "png", False, APP.weapon_images_dir )
+		If image_path.length = 0 Then Return
 		If FILETYPE_FILE = FileType( image_path )
 			APP.weapon_images_dir = ExtractDir( image_path )+"/"
-			APP.save()
-			image_path = image_path.replace( "\", "/" )
+			APP.Save()
+			image_path = image_path.Replace( "\", "/" )
 			Local scan$ = image_path
 			While scan.length > "graphics".length
 				scan = ExtractDir( scan )
@@ -241,7 +278,7 @@ Type TModalWeapon Extends TSubroutine
 					image_path = image_path.Replace( to_remove, "" )
 					If image_path.StartsWith( "graphics" )
 						Select weapon_display_mode
-							Case "turret"
+							Case "TURRET"
 								Select sprite_name
 									Case "main"
 										data.weapon.turretSprite = image_path
@@ -252,7 +289,7 @@ Type TModalWeapon Extends TSubroutine
 									Case "glow"
 										data.weapon.turretGlowSprite = image_path
 								EndSelect
-							Case "hardpoint"
+							Case "HARDPOINT"
 								Select sprite_name
 									Case "main"
 										data.weapon.hardpointSprite = image_path
@@ -271,7 +308,7 @@ Type TModalWeapon Extends TSubroutine
 			EndWhile
 		Else
 			Select weapon_display_mode
-				Case "turret"
+				Case "TURRET"
 					Select sprite_name
 						Case "main"
 							data.weapon.turretSprite = Null
@@ -282,7 +319,7 @@ Type TModalWeapon Extends TSubroutine
 						Case "glow"
 							data.weapon.turretGlowSprite = Null
 					EndSelect
-				Case "hardpoint"
+				Case "HARDPOINT"
 					Select sprite_name
 						Case "main"
 							data.weapon.hardpointSprite = Null
@@ -297,53 +334,86 @@ Type TModalWeapon Extends TSubroutine
 		EndIf
 	EndMethod
 
-	Method draw_weapon( main_img:TImage, under_img:TImage, gun_img:TImage, glow_img:TImage, gun_offsets#[], sprite:TSprite )
-		SetRotation( 90 )
-		SetScale( sprite.scale, sprite.scale )
-		SetAlpha( 1 )
-		SetColor( 255, 255, 255 )
-		'calc. coords
-		Local x# = W_MID + sprite.pan_x + sprite.zpan_x
-		Local y# = H_MID + sprite.pan_y + sprite.zpan_y
-		'hardpoint center point is the bottom of the turret image
-		If weapon_display_mode = "hardpoint" And sprite.img
-			x :+ float(sprite.img.height) / 2.0
-		EndIf
-		'draw
-		If under_img Then DrawImage( under_img, x, y )
-		If main_img Then DrawImage( main_img, x, y )
-		If do_draw_barrels And gun_img Then DrawImage( gun_img, x, y )
-		If do_draw_glow And glow_img Then DrawImage( glow_img, x, y )
-	EndMethod
+'	Method draw_weapon( main_img:TImage, under_img:TImage, gun_img:TImage, glow_img:TImage, gun_offsets#[], sprite:TSprite )
+'		SetRotation( 90 )
+'		SetScale( sprite.scale, sprite.scale )
+'		SetAlpha( 1 )
+'		SetColor( 255, 255, 255 )
+'		'calc. coords
+'		Local x# = W_MID + sprite.pan_x + sprite.zpan_x
+'		Local y# = H_MID + sprite.pan_y + sprite.zpan_y
+'		'hardpoint center point is at 1/4 of then buttom
+'		If weapon_display_mode = "HARDPOINT" And sprite.img
+'			x :+ Float(sprite.img.height) * 0.75
+'		EndIf
+'		'draw
+'		If under_img Then DrawImage( under_img, x, y )
+'		If main_img Then DrawImage( main_img, x, y )
+'		If do_draw_barrels And gun_img Then DrawImage( gun_img, x, y )
+'		If do_draw_glow And glow_img Then DrawImage( glow_img, x, y )
+'	EndMethod
 
 	Method draw_barrel_offsets( ed:TEditor, data:TData, sprite:TSprite )
-		Local offsetsArray#[]
-		If weapon_display_mode = "turret"
+		If ed.drag_nearest_i <> - 1
+			ni = ed.drag_nearest_i
+		Else
+			sprite.get_xy( MouseX, MouseY, img_x, img_y, False)
+			x = RoundFloat( img_x - xOffset, DO_ROUND)
+			y = RoundFloat( - img_y, DO_ROUND )
+			ni = data.find_nearest_weapon_offset( x, y, weapon_display_mode )
+		EndIf
+		If ed.bounds_symmetrical Or ed.drag_mirrored
+			si = data.find_symmetrical_weapon_offset_counterpart(ni, weapon_display_mode)
+		Else
+			si = - 1
+		EndIf
+		Local offsetsArray#[], angleOffsets#[]
+		If weapon_display_mode = "TURRET"
 			offsetsArray = data.weapon.turretOffsets
-		ElseIf weapon_display_mode = "hardpoint"
+			angleOffsets = data.weapon.turretAngleOffsets
+		ElseIf weapon_display_mode = "HARDPOINT"
 			offsetsArray = data.weapon.hardpointOffsets
+			angleOffsets = data.weapon.hardpointAngleOffsets
 		Else
 			Return
 		EndIf
+		If Not offsetsArray Then Return
+		If Not angleOffsets Then Return
 		SetImageFont( DATA_FONT )
-		Local x#, y#
-		Local nearest_i% = data.find_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
-		If ed.drag_nearest_i <> -1 Then nearest_i = ed.drag_nearest_i
+		Local ox#, oy#, r#
 		For Local i% = 0 Until offsetsArray.length Step 2
-			x = W_MID + sprite.pan_x+sprite.zpan_x + sprite.scale*offsetsArray[i+0]
-			y = H_MID + sprite.pan_y+sprite.zpan_y + sprite.scale*offsetsArray[i+1]
-			If i <> nearest_i
+			ox = W_MID + sprite.pan_x + sprite.zpan_x + sprite.scale * (offsetsArray[i + 0] + xOffset)
+			oy = H_MID + sprite.pan_y + sprite.zpan_y + sprite.scale * - offsetsArray[i + 1]
+			r = angleOffsets[i / 2]
+			If i <> ni And i <> si
 				SetAlpha( 0.50 )
-				draw_pointer( x, y, 0, false, 8, 16, $FFFFFF, $000000 )
+				draw_pointer( ox, oy, r, False, 8, 16, $FFFFFF, $000000 )
 			Else
 				SetAlpha( 0.80 )
-				draw_pointer( x, y, 0, false, 10, 20, $FFFFFF, $000000 )
+				draw_pointer( ox, oy, r, False, 10, 20, $FFFFFF, $000000 )
 			EndIf
 			SetAlpha( 1 )
-			draw_string( ""+((i/2)+1), x,y,,, 0.5,0.25 )
+			draw_string( "" + ( (i / 2) + 1), ox, oy,,, 0.5, 0.25 )
 		Next
 		SetImageFont( FONT )
 		SetAlpha( 1 )
+		mouse_str = ""
+		If ni <> - 1
+			If ModKeyAndMouseKey = 1 Or ModKeyAndMouseKey = 17
+				mouse_str :+ coord_string( x, y ) + "~n"
+			ElseIf ModKeyAndMouseKey = 2 Or ModKeyAndMouseKey = 18
+				mouse_str :+ json.FormatDouble(angleOffsets[ni / 2], 1) + Chr($00B0) + " (arc)~n"			
+			Else If ModKeyAndMouseKey = 0 Or ModKeyAndMouseKey = 16
+				mouse_str :+ coord_string( offsetsArray[ni], offsetsArray[ni + 1] ) + "~n" + json.FormatDouble(angleOffsets[ni / 2], 1) + Chr($00B0) + " (arc)~n"
+			EndIf
+		EndIf	
+	EndMethod
+	
+	Method draw_hud( ed:TEditor, data:TData )
+		Local op_str$ = LocalizeString("{{ui_function_weapon_opstr}}") + weapon_display_mode
+		Local op_widget:TextWidget = TextWidget.Create( op_str )
+		draw_container( 7, LINE_HEIGHT * 2, op_widget.w + 20, op_widget.h + 20, 0.0, 0.0 )
+		draw_string( op_widget, 7 +10, LINE_HEIGHT * 2 + 10, $FFFFFF, 0.0, 0.0 )
 	EndMethod
 
 	Method load_weapon_images( data:TData, sprite:TSprite )
@@ -358,8 +428,8 @@ Type TModalWeapon Extends TSubroutine
 		hardpointGlow_img = Null
 		turret_img_seq = Null
 		hardpoint_img_seq = Null
-		img_seq_i = 0
-		img_seq_i_ts = millisecs()
+'		img_seq_i = 0
+'		img_seq_i_ts = millisecs()
 		Local img_path$ = Null
 		'load new imgs
 		If data.weapon.numFrames <= 1

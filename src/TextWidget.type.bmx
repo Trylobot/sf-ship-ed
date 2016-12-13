@@ -5,7 +5,7 @@ Type TextWidget
 	Field w%
 	Field h%
 	
-	Function Create:TextWidget( obj:Object, line_height_override%=-1 )
+	Function Create:TextWidget( obj:Object, line_height_override% = - 1 )
 		Local w:TextWidget = New TextWidget
 		If TextWidget(obj)
 			w.lines = TextWidget(obj).lines[..]
@@ -24,13 +24,13 @@ Type TextWidget
 		update_size()
 	End Method
 	
-	Method update_size( line_height_override%=-1 )
+	Method update_size( line_height_override% = - 1 )
 		If line_height_override = -1 Then line_height_override = LINE_HEIGHT
 		w = 0
 		For Local line$ = EachIn lines
-			w = Max( w, TextWidth( line ))
+			w = Max( w, TextWidth( line ) )
 		Next
-		h = lines.length*line_height_override
+		h = lines.length * line_height_override
 	End Method
 	
 	Method append( widget:TextWidget )

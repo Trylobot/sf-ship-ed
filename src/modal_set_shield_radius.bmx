@@ -5,7 +5,7 @@ Function modal_update_set_shield_radius( ed:TEditor, data:TData, sprite:TSprite 
 	If MouseHit( 1 )
 		'get input
 		Local img_x#, img_y#
-		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
 		data.ship.shieldRadius = calc_distance( data.ship.center[1] + data.ship.shieldCenter[0], data.ship.center[0] - data.ship.shieldCenter[1], img_x, img_y )
 		data.update()
 		'next mode
@@ -32,7 +32,7 @@ End Function
 Function draw_shield_circle( data:TData, sprite:TSprite, position_at_cursor%=False, use_distance_to_cursor%=False )
 	If data.ship.center And data.ship.shieldCenter
 		Local img_x#, img_y#
-		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
 		Local csx%, csy%
 		Local r#, rs#
 		If Not position_at_cursor

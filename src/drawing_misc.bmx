@@ -1,6 +1,6 @@
 '-----------------------
 
-Function draw_string( source:Object, x%, y%, fg%=$FFFFFF, bg%=$000000, origin_x#=0.0, origin_y#=0.0, line_height_override%=-1, draw_bg%=True, s#=1.0 )
+Function draw_string( source:Object, x%, y%, fg% = $FFFFFF, bg% = $000000, origin_x# = 0.0, origin_y# = 0.0, line_height_override% = - 1, draw_bg% = False, s# = 1.0 )
 	Local LH% = LINE_HEIGHT
 	If line_height_override > -1
 		LH = line_height_override
@@ -30,12 +30,12 @@ Function draw_string( source:Object, x%, y%, fg%=$FFFFFF, bg%=$000000, origin_x#
 	SetRotation( 0 )
 	SetScale( s, s )
 	Local a# = GetAlpha()
-	If draw_bg
+	If draw_bg And Not APP.performance_mode
 		SetColor( (bg & $FF0000) Shr 16, (bg & $00FF00) Shr 8, (bg & $0000FF) Shr 0 )
 		SetAlpha( 0.5*a )
 		For Local line$ = EachIn lines
 			'outline and block shadow effects
-			DrawText( line, x_cur - 1, y_cur - 1 ); DrawText( line, x_cur    , y_cur - 1 ); DrawText( line, x_cur + 1, y_cur - 1 )
+			DrawText( line, x_cur - 1, y_cur - 1 ); DrawText( line, x_cur , y_cur - 1 ); DrawText( line, x_cur + 1, y_cur - 1 )
 			DrawText( line, x_cur - 1, y_cur     );                                         DrawText( line, x_cur + 1, y_cur     )
 			DrawText( line, x_cur - 1, y_cur + 1 ); DrawText( line, x_cur    , y_cur + 1 ); DrawText( line, x_cur + 1, y_cur + 1 )
 			DrawText( line, x_cur + 2, y_cur + 2 )
@@ -47,21 +47,20 @@ Function draw_string( source:Object, x%, y%, fg%=$FFFFFF, bg%=$000000, origin_x#
 	SetColor( (fg & $FF0000) Shr 16, (fg & $00FF00) Shr 8, (fg & $0000FF) Shr 0 )
 	SetAlpha( a )
 	For Local line$ = EachIn lines
-		'foreground
-		DrawText( line, x_cur, y_cur )
-		y_cur :+ s*LH
+		DrawText( line, x_cur, y_cur )		
+		y_cur :+ s * LH
 	Next
 	SetScale( 1, 1 )
 End Function
 
-Function draw_container( x%, y%, w%, h%, ox#=0.0, oy#=0.0, fg%=$FFFFFF, bg%=$000000, bg_fill_alpha#=0.5, s#=1.0 )
-	x :- ox*Float( s*w )
-	y :- oy*Float( s*h )
+Function draw_container( x%, y%, w%, h%, ox# = 0.0, oy# = 0.0, fg% = $FFFFFF, bg% = $000000, bg_fill_alpha# = 0.5, s# = 1.0 )
+	x :- ox * Float( s * w )
+	y :- oy * Float( s * h )
 	SetRotation( 0 )
 	SetScale( 1, 1 )
 	SetColor((bg&$FF0000) Shr 16,(bg&$FF00) Shr 8,(bg&$FF))
 	Local a# = GetAlpha()
-	SetAlpha( a*bg_fill_alpha )
+	SetAlpha( a * bg_fill_alpha )
 	DrawRect( x,y, s*w,s*h )
 	SetAlpha( a*1 )
 	DrawRectLines( x-1,y-1, s*w+2,s*h+2 )
@@ -80,47 +79,49 @@ End Function
 
 Function draw_crosshairs( x%, y%, r%, diagonal% = False )
 	Local a# = GetAlpha()
+	Local lw# = GetLineWidth()
 	SetColor( 0, 0, 0 )
 	SetLineWidth( 3 )
-	SetAlpha( 0.8*a )
+	SetAlpha( 0.8 * a )
 	If Not diagonal
-		DrawRect( x-1, y-r-1, 3, 2*r+2 )
-		DrawRect( x-r-1, y-1, 2*r+2, 3 )
+		DrawRect( x - 1, y - r - 1, 3, 2 * r + 2 )
+		DrawRect( x - r - 1, y - 1, 2 * r + 2, 3 )
 	Else
-		DrawLine( x-r-1, y-r-1, x+r+1, y+r+1 )
-		DrawLine( x-r-1, y+r+1, x+r+1, y-r-1 )
+		DrawLine( x - r - 1, y - r - 1, x + r + 1, y + r + 1 )
+		DrawLine( x - r - 1, y + r + 1, x + r + 1, y - r - 1 )
 	End If
 	SetColor( 255, 255, 255 )
 	SetLineWidth( 1 )
 	SetAlpha( a )
 	If Not diagonal
-		DrawLine( x, y-r, x, y+r )
+		DrawLine( x, y - r, x, y + r )
 		DrawLine( x-r, y, x+r, y )
 	Else
 		DrawLine( x-r, y-r, x+r, y+r )
 		DrawLine( x-r, y+r, x+r, y-r )
 	End If
+	SetLineWidth( lw )
 End Function
 
-Function draw_arc( x%, y%, r%, a1#, a2#, c%, pie%=true )
+Function draw_arc( x%, y%, r%, a1#, a2#, c%, pie% = True )
 	c = Max(1, c)
-	Local segments#[] = New Float[2*c]
+	Local segments#[] = New Float[2 * c]
 	Local a#
 	For Local i% = 0 Until 2*c Step 2
-		a = a1 + ((i/2)*(a2 - a1))/c
-		segments[i] = x + r*cos(a)
-		segments[i+1] = y - r*sin(a)
+		a = a1 + ( (i / 2) * (a2 - a1) ) / c
+		segments[i] = x + r * Cos(a)
+		segments[i+1] = y - r*Sin(a)
 	Next
 	'draw bg
 	SetColor( 0,0,0 )
 	SetLineWidth( 4 )
-	For Local i% = 0 Until 2*c-2 Step 2
+	For Local i% = 0 Until 2 * c - 2 Step 2
 		DrawLine( segments[i], segments[i+1], segments[i+2], segments[i+3] )
 	Next
 	If pie
 		DrawLine( segments[0], segments[1], x, y )
 		DrawLine( segments[2*c-2], segments[2*c-1], x, y )
-	End if
+	End If
 	'draw fg
 	SetColor( 255,255,255 )
 	SetLineWidth( 2 )
@@ -130,7 +131,7 @@ Function draw_arc( x%, y%, r%, a1#, a2#, c%, pie%=true )
 	If pie
 		DrawLine( segments[0], segments[1], x, y )
 		DrawLine( segments[2*c-2], segments[2*c-1], x, y )
-	End if
+	End If
 End Function
 
 Function draw_dot( x%, y%, em%=False )
@@ -191,7 +192,7 @@ Function draw_bar_graph( x#,y#, w#,h#, ox#=0.0,oy#=0.0, values#[], em_i%=-1, non
 		DrawLine( xi,yi, xi,yi+hi )
 	Next
 	SetAlpha( a )
-Endfunction
+EndFunction
 
 Function draw_line( x1#,y1#, x2#,y2#, bg%=True, fg%=True )
 	If bg
@@ -216,11 +217,11 @@ Function draw_pointer( x%, y%, rot#, em%=False, r%=12, l%=24, fg%=$FFFFFF,bg%=$0
 	SetColor((bg&$FF0000) Shr 16,(bg&$FF00) Shr 8,(bg&$FF))
 	DrawOval( x-r, y-r, 2*r, 2*r )
 	SetLineWidth( 4 )
-	DrawLine( x, y, x + (l + 1)*cos(rot), y - (l + 1)*sin(rot) )
+	DrawLine( x, y, x + (l + 1)*Cos(rot), y - (l + 1)*Sin(rot) )
 	SetColor((fg&$FF0000) Shr 16,(fg&$FF00) Shr 8,(fg&$FF))
 	DrawOval( x-(r-2), y-(r-2), 2*(r-2), 2*(r-2) )
 	SetLineWidth( 2 )
-	DrawLine( x, y, x + l*cos(rot), y - l*sin(rot) )
+	DrawLine( x, y, x + l*Cos(rot), y - l*Sin(rot) )
 	SetColor((bg&$FF0000) Shr 16,(bg&$FF00) Shr 8,(bg&$FF))
 	DrawOval( x-(r-4), y-(r-4), 2*(r-4), 2*(r-4) )
 	'draw emphasis
@@ -245,11 +246,11 @@ Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36,
 	SetColor((bg&$FF0000) Shr 16,(bg&$FF00) Shr 8,(bg&$FF))
 	DrawOval( x-r, y-r, 2*r, 2*r )
 	SetLineWidth( 4 )
-	DrawLine( x, y, x + (l + 1)*cos(rot), y - (l + 1)*sin(rot) )
+	DrawLine( x, y, x + (l + 1)*Cos(rot), y - (l + 1)*Sin(rot) )
 	SetColor((fg&$FF0000) Shr 16,(fg&$FF00) Shr 8,(fg&$FF))
 	DrawOval( x-(r-2), y-(r-2), 2*(r-2), 2*(r-2) )
 	SetLineWidth( 2 )
-	DrawLine( x, y, x + l*cos(rot), y - l*sin(rot) )
+	DrawLine( x, y, x + l*Cos(rot), y - l*Sin(rot) )
 	SetColor((bg&$FF0000) Shr 16,(bg&$FF00) Shr 8,(bg&$FF))
 	DrawOval( x-(r-4), y-(r-4), 2*(r-4), 2*(r-4) )
 	'draw emphasis
@@ -262,7 +263,7 @@ Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36,
 	SetAlpha( a )
 End Function
 
-Function draw_engine( x%, y%, w%, l%, rot#, z#, em%=False )
+Function draw_engine( x#, y#, w%, l%, rot#, z#, em% = False, engineColor%[], drawPoint% = True)
 	Local a# = GetAlpha()
 	Local outer_r% = 5
 	Local inner_r% = 4
@@ -270,25 +271,34 @@ Function draw_engine( x%, y%, w%, l%, rot#, z#, em%=False )
 		outer_r = 10
 		inner_r = 8
 	End If
+	SetRotation( - rot )
 	'draw sizing rect
-	SetRotation( -rot )
-	SetScale( z, z )
-	SetColor( 255, 255, 255 )
-	If em
-		SetAlpha( a*0.25 )
-	Else
-		SetAlpha( a*0.18 )
+	If drawPoint
+		SetColor( 255, 255, 255 )
+		If em Then SetAlpha( a * 0.05 ) Else SetAlpha( a * 0.025 )
+		SetScale( z, z )
+		DrawRect( x + z * (l / 2) * Cos(rot + 90), y - z * (l / 2) * Sin(rot + 90), w, l )
 	EndIf
-	DrawRect( x + z*(l/2)*cos(rot+90), y - z*(l/2)*sin(rot+90), w, l )
+	'draw flame
+	If em Then SetAlpha( a * 0.25 ) Else SetAlpha( a * 0.75 )
+	SetScale ( (w / 32.0) * z, (l / 32.0) * z)
+	SetColor(engineColor[0], engineColor[1], engineColor[2])
+	DrawImage(ed.engineflame, x + z * (l / 2) * Cos(rot + 90), y - z * (l / 2) * Sin(rot + 90) )
+	SetColor( 255, 255, 255 )
+	SetBlend(LIGHTBLEND)
+	DrawImage(ed.engineflamecore, x + z * (l / 2) * Cos(rot + 90), y - z * (l / 2) * Sin(rot + 90) )	
+	SetBlend(ALPHABLEND)
 	SetRotation( 0 )
 	SetScale( 1, 1 )
-	SetAlpha( a*1 )
-	'draw bg
-	SetColor( 0, 0, 0 )
-	DrawOval( x-outer_r, y-outer_r, 2*outer_r, 2*outer_r )
-	'draw fg
-	SetColor( 255, 255, 255 )
-	DrawOval( x-inner_r, y-inner_r, 2*inner_r, 2*inner_r )
+	SetAlpha( a * 1 )
+	If (drawPoint)
+		'draw bg
+		SetColor( 0, 0, 0 )
+		DrawOval( x-outer_r, y-outer_r, 2*outer_r, 2*outer_r )
+		'draw fg
+		SetColor( 255, 255, 255 )
+		DrawOval( x - inner_r, y - inner_r, 2 * inner_r, 2 * inner_r )
+	EndIf
 	'reset
 	SetLineWidth( 1 )
 	SetAlpha( a )
@@ -338,7 +348,7 @@ Function draw_assigned_weapon_info( ed:TEditor, data:TData, sprite:TSprite, weap
 					current_weapon_str :+ "? OP"
 				EndIf
 			EndIf
-		Endif
+		EndIf
 	Else
 		current_weapon_str :+ "empty"
 	EndIf
@@ -364,7 +374,7 @@ Function draw_variant_weapon_mount( wx%, wy%, weaponSlot:TStarfarerShipWeapon )
 		bg_color = $3F3F3F
 	EndIf
 	'draw icon
-	draw_weapon_mount( wx, wy, weaponSlot.angle, weaponSlot.arc, TRUE, 8, 16, 24, fg_color,bg_color )
+	draw_weapon_mount( wx, wy, weaponSlot.angle, weaponSlot.arc, True, 8, 16, 24, fg_color,bg_color )
 EndFunction
 
 Function draw_builtin_weapon_slot_info( ed:TEditor, data:TData, sprite:TSprite, weaponSlot:TStarfarerShipWeapon )
@@ -398,7 +408,7 @@ Function draw_builtin_assigned_weapon_info( ed:TEditor, data:TData, sprite:TSpri
 			Else
 				current_weapon_str :+ weapon_id
 			EndIf
-		Endif
+		EndIf
 	Else
 		current_weapon_str :+ "empty"
 	EndIf
@@ -415,30 +425,159 @@ Function draw_builtin_weapon_mount( wx%, wy%, weaponSlot:TStarfarerShipWeapon )
 	Local fg_color% = $FFFFFF
 	Local bg_color% = $000000
 	'draw icon
-	draw_weapon_mount( wx, wy, weaponSlot.angle, weaponSlot.arc, TRUE, 8, 16, 24, fg_color,bg_color )
+	draw_weapon_mount( wx, wy, weaponSlot.angle, weaponSlot.arc, True, 8, 16, 24, fg_color,bg_color )
 EndFunction
 
+Function draw_collision_circle( data:TData, sprite:TSprite, position_at_cursor%=False, use_distance_to_cursor%=False )
+	If data.ship.center
+		Local img_x#, img_y#
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+		Local cx%, cy%
+		Local r#, rs#
+		If Not position_at_cursor
+			'use existing position to draw crosshair
+			cx = sprite.sx + data.ship.center[1]*sprite.scale
+			cy = sprite.sy + data.ship.center[0]*sprite.scale
+		Else
+			'draw at cursor instead
+			cx = sprite.sx + img_x*sprite.scale
+			cy = sprite.sy + img_y*sprite.scale
+		EndIf
+		If Not use_distance_to_cursor
+			'use existing radius to draw circle
+			r = data.ship.collisionRadius
+		Else
+			'use distance from existing center to cursor as radius instead
+			r = calc_distance( data.ship.center[1], data.ship.center[0], img_x, img_y )
+		EndIf
+		rs = r*sprite.scale
+		DrawOval( cx - rs, cy - rs, 2*rs, 2*rs )
+	EndIf
+EndFunction
+
+Function draw_collision_center_point( data:TData, sprite:TSprite, position_at_cursor%=False )
+	If data.ship.center
+		Local img_x#, img_y#
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+		Local cx%, cy%
+		If Not position_at_cursor
+			'use existing position to draw crosshair
+			cx = sprite.sx + data.ship.center[1]*sprite.scale
+			cy = sprite.sy + data.ship.center[0]*sprite.scale
+		Else
+			'draw at cursor instead
+			cx = sprite.sx + img_x*sprite.scale
+			cy = sprite.sy + img_y*sprite.scale
+		EndIf
+		draw_crosshairs( cx, cy, 8 )
+		If Not position_at_cursor
+			draw_string( coord_string( data.ship.center[0], data.ship.center[1] ), cx+5, cy+5 )
+		Else
+			draw_string( coord_string( img_y, img_x ), cx+5, cy+5 )
+		EndIf
+	EndIf
+EndFunction
+
+Function draw_shield_circle( data:TData, sprite:TSprite, position_at_cursor%=False, use_distance_to_cursor%=False )
+	If data.ship.center And data.ship.shieldCenter
+		Local img_x#, img_y#
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+		Local csx%, csy%
+		Local r#, rs#
+		If Not position_at_cursor
+			'use existing position to draw crosshair
+			csx = sprite.sx + data.ship.center[1]*sprite.Scale + data.ship.shieldCenter[0]*sprite.Scale
+			csy = sprite.sy + data.ship.center[0]*sprite.Scale - data.ship.shieldCenter[1]*sprite.Scale
+		Else
+			'draw at cursor instead
+			csx = sprite.sx + img_x*sprite.scale
+			csy = sprite.sy + img_y*sprite.scale
+		EndIf
+		If Not use_distance_to_cursor
+			'use existing radius to draw circle
+			r = data.ship.shieldRadius
+		Else
+			'use distance from existing center to cursor as radius instead
+			r = calc_distance( data.ship.center[1] + data.ship.shieldCenter[0], data.ship.center[0] - data.ship.shieldCenter[1], img_x, img_y )
+		EndIf
+		rs = r*sprite.scale
+		DrawOval( csx - rs, csy - rs, 2*rs, 2*rs )
+	EndIf
+EndFunction
+
+Function draw_shield_center_point( data:TData, sprite:TSprite, position_at_cursor%=False )
+	If data.ship.center And data.ship.shieldCenter
+		Local img_x#, img_y#
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+		Local csx%, csy%
+		If Not position_at_cursor
+			'use existing position to draw crosshair
+			csx = sprite.sx + data.ship.center[1]*sprite.Scale + data.ship.shieldCenter[0]*sprite.Scale
+			csy = sprite.sy + data.ship.center[0]*sprite.Scale - data.ship.shieldCenter[1]*sprite.Scale
+		Else
+			'draw at cursor instead
+			csx = sprite.sx + img_x*sprite.scale
+			csy = sprite.sy + img_y*sprite.scale
+		EndIf
+		draw_crosshairs( csx, csy, 6, True )
+		If Not position_at_cursor
+			draw_string( coord_string( data.ship.shieldCenter[0], data.ship.shieldCenter[1] ), csx+5, csy+5 )
+		Else
+			draw_string( coord_string( img_x - data.ship.center[1], -(img_y + data.ship.center[0]) ), csx+5, csy+5 )
+		EndIf
+	EndIf
+EndFunction
 '------------
 
 Global cursor_color_ts% = 0
 
-Function get_cursor_color%( invert%=FALSE )
-	Local val% = 196.0 + 196.0*cos(0.90*Float(millisecs()-cursor_color_ts))
+Function get_cursor_color%( invert%=False )
+	Local val% = 196.0 + 196.0 * Cos(0.90 * Float(MilliSecs() - cursor_color_ts) )
 	If val < 0 Then val = 0 ElseIf val > 255 Then val = 255
 	If invert
 		val = 255 - val
 	EndIf
-	Return (val|(val Shl 8)|(val Shl 16))
+	Return (val | (val Shl 8) | (val Shl 16) )
 EndFunction
 
 Function reset_cursor_color_period%()
-	cursor_color_ts = millisecs() - 200 'has the effect of making cos(...) come out to -1, reducing val to 0
+	cursor_color_ts = MilliSecs() - 200 'has the effect of making cos(...) come out to -1, reducing val to 0
 EndFunction
 
 Function get_rand_color%()
-	Return Rnd()*Float($FFFFFF)
+	Return Rnd() * Float($FFFFFF)
 EndFunction
 
 Function set_color( c% )
 	SetColor( (c&$FF0000) Shr 16,(c&$FF00) Shr 8,(c&$FF) )
 EndFunction
+
+Type TSmoothScroll
+	Field _targetLevel#
+	Field currLevel#
+	Field lastTime# = 1.0
+	Field UPDATE_FACTOR# = 0.25
+	Field SNAP# = 0.025
+	
+	
+	Method ScrollTo#(targetLevel#)
+		_targetLevel = targetLevel
+		If Not currLevel
+			currLevel = targetLevel
+			Return currLevel
+		Else
+			If Abs (currLevel - targetLevel) < SNAP
+				currLevel = targetLevel
+				Return currLevel
+			Else
+				currLevel :+ UPDATE_FACTOR * ( targetLevel - currLevel)
+				Return currLevel
+			EndIf
+		EndIf
+		Return currLevel
+	End Method
+	
+	Method reset()
+		currLevel = Null
+	End Method
+End Type

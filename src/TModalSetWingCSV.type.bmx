@@ -10,7 +10,7 @@ Type TModalSetWingCSV Extends TGenericCSVSubroutine
 	Const COLUMN_FIGHTER_FORMATION% = 5 '(WING) shows the current formation graphically
 
 	Method New()
-		mode_name = "Wing"
+		mode_name = LocalizeString("{{wt_misc_wing}}")
 		default_filename = "wing_data.csv"
 		multiselect_prefix = "wing_csv"
 		csv_identifier_field = "variant"
@@ -40,6 +40,7 @@ Type TModalSetWingCSV Extends TGenericCSVSubroutine
 		stock_stats_field_order = ed.stock_wing_stats_field_order
 		data_csv_row = data.csv_row_wing
 		hide_main_ship = False
+		DebugLogFile(" Activate Wing CSV Editor")
 	EndMethod
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
