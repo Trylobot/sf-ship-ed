@@ -18,5 +18,14 @@ Type TStarfarerVariant
 		weaponGroups = New TStarfarerVariantWeaponGroup[0]
 	EndMethod
 
+	Method getAllWeapons:TMap () ' <String,String>  weapon slot id --> weapon id
+		Local weaponMap:TMap = CreateMap ()
+		For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn weaponGroups
+			For Local key$ = EachIn MapKeys(weaponGroup.weapons)
+				MapInsert (weaponMap, key, MapValueForKey(weaponGroup.weapons, key))
+			Next
+		Next
+		Return weaponMap 
+	EndMethod
 End Type
 

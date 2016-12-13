@@ -2,7 +2,7 @@
 Type TModalSetShipCSV Extends TGenericCSVSubroutine
 
 	Method New()
-		mode_name = "Ship"
+		mode_name = LocalizeString("{{wt_misc_ship}}")
 		default_filename = "ship_data.csv"
 		multiselect_prefix = "ship_csv"
 		csv_identifier_field = "id"
@@ -12,7 +12,6 @@ Type TModalSetShipCSV Extends TGenericCSVSubroutine
 		recognized_data_types.Insert( "id", [COLUMN_STRING] )
 		recognized_data_types.Insert( "system id", [COLUMN_STRING] )
 		recognized_data_types.Insert( "designation", [COLUMN_STRING] )
-		recognized_data_types.Insert( "8/6/5/4%", [COLUMN_STRING] )
 		recognized_data_types.Insert( "number", [COLUMN_STRING] )
 		'////
 		recognized_data_types.Insert( "shield type", [COLUMN_ENUM] )
@@ -26,6 +25,7 @@ Type TModalSetShipCSV Extends TGenericCSVSubroutine
 		stock_stats = ed.stock_ship_stats
 		stock_stats_field_order = ed.stock_ship_stats_field_order
 		data_csv_row = data.csv_row
+		DebugLogFile(" Activate Ship CSV Editor")
 	EndMethod
 
 EndType

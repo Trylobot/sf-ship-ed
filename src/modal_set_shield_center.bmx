@@ -4,7 +4,7 @@ Function modal_update_set_shield_center( ed:TEditor, data:TData, sprite:TSprite 
 	If MouseHit( 1 )
 		'get input
 		Local img_x#, img_y#
-		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
 		data.set_shield_center( img_x, img_y )
 		data.update()
 		'next mode
@@ -31,7 +31,7 @@ End Function
 Function draw_shield_center_point( data:TData, sprite:TSprite, position_at_cursor%=False )
 	If data.ship.center And data.ship.shieldCenter
 		Local img_x#, img_y#
-		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
 		Local csx%, csy%
 		If Not position_at_cursor
 			'use existing position to draw crosshair

@@ -1,22 +1,63 @@
-Const INFINITY% = -1
+Const INFINITY% = - 1
 
 Type CONSOLE
-	Global last_bk%
-
-	Function Update$( str$, max_size%=INFINITY, modified% Var )
+	'Global last_bk%
+	
+	Global CONSOLE_last_str$
+	Field i%
+	
+	Function Update$( str$, max_size% = INFINITY, cursor_i% Var, modified% Var )
+		If str <> CONSOLE_last_str Then i = str.length Else i = cursor_i
+		Select EventID()
+		Case EVENT_KEYDOWN, EVENT_KEYREPEAT
+			Select EventData()
+			Case KEY_BACKSPACE
+				If i > 0
+					str = str[..(i - 1)] + str[i..]
+					i:- 1
+					modified = True
+				EndIf
+			Case KEY_DELETE
+				If i < str.length
+					str = str[..(i)] + str[(i + 1)..]
+					modified = True
+				EndIf
+			Case KEY_LEFT
+				If i > 0 Then i :- 1
+			Case KEY_RIGHT
+				If i < str.length Then i :+ 1
+			Default
+				If PeekEvent() And PeekEvent().id = EVENT_KEYCHAR 'we got some valid input.
+					If max_size = INFINITY Or str.length < max_size
+						str = str[..i] + Chr( PeekEvent().data) + str[i..]
+						i :+ 1
+						modified = True
+					EndIf
+				EndIf
+			EndSelect
+		End Select
+		cursor_i = i
+		CONSOLE_last_str = str
+		Return str
+	End Function
+	
+	
+	
+Rem
+	Function Update$( str$, max_size% = INFINITY, modified% Var )
 		'remove characters from the end of th estring
 		If KeyHit( KEY_BACKSPACE ) And str.length >= 1 '.. 'erase character left of cursor and move cursor left
-			str = str[..(str.Length-1)]
+			str = str[..(str.length - 1)]
 			modified = True
-			last_bk = millisecs()
+			last_bk = MilliSecs()
 		End If
 		If KeyDown( KEY_BACKSPACE )
-			If last_bk <> -1 And ((millisecs() - last_bk) > 333) 'repeat delay 1/3 second, repeat rate once per frame
+			If last_bk <> - 1 And ( (MilliSecs() - last_bk) > 333) 'repeat delay 1/3 second, repeat rate once per frame
 				str = str[..(str.Length-1)]
 				modified = True
 			EndIf
 		Else
-			last_bk = -1
+			last_bk = - 1
 		EndIf
 		'normal input
 		If max_size = INFINITY Or str.Length < max_size
@@ -62,6 +103,6 @@ Type CONSOLE
 		Next
 		Return Null
 	End Function
-
+EndRem
 End Type
 

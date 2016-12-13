@@ -51,6 +51,8 @@ Type TEditor
 	Field ico_zoom:TImage
 	Field ico_mirr:TImage
 	Field ico_exit:TImage
+	Field engineflame:TImage
+	Field engineflamecore:TImage
 	'stock data
 	Field stock_ships:TMap 'String (hullId) --> TStarfarerShip
 	Field stock_variants:TMap 'String (variantId) --> TStarfarerVariant
@@ -68,10 +70,10 @@ Type TEditor
 
 	Method New()
 		program_mode = "ship"
-		mode = "preview_all"
-		mouse_z = MouseZ()
+		mode = "null"
+		mouse_z = MouseZ
 		bounds_symmetrical = True
-		edit_strings_weapon_i = -1
+		edit_strings_weapon_i = - 1
 		edit_strings_engine_i = -1
 		selected_zoom_level = 3 '=1.0
 		initialize_stock_data_containers()
@@ -100,8 +102,8 @@ Type TEditor
 
 	Method load_stock_ship:TStarfarerShip( dir$, file$ )
 		Try
-			Local input_json_str$ = LoadString( dir+file )
-			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ))
+			Local input_json_str$ = LoadString( dir + file )
+			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ) )
 			Fix_Map_TStrings( ship.builtInWeapons ) 'TEMPORARY
 			stock_ships.Insert( ship.hullId, ship )
 			load_multiselect_value( "ship.hullSize", ship.hullSize )
@@ -127,7 +129,7 @@ Type TEditor
 
 	Method load_stock_variant:TStarfarerVariant( dir$, file$ )
 		Try
-			Local input_json_str$ = LoadString( dir+file )
+			Local input_json_str$ = LoadString( dir + file )
 			Local variant:TStarfarerVariant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
 			For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
 				Fix_Map_TStrings( weaponGroup.weapons ) 'TEMPORARY
@@ -173,8 +175,8 @@ Type TEditor
 
 	Method load_stock_weapon:TStarfarerWeapon( dir$, file$ )
 		Try
-			Local input_json_str$ = LoadString( dir+file )
-			Local weapon:TStarfarerWeapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon", "parse_weapon" ))
+			Local input_json_str$ = LoadString( dir + file )
+			Local weapon:TStarfarerWeapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon", "parse_weapon" ) )
 			stock_weapons.Insert( weapon.id, weapon )
 			'load_multiselect_value( "ship.builtInWeapons.id", weapon.id )
 			load_multiselect_value( "weapon.specClass", weapon.specClass )
@@ -182,21 +184,33 @@ Type TEditor
 			load_multiselect_value( "weapon.size", weapon.size )
 			load_multiselect_value( "weapon.barrelMode", weapon.barrelMode )
 			load_multiselect_value( "weapon.animationType", weapon.animationType )
-			DebugLogFile " LOADED "+file
+			DebugLogFile " LOADED " + file
 			Return weapon
 		Catch ex$ 'ignore parsing errors and continue
-			DebugLogFile " Error: "+file+" "+ex
+			DebugLogFile " Error: " + file + " " + ex
 			Return Null
 		EndTry
 	End Method
 
 	Method load_stock_engine_styles( dir$, file$ )
 		Try
-			Local input_json_str$ = LoadString( dir+file )
-			Local engine_styles:TMap = TMap( json.parse( input_json_str, "TMap" ))
-			For Local styleId$ = EachIn engine_styles.Keys()
+			Local input_json_str$ = LoadString( dir + file )
+			Local intermediate_objects:TObject = TObject(json.parse( input_json_str, Null, "parse_CustomEngineStyle") )
+			For Local styleId$ = EachIn intermediate_objects.fields.Keys()
 				load_multiselect_value( "ship.engine.styleId", styleId )
-			Next
+				Local intermediate_object:TObject = TObject(MapValueForKey(intermediate_objects.fields, styleId) )
+				Local destination_type_id:TTypeId = TTypeId.ForName( "TStarfarerCustomEngineStyleSpec")
+				Local engine_style:TStarfarerCustomEngineStyleSpec = TStarfarerCustomEngineStyleSpec(json.initialize_object(intermediate_object, destination_type_id) )
+				stock_engine_styles.Insert(styleId, engine_style)
+				'Print intermediate_object.ToString()
+			Next	
+'			Local engine_styles:TMap = TMap( json.parse( input_json_str, "TMap" ) )
+'			For Local styleId$ = EachIn engine_styles.Keys()
+'				load_multiselect_value( "ship.engine.styleId", styleId )
+'				Local str$ = String(MapValueForKey(engine_styles, styleId) )
+'				Local style:TStarfarerCustomEngineStyleSpec = TStarfarerCustomEngineStyleSpec (MapValueForKey(engine_styles, styleId) )
+'				stock_engine_styles.Insert(styleId, style)
+'			Next
 		Catch ex$ 'ignore parsing errors and continue
 			DebugLogFile " Error: "+file+" "+ex
 		EndTry
@@ -206,7 +220,7 @@ Type TEditor
 		Try
 			If save_field_order
 				stock_ship_stats_field_order = CreateList()
-				TCSVLoader.Load( dir+file, "id", stock_ship_stats, stock_ship_stats_field_order )
+				TCSVLoader.Load( dir + file, "id", stock_ship_stats, stock_ship_stats_field_order )
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_ship_stats )
 			EndIf
@@ -275,7 +289,7 @@ Type TEditor
 		Return (assoc And assoc.Contains( wing_id ))
 	EndMethod
 
-	Method load_stock_weapon_stats( dir$, file$, save_field_order%=False )
+	Method load_stock_weapon_stats( dir$, file$, save_field_order% = False )
 		Try
 			If save_field_order
 				'stock_weapon_stats_field_order = CreateList()
@@ -285,7 +299,7 @@ Type TEditor
 			EndIf
 			DebugLogFile " LOADED "+file
 		Catch ex$ 'ignore parsing errors and continue
-			DebugLogFile " Error: "+file+" "+ex
+			DebugLogFile " Error: " + file + " " + ex
 		EndTry
 	End Method
 
@@ -309,11 +323,17 @@ Type TEditor
 			'or universal/built-in type with same size
 			'or decorative weapons for decorative slots
 			'or energy/ballistic weapons for hybrid slots with same size
+			'or energy/missile weapons for synergy slots with same size
+			'or missile/ballistic weapons for composite slots with same size
 			If slot_type <> "DECORATIVE"
-				If ( slot_type = "UNIVERSAL" And size_diff = 0 ) ..
-				Or ( slot_type = "BUILT_IN" And size_diff = 0 ) ..
-				Or ( slot_type = weapon.type_ And size_diff >= 0 And size_diff <= 1 ) ..
-				Or ( slot_type = "HYBRID" And size_diff = 0 And (weapon.type_ = "ENERGY" Or weapon.type_ = "BALLISTIC") ) 
+				If Not ( weapon.type_ = "DECORATIVE" ) ..
+				And (( slot_type = "UNIVERSAL" And size_diff = 0 ) ..
+					Or ( slot_type = "BUILT_IN" And size_diff = 0 ) ..
+					Or ( slot_type = weapon.type_ And size_diff >= 0 And size_diff <= 1 ) ..
+					Or ( slot_type = "HYBRID" And size_diff = 0 And (weapon.type_ = "ENERGY" Or weapon.type_ = "BALLISTIC") )..
+					Or ( slot_type = "SYNERGY" And size_diff = 0 And (weapon.type_ = "ENERGY" Or weapon.type_ = "MISSILE") )..
+					Or ( slot_type = "COMPOSITE" And size_diff = 0 And (weapon.type_ = "MISSILE" Or weapon.type_ = "BALLISTIC") ).. 
+					)
 					matches = matches[..(matches.length + 1)]
 					matches[matches.length - 1] = weapon.id
 				EndIf
@@ -370,6 +390,7 @@ Type TEditor
 	End Method
 
 	Method get_max_fluxMods%( hullSize$ )
+		If app.fluxmod_limit_override = True Then Return 666 'heh, just in needs
 		'hardcoded: 10/20/30/50
 		Select hullSize
 			Case "FRIGATE"

@@ -55,25 +55,26 @@ Type TModalSetVariant Extends TSubroutine
 	Field hullMods_cursor:TextWidget
 	'///
 	Field cursor_widget:TextWidget
+	Field lasteventsource:Object
 
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		ed.program_mode = "variant"
 		ed.last_mode = "normal"
 		ed.mode = "normal"
-		ed.weapon_lock_i = -1
-		ed.variant_hullMod_i = -1
-		ed.group_field_i = -1
-		'clear key queues
-		MouseHit( MOUSE_LEFT )
+		ed.weapon_lock_i = - 1
+		ed.variant_hullMod_i = - 1
+		ed.group_field_i = - 1
+		ni = - 1
+		DebugLogFile(" Activate Variant Editor")
 	EndMethod
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
-		If ed.weapon_lock_i <> -1
-			update_weapon_assignment_list( ed, data ) 
-		ElseIf ed.variant_hullMod_i <> -1
+		If ed.weapon_lock_i <> - 1
+			update_weapon_assignment_list( ed, data )
+		ElseIf ed.variant_hullMod_i <> - 1
 			update_hullmods_list( ed, data )
-		ElseIf ed.group_field_i <> -1
+		ElseIf ed.group_field_i <> - 1
 			update_weapon_groups_list( ed, data )
 		Else
 			update_default_mode( ed, data, sprite )
@@ -83,11 +84,11 @@ Type TModalSetVariant Extends TSubroutine
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite ) 
 		If Not data.ship.center Then Return
 		draw_hud( ed, data )
-		If ed.weapon_lock_i <> -1
+		If ed.weapon_lock_i <> - 1
 			draw_weapon_assignment_list()
 		ElseIf ed.variant_hullMod_i <> -1
 			draw_hullmods_list()
-		ElseIf ed.group_field_i <> -1
+		ElseIf ed.group_field_i <> - 1
 			draw_weapon_groups_list( ed, data, sprite )
 		Else
 			draw_all_weapon_slots( ed, data, sprite )
@@ -230,18 +231,18 @@ Type TModalSetVariant Extends TSubroutine
 				wep_names :+ weapon_id
 			EndIf
 			wep_names :+ "  ~n"
-			If g > 0 Then wep_g :+ RSet("",2*g)
-			wep_g :+ Chr(9679)+"~n"
+			If g > 0 Then wep_g :+ RSet("", 2 * g)
+			wep_g :+ (g + 1) + "~n"
 			line_i :+ 1
 		Next
 		wep_names_tw = TextWidget.Create( wep_names )
 		wep_g_tw = TextWidget.Create( wep_g )
-		cursor_widget = TextWidget.Create( wep_names )
-		For i = skip_lines Until cursor_widget.lines.length
-			If (i - skip_lines) <> ed.group_field_i
-				cursor_widget.lines[i] = ""
-			EndIf
-		Next
+'		cursor_widget = TextWidget.Create( wep_names )
+'		For i = skip_lines Until cursor_widget.lines.length
+'			If (i - skip_lines) <> ed.group_field_i
+'				cursor_widget.lines[i] = ""
+'			EndIf
+'		Next
 	EndMethod
 
 	'assumes WEAPON-LOCK state
@@ -281,7 +282,7 @@ Type TModalSetVariant Extends TSubroutine
 			EndIf
 		Next
 		weapon_list_widget = TextWidget.Create( weapon_list_display )
-		update_weapon_assignment_list_cursor( ed )
+		'update_weapon_assignment_list_cursor( ed )
 	EndMethod
 
 	Method initialize_hullmods_list( ed:TEditor, data:TData )
@@ -297,27 +298,29 @@ Type TModalSetVariant Extends TSubroutine
 		'////
 		'show hullmods list and cursor
 		hullMods_lines = New String[hullMods_count]
-		hullMods_c = New String[hullMods_count]
+		'hullMods_c = New String[hullMods_count]
 		i = 0
 		For hullMod = EachIn ed.stock_hullmod_stats.Values()
 			hullmod_id = String( hullMod.ValueForKey("id"))
 			display_str = String( hullMod.ValueForKey("name") )
 			hullmod_op = get_hullmod_csv_ordnance_points( ed, data, hullmod_id )
 			display_str = RSet( String.FromInt( hullmod_op ), 3 )+"  "+display_str
-			If data.has_builtin_hullmod( hullmod_id ) Or data.has_hullmod( hullmod_id )
-				display_str = Chr(9679)+" "+display_str 'BLACK CIRCLE
+			If data.has_builtin_hullmod( hullmod_id )
+				display_str = "[b] " + display_str			
+			Else If data.has_hullmod( hullmod_id )
+				display_str = "[+] " + display_str
 			Else
-				display_str = "  "+display_str
+				display_str = "[ ] " + display_str
 			EndIf
 			hullMods_lines[i] = display_str
-			If i = ed.variant_hullMod_i
-				hullMods_c[i] = display_str
-			EndIf
+'			If i = ed.variant_hullMod_i
+'				hullMods_c[i] = display_str
+'			EndIf
 			i :+ 1
 		Next
 		hullMods_widget = TextWidget.Create( hullMods_lines )
-		hullMods_cursor = TextWidget.Create( hullMods_c )
-		hullMods_cursor.w = hullMods_widget.w
+		'hullMods_cursor = TextWidget.Create( hullMods_c )
+		'hullMods_cursor.w = hullMods_widget.w
 	EndMethod
 
 	Method update_weapon_assignment_list( ed:TEditor, data:TData )
@@ -328,44 +331,58 @@ Type TModalSetVariant Extends TSubroutine
 			ed.select_weapon_i = 0
 		EndIf
 		'process input
-		If KeyHit( KEY_ENTER )
-			data.unassign_weapon_from_slot( weapon_slot.id )
-			data.assign_weapon_to_slot( weapon_slot.id, weapon_list[ed.select_weapon_i], 0 )
-			data.update_variant()
-			ed.weapon_lock_i = -1
-		EndIf
-		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
-			ed.weapon_lock_i = -1
-		EndIf
-		If KeyHit( KEY_BACKSPACE ) And ed.variant_hullMod_i = -1
-			data.unassign_weapon_from_slot( weapon_slot.id )
-			data.update_variant()
-			ed.weapon_lock_i = -1
-		EndIf
-		modified = False
-		If KeyHit( KEY_DOWN )
-			ed.select_weapon_i :+ 1
-			If ed.select_weapon_i > (weapon_list.length - 1)
-				ed.select_weapon_i = 0
+		Select EventID()
+		Case EVENT_KEYDOWN, EVENT_KEYREPEAT
+			modified = False
+			Select EventData()
+			Case KEY_ENTER
+				data.unassign_weapon_from_slot( weapon_slot.id )
+				data.assign_weapon_to_slot( weapon_slot.id, weapon_list[ed.select_weapon_i], 0 )
+				data.update_variant()
+				ed.weapon_lock_i = - 1
+				data.hold_snapshot(False)
+				updata_weapondrawermenu(ed)
+			Case KEY_DOWN
+				ed.select_weapon_i :+ 1
+				modified = True			
+			Case KEY_UP
+				ed.select_weapon_i :- 1
+				modified = True
+			Case KEY_PAGEDOWN
+				ed.select_weapon_i :+ 5
+				modified = True
+			Case KEY_PAGEUP
+				ed.select_weapon_i :- 5
+				modified = True										
+			End Select
+			If modified
+				'bounds check
+				If ed.select_weapon_i > (weapon_list.length - 1)
+					ed.select_weapon_i = (weapon_list.length - 1)
+				ElseIf ed.select_weapon_i < 0
+					ed.select_weapon_i = 0
+				EndIf
+				data.unassign_weapon_from_slot( weapon_slot.id )
+				data.assign_weapon_to_slot( weapon_slot.id, weapon_list[ed.select_weapon_i], 0 )
+				data.update_variant()
 			EndIf
-			update_weapon_assignment_list_cursor( ed )
-			modified = True
-		EndIf
-		If KeyHit( KEY_UP )
-			ed.select_weapon_i :- 1
-			If ed.select_weapon_i < 0
-				ed.select_weapon_i =  (weapon_list.length - 1)	
-			EndIf
-			update_weapon_assignment_list_cursor( ed )
-			modified = True
-		EndIf
-		If modified
-			data.unassign_weapon_from_slot( weapon_slot.id )
-			data.assign_weapon_to_slot( weapon_slot.id, weapon_list[ed.select_weapon_i], 0 )
-			data.update_variant()
-		EndIf
+		Case EVENT_GADGETACTION, EVENT_MENUACTION
+			Select EventSource()
+			Case functionMenu[5]
+				ed.weapon_lock_i = - 1
+				data.hold_snapshot(False)
+				updata_weapondrawermenu(ed)
+			Case functionMenu[4]
+				data.unassign_weapon_from_slot( weapon_slot.id )
+				data.update_variant()
+				ed.weapon_lock_i = - 1
+				data.hold_snapshot(False)
+				updata_weapondrawermenu(ed)
+			EndSelect
+		EndSelect		
 	EndMethod
-
+	
+	Rem
 	Method update_weapon_assignment_list_cursor( ed:TEditor )
 		cursor_widget = TextWidget.Create( weapon_list_display[..] )
 		For i = 0 Until cursor_widget.lines.length
@@ -376,7 +393,8 @@ Type TModalSetVariant Extends TSubroutine
 			EndIf
 		Next
 	EndMethod
-
+	EndRem
+	
 	Method update_hullmods_list( ed:TEditor, data:TData )
 		initialize_hullmods_list( ed, data )
 		'bounds enforce (extra check)
@@ -386,131 +404,127 @@ Type TModalSetVariant Extends TSubroutine
 			ed.variant_hullMod_i = 0
 		EndIf
 		'process input
-		If KeyHit( KEY_ENTER )
-			'add/remove hullmod
-			data.toggle_hullmod( String( selected_hullMod.ValueForKey("id")) )
-			data.update_variant()
-		EndIf
-		If KeyHit( KEY_DOWN )
-			ed.variant_hullMod_i :+ 1
-		EndIf
-		If KeyHit( KEY_UP )
-			ed.variant_hullMod_i :- 1
-		EndIf
-		'bounds enforce (wrap top/bottom)
-		If ed.variant_hullMod_i > (hullMods_count - 1)
-			ed.variant_hullMod_i = 0
-		ElseIf ed.variant_hullMod_i < 0
-			ed.variant_hullMod_i = (hullMods_count - 1)
-		EndIf
-		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
-			ed.variant_hullMod_i = -1
-		EndIf
-		If KeyHit( KEY_H )
-			ed.variant_hullMod_i = -1
-		EndIf
+		Select EventID()
+		Case EVENT_KEYDOWN, EVENT_KEYREPEAT
+			Select EventData()
+			Case KEY_ENTER
+				'add/remove hullmod
+				data.toggle_hullmod( String( selected_hullMod.ValueForKey("id")) )
+				data.update_variant()
+			Case KEY_DOWN
+				ed.variant_hullMod_i :+ 1
+				If ed.variant_hullMod_i > (hullMods_count - 1) Then ed.variant_hullMod_i = (hullMods_count - 1)
+			Case KEY_UP
+				ed.variant_hullMod_i :- 1
+				If ed.select_weapon_i < 0 Then ed.variant_hullMod_i = 0
+			Case KEY_PAGEDOWN
+				ed.variant_hullMod_i :+ 5
+				If ed.variant_hullMod_i > (hullMods_count - 1) Then ed.variant_hullMod_i = (hullMods_count - 1)
+			Case KEY_PAGEUP
+				ed.variant_hullMod_i :- 5
+				If ed.select_weapon_i < 0 Then ed.variant_hullMod_i = 0
+			Case KEY_ESCAPE
+				ed.variant_hullMod_i = - 1
+				data.hold_snapshot(False)
+				updata_weapondrawermenu(ed)
+			End Select
+		End Select	
 	EndMethod
 
 	Method update_weapon_groups_list( ed:TEditor, data:TData )
-		If KeyHit( KEY_DOWN )
-			ed.group_field_i :+ 1
-			If ed.group_field_i > (count - 1)
-				ed.group_field_i = 0
-			Else
-				reset_cursor_color_period()
-			EndIf
-			initialize_weapon_groups_list( ed, data )
-		EndIf
-		If KeyHit( KEY_UP )
-			ed.group_field_i :- 1
-			If ed.group_field_i < 0
-				ed.group_field_i = (count - 1)
-			Else
-				reset_cursor_color_period()
-			EndIf
-			initialize_weapon_groups_list( ed, data )
-		EndIf
-		modified = False
-		If KeyHit( KEY_RIGHT )
-			If group_offsets[ed.group_field_i] < (MAX_VARIANT_WEAPON_GROUPS - 1)
+		Select EventID()
+		Case EVENT_KEYDOWN, EVENT_KEYREPEAT
+			modified = False
+			Select EventData()
+			Case KEY_DOWN, KEY_UP
+				If EventData() = KEY_DOWN Then ed.group_field_i :+ 1 Else ed.group_field_i :- 1
+				ed.group_field_i = (ed.group_field_i Mod (count ) + (count ) ) Mod (count )
+				modified = True
+			Case KEY_LEFT, KEY_RIGHT
+				Local j% = group_offsets[ed.group_field_i]
+				If EventData() = KEY_RIGHT Then j :+ 1 Else j :- 1
+				j = (j Mod (MAX_VARIANT_WEAPON_GROUPS + 1) + MAX_VARIANT_WEAPON_GROUPS ) Mod (MAX_VARIANT_WEAPON_GROUPS )
 				data.unassign_weapon_from_slot( weapon_slot_ids[ed.group_field_i] )
-				data.assign_weapon_to_slot( weapon_slot_ids[ed.group_field_i], weapon_ids[ed.group_field_i], group_offsets[ed.group_field_i] + 1 )
+				data.assign_weapon_to_slot( weapon_slot_ids[ed.group_field_i], weapon_ids[ed.group_field_i], j )
+				modified = True
+			Case KEY_A
+				data.toggle_weapon_group_autofire( group_offsets[ed.group_field_i] )
 				data.update_variant()
 				modified = True
-				reset_cursor_color_period()
-			EndIf
-		EndIf
-		If KeyHit( KEY_LEFT )
-			If group_offsets[ed.group_field_i] > 0
-				data.unassign_weapon_from_slot( weapon_slot_ids[ed.group_field_i] )
-				data.assign_weapon_to_slot( weapon_slot_ids[ed.group_field_i], weapon_ids[ed.group_field_i], group_offsets[ed.group_field_i] - 1 )
-				data.update_variant()
-				modified = True
-				reset_cursor_color_period()
-			EndIf
-		EndIf
-		If modified
-			reset_cursor_color_period()
-			initialize_weapon_groups_list( ed, data )
-		EndIf
-		If KeyHit( KEY_A )
-			data.toggle_weapon_group_autofire( group_offsets[ed.group_field_i] )
-			data.update_variant()
-			reset_cursor_color_period()
-			initialize_weapon_groups_list( ed, data )
-		EndIf
-		If (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ))
-			ed.group_field_i = -1
-		EndIf
-		If KeyHit( KEY_G )
-			ed.group_field_i = -1
-		EndIf
+			End Select
+			If modified Then initialize_weapon_groups_list( ed, data )
+		Case EVENT_GADGETACTION, EVENT_MENUACTION
+			Select EventSource()
+			Case functionMenu[5], functionMenuSub[1][0]
+				ed.group_field_i = - 1
+				data.hold_snapshot(False)
+				updata_weapondrawermenu(ed)
+			EndSelect
+		EndSelect
 	EndMethod
-
+	
 	Method update_default_mode( ed:TEditor, data:TData, sprite:TSprite )
 		fluxMods_max = ed.get_max_fluxMods( data.ship.hullSize )
 		hullMods_count = count_keys( ed.stock_hullmod_stats )
 		'get input
-		left_click = MouseHit( 1 )
-		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
-		'locate nearest entity
-		ni = data.find_nearest_variant_weapon_slot( img_x, img_y )
-		If ni <> -1
+		Select EventID()
+		Case EVENT_MOUSEDOWN, EVENT_MOUSEUP, EVENT_MOUSEMOVE
+			sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+			'locate nearest entity
+			ni = data.find_nearest_variant_weapon_slot( img_x, img_y )
+			If ni = - 1 Then Return
 			weapon_slot = data.ship.weaponSlots[ni]
 			'CLICK to select weapon slot to assign weapon to (not for built-in weapons)
-			If left_click And Not weapon_slot.is_builtin()
+			If EventID() = EVENT_MOUSEDOWN And ModKeyAndMouseKey = MODIFIER_LMOUSE 'left mouse click, no mod keys
 				'enter WEAPON LOCK mode
-				ed.weapon_lock_i = ni
-				initialize_weapon_assignment_list( ed, data )
+				If Not weapon_slot.is_builtin()
+					ed.weapon_lock_i = ni
+					data.hold_snapshot(True)
+					initialize_weapon_assignment_list( ed, data )
+					SS.reset()
+					
+				EndIf
 			EndIf
-			'can't let user strip built-in weapon slots either
-			If KeyHit( KEY_BACKSPACE ) And Not weapon_slot.is_builtin()
-				data.unassign_weapon_from_slot( weapon_slot.id )
+		Case EVENT_GADGETACTION, EVENT_MENUACTION
+			Select EventSource()
+			Case functionMenu[4] ' backsapce
+				'strip non built-in weapon in slot
+				If ni = - 1 Then Return
+				If Not weapon_slot.is_builtin()
+					data.unassign_weapon_from_slot( weapon_slot.id )
+					data.update_variant()
+				EndIf
+			Case functionMenuSub[1][0] 'G
+				If data.ship.weaponSlots And data.ship.weaponSlots.Length > 0
+					'enter WEAPON GROUPS mode
+					ed.group_field_i = 0
+					initialize_weapon_groups_list( ed, data )
+					If weapon_slot_ids.length <= 0 Then ed.group_field_i = - 1.. 'no weapons
+					Else data.hold_snapshot(True)
+				EndIf
+			Case functionMenuSub[1][2] 'F add Vents
+				If Not data.modify_fluxVents( fluxMods_max, False ) Then Return
 				data.update_variant()
-			EndIf
-		EndIf
-		If KeyHit( KEY_F )
-			data.modify_fluxVents( fluxMods_max, SHIFT Or CONTROL Or ALT )
-			data.update_variant()
-		EndIf
-		If KeyHit( KEY_C )
-			data.modify_fluxCapacitors( fluxMods_max, SHIFT Or CONTROL Or ALT )
-			data.update_variant()
-		EndIf
-		If KeyHit( KEY_H ) 
-			'enter HULLMODS mode
-			ed.variant_hullMod_i = 0
-			initialize_hullmods_list( ed, data )
-		EndIf
-		If KeyHit( KEY_G ) ..
-		And data.ship.weaponSlots And data.ship.weaponSlots.Length > 0
-			'enter WEAPON GROUPS mode
-			ed.group_field_i = 0
-			initialize_weapon_groups_list( ed, data )
-			If weapon_slot_ids.length <= 0
-				ed.group_field_i = -1
-			EndIf
-		EndIf
+			Case functionMenuSub[1][3] 'F add/remove Vents
+				If Not data.modify_fluxVents( fluxMods_max, True ) Then Return
+				data.update_variant()
+			Case functionMenuSub[1][5] 'C add/remove Capacitors
+				If Not data.modify_fluxCapacitors( fluxMods_max, False ) Then Return
+				data.update_variant()
+			Case functionMenuSub[1][6] 'C add/remove Capacitors
+				If Not data.modify_fluxCapacitors( fluxMods_max, True ) Then Return
+				data.update_variant()
+			Case functionMenuSub[1][7] 'H edit hullmods
+				'enter HULLMODS mode
+				ed.variant_hullMod_i = 0
+				initialize_hullmods_list( ed, data )
+				data.hold_snapshot(True)
+				SS.reset()				
+			Case functionMenuSub[1][8] '/(slash)
+				load_variant_data( ed, data, sprite, True ) 'strip all	
+			EndSelect
+		EndSelect
+		updata_weapondrawermenu(ed)
 	EndMethod
 
 	Method draw_hud( ed:TEditor, data:TData )
@@ -519,13 +533,13 @@ Type TModalSetVariant Extends TSubroutine
 		fg_color = $FFFFFF
 		If op_current > op_max Then fg_color = $FF2020
 		op_str = ..
-			"   Ordnance Points  "+op_current+"/"+op_max+"~n"+..
-			"        Flux Vents  "+data.variant.fluxVents+"~n"+..
-			"   Flux Capacitors  "+data.variant.fluxCapacitors+"~n"+..
-			"Hull Modifications  "+data.variant.hullMods.length+"x"
+			LocalizeString("{{ui_function_variant_opstr1}}") + op_current + "/" + op_max + "~n" + ..
+			LocalizeString("{{ui_function_variant_opstr2}}") + data.variant.fluxVents + "~n" + ..
+			LocalizeString("{{ui_function_variant_opstr3}}") + data.variant.fluxCapacitors + "~n" + ..
+			LocalizeString("{{ui_function_variant_opstr4}}") + data.variant.hullMods.length + "x"
 		op_widget = TextWidget.Create( op_str )
-		draw_container( W_MID,3-10, op_widget.w+20,op_widget.h+20, 0.5,0.0 )
-		draw_string( op_widget, W_MID,3, fg_color,$000000, 0.5,0.0 )
+		draw_container( 7, LINE_HEIGHT * 2, op_widget.w + 20, op_widget.h + 20, 0.0, 0.0 )
+		draw_string( op_widget, 7 + 10, LINE_HEIGHT * 2 + 10, fg_color, $000000, 0.0, 0.0 )
 	EndMethod
 
 	Method draw_all_weapon_slots( ed:TEditor, data:TData, sprite:TSprite )
@@ -580,7 +594,7 @@ Type TModalSetVariant Extends TSubroutine
 		SetAlpha( 1 )
 
 		'THIRD PASS: draw the nearest weapon mount, if there is one set
-		If ni <> -1
+		If ni <> - 1
 			weapon_slot = data.ship.weaponSlots[ni]
 			wx = sprite.sx + (weapon_slot.locations[0] + data.ship.center[1])*sprite.Scale
 			wy = sprite.sy + (-weapon_slot.locations[1] + data.ship.center[0])*sprite.Scale
@@ -612,10 +626,11 @@ Type TModalSetVariant Extends TSubroutine
 			Next
 		Next
 		'draw textbox
-		draw_container( W_MID - wep_names_tw.w - 10,H_MID, wep_names_tw.w + wep_g_tw.w + 20,wep_names_tw.h + 20, 0.0,0.5 )
-		draw_string( wep_names_tw, W_MID,H_MID,,, 1.0,0.5 )
-		draw_string( wep_g_tw,     W_MID,H_MID,,, 0.0,0.5 )
-		draw_string( cursor_widget, W_MID,H_MID, get_cursor_color(),$000000, 1.0,0.5 )
+		draw_container( W_MID - wep_names_tw.w - 10 - TextWidth("=> "), H_MID, wep_names_tw.w + wep_g_tw.w + 20 + TextWidth("=> "), wep_names_tw.h + 20, 0.0, 0.5 )
+		draw_string( wep_names_tw, W_MID, H_MID,,, 1.0, 0.5 )
+		draw_string( wep_g_tw, W_MID, H_MID,,, 0.0, 0.5 )
+		'draw_string( cursor_widget, W_MID, H_MID, get_cursor_color(), $000000, 1.0, 0.5 )
+		draw_string( "=> ", W_MID - (TextWidth("=> ") + wep_names_tw.w), H_MID - (wep_names_tw.h / 2.0) + (ed.group_field_i + 2 + 0.5) * LINE_HEIGHT, get_cursor_color(), $000000, 0.0, 0.5 )	
 	EndMethod
 
 	Method draw_weapon_assignment_list()
@@ -628,11 +643,12 @@ Type TModalSetVariant Extends TSubroutine
 		'if applicable:
 		'  draw lines connecting box to target weapon or engine
 		'  draw actual weapon or engine preview
+		Rem
 		x = wx - weapon_list_widget.w - 20 - 30 'W_MID/2 - weapon_list_widget.w/2 - 10
-		y = wy - weapon_list_widget.h/2 - 10 'H_MID/2 - weapon_list_widget.h/2 - 10
+		y = wy - weapon_list_widget.h / 2 - 10 'H_MID/2 - weapon_list_widget.h/2 - 10
 		w = weapon_list_widget.w + 20
 		h = weapon_list_widget.h + 20
-		SetColor( 0,0,0 )
+		SetColor( 0, 0, 0 )
 		SetAlpha( 0.40 )
 		DrawRect( x,y, w,h )
 		SetAlpha( 1 )
@@ -642,18 +658,48 @@ Type TModalSetVariant Extends TSubroutine
 		SetColor( 255, 255, 255 )
 		DrawRectLines( x,y, w,h )
 		'draw options
-		draw_string( weapon_list_widget, (wx - 40),wy,,, 1.0,0.5 )
+		draw_string( weapon_list_widget, (wx - 40), wy,,, 1.0, 0.5 )
 		SetColor( 0,0,0 )
 		SetAlpha( 1 )
 		'draw cursor
-		draw_string( cursor_widget, (wx - 40),wy, get_cursor_color(),$000000, 1.0,0.5 )
+		draw_string( cursor_widget, (wx - 40), wy, get_cursor_color(), $000000, 1.0, 0.5 )
+		SetAlpha( 1 )
+		EndRem
+		x = wx - weapon_list_widget.w - 20 - 30 - TextWidth("=> ")
+		y = SS.ScrollTo( wy - 10 - ( (ed.select_weapon_i + 0.5) * LINE_HEIGHT) )
+		w = weapon_list_widget.w + 20 + TextWidth("=> ")
+		h = weapon_list_widget.h + 20
+		SetColor( 0,0,0 )
+		SetAlpha( 0.40 )
+		DrawRect( x, y, w, h )
+		SetAlpha( 0.9 )
+		SetColor( 0, 0, 0 )
+		DrawRectLines( x - 1, y - 1, w + 2, h + 2 )
+		DrawRectLines( x + 1, y + 1, w - 2, h - 2 )
+		SetColor( 255, 255, 255 )
+		DrawRectLines( x, y, w, h )
+		'draw options
+		draw_string( weapon_list_widget, (wx - 40), y+10 + weapon_list_widget.h / 2,,, 1.0, 0.5 )
+		SetColor( 0, 0, 0 )
+		SetAlpha( 0.8 )
+		'draw cursor
+		draw_string( "=> ", (wx - 40) - (weapon_list_widget.w ), wy , get_cursor_color(),, 1.0, 0.5 )		
+		SetAlpha( 1 )
+		SetColor( 255, 255, 255 )
+		SetAlpha( 0.2 )	
+		DrawRect( x, wy - LINE_HEIGHT / 2 , w, LINE_HEIGHT )												
 		SetAlpha( 1 )
 	EndMethod
 
 	Method draw_hullmods_list()
-		draw_container( W_MID, H_MID, hullMods_widget.w + 20, hullMods_widget.h + 20, 0.5,0.5,,, 0.75 )
-		draw_string( hullMods_widget, W_MID,H_MID,,, 0.5,0.5 )
-		draw_string( hullMods_cursor, W_MID,H_MID, get_cursor_color(),, 0.5,0.5 )
+		Local drawY# = SS.ScrollTo( H_MID - ( (ed.variant_hullMod_i + 0.5) * LINE_HEIGHT) )
+		draw_container( W_MID - TextWidth("=> "), drawY - 10, hullMods_widget.w + 20 + TextWidth("=> "), hullMods_widget.h + 20, 0.5, 0,,, 0.75 )
+		draw_string( hullMods_widget, W_MID, drawY,,, 0.5, 0 )
+		'draw_string( hullMods_cursor, W_MID,H_MID, get_cursor_color(),, 0.5,0.5 )
+		draw_string( "=> ", W_MID - TextWidth("=> ") - hullMods_widget.w / 2, H_MID, get_cursor_color(),, 0.5, 0.5 )
+		SetAlpha( 0.2 )	
+		DrawRect( W_MID - 20 - TextWidth("=> ") - 0.5 * ( hullMods_widget.w ), H_MID - LINE_HEIGHT / 2 , hullMods_widget.w + 20 + TextWidth("=> "), LINE_HEIGHT )												
+		SetAlpha( 1 )
 	EndMethod
 
 EndType
