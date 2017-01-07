@@ -25,7 +25,20 @@ Type TStarfarerVariant
 				MapInsert (weaponMap, key, MapValueForKey(weaponGroup.weapons, key))
 			Next
 		Next
-		Return weaponMap 
+		Return weaponMap
 	EndMethod
+	
+	Method clone:TStarfarerVariant ()
+		Local c:TStarfarerVariant = New TStarfarerVariant
+		c.displayName = displayName + " Copy"
+		c.hullId = hullId
+		c.variantId = variantId + "_copy"
+		c.fluxVents = fluxVents
+		c.fluxCapacitors = fluxCapacitors
+		c.hullMods = hullMods
+		c.weaponGroups = weaponGroups[..]
+		Return c
+	End Method
+	
 End Type
 
