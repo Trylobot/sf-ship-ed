@@ -766,12 +766,16 @@ Type TData
 	Method modify_fluxVents%( maximum%, decrement% = False )
 		If Not decrement
 			variant.fluxVents :+ 1
-			If variant.fluxVents > maximum Then variant.fluxVents = maximum
-			Return False
+			If variant.fluxVents > maximum
+				variant.fluxVents = maximum
+				Return False
+			EndIf
 		Else
 			variant.fluxVents :- 1
-			If variant.fluxVents < 0 Then variant.fluxVents = 0
-			Return false
+			If variant.fluxVents < 0
+				variant.fluxVents = 0
+				Return False
+			EndIf
 		EndIf
 		Return True
 	EndMethod
@@ -780,12 +784,16 @@ Type TData
 	Method modify_fluxCapacitors%( maximum%, decrement% = False )
 		If Not decrement
 			variant.fluxCapacitors :+ 1
-			If variant.fluxCapacitors > maximum Then variant.fluxCapacitors = maximum
-			Return False
+			If variant.fluxCapacitors > maximum
+				variant.fluxCapacitors = maximum
+				Return False
+			EndIf
 		Else
 			variant.fluxCapacitors :- 1
-			If variant.fluxCapacitors < 0 Then variant.fluxCapacitors = 0
-			Return False
+			If variant.fluxCapacitors < 0
+				variant.fluxCapacitors = 0
+				Return False
+			EndIf
 		EndIf
 		Return True		
 	EndMethod
@@ -799,7 +807,7 @@ Type TData
 				EndIf
 			Next
 			variant.hullMods = variant.hullMods[..variant.hullMods.length+1]
-			variant.hullMods[variant.hullMods.length-1] = hullmod_id
+			variant.hullMods[variant.hullMods.length - 1] = hullmod_id
 		Else
 			variant.hullMods = New String[1]
 			variant.hullMods[0] = hullmod_id

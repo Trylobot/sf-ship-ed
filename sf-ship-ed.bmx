@@ -659,9 +659,36 @@ Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
 		If data.changed
 			If Not Confirm(LocalizeString("{{msg_unsaved_open_new}}") ) Then Return	hit
 		EndIf
+		WD.restAllAnimes()
 		Select ed.program_mode
-		Case "ship", "variant", "csv", "csv_wing"
-			load_ship_data( ed, data, sprite, True )
+		Case "ship" , "csv", "csv_wing"
+			data.ship = New TStarfarerShip
+			data.variant = New TStarfarerVariant
+			data.csv_row = ship_data_csv_field_template.Copy()
+			data.csv_row_wing = wing_data_csv_field_template.Copy()	
+			sprite.img = Null
+			data.update()
+			data.update_variant()
+			data.changed = False
+			data.snapshots_undo:TList = CreateList()
+			data.snapshots_redo:TList = CreateList()
+		Case "variant"
+			data.variant = New TStarfarerVariant
+			data.variant.hullId = data.ship.hullId
+			data.variant.displayName = "New"
+			data.variant.variantId = data.ship.hullId + "_new"
+			data.update()
+			data.update_variant()
+			data.changed = False
+			data.snapshots_undo:TList = CreateList()
+			data.snapshots_redo:TList = CreateList()
+		Case "weapon"
+			data.weapon = New TStarfarerWeapon
+			sprite.wpimg = Null
+			data.update_weapon()
+			data.changed = False
+			data.snapshots_undo:TList = CreateList()
+			data.snapshots_redo:TList = CreateList()
 		EndSelect
 	Case fileMenu[2] 'load mod
 		load_mod( ed, data )
@@ -1566,7 +1593,9 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite, use_new% = Fals
 		FlushEvent()
 	Else ' use_new
 		'all data is reset to fresh
+		WD.restAllAnimes()
 		data.Clear()
+		sprite.img = Null
 		data.update()
 		data.update_variant()
 	EndIf
