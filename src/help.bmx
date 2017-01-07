@@ -42,7 +42,8 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", LocalizeString("{{h_file_newData}}"), ICON_CTRL_ALT_KB, True, 1, "ship" ) )
 	'//////////// 
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "D", LocalizeString("{{h_file_variant_loadData}}"), ICON_KB, True, 0, "variant" ) )
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", LocalizeString("{{h_file_variant_saveData}}"), ICON_KB, True, 1, "variant" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", LocalizeString("{{h_file_variant_saveData}}"), ICON_KB, True, 0, "variant" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", LocalizeString("{{h_file_newData}}"), ICON_CTRL_ALT_KB, True, 1, "variant" ) )
 	'//////////// 
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "D", LocalizeString("{{h_file_csv_loadData}}"), ICON_KB, True, 0, "csv" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", LocalizeString("{{h_file_csv_saveData}}"), ICON_KB, True, 1, "csv" ))
