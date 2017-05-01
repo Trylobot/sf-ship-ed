@@ -18,6 +18,8 @@ Type TModalSetVariant Extends TSubroutine
 	Field skip_lines%
 	'///
 	Field wep_op_str$
+	Field wep_type_str$
+	Field wep_range_str$
 	Field weapon_slot_id$
 	Field weapon_id$
 	Field weapon_name$
@@ -276,8 +278,10 @@ Type TModalSetVariant Extends TSubroutine
 			If weapon_stats
 				weapon_name = String( weapon_stats.ValueForKey( "name" ))
 				wep_op_str = String( weapon_stats.ValueForKey( "OPs" ))
+				wep_type_str = String( weapon_stats.ValueForKey( "type" ))
+				wep_range_str = String( weapon_stats.ValueForKey( "range" ))
 				If weapon_name
-					weapon_list_display[wi] = RSet(wep_op_str,3)+"  "+weapon_name
+					weapon_list_display[wi] = RSet(wep_op_str,3)+"  "+LSet(weapon_name,18)+"  "+LSet(wep_type_str,7)+"  "+LSet(wep_range_str,4)
 				EndIf
 			EndIf
 		Next
