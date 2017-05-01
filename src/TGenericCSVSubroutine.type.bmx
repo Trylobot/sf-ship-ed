@@ -397,16 +397,17 @@ Type TGenericCSVSubroutine Extends TSubroutine
 	EndMethod
 
 	Method draw_csv_row_selector()
-		csv_id_list_scale = 1
-		If loaded_csv_id_list.h > H_MAX
-			csv_id_list_scale = Float(H_MAX)/Float(loaded_csv_id_list.h)
-		EndIf
-		draw_container( W_MID - TextWidth("=> "), H_MID, loaded_csv_id_list.w + 20 + TextWidth("=> "), loaded_csv_id_list.h + 20, 0.5, 0.5,,,, csv_id_list_scale )
-		draw_string( loaded_csv_id_list, W_MID, H_MID,,, 0.5, 0.5,,, csv_id_list_scale )
-		'draw_string( loaded_csv_id_list_item_cursor, W_MID, H_MID, get_cursor_color(), $000000, 0.5, 0.5,,, csv_id_list_scale )
-		'testing
-		draw_string( "=> ", W_MID - (TextWidth("=> ") + loaded_csv_id_list.w / 2.0), H_MID - (loaded_csv_id_list.h / 2.0) + (loaded_csv_id_list_item_i + 0.5) * LINE_HEIGHT, get_cursor_color(), $000000, 0.0, 0.5 )
+		
+		Local drawY# = SS.ScrollTo( H_MID - ( (loaded_csv_id_list_item_i + 0.5) * LINE_HEIGHT) )
+		draw_container( W_MID - TextWidth("=> "), drawY - 10, loaded_csv_id_list.w + 20 + TextWidth("=>  "), loaded_csv_id_list.h + 20, 0.5, 0,,, 0.75 )
+		draw_string( loaded_csv_id_list, W_MID, drawY,,, 0.5, 0 )
+		'draw_string( loaded_csv_id_list_item_cursor, W_MID,H_MID, get_cursor_color(),, 0.5,0.5 )
+		draw_string( "=> ", W_MID - TextWidth("=> ") - loaded_csv_id_list.w / 2, H_MID, get_cursor_color(),, 0.5, 0.5 )
+		SetAlpha( 0.2 )	
+		DrawRect( W_MID - 20 - TextWidth("=>  ") - 0.5 * ( loaded_csv_id_list.w ), H_MID - LINE_HEIGHT / 2 , loaded_csv_id_list.w + 20 + TextWidth("=>  "), LINE_HEIGHT )												
+		SetAlpha( 1 )
 	EndMethod
+
 
 	Rem
 	Method update_csv_row_cursor()
