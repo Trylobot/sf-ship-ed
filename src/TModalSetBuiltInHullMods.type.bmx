@@ -89,10 +89,10 @@ Type TModalSetBuiltInHullMods Extends TSubroutine
 '		hullMods_c = New String[hullMods_count]
 		i = 0
 		For hullMod = EachIn ed.stock_hullmod_stats.Values()
-			hullmod_id = String( hullMod.ValueForKey("id") )
+			hullmod_id = String( hullMod.ValueForKey("id"))
 			display_str = String( hullMod.ValueForKey("name") )
 			hullmod_op = get_hullmod_csv_ordnance_points( ed, data, hullmod_id )
-			display_str = RSet( String.FromInt( hullmod_op ), 3 ) + "  " + display_str
+			display_str = RSet( String.FromInt( hullmod_op ), 3 )+"  "+LSet( display_str, 16 )+"  "+ LSet( String( hullMod.ValueForKey( "short" )), 40).Replace("~q","")
 			If data.has_builtin_hullmod( hullmod_id )
 				display_str = "[b]" + display_str
 			Else
