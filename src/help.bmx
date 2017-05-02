@@ -28,7 +28,7 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "3", LocalizeString("{{h_pmode_3}}"), ICON_KB, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "4", LocalizeString("{{h_pmode_4}}"), ICON_KB, True, 0 ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "5", LocalizeString("{{h_pmode_5}}"), ICON_KB, True, 0 ) )
-	'HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "6","Weapon Stats Mode ", ICON_KB, False, 0 ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "6","Weapon Stats Mode ", ICON_KB, True, 0 ))
 	'HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "7","Projectile Mode ", ICON_KB, False, 1 ))
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_mouse_pan}}"), ICON_MS_RIGHT, True, 0 ))
