@@ -12,6 +12,7 @@ Type TData
 
 	Field csv_row:TMap'<String,String>  'column name --> value
 	Field csv_row_wing:TMap'<String,String>  'column name --> value
+	Field csv_row_weapon:TMap'<String,String>  'column name --> value
 
 	Field weapon:TStarfarerWeapon
 	Field json_str_weapon$
@@ -41,6 +42,7 @@ Type TData
 		variant = New TStarfarerVariant
 		csv_row = ship_data_csv_field_template.Copy()
 		csv_row_wing = wing_data_csv_field_template.Copy()
+		csv_row_weapon = weapon_data_csv_field_template.Copy()
 		weapon = New TStarfarerWeapon
 		changed = False
 		snapshots_undo:TList = CreateList()
@@ -186,6 +188,17 @@ Type TData
 		csv_row_wing.Insert( "id", variant.variantId + "_wing" )
 		snapshot_holdcurr = flag
 	EndMethod
+	
+	Method set_weaponId( old_weaponId$, weaponId$ )
+		Local flag% = snapshot_holdcurr
+		'WEAPON
+		weapon.id = weaponId
+		update()
+		snapshot_holdcurr = True
+		'WEAPON CSV
+		csv_row_weapon.Insert( "id", weapon.id )
+		snapshot_holdcurr = flag
+	EndMethod
 
 	Method set_variantId( old_variantId$, variantId$ )
 		'VARIANT
@@ -205,6 +218,8 @@ Type TData
 				csv_row = data_row
 			Case "wing_data.csv"
 				csv_row_wing = data_row
+			Case "weapon_data.csv"
+				csv_row_weapon = data_row
 		EndSelect
 	End Method
 
@@ -1274,6 +1289,8 @@ Type TData
 			snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
 		Case 5
 			snapshot_curr.json_str_weapon = json_str_weapon
+		Case 6
+			snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
 		Default
 			Select snapshot_curr.program_mode
 			Case "ship"
@@ -1286,6 +1303,8 @@ Type TData
 				snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
 			Case "weapon"
 				snapshot_curr.json_str_weapon = json_str_weapon
+			Case "csv_weapon"
+				snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
 			End Select
 		End Select	
 
@@ -1300,6 +1319,7 @@ Type TData
 		If json_str_variant.length > 0 Then snapshot_init.json_str_variant = json_str_variant
 		If csv_row Then snapshot_init.csv_row = CopyMap(csv_row)
 		If csv_row_wing Then snapshot_init.csv_row_wing = CopyMap( csv_row_wing )
+		If csv_row_weapon Then snapshot_init.csv_row_weapon = CopyMap( csv_row_weapon )
 		If json_str_weapon.length > 0 Then snapshot_init.json_str_weapon = json_str_weapon
 		snapshots_undo.Clear()
 		snapshots_redo.Clear()
@@ -1326,6 +1346,7 @@ Type Tsnapshot
 	Field json_str_variant$
 	Field csv_row:TMap'<String,String>  'column name --> value
 	Field csv_row_wing:TMap'<String,String>  'column name --> value
+	Field csv_row_weapon:TMap'<String,String>  'column name --> value
 	Field json_str_weapon$
 	'for string editing mode.
 	'Field values:TextWidget
