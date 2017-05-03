@@ -90,6 +90,7 @@ Include "src/TWeaponDrawer.bmx"
 Include "src/TTextCoder.bmx"
 Include "src/WeaponDataCSVFieldTemplate.bmx"
 Include "src/TModalSetWeaponCSV.type.bmx"
+Include "src/TModalShowMore.bmx"
 
 Const MODE_SHIP_EDIT% = 1
 
@@ -108,6 +109,7 @@ Global DATA_FONT:TImageFont = Null
 Global LINE_HEIGHT% = APP.font_size + 1
 Global DATA_LINE_HEIGHT% = APP.data_font_size
 Global CODE_MODE% = 1' LATIN1
+Global SHOW_MORE% = 0
 
 Global DO_ROUND% = 1
 
@@ -425,6 +427,7 @@ Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
 Global sub_wing_csv:TModalSetWingCSV = New TModalSetWingCSV
 Global sub_weapon:TModalWeapon = New TModalWeapon
 Global sub_weapon_csv:TModalSetWeaponCSV = New TModalSetWeaponCSV
+Global sub_show_more:TModalShowMore = New TModalShowMore
 
 Global SS:TSmoothScroll = New TSmoothScroll
 '////////////////////////////////////////////////
@@ -557,6 +560,7 @@ Repeat
 	Case EVENT_TIMERTICK
 		RedrawGadget(Canvas)
 	Case EVENT_GADGETPAINT
+	
 	
 	If EventSource() = Canvas
 		Cls
@@ -910,6 +914,8 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
 			sub_launchbays.Activate( ed, data, sprite )
 		Case functionMenuSub[0][9] 'preview
 			sub_preview_all.Activate( ed, data, sprite )
+		Case functionMenuSub[0][10] 'show more
+			sub_show_more.Activate( ed, data, sprite )
 		Case functionMenu[3] 'string edit
 			sub_string_data.Activate( ed, data, sprite )
 		Default
@@ -921,6 +927,8 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
 			load_variant_data( ed, data, sprite, True ) 'strip all	
 		Case functionMenu[3]
 			sub_string_data.Activate( ed, data, sprite ) 'string edit
+		Case functionMenuSub[1][9] 'show more
+			sub_show_more.Activate( ed, data, sprite )
 		Default
 			hit = False
 		EndSelect
@@ -1816,7 +1824,7 @@ Function rebuildFunctionMenu(index%)
 	Select Index
 	Case 0
 		'mode 1 Functions
-		functionMenuSub[0] = New TGadget[10]
+		functionMenuSub[0] = New TGadget[11]
 		functionMenuSub[0][0] = CreateMenu("{{m_function_center}}", 410, functionMenu[0], KEY_C )
 		functionMenuSub[0][1] = CreateMenu("{{m_function_shield}}", 411, functionMenu[0], KEY_S )
 		functionMenuSub[0][2] = CreateMenu("{{m_function_bounds}}", 412, functionMenu[0], KEY_B )
@@ -1827,9 +1835,10 @@ Function rebuildFunctionMenu(index%)
 		functionMenuSub[0][7] = CreateMenu("{{m_function_engine}}", 417, functionMenu[0], KEY_E )
 		functionMenuSub[0][8] = CreateMenu("{{m_function_launchBays}}", 418, functionMenu[0], KEY_L )
 		functionMenuSub[0][9] = CreateMenu("{{m_function_preview}}", 419, functionMenu[0], KEY_P )
+		functionMenuSub[0][10] = CreateMenu("{{m_function_more}}", 420, functionMenu[0], KEY_Q )
 	Case 1
 		'mode 2 Functions
-		functionMenuSub[1] = New TGadget[9]
+		functionMenuSub[1] = New TGadget[10]
 		functionMenuSub[1][0] = CreateMenu("{{m_function_WeaponGroups}}", 420, functionMenu[0], KEY_G )
 		functionMenuSub[1][1] = CreateMenu("{{m_function_vent}}", 421, functionMenu[0] )
 		functionMenuSub[1][2] = CreateMenu("{{m_function_vent_add}}", 4210, functionMenuSub[1][1], KEY_F )	
@@ -1839,6 +1848,7 @@ Function rebuildFunctionMenu(index%)
 		functionMenuSub[1][6] = CreateMenu("{{m_function_cap_remove}}", 4221, functionMenuSub[1][4], KEY_C, MODIFIER_CONTROL)		
 		functionMenuSub[1][7] = CreateMenu("{{m_function_hullmod}}", 423, functionMenu[0], KEY_H )
 		functionMenuSub[1][8] = CreateMenu("{{m_function_stripAll}}", 424, functionMenu[0], KEY_SLASH )
+		functionMenuSub[1][9] = CreateMenu("{{m_function_more}}", 420, functionMenu[0], KEY_Q )
 	'mode 3 Functions skip
 	'mode 4 Functions skip
 	'mode 5 Functions
