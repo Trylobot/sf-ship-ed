@@ -172,7 +172,7 @@ Type TModalSetBuiltInHullMods Extends TSubroutine
 '		draw_string( hullMods_widget, W_MID - 40,H_MID,,, 0.5,0.5 )
 '		draw_string( hullMods_cursor, W_MID - 40, H_MID, get_cursor_color(),, 0.5, 0.5 )
 		Local drawY# = SS.ScrollTo(H_MID  - ( ed.builtIn_hullMod_i + 0.5) * LINE_HEIGHT)
-		draw_container( W_MID - 40 - TextWidth("=> "), drawY - 30, hullMods_widget.w + 20 + TextWidth("=> "), hullMods_widget.h + 20, 0.5, 0,,, 0.75 )
+		draw_container( W_MID - 40 - TextWidth("=> "), drawY - 30, hullMods_widget.w + 20 + TextWidth("=> "), hullMods_widget.h + 40, 0.5, 0,,, 0.75 )
 		draw_string( hullmod_head_str, W_MID - 40 + 10 - TextWidth("=> "), drawY - 20,,, 0.5, 0 )
 		draw_string( hullMods_widget, W_MID - 40 + 10 - TextWidth("=> "), drawY ,,, 0.5, 0 )
 		draw_string( "=> ", W_MID - 40 - TextWidth("=> ") - hullMods_widget.w / 2, H_MID, get_cursor_color(),, 0.5, 0.5 )
