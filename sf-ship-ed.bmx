@@ -88,6 +88,9 @@ Include "src/help.bmx"
 Include "src/multiselect_values.bmx"
 Include "src/TWeaponDrawer.bmx"
 Include "src/TTextCoder.bmx"
+Include "src/WeaponDataCSVFieldTemplate.bmx"
+Include "src/TModalSetWeaponCSV.type.bmx"
+Include "src/TModalShowMore.bmx"
 
 Const MODE_SHIP_EDIT% = 1
 
@@ -106,6 +109,7 @@ Global DATA_FONT:TImageFont = Null
 Global LINE_HEIGHT% = APP.font_size + 1
 Global DATA_LINE_HEIGHT% = APP.data_font_size
 Global CODE_MODE% = 1' LATIN1
+Global SHOW_MORE% = 0
 
 Global DO_ROUND% = 1
 
@@ -298,13 +302,14 @@ fileMenu[5] = CreateMenu("{{m_file_save}}", 205, fileMenu[0], KEY_V)
 CreateMenu"", 0, fileMenu[0]
 fileMenu[6] = CreateMenu("{{m_file_exit}}", 206, fileMenu[0], KEY_F4, MODIFIER_ALT)
 'mode menu
-Global modeMenu:TGadget[6]
+Global modeMenu:TGadget[7]
 modemenu[0] = CreateMenu("{{m_mode}}", 0, WindowMenu(MainWindow) )
 modemenu[1] = CreateMenu("{{m_mode_ship}}", 301, modemenu[0] , KEY_1)
 modeMenu[2] = CreateMenu("{{m_mode_variant}}", 302, modeMenu[0] , KEY_2)
 modeMenu[3] = CreateMenu("{{m_mode_shipstate}}", 303, modeMenu[0] , KEY_3)
 modeMenu[4] = CreateMenu("{{m_mode_wing}}", 304, modeMenu[0] , KEY_4)
 modeMenu[5] = CreateMenu("{{m_mode_weapon}}", 305, modeMenu[0] , KEY_5)
+modeMenu[6] = CreateMenu("{{m_mode_weaponstate}}", 306, modeMenu[0] , KEY_6)
 CheckMenu(modeMenu[1])
 rem
 function menu
@@ -375,6 +380,7 @@ Global mainMenuNeedUpdate% = False
 '	TBtn_mode[2] = CreateButton("CSV Edit Mode", 0, 50, ClientWidth(modePanel) - 10 , 20, modePanel, BUTTON_RADIO)
 '	TBtn_mode[3] = CreateButton("Wing CSV Edit Mode", 0, 70, ClientWidth(modePanel) - 10 , 20, modePanel, BUTTON_RADIO)
 '	TBtn_mode[4] = CreateButton("Weapon Edit Mode", 0, 90, ClientWidth(modePanel) - 10 , 20, modePanel, BUTTON_RADIO)
+'	TBtn_mode[5] = CreateButton("Weapon CSV Edit Mode", 0, 110, ClientWidth(modePanel) - 10 , 20, modePanel, BUTTON_RADIO)
 'SetButtonState( TBtn_mode[0], 1 )
 
 '////////////////////////////////////////////////
@@ -420,6 +426,8 @@ Global sub_set_variant:TModalSetVariant = New TModalSetVariant
 Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
 Global sub_wing_csv:TModalSetWingCSV = New TModalSetWingCSV
 Global sub_weapon:TModalWeapon = New TModalWeapon
+Global sub_weapon_csv:TModalSetWeaponCSV = New TModalSetWeaponCSV
+Global sub_show_more:TModalShowMore = New TModalShowMore
 
 Global SS:TSmoothScroll = New TSmoothScroll
 '////////////////////////////////////////////////
@@ -491,7 +499,8 @@ Repeat
 		'skip most hotkeys when we are in string edit mode or so.
 		If (ed.mode = "string_data" ..
 		Or (ed.program_mode = "csv" And (sub_ship_csv.loaded_csv_id_list Or sub_ship_csv.csv_row_values) )..
-		Or (ed.program_mode = "csv_wing" And (sub_wing_csv.loaded_csv_id_list Or sub_wing_csv.csv_row_values) ) )
+		Or (ed.program_mode = "csv_wing" And (sub_wing_csv.loaded_csv_id_list Or sub_wing_csv.csv_row_values) ) ..
+		Or (ed.program_mode = "csv_weapon" And (sub_weapon_csv.loaded_csv_id_list Or sub_weapon_csv.csv_row_values) ) )
 			If check_sub_routines( ed, data, sprite) Then Continue
 		Else
 			If check_file_menu( ed, data, sprite ) Then Continue
@@ -552,6 +561,7 @@ Repeat
 		RedrawGadget(Canvas)
 	Case EVENT_GADGETPAINT
 	
+	
 	If EventSource() = Canvas
 		Cls
 		'display string for mouse (usually context-help)
@@ -568,6 +578,8 @@ Repeat
 '			sub_wing_csv.Update( ed, data, sprite )
 '		Case "weapon"
 '			sub_weapon.Update( ed, data, sprite )
+'		Case "csv_weapon"
+'			sub_weapon_csv.Update( ed, data, sprite )
 '		End Select
 		'update end
 
@@ -614,7 +626,10 @@ Repeat
 				sub_wing_csv.Draw( ed, data, sprite )
 
 			Case "weapon"
-				sub_weapon.Draw( ed, data, sprite )		
+				sub_weapon.Draw( ed, data, sprite )	
+			
+			Case "csv_weapon"
+				sub_weapon_csv.Draw( ed, data, sprite )	
 		End Select
 		draw_help( ed )
 		draw_data( ed, data )
@@ -682,8 +697,9 @@ Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
 			data.changed = False
 			data.snapshots_undo:TList = CreateList()
 			data.snapshots_redo:TList = CreateList()
-		Case "weapon"
+		Case "weapon", "csv_weapon"
 			data.weapon = New TStarfarerWeapon
+			data.csv_row_weapon = weapon_data_csv_field_template.Copy()
 			sprite.wpimg = Null
 			data.update_weapon()
 			data.changed = False
@@ -708,6 +724,8 @@ Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
 			sub_wing_csv.Load( ed, data, sprite )
 		Case "weapon"
 			sub_weapon.Load( ed, data, sprite )
+		Case "csv_weapon"
+			sub_weapon_csv.Load( ed, data, sprite )
 		EndSelect
 		data.take_initshot()
 		data.changed = False
@@ -744,6 +762,8 @@ Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
 			sub_wing_csv.Save( ed, data, sprite )
 		Case "weapon"
 			sub_weapon.Save( ed, data, sprite )
+		Case "csv_weapon"
+			sub_weapon_csv.Save( ed, data, sprite )
 		EndSelect
 	Case fileMenu[6] 'exit
 		EmitEvent(CreateEvent(EVENT_WINDOWCLOSE, MainWindow) )
@@ -788,6 +808,11 @@ Function check_mode_menu%(ed:TEditor, data:TData, sprite:TSprite)
 		sub_weapon.Activate( ed, data, sprite )
 		RadioMenuArray( 5, modeMenu )
 		rebuildFunctionMenu(4)
+	Case modeMenu[6] 'm_mode_weapon_state
+		If ed.program_mode = "csv_weapon" Then Return True
+		sub_weapon_csv.Activate( ed, data, sprite )
+		RadioMenuArray( 6, modeMenu )
+		rebuildFunctionMenu(5)
 	Default
 		hit = False
 	End Select
@@ -889,6 +914,8 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
 			sub_launchbays.Activate( ed, data, sprite )
 		Case functionMenuSub[0][9] 'preview
 			sub_preview_all.Activate( ed, data, sprite )
+		Case functionMenuSub[0][10] 'show more
+			sub_show_more.Activate( ed, data, sprite )
 		Case functionMenu[3] 'string edit
 			sub_string_data.Activate( ed, data, sprite )
 		Default
@@ -900,6 +927,8 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
 			load_variant_data( ed, data, sprite, True ) 'strip all	
 		Case functionMenu[3]
 			sub_string_data.Activate( ed, data, sprite ) 'string edit
+		Case functionMenuSub[1][9] 'show more
+			sub_show_more.Activate( ed, data, sprite )
 		Default
 			hit = False
 		EndSelect
@@ -961,6 +990,8 @@ Function check_sub_routines% ( ed:TEditor, data:TData, sprite:TSprite )
 		Default
 			sub_weapon.Update( ed, data, sprite )			
 		EndSelect
+	Case "csv_weapon"
+		sub_weapon_csv.Update( ed, data, sprite )
 	Default
 		hit = False
 	End Select
@@ -1154,7 +1185,8 @@ Function draw_ship( ed:TEditor, sprite:TSprite )
 		Or ed.mode = "string_data" ..
 		Or ed.program_mode = "variant" ..
 		Or ed.program_mode = "csv" ..
-		Or ed.program_mode = "csv_wing"
+		Or ed.program_mode = "csv_wing" ..
+		Or ed.program_mode = "csv_weapon"
 			SetColor( 127, 127, 127 )
 		EndIf
 		DrawImage( sprite.img, W_MID + sprite.pan_x + sprite.zpan_x, H_MID + sprite.pan_y + sprite.zpan_y )
@@ -1200,7 +1232,7 @@ Function draw_debug( ed:TEditor, data:TData, sprite:TSprite )
 		Select ed.program_mode
 		Case "ship", "variant", "csv", "csv_wing"
 			reference = sprite.img
-		Case "weapon"
+		Case "weapon", "csv_weapon"
 			reference = sprite.wpimg
 			draw_crosshairs(sprite.asx + sub_weapon.xOffset * sprite.scale, sprite.asy, 6, True)
 		End Select
@@ -1354,6 +1386,13 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
 				EndIf
 			Case "weapon"
 				title_w = TextWidget.Create( data.weapon.id + ".wpn" )
+			Case "csv_weapon"
+				If data.csv_row
+					title_w = TextWidget.Create( "weapon_data.csv : " + String( data.csv_row_weapon.ValueForKey( "id" )))
+				Else
+					title_w = TextWidget.Create ( "weapon_data.csv" )
+				EndIf
+					
 		EndSelect
 		draw_string( title_w, 4, 4 )
 	EndIf
@@ -1785,7 +1824,7 @@ Function rebuildFunctionMenu(index%)
 	Select Index
 	Case 0
 		'mode 1 Functions
-		functionMenuSub[0] = New TGadget[10]
+		functionMenuSub[0] = New TGadget[11]
 		functionMenuSub[0][0] = CreateMenu("{{m_function_center}}", 410, functionMenu[0], KEY_C )
 		functionMenuSub[0][1] = CreateMenu("{{m_function_shield}}", 411, functionMenu[0], KEY_S )
 		functionMenuSub[0][2] = CreateMenu("{{m_function_bounds}}", 412, functionMenu[0], KEY_B )
@@ -1796,9 +1835,10 @@ Function rebuildFunctionMenu(index%)
 		functionMenuSub[0][7] = CreateMenu("{{m_function_engine}}", 417, functionMenu[0], KEY_E )
 		functionMenuSub[0][8] = CreateMenu("{{m_function_launchBays}}", 418, functionMenu[0], KEY_L )
 		functionMenuSub[0][9] = CreateMenu("{{m_function_preview}}", 419, functionMenu[0], KEY_P )
+		functionMenuSub[0][10] = CreateMenu("{{m_function_more}}", 420, functionMenu[0], KEY_Q )
 	Case 1
 		'mode 2 Functions
-		functionMenuSub[1] = New TGadget[9]
+		functionMenuSub[1] = New TGadget[10]
 		functionMenuSub[1][0] = CreateMenu("{{m_function_WeaponGroups}}", 420, functionMenu[0], KEY_G )
 		functionMenuSub[1][1] = CreateMenu("{{m_function_vent}}", 421, functionMenu[0] )
 		functionMenuSub[1][2] = CreateMenu("{{m_function_vent_add}}", 4210, functionMenuSub[1][1], KEY_F )	
@@ -1808,6 +1848,7 @@ Function rebuildFunctionMenu(index%)
 		functionMenuSub[1][6] = CreateMenu("{{m_function_cap_remove}}", 4221, functionMenuSub[1][4], KEY_C, MODIFIER_CONTROL)		
 		functionMenuSub[1][7] = CreateMenu("{{m_function_hullmod}}", 423, functionMenu[0], KEY_H )
 		functionMenuSub[1][8] = CreateMenu("{{m_function_stripAll}}", 424, functionMenu[0], KEY_SLASH )
+		functionMenuSub[1][9] = CreateMenu("{{m_function_more}}", 420, functionMenu[0], KEY_Q )
 	'mode 3 Functions skip
 	'mode 4 Functions skip
 	'mode 5 Functions

@@ -15,6 +15,7 @@ Type TModalSetBuiltInHullMods Extends TSubroutine
 	Field hullMods_c$[]
 	Field hullmod_id$ 
 	Field hullmod_op% 
+	Field hullmod_head_str$
 	Field hullMods_widget:TextWidget
 	Field hullMods_cursor:TextWidget
 
@@ -89,10 +90,19 @@ Type TModalSetBuiltInHullMods Extends TSubroutine
 '		hullMods_c = New String[hullMods_count]
 		i = 0
 		For hullMod = EachIn ed.stock_hullmod_stats.Values()
-			hullmod_id = String( hullMod.ValueForKey("id") )
+			hullmod_id = String( hullMod.ValueForKey("id"))
 			display_str = String( hullMod.ValueForKey("name") )
 			hullmod_op = get_hullmod_csv_ordnance_points( ed, data, hullmod_id )
-			display_str = RSet( String.FromInt( hullmod_op ), 3 ) + "  " + display_str
+			display_str = RSet( String.FromInt( hullmod_op ), 3 )+"  "+LSet( display_str, 28 )
+			hullmod_head_str = RSet( "    OP", 6 )+"  "+LSet( "Name", 28 )
+			If SHOW_MORE = 1
+				display_str = display_str +"  "+ LSet( String( hullMod.ValueForKey( "short" )), 65).Replace("~q","")
+				hullmod_head_str = hullmod_head_str +"  "+ LSet( "Description", 65).Replace("~q","")
+			EndIf
+			If SHOW_MORE = 2
+				display_str = display_str +"  "+ LSet( String( hullMod.ValueForKey( "desc" )), 160).Replace("~q","")
+				hullmod_head_str = hullmod_head_str +"  "+ LSet( "Description", 160).Replace("~q","")
+			EndIf
 			If data.has_builtin_hullmod( hullmod_id )
 				display_str = "[b]" + display_str
 			Else
@@ -158,16 +168,17 @@ Type TModalSetBuiltInHullMods Extends TSubroutine
 	EndMethod
 
 	Method draw_hullmods_list()
-'		draw_container( W_MID, H_MID, hullMods_widget.w + 20, hullMods_widget.h + 20, 0.5,0.5,,, 0.75 )
-'		draw_string( hullMods_widget, W_MID,H_MID,,, 0.5,0.5 )
-'		draw_string( hullMods_cursor, W_MID, H_MID, get_cursor_color(),, 0.5, 0.5 )
+'		draw_container( W_MID - 40, H_MID, hullMods_widget.w + 20, hullMods_widget.h + 20, 0.5,0.5,,, 0.75 )
+'		draw_string( hullMods_widget, W_MID - 40,H_MID,,, 0.5,0.5 )
+'		draw_string( hullMods_cursor, W_MID - 40, H_MID, get_cursor_color(),, 0.5, 0.5 )
 		Local drawY# = SS.ScrollTo(H_MID  - ( ed.builtIn_hullMod_i + 0.5) * LINE_HEIGHT)
-		draw_container( W_MID - TextWidth("=> "), drawY - 10, hullMods_widget.w + 20 + TextWidth("=> "), hullMods_widget.h + 20, 0.5, 0,,, 0.75 )
-		draw_string( hullMods_widget, W_MID + 10 - TextWidth("=> "), drawY ,,, 0.5, 0 )
-		draw_string( "=> ", W_MID - TextWidth("=> ") - hullMods_widget.w / 2, H_MID, get_cursor_color(),, 0.5, 0.5 )
+		draw_container( W_MID - 40 - TextWidth("=> "), drawY - 30, hullMods_widget.w + 20 + TextWidth("=> "), hullMods_widget.h + 40, 0.5, 0,,, 0.75 )
+		draw_string( hullmod_head_str, W_MID - 40 + 10 - TextWidth("=> "), drawY - 20,,, 0.5, 0 )
+		draw_string( hullMods_widget, W_MID - 40 + 10 - TextWidth("=> "), drawY ,,, 0.5, 0 )
+		draw_string( "=> ", W_MID - 40 - TextWidth("=> ") - hullMods_widget.w / 2, H_MID, get_cursor_color(),, 0.5, 0.5 )
 		SetColor(255, 255, 255)
 		SetAlpha( 0.2 )	
-		DrawRect( W_MID - 20 - TextWidth("=> ") - 0.5 * ( hullMods_widget.w ), H_MID - LINE_HEIGHT / 2 , hullMods_widget.w + 20 + TextWidth("=> "), LINE_HEIGHT )												
+		DrawRect( W_MID - 40 - 20 - TextWidth("=> ") - 0.5 * ( hullMods_widget.w ), H_MID - LINE_HEIGHT / 2 , hullMods_widget.w + 20 + TextWidth("=> "), LINE_HEIGHT )												
 		SetAlpha( 1 )
 	EndMethod
 
