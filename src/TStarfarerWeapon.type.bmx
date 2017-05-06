@@ -4,7 +4,7 @@ Type TStarfarerWeapon
 ' specClass = projectile Or specClass = beam
 
 	'essential to both
-	Field id$ = "new_weapon"
+	Field id$ = ""
 	Field specClass$ = "projectile"
 	Field type_$ = "ENERGY"
 	Field size$ = "SMALL"

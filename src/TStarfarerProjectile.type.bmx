@@ -1,0 +1,3 @@
+Type TStarfarerProjectile
+
+End Type

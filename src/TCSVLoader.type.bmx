@@ -46,7 +46,6 @@ Type TCSVLoader
 
 	Function Save_Row( file$, row:TMap, key_field$, field_order:TList )
 		Local row_key$ = String( row.ValueForKey( key_field ) )
-		
 		If Not row_key Or row_key = "" Then Return
 		Local ftype% = FileType( file )
 		Local i%, csv_field$
@@ -177,11 +176,7 @@ Type TCSVLoader
 		And Not field_data.Contains("~n")
 			Return field_data
 		Else
-			If Not field_data.Contains("~q")
-				Return "~q"+field_data+"~q"
-			Else
-				Return field_data
-			EndIf
+			Return "~q"+field_data+"~q"
 		EndIf
 	End Function
 

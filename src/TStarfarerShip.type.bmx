@@ -17,6 +17,7 @@ Type TStarfarerShip
 	Field builtInWeapons:TMap'<String,String>  weapon slot id --> weapon id
 	Field builtInMods$[]
 	Field coversColor$
+	Field builtInWings$[]
 
 	
 	Method New()
@@ -32,6 +33,7 @@ Type TStarfarerShip
 		style = "LOW_TECH"
 		builtInWeapons = CreateMap()
 		builtInMods = New String[0]
+	 builtInWings = New String[0]
 	End Method
 	
 	Method Clone:TStarfarerShip(dst:TStarfarerShip = Null)
