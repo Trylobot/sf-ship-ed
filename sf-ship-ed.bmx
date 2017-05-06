@@ -1,6 +1,6 @@
 Rem
 
-STARSECTOR Modding Kit 2.7.0
+STARSECTOR Modding Kit 2.8.0
 	Former Starfarer ship data editor
 Created by Trylobot
 Updated by Deathfly
@@ -306,7 +306,7 @@ modeMenu[3] = CreateMenu("{{m_mode_shipstate}}", 303, modeMenu[0] , KEY_3)
 modeMenu[4] = CreateMenu("{{m_mode_wing}}", 304, modeMenu[0] , KEY_4)
 modeMenu[5] = CreateMenu("{{m_mode_weapon}}", 305, modeMenu[0] , KEY_5)
 CheckMenu(modeMenu[1])
-rem
+Rem
 function menu
 this is a little too complex
 [0]root; [1]undo Ctrl+Z; [2]redo Ctrl+Y; [3]details T; [4]remove BACKSPACE; [5]exit ESCAPE[]
@@ -485,7 +485,7 @@ Repeat
 			If check_sub_routines( ed, data, sprite) Then Continue
 	Case EVENT_GADGETACTION , EVENT_MENUACTION
 		'DebugLog (EventSource().ToString() )
-		If EventSource() = optionMenu[11] Then Notify("STARSECTOR Ship&Weapon Editor ~nv2.7.0~n(Former Trylobot's ship editor) ~n ~nCreated by Trylobot ~nUpdated by Deathfly ~n~n" + LocalizeString("{{msg_localisation_credits}}") )
+		If EventSource() = optionMenu[11] Then Notify("STARSECTOR Ship&Weapon Editor ~nv2.8.0~n(Former Trylobot's ship editor) ~n ~nCreated by Trylobot ~nUpdated by Deathfly ~n~n" + LocalizeString("{{msg_localisation_credits}}") )
 		check_zoom_and_pan( ed, data, sprite )
 		If check_undo( ed, data, sprite ) Then Continue
 		'skip most hotkeys when we are in string edit mode or so.
