@@ -63,7 +63,9 @@ Type TGenericCSVSubroutine Extends TSubroutine
 			update_csv_row_selector( ed, data )
 		ElseIf csv_row_values
 			update_csv_editor( data )
+
 		ElseIf data_csv_row And EventSource() = functionMenu[3]
+
 			initialize_csv_editor( ed, data )
 			data.hold_snapshot(True)
 		EndIf
@@ -397,6 +399,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 	EndMethod
 
 	Method draw_csv_row_selector()
+
 		
 		Local drawY# = SS.ScrollTo( H_MID - ( (loaded_csv_id_list_item_i + 0.5) * LINE_HEIGHT) )
 		draw_container( W_MID - TextWidth("=> "), drawY - 10, loaded_csv_id_list.w + 20 + TextWidth("=>  "), loaded_csv_id_list.h + 20, 0.5, 0,,, 0.75 )
@@ -407,6 +410,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		DrawRect( W_MID - 20 - TextWidth("=>  ") - 0.5 * ( loaded_csv_id_list.w ), H_MID - LINE_HEIGHT / 2 , loaded_csv_id_list.w + 20 + TextWidth("=>  "), LINE_HEIGHT )												
 		SetAlpha( 1 )
 	EndMethod
+
 
 
 	Rem

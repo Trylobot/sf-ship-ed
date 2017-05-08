@@ -331,6 +331,7 @@ Type TModalSetVariant Extends TSubroutine
 			hullmod_id = String( hullMod.ValueForKey("id"))
 			display_str = String( hullMod.ValueForKey("name") )
 			hullmod_op = get_hullmod_csv_ordnance_points( ed, data, hullmod_id )
+
 			display_str = RSet( String.FromInt( hullmod_op ), 3 )+"  "+LSet( display_str, 28 )
 			hullmod_head_str = RSet( "     OP", 7 )+"  "+LSet( "Name", 28 )
 			If SHOW_MORE = 1
@@ -341,6 +342,7 @@ Type TModalSetVariant Extends TSubroutine
 				display_str = display_str +"  "+ LSet( String( hullMod.ValueForKey( "desc" )), 160).Replace("~q","")
 				hullmod_head_str = hullmod_head_str +"  "+ LSet( "Description", 160).Replace("~q","")
 			EndIf
+
 			If data.has_builtin_hullmod( hullmod_id )
 				display_str = "[b] " + display_str			
 			Else If data.has_hullmod( hullmod_id )
@@ -705,8 +707,10 @@ Type TModalSetVariant Extends TSubroutine
 		x = wx - weapon_list_widget.w - 20 - 30 - TextWidth("=> ")
 		y = SS.ScrollTo( wy - 10 - ( (ed.select_weapon_i + 0.5) * LINE_HEIGHT) )
 		w = weapon_list_widget.w + 20 + TextWidth("=> ")
+
+
 		h = weapon_list_widget.h + 20
-		SetColor( 0,0,0 )
+		SetColor( 0, 0, 0 )
 		SetAlpha( 0.40 )
 		DrawRect( x, y -10, w, h )
 		SetAlpha( 0.9 )
@@ -716,16 +720,20 @@ Type TModalSetVariant Extends TSubroutine
 		SetColor( 255, 255, 255 )
 		DrawRectLines( x, y - 10, w, h )
 		'draw options
+
 		draw_string( wep_head_str, (wx - 40), y,,, 1.0, 0.5 )
 		draw_string( weapon_list_widget, (wx - 40), y+10 + weapon_list_widget.h / 2,,, 1.0, 0.5 )
 		SetColor( 0, 0, 0 )
 		SetAlpha( 0.8 )
 		'draw cursor
+
 		draw_string( "=> ", (wx - 40) - (weapon_list_widget.w ), wy , get_cursor_color(),, 1.0, 0.5 )		
 		SetAlpha( 1 )
 		SetColor( 255, 255, 255 )
 		SetAlpha( 0.2 )	
+
 		DrawRect( x, wy - LINE_HEIGHT / 2, w, LINE_HEIGHT )												
+
 		SetAlpha( 1 )
 	EndMethod
 
@@ -734,7 +742,6 @@ Type TModalSetVariant Extends TSubroutine
 		draw_container( W_MID - 40 - TextWidth("=>"), drawY - 30, hullMods_widget.w + 20 + TextWidth("=>"), hullMods_widget.h + 40, 0.5, 0,,, 0.75 )
 		draw_string( hullmod_head_str, W_MID - 40, drawY - 20,,, 0.5, 0 )
 		draw_string( hullMods_widget, W_MID - 40, drawY,,, 0.5, 0 )
-		'draw_string( hullMods_cursor, W_MID - 40,H_MID, get_cursor_color(),, 0.5,0.5 )
 		draw_string( "=>", W_MID - 40 - TextWidth("=>") - hullMods_widget.w / 2, H_MID, get_cursor_color(),, 0.5, 0.5 )
 		SetAlpha( 0.2 )	
 		DrawRect( W_MID - 40 - 18 - TextWidth("=>") - 0.5 * ( hullMods_widget.w ), H_MID - 1 - LINE_HEIGHT / 2 , hullMods_widget.w + 20 + TextWidth("=>"), LINE_HEIGHT )												

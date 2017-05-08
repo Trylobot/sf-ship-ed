@@ -1,6 +1,7 @@
 Rem
 
-STARSECTOR Modding Kit 2.7.0
+
+STARSECTOR Modding Kit 2.8.0
 	Former Starfarer ship data editor
 Created by Trylobot
 Updated by Deathfly
@@ -311,7 +312,8 @@ modeMenu[4] = CreateMenu("{{m_mode_wing}}", 304, modeMenu[0] , KEY_4)
 modeMenu[5] = CreateMenu("{{m_mode_weapon}}", 305, modeMenu[0] , KEY_5)
 modeMenu[6] = CreateMenu("{{m_mode_weaponstate}}", 306, modeMenu[0] , KEY_6)
 CheckMenu(modeMenu[1])
-rem
+Rem
+
 function menu
 this is a little too complex
 [0]root; [1]undo Ctrl+Z; [2]redo Ctrl+Y; [3]details T; [4]remove BACKSPACE; [5]exit ESCAPE[]
@@ -430,6 +432,7 @@ Global sub_weapon_csv:TModalSetWeaponCSV = New TModalSetWeaponCSV
 Global sub_show_more:TModalShowMore = New TModalShowMore
 
 Global SS:TSmoothScroll = New TSmoothScroll
+
 '////////////////////////////////////////////////
 'MARK init FPS limiter
 Global Lmt_FPS% = APP.fps_limit
@@ -493,7 +496,9 @@ Repeat
 			If check_sub_routines( ed, data, sprite) Then Continue
 	Case EVENT_GADGETACTION , EVENT_MENUACTION
 		'DebugLog (EventSource().ToString() )
-		If EventSource() = optionMenu[11] Then Notify("STARSECTOR Ship&Weapon Editor ~nv2.7.0~n(Former Trylobot's ship editor) ~n ~nCreated by Trylobot ~nUpdated by Deathfly ~n~n" + LocalizeString("{{msg_localisation_credits}}") )
+
+		If EventSource() = optionMenu[11] Then Notify("STARSECTOR Ship&Weapon Editor ~nv2.8.0~n(Former Trylobot's ship editor) ~n ~nCreated by Trylobot ~nUpdated by Deathfly ~n~n" + LocalizeString("{{msg_localisation_credits}}") )
+
 		check_zoom_and_pan( ed, data, sprite )
 		If check_undo( ed, data, sprite ) Then Continue
 		'skip most hotkeys when we are in string edit mode or so.
@@ -879,11 +884,13 @@ Function updatUndo(data:TData)
 	If (data.snapshots_undo.IsEmpty() And Not data.changed) = MenuEnabled(functionMenu[1])
 		functionMenu[1].setenabled(Not (data.snapshots_undo.IsEmpty() And Not data.changed) )
 		mainMenuNeedUpdate = True
+
 	EndIf
 	If (data.snapshots_redo.IsEmpty() ) = MenuEnabled(functionMenu[2])
 		functionMenu[2].setenabled(Not data.snapshots_redo.IsEmpty() )
 		mainMenuNeedUpdate = True
 	EndIf
+
 End Function
 
 
@@ -1812,6 +1819,7 @@ Function FlushEvent%()
 	Wend
 	Return i
 End Function
+
 
 Function rebuildFunctionMenu(index%)
 	'nuke them first

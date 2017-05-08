@@ -67,7 +67,14 @@ Type Application
 		If 0 = FileType( starsector_base_dir + STARFARER_CORE_DIR[0] ) ..
 		And 0 = FileType( starsector_base_dir + STARFARER_CORE_DIR[1] ) ..
 		And 0 = FileType( starsector_base_dir + STARFARER_CORE_DIR[2] )
+
+?MacOS
+			starsector_base_dir = RequestFile(LocalizeString("{{wt_load_core}}") , "app") ) + "/"
+?Linux
 			starsector_base_dir = RequestDir( LocalizeString("{{wt_load_core}}") ) + "/"
+?Win32
+			starsector_base_dir = RequestDir( LocalizeString("{{wt_load_core}}") ) + "/"			
+?
 			If starsector_base_dir = "/" Then starsector_base_dir = ""
 			If 0 = FileType( starsector_base_dir + STARFARER_CORE_DIR[0] ) ..
 			And 0 = FileType( starsector_base_dir + STARFARER_CORE_DIR[1] ) ..

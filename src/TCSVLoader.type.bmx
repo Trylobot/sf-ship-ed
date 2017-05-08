@@ -46,7 +46,7 @@ Type TCSVLoader
 
 	Function Save_Row( file$, row:TMap, key_field$, field_order:TList )
 		Local row_key$ = String( row.ValueForKey( key_field ) )
-		
+
 		If Not row_key Or row_key = "" Then Return
 		Local ftype% = FileType( file )
 		Local i%, csv_field$
