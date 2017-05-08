@@ -41,6 +41,13 @@ Type TStarfarerShip
 		MemMove(Byte Ptr (dst), Byte Ptr (Self), SizeOf(Self) )
 		Return dst
 	End Method
+
+	Method Clone:TStarfarerShip(dst:TStarfarerShip = Null)
+		If Not dst Then dst = New TStarfarerShip
+		MemMove(Byte Ptr (dst), Byte Ptr (Self), SizeOf(Self) )
+		Return dst
+	End Method
+
 End Type
 
 

@@ -18,6 +18,12 @@ Type TModalSetVariant Extends TSubroutine
 	Field skip_lines%
 	'///
 	Field wep_op_str$
+	Field wep_type_str$
+	Field wep_range_str$
+	Field wep_ammo_str$
+	Field wep_damage_str$
+	Field wep_energy_str$
+	Field wep_head_str$
 	Field weapon_slot_id$
 	Field weapon_id$
 	Field weapon_name$
@@ -51,6 +57,7 @@ Type TModalSetVariant Extends TSubroutine
 	Field hullMods_c$[]
 	Field hullmod_id$ 
 	Field hullmod_op% 
+	Field hullmod_head_str$
 	Field hullMods_widget:TextWidget
 	Field hullMods_cursor:TextWidget
 	'///
@@ -276,11 +283,30 @@ Type TModalSetVariant Extends TSubroutine
 			If weapon_stats
 				weapon_name = String( weapon_stats.ValueForKey( "name" ))
 				wep_op_str = String( weapon_stats.ValueForKey( "OPs" ))
+				wep_type_str = String( weapon_stats.ValueForKey( "type" ))
+				wep_range_str = String( weapon_stats.ValueForKey( "range" ))
+				wep_ammo_str = String( weapon_stats.ValueForKey( "ammo" ))
+				wep_damage_str = String( weapon_stats.ValueForKey( "damage/shot" ))
+				wep_energy_str = String( weapon_stats.ValueForKey( "energy/shot" ))
+				
 				If weapon_name
-					weapon_list_display[wi] = RSet(wep_op_str,3)+"  "+weapon_name
+					weapon_list_display[wi] = RSet(wep_op_str,3)+"  "+LSet(weapon_name,18)
+					If SHOW_MORE > 0
+						weapon_list_display[wi] = weapon_list_display[wi]+"  "+LSet(wep_type_str,7)+"  "+LSet(wep_range_str,5)
+						If SHOW_MORE = 2
+							weapon_list_display[wi] = weapon_list_display[wi]+"  "+LSet(wep_ammo_str,4)+"  "+LSet(wep_damage_str,6)+"  "+LSet(wep_energy_str,6)
+						EndIf
+					EndIf
 				EndIf
 			EndIf
 		Next
+		wep_head_str = RSet("OP",3)+"  "+LSet("Name",18)
+			If SHOW_MORE > 0
+				wep_head_str = wep_head_str+"  "+LSet("Type",7)+"  "+LSet("Range",5)
+				If SHOW_MORE = 2
+					wep_head_str = wep_head_str+"  "+LSet("Ammo",4)+"  "+LSet("Damage",6)+"  "+LSet("Energy",6)
+				EndIf
+			EndIf
 		weapon_list_widget = TextWidget.Create( weapon_list_display )
 		'update_weapon_assignment_list_cursor( ed )
 	EndMethod
@@ -300,11 +326,23 @@ Type TModalSetVariant Extends TSubroutine
 		hullMods_lines = New String[hullMods_count]
 		'hullMods_c = New String[hullMods_count]
 		i = 0
+		
 		For hullMod = EachIn ed.stock_hullmod_stats.Values()
 			hullmod_id = String( hullMod.ValueForKey("id"))
 			display_str = String( hullMod.ValueForKey("name") )
 			hullmod_op = get_hullmod_csv_ordnance_points( ed, data, hullmod_id )
-			display_str = RSet( String.FromInt( hullmod_op ), 3 )+"  "+display_str
+
+			display_str = RSet( String.FromInt( hullmod_op ), 3 )+"  "+LSet( display_str, 28 )
+			hullmod_head_str = RSet( "     OP", 7 )+"  "+LSet( "Name", 28 )
+			If SHOW_MORE = 1
+				display_str = display_str +"  "+ LSet( String( hullMod.ValueForKey( "short" )), 65).Replace("~q","")
+				hullmod_head_str = hullmod_head_str +"  "+ LSet( "Description", 65).Replace("~q","")
+			EndIf
+			If SHOW_MORE = 2
+				display_str = display_str +"  "+ LSet( String( hullMod.ValueForKey( "desc" )), 160).Replace("~q","")
+				hullmod_head_str = hullmod_head_str +"  "+ LSet( "Description", 160).Replace("~q","")
+			EndIf
+
 			If data.has_builtin_hullmod( hullmod_id )
 				display_str = "[b] " + display_str			
 			Else If data.has_hullmod( hullmod_id )
@@ -324,6 +362,7 @@ Type TModalSetVariant Extends TSubroutine
 	EndMethod
 
 	Method update_weapon_assignment_list( ed:TEditor, data:TData )
+		initialize_weapon_assignment_list( ed, data )
 		'bounds check
 		If ed.select_weapon_i > (weapon_list.length - 1)
 			ed.select_weapon_i = (weapon_list.length - 1)
@@ -643,62 +682,69 @@ Type TModalSetVariant Extends TSubroutine
 		'if applicable:
 		'  draw lines connecting box to target weapon or engine
 		'  draw actual weapon or engine preview
-		Rem
-		x = wx - weapon_list_widget.w - 20 - 30 'W_MID/2 - weapon_list_widget.w/2 - 10
-		y = wy - weapon_list_widget.h / 2 - 10 'H_MID/2 - weapon_list_widget.h/2 - 10
-		w = weapon_list_widget.w + 20
-		h = weapon_list_widget.h + 20
-		SetColor( 0, 0, 0 )
-		SetAlpha( 0.40 )
-		DrawRect( x,y, w,h )
-		SetAlpha( 1 )
-		SetColor( 0, 0, 0 )
-		DrawRectLines( x-1, y-1, w+2, h+2 )
-		DrawRectLines( x+1, y+1, w-2, h-2 )
-		SetColor( 255, 255, 255 )
-		DrawRectLines( x,y, w,h )
-		'draw options
-		draw_string( weapon_list_widget, (wx - 40), wy,,, 1.0, 0.5 )
-		SetColor( 0,0,0 )
-		SetAlpha( 1 )
-		'draw cursor
-		draw_string( cursor_widget, (wx - 40), wy, get_cursor_color(), $000000, 1.0, 0.5 )
-		SetAlpha( 1 )
-		EndRem
+			Rem
+			x = wx - weapon_list_widget.w - 20 - 30 'W_MID/2 - weapon_list_widget.w/2 - 10
+			y = wy - weapon_list_widget.h / 2 - 10 'H_MID/2 - weapon_list_widget.h/2 - 10
+			w = weapon_list_widget.w + 20
+			h = weapon_list_widget.h + 20
+			SetColor( 0, 0, 0 )
+			SetAlpha( 0.40 )
+			DrawRect( x,y, w,h )
+			SetAlpha( 1 )
+			SetColor( 0, 0, 0 )
+			DrawRectLines( x-1, y-1, w+2, h+2 )
+			DrawRectLines( x+1, y+1, w-2, h-2 )
+			SetColor( 255, 255, 255 )
+			DrawRectLines( x,y, w,h )
+			'draw options
+			draw_string( weapon_list_widget, (wx - 40), wy,,, 1.0, 0.5 )
+			SetColor( 0,0,0 )
+			SetAlpha( 1 )
+			'draw cursor
+			draw_string( cursor_widget, (wx - 40), wy, get_cursor_color(), $000000, 1.0, 0.5 )
+			SetAlpha( 1 )
+			EndRem
 		x = wx - weapon_list_widget.w - 20 - 30 - TextWidth("=> ")
 		y = SS.ScrollTo( wy - 10 - ( (ed.select_weapon_i + 0.5) * LINE_HEIGHT) )
 		w = weapon_list_widget.w + 20 + TextWidth("=> ")
+
+
 		h = weapon_list_widget.h + 20
-		SetColor( 0,0,0 )
+		SetColor( 0, 0, 0 )
 		SetAlpha( 0.40 )
-		DrawRect( x, y, w, h )
+		DrawRect( x, y -10, w, h )
 		SetAlpha( 0.9 )
 		SetColor( 0, 0, 0 )
 		DrawRectLines( x - 1, y - 1, w + 2, h + 2 )
 		DrawRectLines( x + 1, y + 1, w - 2, h - 2 )
 		SetColor( 255, 255, 255 )
-		DrawRectLines( x, y, w, h )
+		DrawRectLines( x, y - 10, w, h )
 		'draw options
+
+		draw_string( wep_head_str, (wx - 40), y,,, 1.0, 0.5 )
 		draw_string( weapon_list_widget, (wx - 40), y+10 + weapon_list_widget.h / 2,,, 1.0, 0.5 )
 		SetColor( 0, 0, 0 )
 		SetAlpha( 0.8 )
 		'draw cursor
+
 		draw_string( "=> ", (wx - 40) - (weapon_list_widget.w ), wy , get_cursor_color(),, 1.0, 0.5 )		
 		SetAlpha( 1 )
 		SetColor( 255, 255, 255 )
 		SetAlpha( 0.2 )	
-		DrawRect( x, wy - LINE_HEIGHT / 2 , w, LINE_HEIGHT )												
+
+		DrawRect( x, wy - LINE_HEIGHT / 2, w, LINE_HEIGHT )												
+
 		SetAlpha( 1 )
 	EndMethod
 
 	Method draw_hullmods_list()
 		Local drawY# = SS.ScrollTo( H_MID - ( (ed.variant_hullMod_i + 0.5) * LINE_HEIGHT) )
-		draw_container( W_MID - TextWidth("=> "), drawY - 10, hullMods_widget.w + 20 + TextWidth("=> "), hullMods_widget.h + 20, 0.5, 0,,, 0.75 )
-		draw_string( hullMods_widget, W_MID, drawY,,, 0.5, 0 )
-		'draw_string( hullMods_cursor, W_MID,H_MID, get_cursor_color(),, 0.5,0.5 )
-		draw_string( "=> ", W_MID - TextWidth("=> ") - hullMods_widget.w / 2, H_MID, get_cursor_color(),, 0.5, 0.5 )
+		draw_container( W_MID - 40 - TextWidth("=>"), drawY - 30, hullMods_widget.w + 20 + TextWidth("=>"), hullMods_widget.h + 40, 0.5, 0,,, 0.75 )
+		draw_string( hullmod_head_str, W_MID - 40, drawY - 20,,, 0.5, 0 )
+		draw_string( hullMods_widget, W_MID - 40, drawY,,, 0.5, 0 )
+		draw_string( "=>", W_MID - 40 - TextWidth("=>") - hullMods_widget.w / 2, H_MID, get_cursor_color(),, 0.5, 0.5 )
 		SetAlpha( 0.2 )	
-		DrawRect( W_MID - 20 - TextWidth("=> ") - 0.5 * ( hullMods_widget.w ), H_MID - LINE_HEIGHT / 2 , hullMods_widget.w + 20 + TextWidth("=> "), LINE_HEIGHT )												
+		DrawRect( W_MID - 40 - 18 - TextWidth("=>") - 0.5 * ( hullMods_widget.w ), H_MID - 1 - LINE_HEIGHT / 2 , hullMods_widget.w + 20 + TextWidth("=>"), LINE_HEIGHT )												
 		SetAlpha( 1 )
 	EndMethod
 

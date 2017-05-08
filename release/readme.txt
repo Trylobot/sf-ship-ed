@@ -6,17 +6,18 @@
 
   Press (C) to enter "Set Center" mode
     Then, Click to set a center
-    Then, Click again to set a collision radius
+    Then, Ctrl + Click to set a collision radius
 
   Press (B) to enter "Set Bounds" mode
     While holding Shift, Click to add points to the bounds polygon
+	While holding Ctrl, Click to insert points to the bounds polygon
     (Note that the default mode is Mirrored, for symmetrical ships)
     Optionally press Spacebar to turn off Mirrored mode
     Optionally Press Backspace if you need to delete a bounds polygon vertex
 
   Press (C) to enter "Set Shield Center" mode
     Then, Click to set a center
-    Then, Click again to set a shield radius
+    Then, Ctrl + Click to set a shield radius
     IMPORTANT: The shield area should be entirely within the collision area
 
   Press (W) to enter "Weapon Slot" mode
@@ -35,8 +36,8 @@
 
   Press (L) to enter "Launch Bay" mode
     While holding Shift, click to add ports to the current launch bay
+	While holding Ctrl, Click to add new launch bay
     Click and drag to move existing launch bay ports
-    Right-click to cycle through the launch bays
     Press backspace to delete a port from a launch bay
 
   Press (T) to edit global string data
@@ -54,7 +55,7 @@
   Press (G) to edit weapon groups
     Press A while in weapon groups mode to toggle Autofire
 
-  Press (F) & (C) to increment flux mods. Shift+(F) & Shift+(C) to decrement.
+  Press (F) & (C) to increment flux mods. Ctrl+(F) & Ctrl+(C) to decrement.
     They will automatically cap out at the limit for your ship's hull size
 
   Press (H) to select hull mods

@@ -45,7 +45,7 @@ Function load_known_multiselect_values( ed:TEditor )
 	ed.load_multiselect_value( "ship.weapon.type", "SYNERGY" )
 	ed.load_multiselect_value( "ship.weapon.type", "COMPOSITE" )
 	ed.load_multiselect_value( "ship.weapon.type", "STATION_MODULE" )
-	
+
 	ed.load_multiselect_value( "variant.weaponGroup.mode", "ALTERNATING" )
 	ed.load_multiselect_value( "variant.weaponGroup.mode", "LINKED" )
 	
@@ -68,19 +68,19 @@ Function load_known_multiselect_values( ed:TEditor )
 	ed.load_multiselect_value( "wing_csv.role", "BOMBER" )
 	ed.load_multiselect_value( "wing_csv.role", "SUPPORT" )
 	'ed.load_multiselect_value( "wing_csv.role", "" )
-	
+
 	ed.load_multiselect_value( "weapon.animationType", "GLOW" )
 	ed.load_multiselect_value( "weapon.animationType", "GLOW_AND_FLASH" )
 	ed.load_multiselect_value( "weapon.animationType", "MUZZLE_FLASH" )
 	ed.load_multiselect_value( "weapon.animationType", "NONE" )
-	ed.load_multiselect_value( "weapon.animationType", "SMOKE" )	
+	ed.load_multiselect_value( "weapon.animationType", "SMOKE" )
 	'ed.load_multiselect_value( "weapon.animationType", "" )
-	
+  
 	ed.load_multiselect_value( "weapon.barrelMode", "ALTERNATING" )
 	ed.load_multiselect_value( "weapon.barrelMode", "ALTERNATING_BURST" )
-	ed.load_multiselect_value( "weapon.barrelMode", "LINKED" )	
+	ed.load_multiselect_value( "weapon.barrelMode", "LINKED" )
 	'ed.load_multiselect_value( "weapon.barrelMode", "" )
-	
+
 	ed.load_multiselect_value( "weapon.size", "LARGE" )
 	ed.load_multiselect_value( "weapon.size", "MEDIUM" )
 	ed.load_multiselect_value( "weapon.size", "SMALL" )
@@ -93,22 +93,28 @@ Function load_known_multiselect_values( ed:TEditor )
 	ed.load_multiselect_value( "weapon.type", "MISSILE" )
 	ed.load_multiselect_value( "weapon.type", "SYSTEM" )
 	ed.load_multiselect_value( "weapon.type", "DECORATIVE" )
+
+	ed.load_multiselect_value( "weapon_csv.type", "KINETIC" )
+	ed.load_multiselect_value( "weapon_csv.type", "HIGH_EXPLOSIVE" )
+	ed.load_multiselect_value( "weapon_csv.type", "FRAGMENTATION" )
+	ed.load_multiselect_value( "weapon_csv.type", "ENERGY" )
 	
 	ed.load_multiselect_value( "weapon.interruptibleBurst", "False" )	
 	ed.load_multiselect_value( "weapon.interruptibleBurst", "True" )
-	
+  
 	ed.load_multiselect_value( "weapon.autocharge", "False" )	
 	ed.load_multiselect_value( "weapon.autocharge", "True" )
-	
+  
 	ed.load_multiselect_value( "weapon.requiresFullCharge", "False" )	
 	ed.load_multiselect_value( "weapon.requiresFullCharge", "True" )	
-	
+  
 	ed.load_multiselect_value( "weapon.beamFireOnlyOnFullCharge", "False" )	
 	ed.load_multiselect_value( "weapon.beamFireOnlyOnFullCharge", "True" )
-	
+  
 	ed.load_multiselect_value( "weapon.convergeOnPoint", "False" )	
 	ed.load_multiselect_value( "weapon.convergeOnPoint", "True" )
-	
+
+
 	ed.load_multiselect_value( "weapon.darkCore", "False" )	
 	ed.load_multiselect_value( "weapon.darkCore", "True" )
 

@@ -1,5 +1,82 @@
+editor version 2.7.0 (starsector 0.7.2a)
 ______________________________________________________________________________
-editor version 2.6.4 (starsector 0.7a RC1)
+
+	CHANGES
+________________________________
+Major Changes
+-------------
+-Migrate to MaxGUI.
+ -Add menu bar.
+ -Make editor resizable while running.
+ -Add an "Unsaved changes warning" when you may discards your unsaved changes.
+
+-Implant undo/redo function.
+ -Will consider a serial string editing actions as one step due to it is too annoying to capture every keys.
+
+-Rework "Set Mass Center and Collision Radius" and "Set Shield Center and Shield Radius" functions.
+ -Left Mouse Click now can only used for set center.
+ -Ctrl + Left Mouse Click now can used to set radius without reset the center frist.
+
+-Rework "Launch Bay Edit" function.
+ -Ctrl + Left Mouse Click always add a new launch bay. 
+ -Hold down Shift will lock on the nearest launch bay.
+ -Shift + Left Mouse Click will add a new launch port to the locked lauch bay. 
+ -Remove the Right Mouse Click function.
+
+-Rework the "Bounds Edit" function.
+ -Ctrl + Left Mouse Click now will try to insert new bound vertex between the nearest bound segment ends.
+
+-New function. "Decorative Weapon Edit Mode"
+ -Same as "Built-in Weapon Edit Mode", but for decorative weapons.
+
+-Add "Weapon Render" function.
+ -Can render all build-in and deco weapons in ship edit mode. And render all weapons in variant edit mode.
+ -Hit "F5" can toggle weapon renderer from "render in 100% opacity", "render in 50% opacity", and "do not render".
+ -Can use F6, F7, and F8 to Play, Stop and Reset all weapon animations, if there any.
+ -In "Weapon Slots Edit Mode", "Built-in/Deco weapon Edit Mode", and "Variant Edit Mode", arrow keys can use to control weapon animation on selceted slot.(See on screen help.)
+
+-Fix up "Weapon Editor" 
+ -Will properly parse and recode a .wpn file.
+ -Will display weapon offsets properly. For hardpoint and turret, both.
+ -Will display cursor coordinate properly.
+ -Make the glow on weapon more closer to in game visual.
+ -String editor for weapon now will provide accessibility to most weapon parameters.
+ -Guides will mark the weapon's pivot point out.
+
+Minor Changes
+-------------
+-Add SYNERGY and COMPOSITE weapon slots support. 
+-Add "coversColor" support.
+-Improve the performance for Preview All function.
+-Replace the default background with a less obscure one.
+-Add a filter that can fit out deco weapons when place weapon in non-deco slot.
+-Enable language localisation. 
+
+-Settings
+ -Add "custom_bg_image" that can set path for using custom background.
+ -Add "performance_mode", set to 1 can simplify some drawing process and result a better performance.
+ -Add "fluxmod_limit_override", set to 1 can override the 10/20/30/50 max flux vants/caps limit in variant edit mode.
+ -Add "scale_help_UI", set to 1 can enable help UI zooming for extreme resolution ratio.(Or you can set "font_size" instead.)
+ -Add "scale_help_UI_scale_level". If it set to 0, help UI will auto zoom.
+ -Add "custom_FONT" that can set path for custom font.
+ -Add "UTF8_support", set to 1 to enable UTF-8 support, to decode UTF-8(without BOM) data file.
+ -Add "localization_file" that can set path for LanguageDefinition file.
+
+-Make engine flames looks more close to in game visual.
+-Rework String data editing console. Make insert characters practical.
+-Rework all "item selector" to fit some way too looong item list.
+-Guides precision increase to 0.5.
+
+	BUGFIX
+________________________________
+-Can safely remove weapon slots with built-in weapon in it.
+-Simplified help UI text drawing method for better performance. 
+-Fixed a crash when try to remove a weapon slot/engine/launch bay while there isn't anyone.
+-When rename a weapons slot, the built-in weapon in that slot will got removed now.
+-Fixed a issue that the rjson core will mistakenly discard "0" for integer output.
+
+______________________________________________________________________________
+editor version 2.6.4 (starsector 0.7.1a)
 - credit to zaphide for pull request!
 - support for HYBRID weapon types
 - support for longer weapon lists
@@ -47,7 +124,7 @@ editor version 2.4.1 (starfarer 0.53.1a RC5)
 - fixed: cannot load vanilla data in Linux (probably)
 - fixed: quoted newlines in CSV data
 - fixed: can't set hullmods in variant if ship has no weapon slots
-- misc: HOME key is now equivalent to ESCAPE key 
+- misc: HOME key is now equivalent to ESCAPE key
 - feature: direct value entry for weapon arcs and angles (press T on a weapon)
 ______________________________________________________________________________
 editor version 2.4.1a (starfarer 0.53.1a RC5)
@@ -88,7 +165,7 @@ ______________________________________________________________________________
 editor version 2.2 (starfarer 0.52a)
 - ship: in bounds mode, weapons, engines and launch bays modes,
   you can now hold CTRL+ALT while RIGHT-CLICK dragging to drag all
-  the entities on-screen at once. 
+  the entities on-screen at once.
 - weapon slots: weapon slots are now assigned names with zero-padded numbers
   so that they can be sorted more easily
 ______________________________________________________________________________
@@ -158,7 +235,7 @@ editor version 1.9 (starfarer 0.51a)
   them, use arrow left/right to choose a value from the list of acceptable
   values. the field is updated immediately.
 - can now open, edit and save *.variants - use [1] and [2] to toggle between
-  *.ship mode and *.variant mode; still use [D] and [V] to open/save 
+  *.ship mode and *.variant mode; still use [D] and [V] to open/save
 - click a weapon slot to assign a weapon from the list of weapons that are
   valid to occupy that slot; filters based on size & type of slot from
   currently loaded *.ship data
@@ -200,13 +277,13 @@ editor version 1.0 (starfarer 0.51a)
 ______________________________________________________________________________
 editor version 0.4 (starfarer 0.51a)
 - added engine slot editor
-______________________________________________________________________________
+______________________________________________________________________________  
 editor version 0.3 (starfarer 0.51a)
-- added weapon slot editor
+- added weapon slot editor, per request
 - strengthened JSON decoder; ignores # comments and performs implicit type-
-  conversion and uses reflection to automatically encode/decode from/to plain 
+  conversion and uses reflection to automatically encode/decode from/to plain
   objects
-______________________________________________________________________________
+______________________________________________________________________________   
 editor version 0.2 (starfarer 0.35a preview rc2)
 - fixed bug; data view not updating when you press "N" (new data)
   or "I" (load ship image)
@@ -216,6 +293,6 @@ editor version 0.2 (starfarer 0.35a preview rc2)
 - program icon (windows only)
 - added collision radius mode
 - added preview all mode
-______________________________________________________________________________
+______________________________________________________________________________   
 editor version 0.1 (starfarer 0.35a preview rc2)
 - initial release
