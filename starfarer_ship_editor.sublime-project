@@ -4,8 +4,8 @@
 		{
 			"file_exclude_patterns":
 			[
-				".gitignore",
-				".gitattributes"
+				".gitattributes",
+				"ENG.ini"
 			],
 			"folder_exclude_patterns":
 			[
@@ -13,9 +13,6 @@
 				".git"
 			],
 			"path": "/C/Dev/BlitzMax/sf-ship-ed"
-		},
-		{
-			"path": "/K/Games/Starsector"
 		}
 	]
 }
