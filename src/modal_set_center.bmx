@@ -4,7 +4,7 @@ Function modal_update_set_center( ed:TEditor, data:TData, sprite:TSprite )
 	If MouseHit( 1 )
 		'get input
 		Local img_x#, img_y#
-		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
 		data.set_center( img_x, img_y )
 		data.update()
 		'next mode
@@ -28,27 +28,6 @@ Function modal_draw_set_center( data:TData, sprite:TSprite )
 	draw_collision_center_point( data, sprite, TRUE )
 End Function
 
-Function draw_collision_center_point( data:TData, sprite:TSprite, position_at_cursor%=False )
-	If data.ship.center
-		Local img_x#, img_y#
-		sprite.get_img_xy( MouseX(), MouseY(), img_x, img_y )
-		Local cx%, cy%
-		If Not position_at_cursor
-			'use existing position to draw crosshair
-			cx = sprite.sx + data.ship.center[1]*sprite.scale
-			cy = sprite.sy + data.ship.center[0]*sprite.scale
-		Else
-			'draw at cursor instead
-			cx = sprite.sx + img_x*sprite.scale
-			cy = sprite.sy + img_y*sprite.scale
-		EndIf
-		draw_crosshairs( cx, cy, 8 )
-		If Not position_at_cursor
-			draw_string( coord_string( data.ship.center[0], data.ship.center[1] ), cx+5, cy+5 )
-		Else
-			draw_string( coord_string( img_y, img_x ), cx+5, cy+5 )
-		EndIf
-	EndIf
-EndFunction
+
 
 

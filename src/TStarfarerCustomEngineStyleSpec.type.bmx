@@ -1,12 +1,14 @@
 Type TStarfarerCustomEngineStyleSpec
-	Field type_$
-	Field engineColor%[]
-	Field contrailColor%[]
+
+	Field engineColor%[4]
 	Field contrailParticleSizeMult#
 	Field contrailParticleDuration#
 	Field contrailMaxSpeedMult#
 	Field contrailAngularVelocityMult#
-
+	Field contrailColor%[4]
+	Field contrailCampaignColor%[4]
+	Field type_$
+	
 	Method New()
 		type_ = "SMOKE"
 		engineColor = [ 0, 0, 0, 0 ]

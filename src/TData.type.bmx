@@ -12,10 +12,23 @@ Type TData
 
 	Field csv_row:TMap'<String,String>  'column name --> value
 	Field csv_row_wing:TMap'<String,String>  'column name --> value
+	Field csv_row_weapon:TMap'<String,String>  'column name --> value
 
 	Field weapon:TStarfarerWeapon
 	Field json_str_weapon$
 	Field json_view_weapon:TList'<TextWidget>
+	
+	Field changed% 'for unsave changes reminder.
+	
+	Field snapshots_undo:TList
+	Field snapshots_redo:TList
+	Field snapshot_inited% = False
+	Field snapshot_shouldhold% = False
+	Field snapshot_holdcurr% = False
+	Field snapshot_undoing% = False
+	Field snapshot_curr:Tsnapshot
+	Field snapshot_init:Tsnapshot
+
 
 	Method New()
 		Clear()
@@ -29,12 +42,16 @@ Type TData
 		variant = New TStarfarerVariant
 		csv_row = ship_data_csv_field_template.Copy()
 		csv_row_wing = wing_data_csv_field_template.Copy()
+		csv_row_weapon = weapon_data_csv_field_template.Copy()
 		weapon = New TStarfarerWeapon
+		changed = False
+		snapshots_undo:TList = CreateList()
+		snapshots_redo:TList = CreateList()
 	EndMethod
 	
 	'requires subsequent call to update()
 	Method decode( input_json_str$ )
-		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ))
+		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ) )
 		enforce_ship_internal_consistency()
 	End Method
 	
@@ -43,6 +60,8 @@ Type TData
 		'encode ship object as json data
 		json_str = json.stringify( ship, "stringify_ship" )
 		json_view = columnize_text( json_str )
+		changed = True
+		take_snapshot(1)
 	End Method
 
 	'requires subsequent call to update()
@@ -81,6 +100,8 @@ Type TData
 		'encode ship object as json data
 		json_str_variant = json.stringify( variant, "stringify_variant" )
 		json_view_variant = columnize_text( json_str_variant )
+		changed = True
+		take_snapshot(2)
 	End Method
 
 	'requires subsequent call to update_variant()
@@ -101,7 +122,7 @@ Type TData
 		For Local weapon_slot:TStarfarerShipWeapon = EachIn ship.weaponSlots
 			If weapon_slot.is_builtin()
 				'Ensure that any BUILT_IN slots are set to match in the VARIANT
-				Local weapon_id$ = String( ship.builtInWeapons.ValueForKey( weapon_slot.id ))
+				Local weapon_id$ = String( ship.builtInWeapons.ValueForKey( weapon_slot.id ) )
 				If weapon_id <> Null
 					assign_weapon_to_slot( weapon_slot.id, weapon_id )
 				Else 'weapon_id == Null
@@ -112,6 +133,11 @@ Type TData
 				unassign_weapon_from_slot( weapon_slot.id )
 			EndIf
 		Next
+		'Visit every built-in weapons
+		For Local weapon_id$ = EachIn ship.builtInWeapons.Keys()
+			'slot remove or renamed.
+			If Not weapon_slot_id_exists(weapon_id) Then ship.builtInWeapons.Remove(weapon_id)
+		Next
 		'Visit every weapon referenced in the variant
 		For Local group:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
 			For Local weapon_slot_id$ = EachIn group.weapons.Keys()
@@ -121,11 +147,11 @@ Type TData
 					Local weapon_slot:TStarfarerShipWeapon = find_weapon_slot_by_id( weapon_slot_id )
 					Local valid_weapons$[] = ed.select_weapons( weapon_slot.type_, weapon_slot.size )
 					Local weapon_id$ = String( group.weapons.ValueForKey( weapon_slot_id ))
-					If Not in_str_array( weapon_id, valid_weapons ) 
+					If Not in_str_array( weapon_id, valid_weapons )
 						'Not valid
 						unassign_weapon_from_slot( weapon_slot_id )	
 					EndIf
-				Else 
+				Else
 					'Not found
 					unassign_weapon_from_slot( weapon_slot_id )
 				EndIf
@@ -134,28 +160,46 @@ Type TData
 	EndMethod
 
 	Method decode_weapon( input_json_str$ )
-		weapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon", "parse_weapon" ))
+		weapon = TStarfarerWeapon( json.parse( input_json_str, "TStarfarerWeapon", "parse_weapon" ) )
 	EndMethod
 
 	Method update_weapon()
 		json.formatted = True
 		json_str_weapon = json.stringify( weapon, "stringify_weapon" )
 		json_view_weapon = columnize_text( json_str_weapon )
+		changed = True
+		take_snapshot(5)
 	EndMethod
 
 	Method set_hullId( old_hullId$, hullId$ )
+		Local flag% = snapshot_holdcurr
 		'SHIP
 		ship.hullId = hullId
 		update()
+		snapshot_holdcurr = True
 		'VARIANT
 		variant.hullId = hullId
-		variant.variantId = hullId+"_variant"
+		variant.variantId = hullId + "_variant"
 		update_variant()
 		'SHIP CSV
 		csv_row.Insert( "id", ship.hullId )
 		'WING CSV
 		csv_row_wing.Insert( "variant", variant.variantId )
-		csv_row_wing.Insert( "id", variant.variantId+"_wing" )
+		csv_row_wing.Insert( "id", variant.variantId + "_wing" )
+		snapshot_holdcurr = flag
+
+	EndMethod
+	
+	Method set_weaponId( old_weaponId$, weaponId$ )
+		Local flag% = snapshot_holdcurr
+		'WEAPON
+		weapon.id = weaponId
+		update()
+		snapshot_holdcurr = True
+		'WEAPON CSV
+		csv_row_weapon.Insert( "id", weapon.id )
+		snapshot_holdcurr = flag
+
 	EndMethod
 
 	Method set_variantId( old_variantId$, variantId$ )
@@ -176,6 +220,8 @@ Type TData
 				csv_row = data_row
 			Case "wing_data.csv"
 				csv_row_wing = data_row
+			Case "weapon_data.csv"
+				csv_row_weapon = data_row
 		EndSelect
 	End Method
 
@@ -200,7 +246,7 @@ Type TData
 			If Not ship.bounds
 				ship.bounds = New Float[2]
 			Else
-				ship.bounds = ship.bounds[..ship.bounds.length+2]
+				ship.bounds = ship.bounds[..ship.bounds.length + 2]
 			End If
 			ship.bounds[ship.bounds.length-2] = img_x - ship.center[1]
 			If Not reflect_over_y_axis
@@ -265,9 +311,9 @@ Type TData
 		If ship.bounds And ship.center And i >= 0 And i < ship.bounds.Length - 1
 			ship.bounds[i] = img_x - ship.center[1]
 			If Not reflect_over_y_axis
-				ship.bounds[i+1] = -( img_y - ship.center[0] )
+				ship.bounds[i + 1] = - ( img_y - ship.center[0] )
 			Else
-				ship.bounds[i+1] = img_y - ship.center[0]
+				ship.bounds[i + 1] = img_y - ship.center[0]
 			End If
 		End If
 	End Method
@@ -275,108 +321,119 @@ Type TData
 
 	'requires subsequent call to update()
 	'this function is not yet ready for prime-time
-	Method insert_bound( img_x#,img_y#, reflect_over_y_axis% = False )
-		If ship.bounds And ship.center
+	Method insert_bound( img_x#, img_y#, symmetrical% = False )
+		If Not ship.center Then Return
+		If Not ship.bounds
+			append_bound( img_x, img_y, False )
+			If symmetrical Then prepend_bound( img_x, img_y, True )
+		Else
 			If ship.bounds.Length < 6 'there must be at least 3 points (a triangle) for this to make sense
-				append_bound( img_x, img_y, reflect_over_y_axis )
+				append_bound( img_x, img_y, False )
+				If symmetrical Then prepend_bound( img_x, img_y, True )
 				Return
 			EndIf
 			Local x# = img_x - ship.center[1]
-			Local y# = -( img_y - ship.center[0] )
-			If reflect_over_y_axis Then y :* -1
-			Local dist#, s1x#,s1y#, s2x#,s2y#
-			Local nearest_i% = -1
+			Local y# = - ( img_y - ship.center[0] )
+			Local ys# = - y
+			Local dist#, s1x#, s1y#, s2x#, s2y#
+			Local nearest_i% = - 1
+			Local nearest_si% = - 1
 			Local nearest_i_dist# = 0
 			For Local i% = 0 Until ship.bounds.Length Step 2
 				s1x = ship.bounds[i]
-				s1y = ship.bounds[i+1]
-				If i+2 < ship.bounds.Length
-					s2x = ship.bounds[i+2]
-					s2y = ship.bounds[i+3]
+				s1y = ship.bounds[i + 1]
+				If i + 2 < ship.bounds.Length
+					s2x = ship.bounds[i + 2]
+					s2y = ship.bounds[i + 3]
 				Else 'wrap around to first point
 					s2x = ship.bounds[0]
 					s2y = ship.bounds[1]
 				EndIf
-				dist = calc_dist_from_point_to_segment( x,y, s1x,s1y, s2x,s2y )
-				If nearest_i = -1 Or dist < nearest_i_dist
+				dist = calc_dist_from_point_to_segment( x, y, s1x, s1y, s2x, s2y )
+				If nearest_i = - 1 Or dist < nearest_i_dist
 					nearest_i = i
 					nearest_i_dist = dist
 				Else
 				EndIf
 			Next
-			If nearest_i = 0 'prepend; b0 -> b1
-				prepend_bound( img_x, img_y, reflect_over_y_axis )
-			ElseIf nearest_i = ship.bounds.Length-2 'append; bN -> b0
-				append_bound( img_x, img_y, reflect_over_y_axis )
-			Else 'insert middle; bV -> bW
-				ship.bounds = ship.bounds[..ship.bounds.Length+2]
-				For Local i% = ship.bounds.Length-2 Until nearest_i Step -2
-					ship.bounds[i]   = ship.bounds[i-2]
-					ship.bounds[i+1] = ship.bounds[i-1]
-				Next
-				ship.bounds[nearest_i]   = x
-				ship.bounds[nearest_i+1] = y
+			If symmetrical
+				For Local i% = 0 Until ship.bounds.Length Step 2
+				s1x = ship.bounds[i]
+				s1y = ship.bounds[i + 1]
+				If i + 2 < ship.bounds.Length
+					s2x = ship.bounds[i + 2]
+					s2y = ship.bounds[i + 3]
+				Else 'wrap around to first point
+					s2x = ship.bounds[0]
+					s2y = ship.bounds[1]
+				EndIf
+				dist = calc_dist_from_point_to_segment( x, ys, s1x, s1y, s2x, s2y )
+				If nearest_si = - 1 Or dist <= nearest_i_dist
+					nearest_si = i
+					nearest_i_dist = dist
+				Else
+				EndIf
+			Next
+			EndIf
+			If nearest_si = - 1
+				ship.bounds = ship.bounds[..nearest_i + 2] + [x, y] + ship.bounds[nearest_i + 2..]
+			Else
+				'Print nearest_i + " " + nearest_si
+				If nearest_i <= nearest_si
+					ship.bounds = ship.bounds[..nearest_si + 2] + [x, ys] + ship.bounds[nearest_si + 2..]
+					ship.bounds = ship.bounds[..nearest_i + 2] + [x, y] + ship.bounds[nearest_i + 2..]
+				Else
+					ship.bounds = ship.bounds[..nearest_i + 2] + [x, y] + ship.bounds[nearest_i + 2..]
+					ship.bounds = ship.bounds[..nearest_si + 2] + [x, ys] + ship.bounds[nearest_si + 2..]
+				EndIf
 			EndIf
 		EndIf
 	EndMethod
 
 	'requires subsequent call to update_weapon()
-	Method append_weapon_offset( img_x#,img_y#, spr_w#,spr_h#, reflect_over_y_axis% = False )
+	Method append_weapon_offset( x#, y#, mount_type$, reflect_over_y_axis% = False )
 		If Not weapon Then Return
-		Local L%, x#,y#
-		If weapon.turretOffsets Then L = weapon.turretOffsets.Length Else L = 0
-		weapon.turretOffsets = weapon.turretOffsets[..L+2]
-		x = img_x - (spr_w/2.0)
-		y = img_y - (spr_h/2.0)
-		If reflect_over_y_axis Then y :* -1
-		weapon.turretOffsets[weapon.turretOffsets.Length-2] = x
-		weapon.turretOffsets[weapon.turretOffsets.Length-1] = y
-		If weapon.turretAngleOffsets Then L = weapon.turretAngleOffsets.Length Else L = 0
-		weapon.turretAngleOffsets = weapon.turretAngleOffsets[..L+1]
-		weapon.turretAngleOffsets[weapon.turretAngleOffsets.Length-1] = 0
-		If weapon.hardpointOffsets Then L = weapon.hardpointOffsets.Length Else L = 0
-		weapon.hardpointOffsets = weapon.hardpointOffsets[..L+2]
-		x = img_x - (spr_w/2.0)
-		y = img_y - (spr_h)
-		If reflect_over_y_axis Then y :* -1
-		weapon.hardpointOffsets[weapon.hardpointOffsets.Length-2] = x
-		weapon.hardpointOffsets[weapon.hardpointOffsets.Length-1] = y
-		If weapon.hardpointAngleOffsets Then L = weapon.hardpointAngleOffsets.Length Else L = 0
-		weapon.hardpointAngleOffsets = weapon.hardpointAngleOffsets[..L+1]
-		weapon.hardpointAngleOffsets[weapon.hardpointAngleOffsets.Length-1] = 0
+		If reflect_over_y_axis Then y = - y
+		Select mount_type
+		Case "TURRET"
+			weapon.turretOffsets = weapon.turretOffsets[..] + [x, y]
+			weapon.turretAngleOffsets = weapon.turretAngleOffsets[..] + [0.0]
+		Case "HARDPOINT"
+			weapon.hardpointOffsets = weapon.hardpointOffsets[..] + [x, y]
+			weapon.hardpointAngleOffsets = weapon.hardpointAngleOffsets[..] + [0.0]
+		End Select
 	EndMethod
 
 	'requires subsequent call to update_weapon()	
-	Method modify_weapon_offset( i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$, reflect_over_y_axis%=False )
+	Method modify_weapon_offset( i%, x#, y#, spr_w#, spr_h#, weapon_display_mode$, reflect_over_y_axis% = False )
 		If Not weapon Then Return
 		Local offsets#[]
-		Local x#,y#
 		Select weapon_display_mode
-			Case "turret"
+			Case "TURRET"
 				offsets = weapon.turretOffsets
 				If Not offsets Or i < 0 Or i > offsets.Length-2 Then Return
-				x = img_x - (spr_w / 2.0)
-				y = img_y - (spr_h / 2.0)
-				If reflect_over_y_axis Then y :* -1
-			Case "hardpoint"
+				If reflect_over_y_axis Then y :* - 1
+			Case "HARDPOINT"
 				offsets = weapon.hardpointOffsets
-				If Not offsets Or i < 0 Or i > offsets.Length-2 Then Return
-				x = img_x - (spr_w / 2.0)
-				y = img_y - (spr_h)
-				If reflect_over_y_axis Then y :* -1
+				If Not offsets Or i < 0 Or i > offsets.Length - 2 Then Return
+				If reflect_over_y_axis Then y :* - 1
 		EndSelect
 		If Not offsets Then Return
 		offsets[i] =   x
-		offsets[i+1] = y
+		offsets[i + 1] = y
 	EndMethod
 
-	Method remove_nearest_weapon_offset( img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$ )
-		Local nearest_i% = find_nearest_weapon_offset( img_x,img_y, spr_w,spr_h, weapon_display_mode )
-		If nearest_i <> -1
-			weapon.turretOffsets = remove_pair( weapon.turretOffsets, nearest_i )
-			weapon.turretAngleOffsets = remove_at( weapon.turretAngleOffsets, nearest_i/2 )
-			weapon.hardpointOffsets = remove_pair( weapon.hardpointOffsets, nearest_i )
-			weapon.hardpointAngleOffsets = remove_at( weapon.hardpointAngleOffsets, nearest_i/2 )
+	Method remove_nearest_weapon_offset( x#, y#, weapon_display_mode$ )
+		Local nearest_i% = find_nearest_weapon_offset( x, y, weapon_display_mode )
+		If nearest_i <> - 1
+			Select weapon_display_mode
+			Case "TURRET"
+				weapon.turretOffsets = weapon.turretOffsets[..nearest_i] + weapon.turretOffsets[nearest_i + 2..]
+				weapon.turretAngleOffsets = weapon.turretAngleOffsets[..nearest_i / 2] + weapon.turretAngleOffsets[(nearest_i / 2) + 1..]
+			Case "HARDPOINT"
+				weapon.hardpointOffsets = weapon.hardpointOffsets[..nearest_i] + weapon.hardpointOffsets[nearest_i + 2..]
+				weapon.hardpointAngleOffsets = weapon.hardpointAngleOffsets[..nearest_i / 2] + weapon.hardpointAngleOffsets[(nearest_i / 2) + 1..]
+			End Select
 		EndIf
 	EndMethod
 
@@ -440,14 +497,14 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method set_weapon_slot_angular_range( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=False )
+	Method set_weapon_slot_angular_range( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any% = False )
 		If Not ship.weaponSlots Or Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
 		Local weapon:TStarfarerShipWeapon = ship.weaponSlots[slot_i]
 		Local cp_weapon:TStarfarerShipWeapon = find_symmetrical_weapon_counterpart( weapon )
 		Local raw_angle# = calc_angle( weapon.locations[0], weapon.locations[1], img_x, img_y )
-		weapon.arc = Abs( 2*ang_wrap( raw_angle - weapon.angle ))
+		weapon.arc = Abs( 2 * ang_wrap( raw_angle - weapon.angle ) )
 		If weapon.arc < 0 Then weapon.arc = 0
 		If weapon.arc > 360 Then weapon.arc = 360
 		If update_symmetrical_counterpart_if_any And cp_weapon
@@ -457,15 +514,17 @@ Type TData
 
 	'requires subsequent call to update()
 	'     AND subsequent call to update_variant()
-	Method remove_weapon_slot( slot_i%, remove_symmetrical_counterpart_if_any%=False )
-		If Not ship.weaponSlots Then Return
+	Method remove_weapon_slot( slot_i%, remove_symmetrical_counterpart_if_any% = False )
+		If Not ship.weaponSlots Or slot_i = - 1 Then Return
 		Local weapon:TStarfarerShipWeapon = ship.weaponSlots[slot_i]
 		Local cp_weapon:TStarfarerShipWeapon = find_symmetrical_weapon_counterpart( weapon )
 		ship.weaponSlots = remove_TStarfarerShipWeapon( ship.weaponSlots, weapon )
-		unassign_weapon_from_slot( weapon.id )
+		'this will call unassign_weapon_from_slot so no need to call it again
+		unassign_builtin_weapon_from_slot( weapon.id )
+		'unassign_weapon_from_slot( weapon.id )
 		If remove_symmetrical_counterpart_if_any And cp_weapon
 			ship.weaponSlots = remove_TStarfarerShipWeapon( ship.weaponSlots, cp_weapon )
-			unassign_weapon_from_slot( cp_weapon.id )
+			unassign_builtin_weapon_from_slot( cp_weapon.id )
 		EndIf
 	End Method
 
@@ -550,7 +609,7 @@ Type TData
 
 	'requires subsequent call to update()
 	Method remove_engine( slot_i% , remove_symmetrical_counterpart_if_any%=False )
-		If Not ship.engineSlots Then Return
+		If Not ship.engineSlots Or slot_i = - 1 Then Return
 		Local engine:TStarfarerShipEngine = ship.engineSlots[slot_i]
 		Local cp_engine:TStarfarerShipEngine = find_symmetrical_engine_counterpart( engine )
 		ship.engineSlots = remove_TStarfarerShipEngine( ship.engineSlots, engine )
@@ -566,8 +625,8 @@ Type TData
 		img_y = -( img_y - ship.center[0] )
 		Local launch_bay:TStarfarerShipWeapon = ship.weaponSlots[slot_i]
 		'Local cp_launch_bay:TStarfarerShipWeapon = find_symmetrical_weapon_counterpart( launch_bay )
-		launch_bay.locations[loc_i+0] = img_x
-		launch_bay.locations[loc_i+1] = img_y
+		launch_bay.locations[loc_i + 0] = img_x
+		launch_bay.locations[loc_i + 1] = img_y
 		'If update_symmetrical_counterpart_if_any And cp_launch_bay
 		'	cp_launch_bay.locations[0] = img_x
 		'	cp_launch_bay.locations[1] = -img_y
@@ -575,23 +634,23 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method add_launch_bay_port( img_x#, img_y#, selected_launch_bay_index%, reflect_over_y_axis%=False )
+	Method add_launch_bay_port( img_x#, img_y#, selected_launch_bay_index%, reflect_over_y_axis% = False )
 		If Not ship.center Then Return
 		img_x = img_x - ship.center[1]
-		img_y = -( img_y - ship.center[0] )
+		img_y = - ( img_y - ship.center[0] )
 		'find launch bay
 		Local launch_bay:TStarfarerShipWeapon = get_launch_bay_by_contextual_index( selected_launch_bay_index )
 		If launch_bay
 			'add space for a new port in the bay
-			launch_bay.locations = launch_bay.locations[..launch_bay.locations.length+2]
+			launch_bay.locations = launch_bay.locations[..launch_bay.locations.length + 2]
 		Else
 			'add new launch bay (weapon)
 			launch_bay = New TStarfarerShipWeapon
 			launch_bay.type_ = "LAUNCH_BAY"
-      launch_bay.mount = "HIDDEN"
-      launch_bay.size = "LARGE"
-      launch_bay.angle = 0
-      launch_bay.arc = 360
+			launch_bay.mount = "HIDDEN"
+			launch_bay.size = "LARGE"
+			launch_bay.angle = 0
+			launch_bay.arc = 360
 			'name the launch bay
 			Local wsi% = 1
 			launch_bay.id = "LB "+wsi
@@ -603,7 +662,7 @@ Type TData
 			If Not ship.weaponSlots
 				ship.weaponSlots = [ launch_bay ]
 			Else
-				ship.weaponSlots = ship.weaponSlots[..ship.weaponSlots.Length+1]
+				ship.weaponSlots = ship.weaponSlots[..ship.weaponSlots.Length + 1]
 				ship.weaponSlots[ship.weaponSlots.Length-1] = launch_bay
 			EndIf
 		EndIf
@@ -614,7 +673,7 @@ Type TData
 
 	'requires subsequent call to update()
 	Method remove_launch_bay_port( slot_i%, loc_i%, update_symmetrical_counterpart_if_any%=False )
-		If Not ship.weaponSlots Or Not ship.center Then Return
+		If Not ship.weaponSlots Or Not ship.center Or slot_i = -1 Then Return
 		Local launch_bay:TStarfarerShipWeapon = ship.weaponSlots[slot_i]
 		launch_bay.locations = remove_pair( launch_bay.locations, loc_i )
 		If launch_bay.locations.length = 0
@@ -623,27 +682,23 @@ Type TData
 	EndMethod
 
 	'requires subsequent call to update()
-	Method set_weapon_offset_angle( slot_i%, img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$, update_symmetrical_counterpart_if_any%=False )
+	Method set_weapon_offset_angle( slot_i%, x#, y#, weapon_display_mode$, update_symmetrical_counterpart_if_any% = False )
 		If Not weapon Then Return
 		Local offsets#[], angleOffsets#[]
-		Local x#, y#
 		Select weapon_display_mode
-			Case "turret"
+			Case "TURRET"
 				offsets = weapon.turretOffsets
 				angleOffsets = weapon.turretAngleOffsets
-				x = img_x - (spr_w / 2.0)
-				y = img_y - (spr_h / 2.0)
-			Case "hardpoint"
+			Case "HARDPOINT"
 				offsets = weapon.hardpointOffsets
 				angleOffsets = weapon.hardpointAngleOffsets
-				x = img_x - (spr_w / 2.0)
-				y = img_y - (spr_h)
 		EndSelect
-		Local new_ang# = calc_angle( offsets[slot_i],offsets[slot_i+1], x,y )
-		angleOffsets[slot_i/2] = new_ang
+		If Not offsets Then Return
+		Local new_ang# = calc_angle( offsets[slot_i], offsets[slot_i + 1], x, y )
+		angleOffsets[slot_i / 2] = new_ang
 		If update_symmetrical_counterpart_if_any
 			Local slot_i_cp% = find_symmetrical_weapon_offset_counterpart( slot_i, weapon_display_mode )
-			angleOffsets[slot_i_cp/2] = -new_ang
+			If slot_i_cp <> - 1 Then angleOffsets[slot_i_cp / 2] = - new_ang
 		EndIf
 	End Method
 
@@ -725,25 +780,39 @@ Type TData
 	EndMethod
 
 	'requires subsequent call to update_variant()
-	Method modify_fluxVents( maximum%, decrement%=False )
+	Method modify_fluxVents%( maximum%, decrement% = False )
 		If Not decrement
 			variant.fluxVents :+ 1
-			If variant.fluxVents > maximum Then variant.fluxVents = maximum
+			If variant.fluxVents > maximum
+				variant.fluxVents = maximum
+				Return False
+			EndIf
 		Else
 			variant.fluxVents :- 1
-			If variant.fluxVents < 0 Then variant.fluxVents = 0
+			If variant.fluxVents < 0
+				variant.fluxVents = 0
+				Return False
+			EndIf
 		EndIf
+		Return True
 	EndMethod
 
 	'requires subsequent call to update_variant()
-	Method modify_fluxCapacitors( maximum%, decrement%=False )
+	Method modify_fluxCapacitors%( maximum%, decrement% = False )
 		If Not decrement
 			variant.fluxCapacitors :+ 1
-			If variant.fluxCapacitors > maximum Then variant.fluxCapacitors = maximum
+			If variant.fluxCapacitors > maximum
+				variant.fluxCapacitors = maximum
+				Return False
+			EndIf
 		Else
 			variant.fluxCapacitors :- 1
-			If variant.fluxCapacitors < 0 Then variant.fluxCapacitors = 0
+			If variant.fluxCapacitors < 0
+				variant.fluxCapacitors = 0
+				Return False
+			EndIf
 		EndIf
+		Return True		
 	EndMethod
 
 	'requires subsequent call to update_variant()
@@ -755,7 +824,7 @@ Type TData
 				EndIf
 			Next
 			variant.hullMods = variant.hullMods[..variant.hullMods.length+1]
-			variant.hullMods[variant.hullMods.length-1] = hullmod_id
+			variant.hullMods[variant.hullMods.length - 1] = hullmod_id
 		Else
 			variant.hullMods = New String[1]
 			variant.hullMods[0] = hullmod_id
@@ -886,11 +955,11 @@ Type TData
 	EndMethod
 
 	Method find_nearest_bound%( img_x#, img_y# )
-		If Not ship.bounds Or Not ship.center Then Return -1
+		If Not ship.bounds Or Not ship.center Then Return - 1
 		img_x = img_x - ship.center[1]
-		img_y = -( img_y - ship.center[0] )
+		img_y = - ( img_y - ship.center[0] )
 		Local nearest_i% = -1
-		Local nearest_dist# = -1
+		Local nearest_dist# = - 1
 		Local dist#
 		For Local i% = 0 Until ship.bounds.length-1 Step 2
 			dist = calc_distance( img_x, img_y, ship.bounds[i], ship.bounds[i+1] )
@@ -901,27 +970,62 @@ Type TData
 		Next
 		Return nearest_i
 	End Method
+	
+	Rem
+	'return the nearest bound segment's 1st endpoint's i
+	'nearest bound segment should be i, i+1, i+2, i+3
+	EndRem
+	Method find_nearest_bound_segment_1st_i% (img_x#, img_y#, reflect_over_y_axis% = False)
+		If Not ship.bounds Or Not ship.center Then Return - 1
+		img_x = img_x - ship.center[1]
+		img_y = - ( img_y - ship.center[0] )
+		If reflect_over_y_axis Then img_y :* - 1		
+		Local dist#, s1x#, s1y#, s2x#, s2y#
+		Local nearest_i% = - 1
+		Local nearest_i_dist# = 0
+		For Local i% = 0 Until ship.bounds.Length Step 2
+			s1x = ship.bounds[i]
+			s1y = ship.bounds[i + 1]
+			If i + 2 < ship.bounds.Length
+				s2x = ship.bounds[i + 2]
+				s2y = ship.bounds[i + 3]
+			Else 'wrap around to first point
+				s2x = ship.bounds[0]
+				s2y = ship.bounds[1]
+			EndIf
+			dist = calc_dist_from_point_to_segment( img_x, img_y, s1x, s1y, s2x, s2y )
+			If nearest_i = - 1 Or dist < nearest_i_dist
+				nearest_i = i
+				nearest_i_dist = dist
+			EndIf
+		Next
+		Return nearest_i
+	End Method
+	
+	Method find_nearest_bound_segment_i (img_x#, img_y#, x1_i# Var, y1_i# Var, x2_i#var, y2_i# Var)
+		If Not ship.bounds Or Not ship.center Then x1_i = y1_i = x2_i = y2_i = - 1
+		x1_i = find_nearest_bound_segment_1st_i(img_x, img_y)
+		y1_i = x1_i + 1
+		x2_i = (x1_i + 2) Mod ship.bounds.Length
+		y2_i = (x1_i + 3) Mod ship.bounds.Length
+	End Method
 
-	Method find_nearest_weapon_offset%( img_x#,img_y#, spr_w#,spr_h#, weapon_display_mode$ )
-		If Not weapon Then Return -1
+	Method find_nearest_weapon_offset%( x#, y#, weapon_display_mode$ )	
+		If Not weapon Then Return - 1
 		Local offsets#[]
 		Select weapon_display_mode
-			Case "turret"
+			Case "TURRET"
 				offsets = weapon.turretOffsets
-				img_x = img_x - (spr_w / 2.0)
-				img_y = img_y - (spr_h / 2.0)
-			Case "hardpoint"
+			Case "HARDPOINT"
 				offsets = weapon.hardpointOffsets
-				img_x = img_x - (spr_w / 2.0)
-				img_y = img_y - (spr_h)
 		EndSelect
-		If Not offsets Then Return -1
-		Local nearest_i% = -1
-		Local nearest_dist# = -1
+		If Not offsets Then Return - 1
+		Local nearest_i% = - 1
+		Local nearest_dist# = - 1
 		Local dist#
 		For Local i% = 0 Until offsets.length Step 2
-			dist = calc_distance( img_x,img_y, offsets[i],offsets[i+1] )
-			If nearest_i = -1 Or dist < nearest_dist
+			dist = calc_distance( x, y, offsets[i], offsets[i + 1] )
+			If nearest_i = - 1 Or dist < nearest_dist
 				nearest_dist = dist
 				nearest_i = i
 			End If
@@ -931,11 +1035,11 @@ Type TData
 
 	'excludes only launch bays; intended to be used while defining
 	'weapon slots in SHIP mode.
-	Method find_nearest_weapon_slot%( img_x#, img_y# )
+	Method find_nearest_weapon_slot%( img_x#, img_y#)
 		If Not ship.weaponSlots Or Not ship.center Then Return -1
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
-		Local nearest_i% = -1
+		Local nearest_i% = - 1
 		Local nearest_dist# = -1
 		Local dist#
 		For Local i% = 0 Until ship.weaponSlots.length
@@ -943,7 +1047,7 @@ Type TData
 				Continue 'skip these
 			EndIf
 			dist = calc_distance( img_x, img_y, ship.weaponSlots[i].locations[0], ship.weaponSlots[i].locations[1] )
-			If nearest_i = -1 Or dist < nearest_dist
+			If nearest_i = - 1 Or dist < nearest_dist
 				nearest_dist = dist
 				nearest_i = i
 			End If
@@ -995,6 +1099,29 @@ Type TData
 		Return nearest_i
 	End Method
 	
+	'this method is intended to work exclusively while editing DECORATIVE weapon slots
+	'so it exludes non-decorative weapon slots;
+	Method find_nearest_decorative_weapon_slot%( img_x#, img_y# )
+		If Not ship.weaponSlots Or Not ship.center Then Return -1
+		img_x = img_x - ship.center[1]
+		img_y = -( img_y - ship.center[0] )
+		Local nearest_i% = -1
+		Local nearest_dist# = -1
+		Local dist#
+		For Local i% = 0 Until ship.weaponSlots.length
+			If Not ship.weaponSlots[i].is_decorative()
+				Continue 'skip these
+			EndIf
+			dist = calc_distance( img_x, img_y, ship.weaponSlots[i].locations[0], ship.weaponSlots[i].locations[1] )
+			If nearest_i = -1 Or dist < nearest_dist
+				nearest_dist = dist
+				nearest_i = i
+			End If
+		Next
+		Return nearest_i
+	End Method
+
+	
 	Method find_nearest_engine%( img_x#, img_y# )
 		If Not ship.engineSlots Or Not ship.center Then Return -1
 		img_x = img_x - ship.center[1]
@@ -1013,7 +1140,7 @@ Type TData
 	End Method
 	
 	Method get_launch_bay_by_contextual_index:TStarfarerShipWeapon( LB_i% )
-		If Not ship.weaponSlots Then Return Null
+		If Not ship.weaponSlots Or LB_i = - 1 Then Return Null
 		Local c_i% = 0
 		For Local i% = 0 Until ship.weaponSlots.length
 			Local weapon:TStarfarerShipWeapon = ship.weaponSlots[i]
@@ -1049,17 +1176,15 @@ Type TData
 
 	Method find_symmetrical_weapon_offset_counterpart%( i%, weapon_display_mode$ )
 		Local offsets#[]
-		If weapon_display_mode = "turret"
+		If weapon_display_mode = "TURRET"
 			offsets = weapon.turretOffsets
-		Else If weapon_display_mode = "hardpoint"
+		Else If weapon_display_mode = "HARDPOINT"
 			offsets = weapon.hardpointOffsets
 		EndIf
-		Local x# = offsets[i]
-		Local y# = offsets[i+1]
-		If Not offsets Or i Mod 2 <> 0 Or i < 0 Or i > offsets.length-2 Then Return -1
+		If Not offsets Or i Mod 2 <> 0 Or i < 0 Or i > offsets.length - 2 Then Return - 1
 		For Local si% = 0 Until offsets.length Step 2
-			If  offsets[si]   = x  ..
-			And offsets[si+1] = -y ..
+			If offsets[si] = offsets[i] ..
+			And offsets[si + 1] = - offsets[i + 1] ..
 			And i <> si
 				Return si
 			EndIf
@@ -1141,5 +1266,99 @@ Type TData
 		Return columns
 	EndMethod
 
-End Type
+	Method take_snapshot( input% = 0 )
+		If snapshot_undoing Then Return
+		If Not snapshot_inited Then Return
+		If Not snapshot_curr
+			snapshot_curr = New Tsnapshot
+		Else If Not snapshot_holdcurr
+			snapshots_undo.AddFirst(snapshot_curr)
+			snapshots_redo.Clear()
+			snapshot_curr = New Tsnapshot
+		EndIf
+		If snapshot_shouldhold Then snapshot_holdcurr = True
+		snapshot_curr.program_mode = ed.program_mode
+		snapshot_curr.mode = ed.mode
+		snapshot_curr.last_mode = ed.last_mode
+		Select input
+		Case 1
+			snapshot_curr.json_str = json_str
+		Case 2
+			snapshot_curr.json_str_variant = json_str_variant
+		Case 3
+			snapshot_curr.csv_row = CopyMap(csv_row)
+		Case 4
+			snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
+		Case 5
+			snapshot_curr.json_str_weapon = json_str_weapon
 
+		Case 6
+			snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
+
+		Default
+			Select snapshot_curr.program_mode
+			Case "ship"
+				snapshot_curr.json_str = json_str
+			Case "variant"
+				snapshot_curr.json_str_variant = json_str_variant
+			Case "csv"
+				snapshot_curr.csv_row = CopyMap(csv_row)
+			Case "csv_wing"
+				snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
+			Case "weapon"
+				snapshot_curr.json_str_weapon = json_str_weapon
+
+			Case "csv_weapon"
+				snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
+
+			End Select
+		End Select	
+
+	End Method
+	
+	Method take_initshot()
+		snapshot_init = New Tsnapshot
+		snapshot_init.program_mode = ed.program_mode
+		snapshot_init.mode = ed.mode
+		snapshot_init.last_mode = ed.last_mode
+		If json_str.length > 0 Then snapshot_init.json_str = json_str
+		If json_str_variant.length > 0 Then snapshot_init.json_str_variant = json_str_variant
+		If csv_row Then snapshot_init.csv_row = CopyMap(csv_row)
+		If csv_row_wing Then snapshot_init.csv_row_wing = CopyMap( csv_row_wing )
+
+		If csv_row_weapon Then snapshot_init.csv_row_weapon = CopyMap( csv_row_weapon )
+
+		If json_str_weapon.length > 0 Then snapshot_init.json_str_weapon = json_str_weapon
+		snapshots_undo.Clear()
+		snapshots_redo.Clear()
+		snapshot_curr = Null
+		snapshot_inited = True
+	End Method
+	
+	Method hold_snapshot(should_hold%)
+		If should_hold
+			snapshot_shouldhold = True
+		Else
+			snapshot_shouldhold = False
+			snapshot_holdcurr = False
+		EndIf
+	End Method
+
+	
+End Type	
+Type Tsnapshot	
+	Field program_mode$
+	Field mode$
+	Field last_mode$
+	Field json_str$
+	Field json_str_variant$
+	Field csv_row:TMap'<String,String>  'column name --> value
+	Field csv_row_wing:TMap'<String,String>  'column name --> value
+
+	Field csv_row_weapon:TMap'<String,String>  'column name --> value
+
+	Field json_str_weapon$
+	'for string editing mode.
+	'Field values:TextWidget
+	
+End Type

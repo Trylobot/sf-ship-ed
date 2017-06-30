@@ -5,7 +5,7 @@ Type TStarfarerShipWeapon
 	Field id$
 	Field locations#[]
 	Field position#[]
-	Field mount$
+	Field mount$	
 	Field size$
 	Field type_$
 	
@@ -32,6 +32,10 @@ Type TStarfarerShipWeapon
 		  And  Not is_decorative()
 	EndMethod
 
+	Method draw_order%()
+		If mount = "TURRET" Then Return 3 Else Return 0
+	End Method
+	
 	Method New()
 		angle = 0.0
 		arc = 0.0
@@ -52,7 +56,7 @@ Type TStarfarerShipWeapon
 		copy.mount = mount
 		copy.size = size
 		copy.type_ = type_
-		return copy
+		Return copy
 	End Method
 End Type
 
@@ -66,7 +70,7 @@ Function remove_TStarfarerShipWeapon:TStarfarerShipWeapon[]( arr:TStarfarerShipW
 	For i = 0 Until arr.length
 		If w = arr[i] Then Exit
 	Next
-	If i = arr.length Then return arr 'nothing to remove
+	If i = arr.length Then Return arr 'nothing to remove
 	
 	If i >= 0 And i < arr.Length
 		If arr.Length = 1

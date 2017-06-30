@@ -7,7 +7,7 @@ Type TSubroutine
 	Method Deactivate( ed:TEditor, data:TData, sprite:TSprite )
 	EndMethod
 	
-	Method Update( ed:TEditor, data:TData, sprite:TSprite )
+	Method Update( ed:TEditor, data:TData, sprite:TSprite)
 	EndMethod
 	
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite )

@@ -1,5 +1,5 @@
 
-Function find_rect_verts( x_o#, y_o#, r_w#, r_h#, s#, p_x#, p_y#, zp_x#, zp_y#, ix# var, iy# var, iw# var, ih# var )
+Function find_rect_verts( x_o#, y_o#, r_w#, r_h#, s#, p_x#, p_y#, zp_x#, zp_y#, ix# Var, iy# Var, iw# Var, ih# Var )
 	ix = x_o - 0.5*s*r_w + p_x + zp_x
 	iy = y_o - 0.5*s*r_h + p_y + zp_y
 	iw = s*r_w
@@ -16,7 +16,25 @@ Function map_xy( x_in#, y_in#, x_out# Var, y_out# Var, translate_x#, translate_y
 EndFunction
 
 Function nearest_half#( x# )
-	Return Floor((x*2.0) + 0.5)/2.0
+	Return Floor( (x * 2.0) + 0.5) / 2.0
+EndFunction
+
+Rem
+round a Float 
+mode 0 = do not round
+mode 1 = round to nearest_half
+moud 2 = round to nearest whole number
+EndRem
+Function RoundFloat#( x#, mode% = 0)
+	Select mode
+	Case 0
+		Return x
+	Case 1
+		Return Floor( (x * 2.0) + 0.5) / 2.0
+	Case 2
+		Return Floor (x) + (x Mod 1 >= 0.5)
+	End Select
+
 EndFunction
 
 Function coord_string$( x!, y! )
@@ -26,15 +44,7 @@ EndFunction
 
 Function remove_pair#[]( arr#[], i% )
 	If i >= 0 And i < arr.Length-1
-		If arr.Length = 2
-			Return Null
-		Else
-			For i = i Until arr.Length-2 Step 2
-				arr[i] = arr[i+2]
-				arr[i+1] = arr[i+3]
-			Next
-			Return arr[..arr.length-2]
-		End If
+		If arr.Length = 2 Then Return Null Else Return arr[..i] + arr[i + 2..]
 	Else
 		Return arr
 	End If
@@ -42,14 +52,7 @@ EndFunction
 
 Function remove_at#[]( arr#[], i% )
 	If i >= 0 And i < arr.Length
-		If arr.Length = 1
-			Return Null
-		Else
-			For i = i Until arr.Length-1
-				arr[i] = arr[i+1]
-			Next
-			Return arr[..arr.length-1]
-		End If
+		If arr.Length = 1 Then Return Null Else Return arr[..i] + arr[i + 1..]
 	Else
 		Return arr
 	End If
@@ -59,27 +62,48 @@ Function calc_distance#( x1#, y1#, x2#, y2# )
 	Local diff_x#, diff_y#
 	diff_x = x2 - x1
 	diff_y = y2 - y1
-	Return Sqr( diff_x*diff_x + diff_y*diff_y )
+	Return RoundFloat(Sqr( diff_x * diff_x + diff_y * diff_y ), DO_ROUND)
 EndFunction
 
 Function calc_angle#( x1#, y1#, x2#, y2# )
 	Local diff_x#, diff_y#
 	diff_x = x2 - x1
 	diff_y = y2 - y1
-	Return ATan2( diff_y, diff_x )
+	Return RoundFloat( ATan2( diff_y, diff_x ), DO_ROUND)
 EndFunction
 
-Function calc_dist_from_point_to_segment#( px#,py#, s1x#,s1y#, s2x#,s2y# )
-	Local s_len# = calc_distance( s1x,s1y, s2x,s2y )
-	If s_len = 0 Then Return calc_distance( px,py, s1x,s1y )
-	Local t# = ((px - s1x)*(s2x - s1x) + (py - s1y)*(s2y - s1y)) / s_len
-	If t < 0 
-		Return calc_distance( px,py, s1x,s1y )
-	Else If t > 0
-		Return calc_distance( px,py, s2x,s2y )
+Function calc_dist_from_point_to_segment#( px#, py#, s1x#, s1y#, s2x#, s2y# )
+	s2x :- s1x
+	s2y :- s1y
+	px :- s1x
+	py :- s1y
+	Local dotprod# = px * s2x + py * s2y
+	Local projlenSq#
+	If dotprod <= 0.0
+		projlenSq = 0.0
 	Else
-		Return calc_distance( px,py, (s1x + t*(s2x - s1x)),(s1y + t*(s2y - s1y)) )
+		px = s2x - px
+		py = s2y - py
+		dotprod = px * s2x + py * s2y
+		If dotprod <= 0.0
+			projlenSq = 0.0
+		Else
+		projlenSq = dotprod * dotprod / (s2x * s2x + s2y * s2y)
+		EndIf
 	EndIf
+	Local lenSq# = px * px + py * py - projlenSq
+	If lenSq < 0 Then lenSq = 0
+	Return Sqr(lenSq)
+'	Local s_len# = calc_distance( s1x, s1y, s2x, s2y )
+'	If s_len = 0 Then Return calc_distance( px, py, s1x, s1y )
+'	Local t# = ( (px - s1x) * (s2x - s1x) + (py - s1y) * (s2y - s1y) ) / s_len
+'	If t < 0
+'		Return calc_distance( px, py, s1x, s1y )
+'	Else If t > 0
+'		Return calc_distance( px, py, s2x, s2y )
+'	Else
+'		Return calc_distance( px,py, (s1x + t*(s2x - s1x)),(s1y + t*(s2y - s1y)) )
+'	EndIf
 EndFunction
 
 Function ang_wrap#( a# ) 'forces the angle into the range [-180,180]
@@ -104,7 +128,7 @@ Function polar_to_cartesian( r#, a#, x# Var, y# Var )
 EndFunction
 
 Function count_keys%( map:TMap )
-	If not map Then return 0
+	If Not map Then Return 0
 	Local count% = 0
 	For Local k$ = EachIn map.Keys()
 		count :+ 1
@@ -143,4 +167,8 @@ Function Fix_Map_TStrings( map:TMap )
 	EndIf
 EndFunction
 
+Function CurveValue:Float(Current:Float, Destination:Float, Curve:Int)
+	Current = Current + ( (Destination - Current) /Curve)
+	Return Current
+End Function
 

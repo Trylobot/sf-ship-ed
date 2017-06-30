@@ -12,7 +12,9 @@ Function escape_key_update()
 	If FLAG_instaquit_plz Then Return 'no questions asked
 	'instaquit
 	If esc_held And (MilliSecs() - esc_press_ts) >= instaquit_time_required
-		FLAG_instaquit_plz = True
+		'FLAG_instaquit_plz = True
+		EmitEvent CreateEvent(EVENT_WINDOWCLOSE, mainWindow)
+			FlushKeys()	
 	End If
 	'escape key state
 	If (KeyDown( KEY_ESCAPE ) Or KeyDown( KEY_HOME ))
