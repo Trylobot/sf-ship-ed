@@ -108,6 +108,7 @@ Function load_help()
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_variant_assignWeapon}}"), ICON_MS_LEFT, True, 0, "variant" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "G", LocalizeString("{{h_function_variant_weaponGroups}}"), ICON_KB, True, 0, "variant" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "A", LocalizeString("{{h_function_variant_autofire}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F", LocalizeString("{{h_function_variant_addVents}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F", LocalizeString("{{h_function_variant_removeVents}}"), ICON_CTRL_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "C", LocalizeString("{{h_function_variant_addCap}}"), ICON_KB, True, 0, "variant" ))

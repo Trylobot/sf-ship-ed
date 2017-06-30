@@ -1,3 +1,17 @@
+______________________________________________________________________________
+
+editor version 2.7.1 (starsector 0.8.1a)
+______________________________________________________________________________
+
+  CHANGES
+
+  - Fixed bug #15 "Selected weapon slot not displayed during weapon group assignment (variant mode)"
+  - Also moved the weapon groups list to the left side of the screen, so that the selected weapon can be seen more easily.
+  - Added a keyboard help entry in variant mode for toggling autofire with "A"
+
+
+
+______________________________________________________________________________
 editor version 2.7.0 (starsector 0.7.2a)
 ______________________________________________________________________________
 

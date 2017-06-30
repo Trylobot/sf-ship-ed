@@ -647,29 +647,35 @@ Type TModalSetVariant Extends TSubroutine
 
 	Method draw_weapon_groups_list( ed:TEditor, data:TData, sprite:TSprite )
 		'draw pertinent weapon slot
-		For g = 0 Until data.variant.weaponGroups.length
-			group = data.variant.weaponGroups[g]
-			For weapon_slot_id = EachIn group.weapons.Keys()
-				If line_i = ed.group_field_i
-					For weapon_slot = EachIn data.ship.weaponSlots
-						If weapon_slot.id = weapon_slot_id
-							wx = sprite.sx + (weapon_slot.locations[0] + data.ship.center[1])*sprite.Scale
-							wy = sprite.sy + (-weapon_slot.locations[1] + data.ship.center[0])*sprite.Scale
+		If ed.group_field_i <> -1
+			For weapon_slot = EachIn data.ship.weaponSlots
+				If weapon_slot_ids[ed.group_field_i] = weapon_slot.id
+					'  found slot on ship
+					If weapon_slot.is_visible_to_variant()
+						wx = sprite.sx + (weapon_slot.locations[0] + data.ship.center[1])*sprite.Scale
+						wy = sprite.sy + (-weapon_slot.locations[1] + data.ship.center[0])*sprite.Scale
+						If Not weapon_slot.is_builtin()
+							'  "normal" (variant data) weapon
 							draw_weapon_slot_info( ed,data,sprite, weapon_slot )
 							draw_assigned_weapon_info( ed,data,sprite, weapon_slot )
-							draw_variant_weapon_mount( wx, wy, weapon_slot )
-							Exit
+							draw_variant_weapon_mount( wx,wy, weapon_slot )
+						Else
+							'  "built-in" (ship data) weapon
+							draw_builtin_weapon_slot_info( ed,data,sprite, weapon_slot )
+							draw_builtin_assigned_weapon_info( ed,data,sprite, weapon_slot )
+							draw_builtin_weapon_mount( wx,wy, weapon_slot )
 						EndIf
-					Next
+						Exit
+					EndIf
 				EndIf
 			Next
-		Next
+		EndIf
 		'draw textbox
-		draw_container( W_MID - wep_names_tw.w - 10 - TextWidth("=> "), H_MID, wep_names_tw.w + wep_g_tw.w + 20 + TextWidth("=> "), wep_names_tw.h + 20, 0.0, 0.5 )
-		draw_string( wep_names_tw, W_MID, H_MID,,, 1.0, 0.5 )
-		draw_string( wep_g_tw, W_MID, H_MID,,, 0.0, 0.5 )
+		draw_container( 20, H_MID, wep_names_tw.w + wep_g_tw.w + 20 + TextWidth("=> "), wep_names_tw.h + 20, 0.0, 0.5 )
+		draw_string( wep_names_tw, 20 + 10 + 10, H_MID,,, 0.0, 0.5 )
+		draw_string( wep_g_tw, wep_names_tw.w + wep_g_tw.w + 20 + TextWidth("=> "), H_MID,,, 1.0, 0.5 )
 		'draw_string( cursor_widget, W_MID, H_MID, get_cursor_color(), $000000, 1.0, 0.5 )
-		draw_string( "=> ", W_MID - (TextWidth("=> ") + wep_names_tw.w), H_MID - (wep_names_tw.h / 2.0) + (ed.group_field_i + 2 + 0.5) * LINE_HEIGHT, get_cursor_color(), $000000, 0.0, 0.5 )	
+		draw_string( "=> ", 20, H_MID - (wep_names_tw.h / 2.0) + (ed.group_field_i + 2 + 0.5) * LINE_HEIGHT, get_cursor_color(), $000000, 0.0, 0.5 )	
 	EndMethod
 
 	Method draw_weapon_assignment_list()
