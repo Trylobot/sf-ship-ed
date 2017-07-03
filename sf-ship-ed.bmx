@@ -181,6 +181,8 @@ json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$position:arra
 json.add_transform( "stringify_ship", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
 json.add_transform( "stringify_ship", "$builtInMods:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
 json.add_transform( "stringify_ship", "$coversColor:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+'TStarfarerVariant
+json.add_transform( "stringify_variant", "$goalVariant", json.XJ_CONVERT, "boolean" )
 'TStarfarerCustomEngineStyleSpec
 json.add_transform( "parse_ship", "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
 json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:object/$type_:string", json.XJ_RENAME, "type" )

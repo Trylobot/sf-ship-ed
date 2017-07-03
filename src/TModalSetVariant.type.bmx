@@ -480,16 +480,12 @@ Type TModalSetVariant Extends TSubroutine
 				ed.group_field_i = (ed.group_field_i Mod (count ) + (count ) ) Mod (count )
 				modified = True
 			Case KEY_LEFT, KEY_RIGHT
-				'DebugLog "group_offsets[ed.group_field_i] => "+group_offsets[ed.group_field_i]
 				Local j% = group_offsets[ed.group_field_i]
 				If EventData() = KEY_RIGHT Then j :+ 1 Else j :- 1
-				'DebugLog "j0 => "+j
 				j = (j Mod MAX_VARIANT_WEAPON_GROUPS + MAX_VARIANT_WEAPON_GROUPS) Mod MAX_VARIANT_WEAPON_GROUPS
-				'DebugLog "j1 => "+j
 				data.unassign_weapon_from_slot( weapon_slot_ids[ed.group_field_i] )
-				'DebugLog "weapon_slot_id => "+weapon_slot_ids[ed.group_field_i]
-				'DebugLog "weapon_id => "+weapon_ids[ed.group_field_i]
 				data.assign_weapon_to_slot( weapon_slot_ids[ed.group_field_i], weapon_ids[ed.group_field_i], j )
+				data.update_variant()
 				modified = True
 			Case KEY_A
 				data.toggle_weapon_group_autofire( group_offsets[ed.group_field_i] )
