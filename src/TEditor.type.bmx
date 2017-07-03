@@ -66,7 +66,6 @@ Type TEditor
 	Field stock_hullmod_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
 	Field stock_ship_stats_field_order:TList'<String> 'column names
 	Field stock_wing_stats_field_order:TList'<String> 'column names
-	Field stock_weapon_stats_field_order:TList'<String> 'column names
 	Field multiselect_values:TMap 'String (field) --> TMap (set of valid values)
 
 	Method New()
@@ -97,7 +96,6 @@ Type TEditor
 		'csv field order
 		stock_ship_stats_field_order = ship_data_csv_field_order_template.Copy()
 		stock_wing_stats_field_order = wing_data_csv_field_order_template.Copy()
-		stock_weapon_stats_field_order = weapon_data_csv_field_order_template.Copy()
 		'scraped enum values
 		multiselect_values = CreateMap()
 	EndMethod
@@ -299,25 +297,11 @@ Type TEditor
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_weapon_stats )
 			EndIf
-			Local row:TMap
-			For Local id$ = EachIn stock_weapon_stats.Keys()
-				'scan all rows for multiselect values
-				row = TMap( stock_weapon_stats.ValueForKey( id ))
-				load_multiselect_value( "weapon_csv.type", String( row.ValueForKey( "type" )))
-			Next
 			DebugLogFile " LOADED "+file
 		Catch ex$ 'ignore parsing errors and continue
 			DebugLogFile " Error: " + file + " " + ex
 		EndTry
 	End Method
-	
-	Method get_weapon_stats:TMap( weaponId$ )
-		If stock_weapon_stats.Contains( weaponId )
-			Return TMap( stock_weapon_stats.ValueForKey( weaponId ))
-		Else
-			Return weapon_data_csv_field_template.Copy()
-		EndIf
-	EndMethod
 
 	Method load_stock_hullmod_stats( dir$, file$, save_field_order%=False )
 		Try

@@ -90,7 +90,7 @@ ________________________________
 -Fixed a issue that the rjson core will mistakenly discard "0" for integer output.
 
 ______________________________________________________________________________
-editor version 2.6.4 (starsector 0.7.1a)
+editor version 2.6.4 (starsector 0.7a RC1)
 - credit to zaphide for pull request!
 - support for HYBRID weapon types
 - support for longer weapon lists
@@ -138,7 +138,7 @@ editor version 2.4.1 (starfarer 0.53.1a RC5)
 - fixed: cannot load vanilla data in Linux (probably)
 - fixed: quoted newlines in CSV data
 - fixed: can't set hullmods in variant if ship has no weapon slots
-- misc: HOME key is now equivalent to ESCAPE key
+- misc: HOME key is now equivalent to ESCAPE key 
 - feature: direct value entry for weapon arcs and angles (press T on a weapon)
 ______________________________________________________________________________
 editor version 2.4.1a (starfarer 0.53.1a RC5)
@@ -179,7 +179,7 @@ ______________________________________________________________________________
 editor version 2.2 (starfarer 0.52a)
 - ship: in bounds mode, weapons, engines and launch bays modes,
   you can now hold CTRL+ALT while RIGHT-CLICK dragging to drag all
-  the entities on-screen at once.
+  the entities on-screen at once. 
 - weapon slots: weapon slots are now assigned names with zero-padded numbers
   so that they can be sorted more easily
 ______________________________________________________________________________
@@ -249,7 +249,7 @@ editor version 1.9 (starfarer 0.51a)
   them, use arrow left/right to choose a value from the list of acceptable
   values. the field is updated immediately.
 - can now open, edit and save *.variants - use [1] and [2] to toggle between
-  *.ship mode and *.variant mode; still use [D] and [V] to open/save
+  *.ship mode and *.variant mode; still use [D] and [V] to open/save 
 - click a weapon slot to assign a weapon from the list of weapons that are
   valid to occupy that slot; filters based on size & type of slot from
   currently loaded *.ship data
@@ -291,13 +291,13 @@ editor version 1.0 (starfarer 0.51a)
 ______________________________________________________________________________
 editor version 0.4 (starfarer 0.51a)
 - added engine slot editor
-______________________________________________________________________________  
+______________________________________________________________________________
 editor version 0.3 (starfarer 0.51a)
-- added weapon slot editor, per request
+- added weapon slot editor
 - strengthened JSON decoder; ignores # comments and performs implicit type-
-  conversion and uses reflection to automatically encode/decode from/to plain
+  conversion and uses reflection to automatically encode/decode from/to plain 
   objects
-______________________________________________________________________________   
+______________________________________________________________________________
 editor version 0.2 (starfarer 0.35a preview rc2)
 - fixed bug; data view not updating when you press "N" (new data)
   or "I" (load ship image)
@@ -307,6 +307,6 @@ editor version 0.2 (starfarer 0.35a preview rc2)
 - program icon (windows only)
 - added collision radius mode
 - added preview all mode
-______________________________________________________________________________   
+______________________________________________________________________________
 editor version 0.1 (starfarer 0.35a preview rc2)
 - initial release
