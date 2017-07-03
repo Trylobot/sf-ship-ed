@@ -88,9 +88,9 @@ Include "src/help.bmx"
 Include "src/multiselect_values.bmx"
 Include "src/TWeaponDrawer.bmx"
 Include "src/TTextCoder.bmx"
-Include "src/WeaponDataCSVFieldTemplate.bmx"
-Include "src/TModalSetWeaponCSV.type.bmx"
-Include "src/TModalShowMore.bmx"
+'Include "src/WeaponDataCSVFieldTemplate.bmx"
+'Include "src/TModalSetWeaponCSV.type.bmx"
+'Include "src/TModalShowMore.bmx"
 
 Const MODE_SHIP_EDIT% = 1
 
