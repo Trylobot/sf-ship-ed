@@ -746,13 +746,19 @@ Type TData
 	'requires subsequent call to update_variant()
 	Method unassign_weapon_from_slot( ship_weapon_slot_id$ )
 		'remove a slot assignment
+		'DebugLog "unassign_weapon_from_slot "+ship_weapon_slot_id
+		'Local i% = 0
 		For Local group:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
+			'DebugLog "  variant.weaponGroup "+i
 			For Local existing_ship_weapon_slot_id$ = EachIn group.weapons.Keys()
+				'DebugLog "    existing_ship_weapon_slot_id => "+existing_ship_weapon_slot_id
 				If ship_weapon_slot_id = existing_ship_weapon_slot_id
+					'DebugLog "      removed!"
 					group.weapons.Remove( ship_weapon_slot_id )
-					'TODO: if the group is empty, remove it (??)
+					'TODO: if the group is empty, remove it (??) -- empty groups aren't visible in-game anyhow
 				EndIf
 			Next
+			'i :+ 1
 		Next
 	EndMethod
 
