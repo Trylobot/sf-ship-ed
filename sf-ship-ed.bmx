@@ -1262,6 +1262,8 @@ Function draw_data( ed:TEditor, data:TData )
     Local view:TList
     If ed.program_mode = "ship"
       view = data.json_view
+    ElseIf ed.program_mode = "skin"
+      view = data.json_view_skin
     ElseIf ed.program_mode = "variant"
       view = data.json_view_variant
     ElseIf ed.program_mode = "weapon"
