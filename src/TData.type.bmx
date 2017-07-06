@@ -6,6 +6,10 @@ Type TData
 	Field json_str$
 	Field json_view:TList'<TextWidget>
 
+	Field skin:TStarfarerSkin
+	Field json_str_skin$
+	Field json_view_skin:TList'<TextWidget>
+
 	Field variant:TStarfarerVariant
 	Field json_str_variant$
 	Field json_view_variant:TList'<TextWidget>
@@ -97,9 +101,24 @@ Type TData
 	
 	Method update_variant()
 		json.formatted = True
-		'encode ship object as json data
+		'encode object as json data
 		json_str_variant = json.stringify( variant, "stringify_variant" )
 		json_view_variant = columnize_text( json_str_variant )
+		changed = True
+		take_snapshot(2)
+	End Method
+
+	'requires subsequent call to update_skin()
+	Method decode_skin( input_json_str$ )
+		skin = TStarfarerSkin( json.parse( input_json_str, "TStarfarerSkin" ))
+		'enforce_skin_internal_consistency()
+	End Method
+	
+	Method update_skin()
+		json.formatted = True
+		'encode object as json data
+		json_str_skin = json.stringify( skin, "stringify_skin" )
+		json_view_skin = columnize_text( json_str_skin )
 		changed = True
 		take_snapshot(2)
 	End Method

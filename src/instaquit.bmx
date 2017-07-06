@@ -4,47 +4,21 @@ Global esc_held% = False
 Global esc_press_ts% = MilliSecs()
 Global esc_held_progress_bar_show_time_required% = 180
 Global instaquit_time_required% = 1000
-Global FLAG_instaquit_plz% = False
 
 '-----------------------
 
 Function escape_key_update()
-	If FLAG_instaquit_plz Then Return 'no questions asked
-	'instaquit
 	If esc_held And (MilliSecs() - esc_press_ts) >= instaquit_time_required
-		'FLAG_instaquit_plz = True
 		EmitEvent CreateEvent(EVENT_WINDOWCLOSE, mainWindow)
-			FlushKeys()	
 	End If
 	'escape key state
-	If (KeyDown( KEY_ESCAPE ) Or KeyDown( KEY_HOME ))
+	If EventID() = EVENT_KEYDOWN And EventData() = KEY_ESCAPE
 		If Not esc_held
 			esc_press_ts = MilliSecs()
 		End If
 		esc_held = True
-	Else
+	Else If EventID() = EVENT_KEYUP And EventData() = KEY_ESCAPE
 		esc_held = False
-	End If
-End Function
-
-Function escape_key_release%()
-	Return (esc_held And (Not KeyDown( KEY_ESCAPE ) And Not KeyDown( KEY_HOME )))
-End Function
-
-Function time_alpha_pct#( ts%, time%, in% = True ) 'either fading IN or OUT
-	Local ms% = MilliSecs()
-	If in 'fade in
-		If (ms - ts) <= time
-			Return (Float(ms - ts) / Float(time))
-		Else
-			Return 1.0
-		End If
-	Else 'fade out
-		If (ms - ts) <= time
-			Return (1.0 - (Float(ms - ts) / Float(time)))
-		Else
-			Return 0.0
-		End If
 	End If
 End Function
 
@@ -64,6 +38,23 @@ Function draw_instaquit_progress( scr_w%, scr_h% )
 		SetColor( 255, 255, 255 )
 		Local margin% = scr_w/4
 		draw_percentage_bar( margin, scr_h/2 - FONT.Height() - 5, scr_w - 2*margin, 50, Float( MilliSecs() - esc_press_ts ) / Float( instaquit_time_required - 50 ),,,,,,, 2 )
+	End If
+End Function
+
+Function time_alpha_pct#( ts%, time%, in% = True ) 'either fading IN or OUT
+	Local ms% = MilliSecs()
+	If in 'fade in
+		If (ms - ts) <= time
+			Return (Float(ms - ts) / Float(time))
+		Else
+			Return 1.0
+		End If
+	Else 'fade out
+		If (ms - ts) <= time
+			Return (1.0 - (Float(ms - ts) / Float(time)))
+		Else
+			Return 0.0
+		End If
 	End If
 End Function
 
