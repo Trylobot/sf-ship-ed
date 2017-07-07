@@ -42,5 +42,17 @@ Type TextWidget
 			lines[L + old_length] = widget.lines[L]
 		Next
 	End Method
-End Type
 
+	Method draw( x#,y#, ox#,oy# )
+		Local p# = 10 ' padding
+		Local fg% = $FFFFFF
+		Local bg% = $000000
+		Local bg_fill_alpha# = 0.75
+    Local s# = 1.0 ' scale
+		draw_container( x,y, w+(2*p),h+(2*p), ox,oy, fg,bg,bg_fill_alpha, s )
+		draw_string( Self, x,y+p, fg,bg, ox,oy )
+		SetColor(255,255,255)
+		SetAlpha(1)
+	EndMethod
+
+End Type

@@ -1,4 +1,3 @@
-'-----------------------
 
 Function draw_string( source:Object, x%, y%, fg% = $FFFFFF, bg% = $000000, origin_x# = 0.0, origin_y# = 0.0, line_height_override% = - 1, draw_bg% = False, s# = 1.0 )
 	Local LH% = LINE_HEIGHT
@@ -558,8 +557,7 @@ Type TSmoothScroll
 	Field lastTime# = 1.0
 	Field UPDATE_FACTOR# = 0.25
 	Field SNAP# = 0.025
-	
-	
+		
 	Method ScrollTo#(targetLevel#)
 		_targetLevel = targetLevel
 		If Not currLevel

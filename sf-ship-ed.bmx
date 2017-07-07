@@ -44,14 +44,15 @@ Incbin "assets/ico_mirr.png"
 Incbin "assets/ico_exit.png"
 Incbin "assets/engineflame32.png"
 Incbin "assets/engineflamecore32.png"
-
 Incbin "release/ENG.ini"
 
+Include "src/config_json_transforms.bmx"
 Include "src/functions_misc.bmx"
 Include "src/drawing_misc.bmx"
 Include "src/instaquit.bmx"
 Include "src/menu.bmx"
 Include "src/TextWidget.type.bmx"
+Include "src/TableWidget.type.bmx"
 Include "src/TKeyboardHelpWidget.type.bmx"
 Include "src/TStarfarerShip.type.bmx"
 Include "src/TStarfarerSkin.type.bmx"
@@ -167,127 +168,7 @@ Flip( 1 )
 
 '////////////////////////////////////////////////
 'MARK json
-json.error_level = 1
-json.ext_logging_fn = DebugLogFile
-json.formatted = True
-json.formatted_array = True
-json.empty_container_as_null = False
-json.precision = 6
-'Application
-json.add_transform( "stringify_settings", "$hide_vanilla_data", json.XJ_CONVERT, "boolean" )
-'TStarfarerShipWeapon
-json.add_transform( "parse_ship", "$weaponSlots:array/:object/$type:string", json.XJ_RENAME, "type_" )
-json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$type_:string", json.XJ_RENAME, "type" )
-json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$position:array", json.XJ_DELETE,, predicate_omit_position )
-json.add_transform( "stringify_ship", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
-json.add_transform( "stringify_ship", "$builtInMods:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-json.add_transform( "stringify_ship", "$coversColor:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-'TStarfarerVariant
-json.add_transform( "stringify_variant", "$goalVariant", json.XJ_CONVERT, "boolean" )
-'TStarfarerCustomEngineStyleSpec
-json.add_transform( "parse_ship", "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
-json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:object/$type_:string", json.XJ_RENAME, "type" )
-json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:object", json.XJ_DELETE,, predicate_omit_styleSpec )
-json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleId:string", json.XJ_DELETE,, predicate_omit_styleId )
-'TStarfarerShip
-json.add_transform( "stringify_skin", "$baseValue:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
-json.add_transform( "stringify_skin", "$baseValueMult:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
-json.add_transform( "stringify_skin", "$fleetPoints:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
-json.add_transform( "stringify_skin", "$ordnancePoints:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
-json.add_transform( "stringify_skin", "$descriptionId:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_skin", "$descriptionPrefix:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_skin", "$systemId:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_skin", "$removeHints:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-json.add_transform( "stringify_skin", "$addHints:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-json.add_transform( "stringify_skin", "$removeBuiltInMods:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-json.add_transform( "stringify_skin", "$builtInMods:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-json.add_transform( "stringify_skin", "$removeWeaponSlots:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-json.add_transform( "stringify_skin", "$weaponSlotChanges:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
-json.add_transform( "stringify_skin", "$removeBuiltInWeapons:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-json.add_transform( "stringify_skin", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
-json.add_transform( "stringify_skin", "$removeEngineSlots:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-json.add_transform( "stringify_skin", "$engineSlotChanges:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
-'TStarfarerCustomEngineStyleSpec
-json.add_transform( "parse_CustomEngineStyle", "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
-'TStarfarerWeapon
-json.add_transform( "parse_weapon", "$type:string", json.XJ_RENAME, "type_" )
-json.add_transform( "stringify_weapon", "$type_:string", json.XJ_RENAME, "type" )
-'TStarfarerWeapon for the booleans!
-json.add_transform( "stringify_weapon", "$animateWhileFiring", json.XJ_CONVERT, "boolean" )
-json.add_transform( "stringify_weapon", "$alwaysAnimate", json.XJ_CONVERT, "boolean" )
-json.add_transform( "stringify_weapon", "$renderBelowAllWeapons", json.XJ_CONVERT, "boolean" )
-json.add_transform( "stringify_weapon", "$showDamageWhenDecorative", json.XJ_CONVERT, "boolean" )
-json.add_transform( "stringify_weapon", "$separateRecoilForLinkedBarrels", json.XJ_CONVERT, "boolean" )
-json.add_transform( "stringify_weapon", "$interruptibleBurst", json.XJ_CONVERT, "boolean" )
-json.add_transform( "stringify_weapon", "$autocharge", json.XJ_CONVERT, "boolean" )
-json.add_transform( "stringify_weapon", "$requiresFullCharge", json.XJ_CONVERT, "boolean" )
-json.add_transform( "stringify_weapon", "$beamFireOnlyOnFullCharge", json.XJ_CONVERT, "boolean" )
-json.add_transform( "stringify_weapon", "$convergeOnPoint", json.XJ_CONVERT, "boolean" )
-json.add_transform( "stringify_weapon", "$darkCore", json.XJ_CONVERT, "boolean" )
-'TStarfarerWeapon specClass <> beam
-json.add_transform( "stringify_weapon", "$fringeColor", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$coreColor", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$beamEffect:string", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$beamFireOnlyOnFullCharge", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$convergeOnPoint", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$width:number", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$textureScrollSpeed:number", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$pixelsPerTexel:number", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$hitGlowRadius:number", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$darkCore", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$collisionClass:string", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$collisionClassByFighter:string", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-json.add_transform( "stringify_weapon", "$pierceSet:array", json.XJ_DELETE,, predicate_omit_if_not_specClass_beam )
-'TStarfarerWeapon specClass <> projectile
-json.add_transform( "stringify_weapon", "$projectileSpecId:string", json.XJ_DELETE,, predicate_omit_if_not_specClass_projectile )
-json.add_transform( "stringify_weapon", "$barrelMode:string", json.XJ_DELETE,, predicate_omit_if_not_specClass_projectile )
-json.add_transform( "stringify_weapon", "$animationType:string", json.XJ_DELETE,, predicate_omit_if_not_specClass_projectile )
-json.add_transform( "stringify_weapon", "$visualRecoil", json.XJ_DELETE,, predicate_omit_if_not_specClass_projectile )
-json.add_transform( "stringify_weapon", "$separateRecoilForLinkedBarrels", json.XJ_DELETE,, predicate_omit_if_not_specClass_projectile )
-json.add_transform( "stringify_weapon", "$interruptibleBurst", json.XJ_DELETE,, predicate_omit_if_not_specClass_projectile )
-json.add_transform( "stringify_weapon", "$autocharge", json.XJ_DELETE,, predicate_omit_if_not_specClass_projectile )
-json.add_transform( "stringify_weapon", "$requiresFullCharge", json.XJ_DELETE,, predicate_omit_if_not_specClass_projectile )
-json.add_transform( "stringify_weapon", "$muzzleFlashSpec:object", json.XJ_DELETE,, predicate_omit_if_not_specClass_projectile )
-json.add_transform( "stringify_weapon", "$smokeSpec:object", json.XJ_DELETE,, predicate_omit_if_not_specClass_projectile )
-'TStarfarerWeapon can be removed if it is default
-' string with default = ""
-json.add_transform( "stringify_weapon", "$turretUnderSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_weapon", "$turretGunSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_weapon", "$turretGlowSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_weapon", "$hardpointUnderSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_weapon", "$hardpointGunSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_weapon", "$hardpointGlowSprite:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_weapon", "$everyFrameEffect:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_weapon", "$beamEffect:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_weapon", "$fireSoundOne:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-json.add_transform( "stringify_weapon", "$fireSoundTwo:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-' number
-json.add_transform( "stringify_weapon", "$numFrames:number", json.XJ_DELETE,, predicate_omit_if_single_frame )
-json.add_transform( "stringify_weapon", "$frameRate:number", json.XJ_DELETE,, predicate_omit_if_single_frame )
-json.add_transform( "stringify_weapon", "$visualRecoil:number", json.XJ_DELETE,, predicate_omit_if_equals_zero)
-json.add_transform( "stringify_weapon", "$displayArcRadius:number", json.XJ_DELETE,, predicate_omit_if_equals_zero)
-' array
-json.add_transform( "stringify_weapon", "$pierceSet:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-json.add_transform( "stringify_weapon", "$renderHints:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-' object
-json.add_transform( "stringify_weapon", "$muzzleFlashSpec:object", json.XJ_DELETE,, predicate_omit_if_no_muzzle_flash )
-json.add_transform( "stringify_weapon", "$smokeSpec:object", json.XJ_DELETE,, predicate_omit_if_no_smoke )
-json.add_transform( "stringify_weapon", "$glowColor", json.XJ_DELETE,, predicate_omit_if_no_glow )
-' booleans
-json.add_transform( "stringify_weapon", "$convergeOnPoint", json.XJ_DELETE,, predicate_omit_if_boolean_equals_FALSE)
-json.add_transform( "stringify_weapon", "$darkCore", json.XJ_DELETE,, predicate_omit_if_boolean_equals_FALSE )
-json.add_transform( "stringify_weapon", "$separateRecoilForLinkedBarrels", json.XJ_DELETE,, predicate_omit_if_boolean_equals_FALSE )
-json.add_transform( "stringify_weapon", "$interruptibleBurst", json.XJ_DELETE,, predicate_omit_if_boolean_equals_FALSE )
-json.add_transform( "stringify_weapon", "$autocharge", json.XJ_DELETE,, predicate_omit_if_boolean_equals_FALSE )
-json.add_transform( "stringify_weapon", "$renderBelowAllWeapons", json.XJ_DELETE,, predicate_omit_if_boolean_equals_FALSE )
-json.add_transform( "stringify_weapon", "$beamFireOnlyOnFullCharge", json.XJ_DELETE,, predicate_omit_if_boolean_equals_FALSE )
-json.add_transform( "stringify_weapon", "$showDamageWhenDecorative", json.XJ_DELETE,, predicate_omit_if_boolean_equals_FALSE )
-json.add_transform( "stringify_weapon", "$requiresFullCharge", json.XJ_DELETE,, predicate_omit_if_boolean_equals_TRUE )
-json.add_transform( "stringify_weapon", "$animateWhileFiring", json.XJ_DELETE,, predicate_omit_if_boolean_equals_TRUE )
-json.add_transform( "stringify_weapon", "$alwaysAnimate", json.XJ_DELETE,, predicate_omit_if_boolean_equals_TRUE )
-' unknow things
-json.add_transform( "stringify_weapon", "$specialWeaponGlowWidth:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
-json.add_transform( "stringify_weapon", "$specialWeaponGlowHeight:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
+config_json_transforms()
 
 '////////////////////////////////////////////////
 'MARK Local var init
@@ -306,7 +187,7 @@ data.update_weapon()
 
 'MARK init UI
 init_gui_menus()
-rebuildFunctionMenu(0)
+rebuildFunctionMenu(MENU_MODE_SHIP) 'default mode: ship
 
 'MARK init help
 load_help()
@@ -672,9 +553,9 @@ Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
       data.snapshots_undo:TList = CreateList()
       data.snapshots_redo:TList = CreateList()
     EndSelect
-  Case fileMenu[2] 'load mod
+  Case fileMenu[MENU_FILE_LOAD_MOD] 'load mod
     load_mod( ed, data )
-  Case fileMenu[3] 'load data
+  Case fileMenu[MENU_FILE_LOAD_DATA] 'load data
     If data.changed
       If Not Confirm(LocalizeString("{{msg_unsaved_open_new}}") ) Then Return hit
     EndIf
@@ -697,12 +578,12 @@ Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
     EndSelect
     data.take_initshot()
     data.changed = False
-  Case fileMenu[4] 'load image
+  Case fileMenu[MENU_FILE_LOAD_IMAGE] 'load image
     Select ed.program_mode
       Case "ship", "skin", "variant", "csv", "csv_wing"
       load_ship_image( ed, data, sprite )
     EndSelect
-  Case fileMenu[5] 'save data
+  Case fileMenu[MENU_FILE_SAVE] 'save data
     Select ed.program_mode
     Case "ship"
       Local data_path$ = RequestFile( LocalizeString( "{{wt_save_ship}}"), "ship", True, APP.data_dir + data.ship.hullId + ".ship" )
@@ -743,8 +624,8 @@ Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
     Case "csv_weapon"
       sub_weapon_csv.Save( ed, data, sprite )
     EndSelect
-  Case fileMenu[6] 'exit
-    EmitEvent(CreateEvent(EVENT_WINDOWCLOSE, MainWindow) )
+  Case fileMenu[MENU_FILE_EXIT] 'exit
+    end_program( data )
   Default
     hit = False
   End Select
@@ -756,7 +637,7 @@ End Function
 Function check_mode_menu%(ed:TEditor, data:TData, sprite:TSprite)
   Local hit% = True
   Select EventSource()
-  Case modeMenu[1] 'm_mode_ship
+  Case modeMenu[MENU_MODE_SHIP] 'm_mode_ship
     If ed.program_mode = "ship" Then Return True
     'if coming from variant editing, go right into weapons mode editing
     If ed.program_mode = "variant" Then ed.mode = "weapon_slots" Else ed.mode = "none"
@@ -764,43 +645,43 @@ Function check_mode_menu%(ed:TEditor, data:TData, sprite:TSprite)
     ed.program_mode = "ship"
     ed.weapon_lock_i = - 1
     ed.field_i = 0
-    RadioMenuArray( 1, modeMenu )
-    rebuildFunctionMenu(1 -1)
-  Case modeMenu[2] 'm_mode_variant
+    RadioMenuArray( MENU_MODE_SHIP, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_SHIP)
+  Case modeMenu[MENU_MODE_VARIANT] 'm_mode_variant
     If ed.program_mode = "variant" Then Return True
     sub_set_variant.Activate( ed, data, sprite )
-    RadioMenuArray( 2, modeMenu )
-    rebuildFunctionMenu(2 -1)
-  Case modeMenu[3] 'm_mode_ship_state
+    RadioMenuArray( MENU_MODE_VARIANT, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_VARIANT)
+  Case modeMenu[MENU_MODE_SKIN] 'm_mode_skin
     If ed.program_mode = "skin" Then Return True
     sub_set_skin.Activate( ed, data, sprite )
-    RadioMenuArray( 3, modeMenu )
-    rebuildFunctionMenu(3 -1)
-  Case modeMenu[4] 'm_mode_ship_state
+    RadioMenuArray( MENU_MODE_SKIN, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_SKIN)
+  Case modeMenu[MENU_MODE_SHIPSTATS] 'm_mode_ship_stats
     If ed.program_mode = "csv" Then Return True
     sub_ship_csv.Activate( ed, data, sprite )
-    RadioMenuArray( 4, modeMenu )
-    rebuildFunctionMenu(4 -1)
-  Case modeMenu[5] 'm_mode_wing
+    RadioMenuArray( MENU_MODE_SHIPSTATS, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_SHIPSTATS)
+  Case modeMenu[MENU_MODE_WING] 'm_mode_wing
     If ed.program_mode = "csv_wing" Then Return True
     sub_wing_csv.Activate( ed, data, sprite )
-    RadioMenuArray( 5, modeMenu )
-    rebuildFunctionMenu(5 -1)
-  Case modeMenu[6] 'm_mode_weapon
+    RadioMenuArray( MENU_MODE_WING, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_WING)
+  Case modeMenu[MENU_MODE_WEAPON] 'm_mode_weapon
     If ed.program_mode = "weapon" Then Return True
     sub_weapon.Activate( ed, data, sprite )
-    RadioMenuArray( 6, modeMenu )
-    rebuildFunctionMenu(6 -1)
-  Case modeMenu[7] 'm_mode_weapon_state
+    RadioMenuArray( MENU_MODE_WEAPON, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_WEAPON)
+  Case modeMenu[MENU_MODE_WEAPONSTATS] 'm_mode_weapon_stats
     If ed.program_mode = "csv_weapon" Then Return True
     sub_weapon_csv.Activate( ed, data, sprite )
-    RadioMenuArray( 7, modeMenu )
-    rebuildFunctionMenu(7 -1)
-  ' Case modeMenu[8] 'm_mode_projectile
+    RadioMenuArray( MENU_MODE_WEAPONSTATS, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_WEAPONSTATS)
+  ' Case modeMenu[MENU_MODE_PROJECTILE] 'm_mode_projectile
   '   If ed.program_mode = "proj" Then Return True
   '   sub_projectile.Activate( ed, data, sprite )
-  '   RadioMenuArray( 8, modeMenu )
-  '   rebuildFunctionMenu(8 -1)
+  '   RadioMenuArray( MENU_MODE_PROJECTILE, modeMenu )
+  '   rebuildFunctionMenu(MENU_MODE_PROJECTILE)
   Default
     hit = False
   End Select
@@ -883,56 +764,56 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
     
     Case "ship"
       Select EventSource()
-      Case functionMenu[5] 'exit
-        ed.last_mode = ed.mode
-        ed.mode = "none"
-        ed.field_i = 0  
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_CENTER] 'mass center
-        sub_set_ship_center.Activate( ed, data, sprite )
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_SHIELD] 'shield center
-        sub_set_shield_center.Activate( ed, data, sprite )
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BOUNDS] 'bounds
-        sub_set_bounds.Activate( ed, data, sprite )
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_WEAPONSLOTS] 'weapon slots
-        sub_set_weapon_slots.Activate( ed, data, sprite )
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINWEAPONS], functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_DECORATIVE] 'built-in or decorate weapon mode, check it in Activate later
-        sub_set_built_in_weapons.Activate( ed, data, sprite )
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINHULLMODS] 'built-in hullmods
-        sub_set_built_in_hullmods.Activate( ed, data, sprite )
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINWINGS] 'built-in wings
-        sub_set_built_in_wings.Activate( ed, data, sprite )
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_ENGINE] 'engine slots
-        sub_set_engine_slots.Activate( ed, data, sprite )
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_LAUNCHBAYS] 'launch bays
-        sub_launchbays.Activate( ed, data, sprite )
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_PREVIEW] 'preview
-        sub_preview_all.Activate( ed, data, sprite )
-      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_MORE] 'show more
-        sub_show_more.Activate( ed, data, sprite )
-      Case functionMenu[MENU_FUNCTION_DETAILS] 'string edit
-        sub_string_data.Activate( ed, data, sprite )
-      Default
-        hit = False
+        Case functionMenu[5] 'exit
+          ed.last_mode = ed.mode
+          ed.mode = "none"
+          ed.field_i = 0  
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_CENTER] 'mass center
+          sub_set_ship_center.Activate( ed, data, sprite )
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_SHIELD] 'shield center
+          sub_set_shield_center.Activate( ed, data, sprite )
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BOUNDS] 'bounds
+          sub_set_bounds.Activate( ed, data, sprite )
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_WEAPONSLOTS] 'weapon slots
+          sub_set_weapon_slots.Activate( ed, data, sprite )
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINWEAPONS], functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_DECORATIVE] 'built-in or decorative weapon mode, check it in Activate later
+          sub_set_built_in_weapons.Activate( ed, data, sprite )
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINHULLMODS] 'built-in hullmods
+          sub_set_built_in_hullmods.Activate( ed, data, sprite )
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINWINGS] 'built-in wings
+          sub_set_built_in_wings.Activate( ed, data, sprite )
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_ENGINE] 'engine slots
+          sub_set_engine_slots.Activate( ed, data, sprite )
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_LAUNCHBAYS] 'launch bays
+          sub_launchbays.Activate( ed, data, sprite )
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_PREVIEW] 'preview
+          sub_preview_all.Activate( ed, data, sprite )
+        Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_MORE] 'show more
+          sub_show_more.Activate( ed, data, sprite )
+        Case functionMenu[MENU_FUNCTION_DETAILS] 'string edit
+          sub_string_data.Activate( ed, data, sprite )
+        Default
+          hit = False
       EndSelect
     
     Case "variant"
       Select EventSource()
-      Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_STRIPALL]
-        load_variant_data( ed, data, sprite, True ) 'strip all  
-      Case functionMenu[MENU_FUNCTION_DETAILS]
-        sub_string_data.Activate( ed, data, sprite ) 'string edit
-      Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_MORE] 'show more
-        sub_show_more.Activate( ed, data, sprite )
-      Default
-        hit = False
+        Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_STRIPALL]
+          load_variant_data( ed, data, sprite, True ) 'strip all  
+        Case functionMenu[MENU_FUNCTION_DETAILS]
+          sub_string_data.Activate( ed, data, sprite ) 'string edit
+        Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_MORE] 'show more
+          sub_show_more.Activate( ed, data, sprite )
+        Default
+          hit = False
       EndSelect
     
     Case "weapon"
       Select EventSource()
-      Case functionMenu[MENU_FUNCTION_DETAILS]
-        sub_string_data.Activate( ed, data, sprite ) 'string edit
-      Default
-        hit = False
+        Case functionMenu[MENU_FUNCTION_DETAILS]
+          sub_string_data.Activate( ed, data, sprite ) 'string edit
+        Default
+          hit = False
       EndSelect
 
     Default

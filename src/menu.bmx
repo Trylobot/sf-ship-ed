@@ -25,6 +25,7 @@ Global MENU_MODE_SHIPSTATS% = s; s:+1
 Global MENU_MODE_WING% = s; s:+1
 Global MENU_MODE_WEAPON% = s; s:+1
 Global MENU_MODE_WEAPONSTATS% = s; s:+1
+'Global MENU_MODE_PROJECTILE% = s; s:+1
 Global modeMenu:TGadget[s]
 s = 0
 Global MENU_FUNCTION% = s; s:+1
