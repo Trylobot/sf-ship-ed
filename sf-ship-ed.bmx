@@ -50,6 +50,7 @@ Incbin "release/ENG.ini"
 Include "src/functions_misc.bmx"
 Include "src/drawing_misc.bmx"
 Include "src/instaquit.bmx"
+Include "src/menu.bmx"
 Include "src/TextWidget.type.bmx"
 Include "src/TKeyboardHelpWidget.type.bmx"
 Include "src/TStarfarerShip.type.bmx"
@@ -77,6 +78,7 @@ Include "src/TModalSetShieldCenter.type.bmx"
 Include "src/TModalSetWeaponSlots.type.bmx"
 Include "src/TModalSetBuiltInWeapons.type.bmx"
 Include "src/TModalSetBuiltInHullMods.type.bmx"
+Include "src/TModalSetBuiltInWings.type.bmx"
 Include "src/TModalSetEngineSlots.type.bmx"
 Include "src/TModalSetStringData.type.bmx"
 Include "src/TModalLaunchBays.type.bmx"
@@ -302,108 +304,12 @@ data.update()
 data.update_variant()
 data.update_weapon()
 
+'MARK init UI
+init_gui_menus()
+rebuildFunctionMenu(0)
 
-
-'////////////////////////////////////////////////
 'MARK init help
 load_help()
-'MARK init UI
-'TODO init UI
-'file menu
-Global fileMenu:TGadget[7]
-fileMenu[0] = CreateMenu("{{m_file}}", 0, WindowMenu(MainWindow) )
-fileMenu[1] = CreateMenu("{{m_file_new}}", 201, fileMenu[0], KEY_N, MODIFIER_CONTROL | MODIFIER_ALT)
-CreateMenu"", 0, filemenu[0]
-fileMenu[2] = CreateMenu("{{m_file_loadmod}}", 202, fileMenu[0], KEY_M)
-fileMenu[3] = CreateMenu("{{m_file_loaddata}}", 203, fileMenu[0], KEY_D)
-fileMenu[4] = CreateMenu("{{m_file_loadimg}}", 204, fileMenu[0], KEY_I)
-CreateMenu"", 0, fileMenu[0]
-fileMenu[5] = CreateMenu("{{m_file_save}}", 205, fileMenu[0], KEY_V)
-CreateMenu"", 0, fileMenu[0]
-fileMenu[6] = CreateMenu("{{m_file_exit}}", 206, fileMenu[0], KEY_F4, MODIFIER_ALT)
-'mode menu
-Global modeMenu:TGadget[8]
-modemenu[0] = CreateMenu("{{m_mode}}", 0, WindowMenu(MainWindow) )
-modemenu[1] = CreateMenu("{{m_mode_ship}}", 301, modemenu[0] , KEY_1)
-modeMenu[2] = CreateMenu("{{m_mode_variant}}", 302, modeMenu[0] , KEY_2)
-modeMenu[3] = CreateMenu("{{m_mode_skin}}", 303, modemenu[0] , KEY_3)
-modeMenu[4] = CreateMenu("{{m_mode_shipstate}}", 303, modeMenu[0] , KEY_4)
-modeMenu[5] = CreateMenu("{{m_mode_wing}}", 304, modeMenu[0] , KEY_5)
-modeMenu[6] = CreateMenu("{{m_mode_weapon}}", 305, modeMenu[0] , KEY_6)
-modeMenu[7] = CreateMenu("{{m_mode_weaponstate}}", 306, modeMenu[0] , KEY_7)
-CheckMenu(modeMenu[1])
-Rem
-
-function menu
-this is a little too complex
-[0]root; [1]undo Ctrl+Z; [2]redo Ctrl+Y; [3]details T; [4]remove BACKSPACE; [5]exit ESCAPE[]
-EndRem
-Global functionMenu:TGadget[9]
-functionMenu[0] = CreateMenu("{{m_function}}", 0, WindowMenu(MainWindow) )
-functionMenu[1] = CreateMenu("{{m_function_undo}}", 401, functionMenu[0], KEY_Z, MODIFIER_CONTROL )
-DisableMenu(functionMenu[1])
-functionMenu[2] = CreateMenu("{{m_function_redo}}", 402, functionMenu[0], KEY_Y, MODIFIER_CONTROL )
-DisableMenu(functionMenu[2])
-CreateMenu"", 0, functionMenu[0]
-functionMenu[3] = CreateMenu("{{m_function_details}}", 403, functionMenu[0], KEY_T )
-functionMenu[4] = CreateMenu("{{m_function_remove}}", 404, functionMenu[0], KEY_BACKSPACE )
-'Exit
-functionMenu[5] = CreateMenu("{{m_function_exit}}", 405, functionMenu[0], KEY_ESCAPE )
-functionMenu[6] = CreateMenu("{{m_function_zoom}}", 406, functionMenu[0] )
-functionMenu[7] = CreateMenu("{{m_function_zoomin}}", 407, functionMenu[6], KEY_EQUALS, MODIFIER_CONTROL )
-functionMenu[8] = CreateMenu("{{m_function_zoomout}}", 408, functionMenu[6], KEY_MINUS, MODIFIER_CONTROL )
-CreateMenu"", 0, functionMenu[0]
-
-'animateMene, dock on the end of functionMenu for now.
-Global animateMenu:TGadget[5]
-animateMenu[0] = CreateMenu("{{m_function_Animate}}", 460, functionMenu[0] )
-animateMenu[1] = CreateMenu("{{m_function_Animate_play}}", 461, animateMenu[0], KEY_UP )
-animateMenu[2] = CreateMenu("{{m_function_Animate_stop}}", 462, animateMenu[0], KEY_DOWN )
-animateMenu[3] = CreateMenu("{{m_function_Animate_next}}", 463, animateMenu[0], KEY_LEFT )
-animateMenu[4] = CreateMenu("{{m_function_Animate_back}}", 464, animateMenu[0], KEY_RIGHT )
-'Sub Functions's that got switch
-Global functionMenuSub:TGadget[][] = New TGadget[][5]
-rebuildFunctionMenu(0)
-'optionMenu
-Global optionMenu:TGadget[12]
-optionMenu[0] = CreateMenu("{{m_option}}", 0, WindowMenu(MainWindow) )
-optionMenu[9] = CreateMenu("{{m_option_mirror}}", 501, optionMenu[0], KEY_SPACE )
-optionMenu[10] = CreateMenu("{{m_option_vanilla}}", 501, optionMenu[0], KEY_TILDE )
-CreateMenu"", 0, optionMenu[0]
-optionMenu[1] = CreateMenu("{{m_option_help}}", 501, optionMenu[0], KEY_F1 )
-optionMenu[2] = CreateMenu("{{m_option_json}}", 502, optionMenu[0], KEY_F2 )
-optionMenu[3] = CreateMenu("{{m_option_guides}}", 503, optionMenu[0], KEY_F3 )
-CreateMenu"", 0, optionMenu[0]
-optionMenu[4] = CreateMenu("{{m_option_weapondrawer}}", 504, optionMenu[0], KEY_F5 )
-optionMenu[5] = CreateMenu("{{m_option_playAnimate}}", 505, optionMenu[0], KEY_F6 )
-optionMenu[6] = CreateMenu("{{m_option_stopAnimate}}", 506, optionMenu[0], KEY_F7 )
-optionMenu[7] = CreateMenu("{{m_option_resetAnimate}}", 507, optionMenu[0], KEY_F8 )
-CreateMenu"", 0, optionMenu[0]
-'optionMenu[8] = CreateMenu("{{m_option_settings}}", 508, optionMenu[0] )
-optionMenu[11] = CreateMenu("{{m_option_about}}", 510, optionMenu[0])
-UpdateWindowMenu(MainWindow)
-Global mainMenuNeedUpdate% = False
-
-'Local testWindow:TGadget = CreateWindow("test", 0, 0, 400, 400, Null)
-'Local MyText:TGadget = CreateTextArea(0, 0, 380, 360, testWindow)
-
-'Global toolWindow:TGadget = CreateWindow("Mode, Tool, etc.", 0, 0, 200, 600, mainWindow, WINDOW_TITLEBAR | WINDOW_TOOL)
-'Global TBtn_file:TGadget[4]
-' TBtn_file[0] = CreateButton("New Data", 10, 10, 90, 20, toolWindow, BUTTON_PUSH)
-' TBtn_file[1] = CreateButton("Save Data", 100, 10, 90, 20, toolWindow, BUTTON_PUSH)
-' TBtn_file[2] = CreateButton("Load Data", 10, 30, 90, 20, toolWindow, BUTTON_PUSH)
-' TBtn_file[3] = CreateButton("Load Img", 100, 30, 90, 20, toolWindow, BUTTON_PUSH)
-'Global toolWindowCruY% = 30
-'toolWindowCruY :+ 20
-'Global modePanel:TGadget = CreatePanel(15, toolWindowCruY, 170, 150, toolWindow, PANEL_GROUP, "Mode Select")
-'Global TBtn_mode:TGadget[5]
-' TBtn_mode[0] = CreateButton("Ship Edit Mode", 0, 10, ClientWidth(modePanel) - 10 , 20, modePanel, BUTTON_RADIO)
-' TBtn_mode[1] = CreateButton("Variant Edit Mode", 0, 30, ClientWidth(modePanel) - 10 , 20, modePanel, BUTTON_RADIO)
-' TBtn_mode[2] = CreateButton("CSV Edit Mode", 0, 50, ClientWidth(modePanel) - 10 , 20, modePanel, BUTTON_RADIO)
-' TBtn_mode[3] = CreateButton("Wing CSV Edit Mode", 0, 70, ClientWidth(modePanel) - 10 , 20, modePanel, BUTTON_RADIO)
-' TBtn_mode[4] = CreateButton("Weapon Edit Mode", 0, 90, ClientWidth(modePanel) - 10 , 20, modePanel, BUTTON_RADIO)
-' TBtn_mode[5] = CreateButton("Weapon CSV Edit Mode", 0, 110, ClientWidth(modePanel) - 10 , 20, modePanel, BUTTON_RADIO)
-'SetButtonState( TBtn_mode[0], 1 )
 
 '////////////////////////////////////////////////
 
@@ -441,6 +347,7 @@ Global sub_set_shield_center:TModalSetShieldCenter = New TModalSetShieldCenter
 Global sub_set_weapon_slots:TModalSetWeaponSlots = New TModalSetWeaponSlots
 Global sub_set_built_in_weapons:TModalSetBuiltInWeapons = New TModalSetBuiltInWeapons
 Global sub_set_built_in_hullmods:TModalSetBuiltInHullMods = New TModalSetBuiltInHullMods
+Global sub_set_built_in_wings:TModalSetBuiltInWings = New TModalSetBuiltInWings
 Global sub_set_engine_slots:TModalSetEngineSlots = New TModalSetEngineSlots
 Global sub_string_data:TModalSetStringData = New TModalSetStringData
 Global sub_launchbays:TModalLaunchBays = New TModalLaunchBays
@@ -633,6 +540,8 @@ Repeat
               sub_set_built_in_weapons.Draw( ed, data, sprite )
             Case "built_in_hullmods"
               sub_set_built_in_hullmods.Draw( ed, data, sprite )
+            Case "built_in_wings"
+              sub_set_built_in_wings.Draw( ed, data, sprite )
             Case "engine_slots"
               sub_set_engine_slots.Draw( ed, data, sprite )
             Case "launch_bays"
@@ -725,7 +634,7 @@ End
 Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
   Local hit% = True
   Select EventSource()
-  Case fileMenu[1] 'new file
+  Case fileMenu[MENU_FILE_NEW] 'new file
     If data.changed
       If Not Confirm(LocalizeString("{{msg_unsaved_open_new}}") ) Then Return hit
     EndIf
@@ -856,42 +765,42 @@ Function check_mode_menu%(ed:TEditor, data:TData, sprite:TSprite)
     ed.weapon_lock_i = - 1
     ed.field_i = 0
     RadioMenuArray( 1, modeMenu )
-    rebuildFunctionMenu(0)
+    rebuildFunctionMenu(1 -1)
   Case modeMenu[2] 'm_mode_variant
     If ed.program_mode = "variant" Then Return True
     sub_set_variant.Activate( ed, data, sprite )
     RadioMenuArray( 2, modeMenu )
-    rebuildFunctionMenu(1)
+    rebuildFunctionMenu(2 -1)
   Case modeMenu[3] 'm_mode_ship_state
     If ed.program_mode = "skin" Then Return True
     sub_set_skin.Activate( ed, data, sprite )
     RadioMenuArray( 3, modeMenu )
-    rebuildFunctionMenu(2)
+    rebuildFunctionMenu(3 -1)
   Case modeMenu[4] 'm_mode_ship_state
     If ed.program_mode = "csv" Then Return True
     sub_ship_csv.Activate( ed, data, sprite )
     RadioMenuArray( 4, modeMenu )
-    rebuildFunctionMenu(3)
+    rebuildFunctionMenu(4 -1)
   Case modeMenu[5] 'm_mode_wing
     If ed.program_mode = "csv_wing" Then Return True
     sub_wing_csv.Activate( ed, data, sprite )
     RadioMenuArray( 5, modeMenu )
-    rebuildFunctionMenu(4)
+    rebuildFunctionMenu(5 -1)
   Case modeMenu[6] 'm_mode_weapon
     If ed.program_mode = "weapon" Then Return True
     sub_weapon.Activate( ed, data, sprite )
     RadioMenuArray( 6, modeMenu )
-    rebuildFunctionMenu(5)
+    rebuildFunctionMenu(6 -1)
   Case modeMenu[7] 'm_mode_weapon_state
     If ed.program_mode = "csv_weapon" Then Return True
     sub_weapon_csv.Activate( ed, data, sprite )
     RadioMenuArray( 7, modeMenu )
-    rebuildFunctionMenu(6)
+    rebuildFunctionMenu(7 -1)
   ' Case modeMenu[8] 'm_mode_projectile
   '   If ed.program_mode = "proj" Then Return True
   '   sub_projectile.Activate( ed, data, sprite )
   '   RadioMenuArray( 8, modeMenu )
-  '   rebuildFunctionMenu(7)
+  '   rebuildFunctionMenu(8 -1)
   Default
     hit = False
   End Select
@@ -971,59 +880,67 @@ End Function
 Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
   Local hit% = True
   Select ed.program_mode
-  Case "ship"
-    Select EventSource()
-    Case functionMenu[5] 'exit
-      ed.last_mode = ed.mode
-      ed.mode = "none"
-      ed.field_i = 0  
-    Case functionMenuSub[0][0] 'mass center
-      sub_set_ship_center.Activate( ed, data, sprite )
-    Case functionMenuSub[0][1] 'shield center
-      sub_set_shield_center.Activate( ed, data, sprite )
-    Case functionMenuSub[0][2] 'bounds
-      sub_set_bounds.Activate( ed, data, sprite )
-    Case functionMenuSub[0][3] 'weapon slots
-      sub_set_weapon_slots.Activate( ed, data, sprite )
-    Case functionMenuSub[0][4], functionMenuSub[0][5] 'built-in or decorate weapon mode, check it in Activate later
-      sub_set_built_in_weapons.Activate( ed, data, sprite )
-    Case functionMenuSub[0][6] 'built in hullmods
-      sub_set_built_in_hullmods.Activate( ed, data, sprite )
-    Case functionMenuSub[0][7] 'engine slots
-      sub_set_engine_slots.Activate( ed, data, sprite )
-    Case functionMenuSub[0][8] 'launch bays
-      sub_launchbays.Activate( ed, data, sprite )
-    Case functionMenuSub[0][9] 'preview
-      sub_preview_all.Activate( ed, data, sprite )
-    Case functionMenuSub[0][10] 'show more
-      sub_show_more.Activate( ed, data, sprite )
-    Case functionMenu[3] 'string edit
-      sub_string_data.Activate( ed, data, sprite )
+    
+    Case "ship"
+      Select EventSource()
+      Case functionMenu[5] 'exit
+        ed.last_mode = ed.mode
+        ed.mode = "none"
+        ed.field_i = 0  
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_CENTER] 'mass center
+        sub_set_ship_center.Activate( ed, data, sprite )
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_SHIELD] 'shield center
+        sub_set_shield_center.Activate( ed, data, sprite )
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BOUNDS] 'bounds
+        sub_set_bounds.Activate( ed, data, sprite )
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_WEAPONSLOTS] 'weapon slots
+        sub_set_weapon_slots.Activate( ed, data, sprite )
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINWEAPONS], functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_DECORATIVE] 'built-in or decorate weapon mode, check it in Activate later
+        sub_set_built_in_weapons.Activate( ed, data, sprite )
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINHULLMODS] 'built-in hullmods
+        sub_set_built_in_hullmods.Activate( ed, data, sprite )
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINWINGS] 'built-in wings
+        sub_set_built_in_wings.Activate( ed, data, sprite )
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_ENGINE] 'engine slots
+        sub_set_engine_slots.Activate( ed, data, sprite )
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_LAUNCHBAYS] 'launch bays
+        sub_launchbays.Activate( ed, data, sprite )
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_PREVIEW] 'preview
+        sub_preview_all.Activate( ed, data, sprite )
+      Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_MORE] 'show more
+        sub_show_more.Activate( ed, data, sprite )
+      Case functionMenu[MENU_FUNCTION_DETAILS] 'string edit
+        sub_string_data.Activate( ed, data, sprite )
+      Default
+        hit = False
+      EndSelect
+    
+    Case "variant"
+      Select EventSource()
+      Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_STRIPALL]
+        load_variant_data( ed, data, sprite, True ) 'strip all  
+      Case functionMenu[MENU_FUNCTION_DETAILS]
+        sub_string_data.Activate( ed, data, sprite ) 'string edit
+      Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_MORE] 'show more
+        sub_show_more.Activate( ed, data, sprite )
+      Default
+        hit = False
+      EndSelect
+    
+    Case "weapon"
+      Select EventSource()
+      Case functionMenu[MENU_FUNCTION_DETAILS]
+        sub_string_data.Activate( ed, data, sprite ) 'string edit
+      Default
+        hit = False
+      EndSelect
+
     Default
       hit = False
-    EndSelect
-  Case "variant"
-    Select EventSource()
-    Case functionMenuSub[1][8]
-      load_variant_data( ed, data, sprite, True ) 'strip all  
-    Case functionMenu[3]
-      sub_string_data.Activate( ed, data, sprite ) 'string edit
-    Case functionMenuSub[1][9] 'show more
-      sub_show_more.Activate( ed, data, sprite )
-    Default
-      hit = False
-    EndSelect
-  Case "weapon"
-    Select EventSource()
-    Case functionMenu[3]
-      sub_string_data.Activate( ed, data, sprite ) 'string edit
-    Default
-      hit = False
-    EndSelect
-  Default
-    hit = False
+
   End Select
   updata_weapondrawermenu(ed)
+
   Return hit
 End Function
 
@@ -1044,6 +961,8 @@ Function check_sub_routines% ( ed:TEditor, data:TData, sprite:TSprite )
           sub_set_built_in_weapons.Update( ed, data, sprite )
         Case "built_in_hullmods"
           sub_set_built_in_hullmods.Update( ed, data, sprite )
+        Case "built_in_wings"
+          sub_set_built_in_wings.Update( ed, data, sprite )
         Case "engine_slots"
           sub_set_engine_slots.Update( ed, data, sprite )
         Case "launch_bays"
@@ -1269,6 +1188,7 @@ Function draw_ship( ed:TEditor, sprite:TSprite )
     If ed.mode = "weapon_slots" ..
     Or ed.mode = "built_in_weapons" ..
     Or ed.mode = "built_in_hullmods" ..
+    Or ed.mode = "built_in_wings" ..
     Or ed.mode = "launch_bays" ..
     Or ed.mode = "string_data" ..
     Or ed.program_mode = "variant" ..
@@ -1923,54 +1843,3 @@ Function FlushEvent%()
   Return i
 End Function
 
-
-Function rebuildFunctionMenu(index%)
-  'nuke them first
-  For Local i:TGadget[] = EachIn functionMenuSub
-    For Local j:TGadget = EachIn i
-      FreeGadget(j)
-    Next
-  Next
-  'then rebuile it
-  Select Index
-  Case 0
-    'mode 1 Functions
-    functionMenuSub[0] = New TGadget[11]
-    functionMenuSub[0][0] = CreateMenu("{{m_function_center}}", 410, functionMenu[0], KEY_C )
-    functionMenuSub[0][1] = CreateMenu("{{m_function_shield}}", 411, functionMenu[0], KEY_S )
-    functionMenuSub[0][2] = CreateMenu("{{m_function_bounds}}", 412, functionMenu[0], KEY_B )
-    functionMenuSub[0][3] = CreateMenu("{{m_function_weaponSlots}}", 413, functionMenu[0], KEY_W )
-    functionMenuSub[0][4] = CreateMenu("{{m_function_builtInWeapons}}", 414, functionMenu[0], KEY_U )
-    functionMenuSub[0][5] = CreateMenu("{{m_function_decorate}}", 415, functionMenu[0], KEY_R )
-    functionMenuSub[0][6] = CreateMenu("{{m_function_builtInHullmods}}", 416, functionMenu[0], KEY_H )
-    functionMenuSub[0][7] = CreateMenu("{{m_function_engine}}", 417, functionMenu[0], KEY_E )
-    functionMenuSub[0][8] = CreateMenu("{{m_function_launchBays}}", 418, functionMenu[0], KEY_L )
-    functionMenuSub[0][9] = CreateMenu("{{m_function_preview}}", 419, functionMenu[0], KEY_P )
-    functionMenuSub[0][10] = CreateMenu("{{m_function_more}}", 420, functionMenu[0], KEY_Q )
-  Case 1
-    'mode 2 Functions
-    functionMenuSub[1] = New TGadget[10]
-    functionMenuSub[1][0] = CreateMenu("{{m_function_WeaponGroups}}", 420, functionMenu[0], KEY_G )
-    functionMenuSub[1][1] = CreateMenu("{{m_function_vent}}", 421, functionMenu[0] )
-    functionMenuSub[1][2] = CreateMenu("{{m_function_vent_add}}", 4210, functionMenuSub[1][1], KEY_F )  
-    functionMenuSub[1][3] = CreateMenu("{{m_function_vent_remove}}", 4211, functionMenuSub[1][1], KEY_F, MODIFIER_CONTROL)    
-    functionMenuSub[1][4] = CreateMenu("{{m_function_cap}}", 422, functionMenu[0])
-    functionMenuSub[1][5] = CreateMenu("{{m_function_cap_add}}", 4220, functionMenuSub[1][4], KEY_C)
-    functionMenuSub[1][6] = CreateMenu("{{m_function_cap_remove}}", 4221, functionMenuSub[1][4], KEY_C, MODIFIER_CONTROL)   
-    functionMenuSub[1][7] = CreateMenu("{{m_function_hullmod}}", 423, functionMenu[0], KEY_H )
-    functionMenuSub[1][8] = CreateMenu("{{m_function_stripAll}}", 424, functionMenu[0], KEY_SLASH )
-    functionMenuSub[1][9] = CreateMenu("{{m_function_more}}", 420, functionMenu[0], KEY_Q )
-  'mode 3 Functions skip
-  'mode 4 Functions skip
-  'mode 5 Functions
-  Case 4
-    functionMenuSub[4] = New TGadget[8]
-    functionMenuSub[4][0] = CreateMenu("{{m_function_weapon_offsets}}", 450, functionMenu[0], KEY_O )
-    functionMenuSub[4][1] = CreateMenu("{{m_function_weapon_displaymode}}", 451, functionMenu[0], KEY_H )
-    functionMenuSub[4][2] = CreateMenu("{{m_function_wpimg_main}}", 452, fileMenu[4], KEY_A ) 
-    functionMenuSub[4][3] = CreateMenu("{{m_function_wpimg_barrel}}", 453, fileMenu[4], KEY_G)    
-    functionMenuSub[4][4] = CreateMenu("{{m_function_wpimg_under}}", 454, fileMenu[4], KEY_U)
-    functionMenuSub[4][5] = CreateMenu("{{m_function_wpimg_glow}}", 455, fileMenu[4], KEY_L)
-    functionMenuSub[4][6] = CreateMenu("{{m_function_weapon_glowtoggle}}", 455, functionMenu[0], KEY_W)     
-  End Select
-End Function

@@ -15,6 +15,7 @@ Type TEditor
 	Field edit_strings_weapon_i%
 	Field edit_strings_engine_i%
 	Field builtIn_hullMod_i%
+	Field builtIn_wing_i%
 	Field variant_hullMod_i%
 	Field group_field_i%
 	'mouse states

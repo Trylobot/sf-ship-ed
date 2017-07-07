@@ -545,7 +545,7 @@ Type TModalSetSkin Extends TSubroutine
 '			If modified Then initialize_weapon_groups_list( ed, data )
 '		Case EVENT_GADGETACTION, EVENT_MENUACTION
 '			Select EventSource()
-'			Case functionMenu[5], functionMenuSub[1][0]
+'			Case functionMenu[MENU_FUNCTION_EXIT], functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_WEAPONGROUPS]
 '				ed.group_field_i = - 1
 '				data.hold_snapshot(False)
 '				updata_weapondrawermenu(ed)
@@ -577,14 +577,14 @@ Type TModalSetSkin Extends TSubroutine
 '			EndIf
 '		Case EVENT_GADGETACTION, EVENT_MENUACTION
 '			Select EventSource()
-'			Case functionMenu[4] ' backsapce
+'			Case functionMenu[MENU_FUNCTION_REMOVE] ' backsapce
 '				'strip non built-in weapon in slot
 '				If ni = - 1 Then Return
 '				If Not weapon_slot.is_builtin()
 '					data.unassign_weapon_from_slot( weapon_slot.id )
 '					data.update_variant()
 '				EndIf
-'			Case functionMenuSub[1][0] 'G
+'			Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_WEAPONGROUPS] 'G
 '				If data.ship.weaponSlots And data.ship.weaponSlots.Length > 0
 '					'enter WEAPON GROUPS mode
 '					ed.group_field_i = 0
@@ -592,25 +592,25 @@ Type TModalSetSkin Extends TSubroutine
 '					If weapon_slot_ids.length <= 0 Then ed.group_field_i = - 1.. 'no weapons
 '					Else data.hold_snapshot(True)
 '				EndIf
-'			Case functionMenuSub[1][2] 'F add Vents
+'			Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT_ADD] 'F add Vents
 '				If Not data.modify_fluxVents( fluxMods_max, False ) Then Return
 '				data.update_variant()
-'			Case functionMenuSub[1][3] 'F add/remove Vents
+'			Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT_REMOVE] 'F add/remove Vents
 '				If Not data.modify_fluxVents( fluxMods_max, True ) Then Return
 '				data.update_variant()
-'			Case functionMenuSub[1][5] 'C add/remove Capacitors
+'			Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP_ADD] 'C add/remove Capacitors
 '				If Not data.modify_fluxCapacitors( fluxMods_max, False ) Then Return
 '				data.update_variant()
-'			Case functionMenuSub[1][6] 'C add/remove Capacitors
+'			Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP_REMOVE] 'C add/remove Capacitors
 '				If Not data.modify_fluxCapacitors( fluxMods_max, True ) Then Return
 '				data.update_variant()
-'			Case functionMenuSub[1][7] 'H edit hullmods
+'			Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_HULLMOD] 'H edit hullmods
 '				'enter HULLMODS mode
 '				ed.variant_hullMod_i = 0
 '				initialize_hullmods_list( ed, data )
 '				data.hold_snapshot(True)
 '				SS.reset()				
-'			Case functionMenuSub[1][8] '/(slash)
+'			Case functionMenuSub[MENU_MODE_VARIANT][8] '/(slash)
 '				load_variant_data( ed, data, sprite, True ) 'strip all	
 '			EndSelect
 '		EndSelect
