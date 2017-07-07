@@ -19,11 +19,14 @@ Type TModalSetStringData Extends TSubroutine
 	Field data_types%[]
 	Field enum_defs$[][]
 
-	Field MODE_SHIP% = 0
-	Field MODE_SHIP_WEAPON%  = 1
-	Field MODE_SHIP_ENGINE% = 2
-	Field MODE_VARIANT% = 3
-	Field MODE_WEAPON% = 4
+	Field MODE_SHIP%               = 0
+	Field MODE_SHIP_WEAPON%        = 1
+	Field MODE_SHIP_ENGINE%        = 2
+	Field MODE_VARIANT%            = 3
+	Field MODE_WEAPON%             = 4
+	Field MODE_SKIN%               = 5
+	Field MODE_SKIN_WEAPON_CHANGE% = 6
+	Field MODE_SHIP_ENGINE_CHANGE% = 7
 	Field subroutine_mode%
 
 	Field customBeamTexTmp:TArray
@@ -61,6 +64,20 @@ Type TModalSetStringData Extends TSubroutine
 				subroutine_mode = MODE_SHIP
 				target = data.ship
 				DebugLogFile(" Editing Ship " + data.ship.hullId)					
+			EndIf
+		Else If ed.program_mode = "skin"
+			If ed.edit_strings_weapon_i <> - 1
+				subroutine_mode = MODE_SKIN_WEAPON_CHANGE
+				'target = data.skin.weaponSlotChanges.ValueForKey(ed.edit_strings_weapon_i)
+				'DebugLogFile(" Editing Weaopn Slot " + ed.edit_strings_weapon_i + " " + (TStarfarerShipWeapon (target) ).id)
+			ElseIf ed.edit_strings_engine_i <> - 1
+				subroutine_mode = MODE_SHIP_ENGINE_CHANGE
+				'target = data.ship.engineSlotChanges.ValueForKey(ed.edit_strings_engine_i)
+				'DebugLogFile(" Editing Engine Slot " + ed.edit_strings_engine_i + " " + edit_strings_engine_i)
+			Else
+				subroutine_mode = MODE_SKIN
+				target = data.skin
+				DebugLogFile(" Editing Ship " + data.skin.skinHullId + "("+data.skin.baseHullId+")")
 			EndIf
 		Else If ed.program_mode = "variant"
 			subroutine_mode = MODE_VARIANT

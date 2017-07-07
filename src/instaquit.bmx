@@ -4,32 +4,43 @@ Global esc_held% = False
 Global esc_press_ts% = MilliSecs()
 Global esc_held_progress_bar_show_time_required% = 180
 Global instaquit_time_required% = 1000
-Global FLAG_instaquit_plz% = False
 
 '-----------------------
 
-Function escape_key_update()
-	If FLAG_instaquit_plz Then Return 'no questions asked
-	'instaquit
+Function escape_key_update( data:TData )
 	If esc_held And (MilliSecs() - esc_press_ts) >= instaquit_time_required
-		'FLAG_instaquit_plz = True
-		EmitEvent CreateEvent(EVENT_WINDOWCLOSE, mainWindow)
-			FlushKeys()	
-	End If
+		end_program( data )
+	EndIf
 	'escape key state
-	If (KeyDown( KEY_ESCAPE ) Or KeyDown( KEY_HOME ))
-		If Not esc_held
-			esc_press_ts = MilliSecs()
-		End If
-		esc_held = True
-	Else
-		esc_held = False
-	End If
-End Function
+	If EventData() = KEY_ESCAPE
+		If EventID() = EVENT_KEYDOWN
+			If Not esc_held
+				esc_press_ts = MilliSecs()
+			EndIf
+			esc_held = True
+		ElseIf EventID() = EVENT_KEYUP
+			esc_held = False
+		EndIf
+	EndIf
+EndFunction
 
-Function escape_key_release%()
-	Return (esc_held And (Not KeyDown( KEY_ESCAPE ) And Not KeyDown( KEY_HOME )))
-End Function
+Function draw_instaquit_progress( scr_w%, scr_h% )
+	If esc_held And (MilliSecs() - esc_press_ts) >= esc_held_progress_bar_show_time_required
+		'draw black transparent screen overlay
+		SetOrigin( 0, 0 )
+		SetRotation( 0 )
+		SetScale( 1, 1 )
+		Local alpha_multiplier# = time_alpha_pct( esc_press_ts + esc_held_progress_bar_show_time_required, esc_held_progress_bar_show_time_required )
+		SetAlpha( 0.75 * alpha_multiplier )
+		SetColor( 0, 0, 0 )
+		DrawRect( 0,0, scr_w,scr_h )
+		'draw progress bar
+		SetAlpha( 1.0 * alpha_multiplier )
+		SetColor( 255, 255, 255 )
+		Local margin% = scr_w/4
+		draw_percentage_bar( margin, scr_h/2 - FONT.Height() - 5, scr_w - 2*margin, 50, Float( MilliSecs() - esc_press_ts ) / Float( instaquit_time_required - 50 ),,,,,,, 2 )
+	EndIf
+EndFunction
 
 Function time_alpha_pct#( ts%, time%, in% = True ) 'either fading IN or OUT
 	Local ms% = MilliSecs()
@@ -44,28 +55,9 @@ Function time_alpha_pct#( ts%, time%, in% = True ) 'either fading IN or OUT
 			Return (1.0 - (Float(ms - ts) / Float(time)))
 		Else
 			Return 0.0
-		End If
+		EndIf
 	End If
-End Function
-
-Function draw_instaquit_progress( scr_w%, scr_h% )
-	If (KeyDown( KEY_ESCAPE ) Or KeyDown( KEY_HOME )) ..
-	And esc_held And (MilliSecs() - esc_press_ts) >= esc_held_progress_bar_show_time_required
-		'draw black transparent screen overlay
-		SetOrigin( 0, 0 )
-		SetRotation( 0 )
-		SetScale( 1, 1 )
-		Local alpha_multiplier# = time_alpha_pct( esc_press_ts + esc_held_progress_bar_show_time_required, esc_held_progress_bar_show_time_required )
-		SetAlpha( 0.75 * alpha_multiplier )
-		SetColor( 0, 0, 0 )
-		DrawRect( 0,0, scr_w,scr_h )
-		'draw progress bar
-		SetAlpha( 1.0 * alpha_multiplier )
-		SetColor( 255, 255, 255 )
-		Local margin% = scr_w/4
-		draw_percentage_bar( margin, scr_h/2 - FONT.Height() - 5, scr_w - 2*margin, 50, Float( MilliSecs() - esc_press_ts ) / Float( instaquit_time_required - 50 ),,,,,,, 2 )
-	End If
-End Function
+EndFunction
 
 Function draw_percentage_bar( ..
 x#, y#, w#, h#, ..
@@ -80,13 +72,13 @@ line_width# = 1.0 )
 		w = Floor( w )
 		h = Floor( h )
 		line_width = Floor( line_width )
-	End If
+	EndIf
 	'normalize
 	If pct > 1.0
 		pct = 1.0
-	Else If pct < 0.0
+	ElseIf pct < 0.0
 		pct = 0.0
-	End If
+	EndIf
 	SetAlpha( a )
 	SetColor( 0, 0, 0 )
 	SetScale( 1, 1 )
@@ -100,5 +92,5 @@ line_width# = 1.0 )
 		DrawRect( x + 2.0*line_width, y + 2.0*line_width, pct*(w - 4.0*line_width), h - 4.0*line_width )
 	Else 'Not borders
 		DrawRect( x, y, pct*w, h )
-	End If
-End Function
+	EndIf
+EndFunction

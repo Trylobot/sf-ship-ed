@@ -2,41 +2,45 @@ Type TStarfarerSkin
 	Field baseHullId$
 	Field skinHullId$
 	Field hullName$
+	Field spriteName$
 	Field descriptionId$
 	Field descriptionPrefix$
 	Field fleetPoints%
 	Field ordnancePoints%
 	Field systemId$
+	Field baseValue%
 	Field baseValueMult#
 	Field removeHints$[]
 	Field addHints$[]
-	Field spriteName$
-	Field removeWeaponSlots$[]' weapon slot id's
-	Field removeEngineSlots%[]' engine slot indices (no id's)
-	Field removeBuiltInMods$[]' hullmod ids
-	Field removeBuiltInWeapons$[]' weapon slot id's
-	Field builtInMods$[]' hullmod ids
-	Field builtInWeapons:TMap'<String,String>  weapon slot id --> weapon id
+	Field removeBuiltInMods$[] ' hullmod ids
+	Field builtInMods$[] ' hullmod ids
+	Field removeWeaponSlots$[] ' weapon slot id's
 	Field weaponSlotChanges:TMap'<String,TStarfarerShipWeapon>  weapon slot id --> TStarfarerShipWeapon
+	Field removeBuiltInWeapons$[] ' weapon slot id's
+	Field builtInWeapons:TMap'<String,String>  weapon slot id --> weapon id
+	Field removeEngineSlots%[] ' engine slot indices (no id's)
+	Field engineSlotChanges:TMap'<String,TStarfarerShipEngine>  engine slot index --> TStarfarerShipEngine
 	
 	Method New()
 		baseHullId = "base_hull"
-		skinHullId = "skin_hull"
-		hullName = "Skin Hull"
+		skinHullId = "base_hull_skin"
+		hullName = "Hull Skin"
+		spriteName = "graphics/ships/skins/new_skin.png"
 		descriptionId = "base_hull"
 		descriptionPrefix = ""
+		baseValue = 0
 		baseValueMult = 1
 		systemId = ""
-		spriteName = "graphics/ships/new_hull.png"
 		removeHints = New String[0]
 		addHints = New String[0]
-		removeWeaponSlots = New String[0]
-		removeEngineSlots = New Int[0]
 		removeBuiltInMods = New String[0]
-		removeBuiltInWeapons = New String[0]
 		builtInMods = New String[0]
-		builtInWeapons = CreateMap()
+		removeWeaponSlots = New String[0]
 		weaponSlotChanges = CreateMap()
+		removeBuiltInWeapons = New String[0]
+		builtInWeapons = CreateMap()
+		removeEngineSlots = New Int[0]
+		engineSlotChanges = CreateMap()
 	End Method
 
 End Type

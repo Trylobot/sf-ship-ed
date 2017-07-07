@@ -5,7 +5,6 @@
 			"file_exclude_patterns":
 			[
 				".gitattributes",
-				"ENG.ini"
 			],
 			"folder_exclude_patterns":
 			[

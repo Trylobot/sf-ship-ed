@@ -6,6 +6,10 @@ Type TData
 	Field json_str$
 	Field json_view:TList'<TextWidget>
 
+	Field skin:TStarfarerSkin
+	Field json_str_skin$
+	Field json_view_skin:TList'<TextWidget>
+
 	Field variant:TStarfarerVariant
 	Field json_str_variant$
 	Field json_view_variant:TList'<TextWidget>
@@ -97,9 +101,24 @@ Type TData
 	
 	Method update_variant()
 		json.formatted = True
-		'encode ship object as json data
+		'encode object as json data
 		json_str_variant = json.stringify( variant, "stringify_variant" )
 		json_view_variant = columnize_text( json_str_variant )
+		changed = True
+		take_snapshot(2)
+	End Method
+
+	'requires subsequent call to update_skin()
+	Method decode_skin( input_json_str$ )
+		skin = TStarfarerSkin( json.parse( input_json_str, "TStarfarerSkin" ))
+		'enforce_skin_internal_consistency()
+	End Method
+	
+	Method update_skin()
+		json.formatted = True
+		'encode object as json data
+		json_str_skin = json.stringify( skin, "stringify_skin" )
+		json_view_skin = columnize_text( json_str_skin )
 		changed = True
 		take_snapshot(2)
 	End Method
@@ -320,7 +339,6 @@ Type TData
 
 
 	'requires subsequent call to update()
-	'this function is not yet ready for prime-time
 	Method insert_bound( img_x#, img_y#, symmetrical% = False )
 		If Not ship.center Then Return
 		If Not ship.bounds
@@ -387,53 +405,6 @@ Type TData
 					ship.bounds = ship.bounds[..nearest_si + 2] + [x, ys] + ship.bounds[nearest_si + 2..]
 				EndIf
 			EndIf
-		EndIf
-	EndMethod
-
-	'requires subsequent call to update_weapon()
-	Method append_weapon_offset( x#, y#, mount_type$, reflect_over_y_axis% = False )
-		If Not weapon Then Return
-		If reflect_over_y_axis Then y = - y
-		Select mount_type
-		Case "TURRET"
-			weapon.turretOffsets = weapon.turretOffsets[..] + [x, y]
-			weapon.turretAngleOffsets = weapon.turretAngleOffsets[..] + [0.0]
-		Case "HARDPOINT"
-			weapon.hardpointOffsets = weapon.hardpointOffsets[..] + [x, y]
-			weapon.hardpointAngleOffsets = weapon.hardpointAngleOffsets[..] + [0.0]
-		End Select
-	EndMethod
-
-	'requires subsequent call to update_weapon()	
-	Method modify_weapon_offset( i%, x#, y#, spr_w#, spr_h#, weapon_display_mode$, reflect_over_y_axis% = False )
-		If Not weapon Then Return
-		Local offsets#[]
-		Select weapon_display_mode
-			Case "TURRET"
-				offsets = weapon.turretOffsets
-				If Not offsets Or i < 0 Or i > offsets.Length-2 Then Return
-				If reflect_over_y_axis Then y :* - 1
-			Case "HARDPOINT"
-				offsets = weapon.hardpointOffsets
-				If Not offsets Or i < 0 Or i > offsets.Length - 2 Then Return
-				If reflect_over_y_axis Then y :* - 1
-		EndSelect
-		If Not offsets Then Return
-		offsets[i] =   x
-		offsets[i + 1] = y
-	EndMethod
-
-	Method remove_nearest_weapon_offset( x#, y#, weapon_display_mode$ )
-		Local nearest_i% = find_nearest_weapon_offset( x, y, weapon_display_mode )
-		If nearest_i <> - 1
-			Select weapon_display_mode
-			Case "TURRET"
-				weapon.turretOffsets = weapon.turretOffsets[..nearest_i] + weapon.turretOffsets[nearest_i + 2..]
-				weapon.turretAngleOffsets = weapon.turretAngleOffsets[..nearest_i / 2] + weapon.turretAngleOffsets[(nearest_i / 2) + 1..]
-			Case "HARDPOINT"
-				weapon.hardpointOffsets = weapon.hardpointOffsets[..nearest_i] + weapon.hardpointOffsets[nearest_i + 2..]
-				weapon.hardpointAngleOffsets = weapon.hardpointAngleOffsets[..nearest_i / 2] + weapon.hardpointAngleOffsets[(nearest_i / 2) + 1..]
-			End Select
 		EndIf
 	EndMethod
 
@@ -702,6 +673,48 @@ Type TData
 		EndIf
 	End Method
 
+	'requires subsequent call to update()
+	Method toggle_builtin_hullmod( hullmod_id$ )
+		If ship.builtInMods.length > 0
+			Local found% = False
+			For Local i% = 0 Until ship.builtInMods.length
+				If ship.builtInMods[i] = hullmod_id
+					'Found, Remove
+					found = True
+					For i = i Until ship.builtInMods.Length-1
+						ship.builtInMods[i] = ship.builtInMods[i+1]
+					Next
+					ship.builtInMods = ship.builtInMods[..ship.builtInMods.length-1]
+				EndIf
+			Next
+			If Not found
+				'Non-Empty but Not Found, Add
+				ship.builtInMods = ship.builtInMods[..ship.builtInMods.length+1]
+				ship.builtInMods[ship.builtInMods.length-1] = hullmod_id
+			EndIf
+		Else
+			'Empty, Add
+			ship.builtInMods = New String[1]
+			ship.builtInMods[0] = hullmod_id
+		EndIf
+	EndMethod
+
+	'requires subsequent call to update()
+	Method add_builtin_wing( wing_id$ )
+		'TODO: enforce limits ? or at least warn about limit exceeded
+		'  primary limiter: (int) ship_data.csv["hullId"]["fighter bays"]
+		'  secondary limiter: (count) ship.weaponSlots WHERE type == "LAUNCH_BAY"
+		ship.builtInWings = ship.builtInWings[..ship.builtInWings.length+1]
+		ship.builtInWings[ship.builtInWings.length-1] = wing_id
+	EndMethod
+
+	'requires subsequent call to update()
+	Method remove_last_builtin_wing()
+		If ship.builtInWings.length > 0
+			ship.builtInWings = ship.builtInWings[..ship.builtInWings.length-1]
+		EndIf
+	EndMethod
+
 	'////////////
 	
 	'requires subsequent call to update_variant()
@@ -750,7 +763,7 @@ Type TData
 			For Local existing_ship_weapon_slot_id$ = EachIn group.weapons.Keys()
 				If ship_weapon_slot_id = existing_ship_weapon_slot_id
 					group.weapons.Remove( ship_weapon_slot_id )
-					'TODO: if the group is empty, remove it (??)
+					'TODO: if the group is empty, remove it (??) -- empty groups aren't visible in-game anyhow
 				EndIf
 			Next
 		Next
@@ -816,39 +829,6 @@ Type TData
 	EndMethod
 
 	'requires subsequent call to update_variant()
-	Method add_hullmod( hullmod_id$ )
-		If variant.hullMods.length > 0
-			For Local existing_hullmod_id$ = EachIn variant.hullMods
-				If existing_hullmod_id = hullmod_id
-					Return 'done
-				EndIf
-			Next
-			variant.hullMods = variant.hullMods[..variant.hullMods.length+1]
-			variant.hullMods[variant.hullMods.length - 1] = hullmod_id
-		Else
-			variant.hullMods = New String[1]
-			variant.hullMods[0] = hullmod_id
-		EndIf
-	EndMethod
-
-	'requires subsequent call to update_variant()
-	Method remove_hullmod( hullmod_id$ )
-		If variant.hullMods.length > 0
-			For Local i% = 0 Until variant.hullMods.length
-				If variant.hullMods[i] = hullmod_id
-					'Found. Remove.
-					For i = i Until variant.hullMods.Length-1
-						variant.hullMods[i] = variant.hullMods[i+1]
-					Next
-					variant.hullMods = variant.hullMods[..variant.hullMods.length-1]
-				EndIf
-			Next
-		Else
-			Return 'done
-		EndIf
-	EndMethod
-
-	'requires subsequent call to update_variant()
 	Method toggle_hullmod( hullmod_id$ )
 		If variant.hullMods.length > 0
 			Local found% = False
@@ -874,33 +854,65 @@ Type TData
 		EndIf
 	EndMethod
 
-	'requires subsequent call to update()
-	Method toggle_builtin_hullmod( hullmod_id$ )
-		If ship.builtInMods.length > 0
-			Local found% = False
-			For Local i% = 0 Until ship.builtInMods.length
-				If ship.builtInMods[i] = hullmod_id
-					'Found, Remove
-					found = True
-					For i = i Until ship.builtInMods.Length-1
-						ship.builtInMods[i] = ship.builtInMods[i+1]
-					Next
-					ship.builtInMods = ship.builtInMods[..ship.builtInMods.length-1]
-				EndIf
-			Next
-			If Not found
-				'Non-Empty but Not Found, Add
-				ship.builtInMods = ship.builtInMods[..ship.builtInMods.length+1]
-				ship.builtInMods[ship.builtInMods.length-1] = hullmod_id
-			EndIf
-		Else
-			'Empty, Add
-			ship.builtInMods = New String[1]
-			ship.builtInMods[0] = hullmod_id
+	'////////////////
+
+	'requires subsequent call to update_weapon()
+	Method append_weapon_offset( x#, y#, mount_type$, reflect_over_y_axis% = False )
+		If Not weapon Then Return
+		If reflect_over_y_axis Then y = - y
+		Select mount_type
+		Case "TURRET"
+			weapon.turretOffsets = weapon.turretOffsets[..] + [x, y]
+			weapon.turretAngleOffsets = weapon.turretAngleOffsets[..] + [0.0]
+		Case "HARDPOINT"
+			weapon.hardpointOffsets = weapon.hardpointOffsets[..] + [x, y]
+			weapon.hardpointAngleOffsets = weapon.hardpointAngleOffsets[..] + [0.0]
+		End Select
+	EndMethod
+
+	'requires subsequent call to update_weapon()	
+	Method modify_weapon_offset( i%, x#, y#, spr_w#, spr_h#, weapon_display_mode$, reflect_over_y_axis% = False )
+		If Not weapon Then Return
+		Local offsets#[]
+		Select weapon_display_mode
+			Case "TURRET"
+				offsets = weapon.turretOffsets
+				If Not offsets Or i < 0 Or i > offsets.Length-2 Then Return
+				If reflect_over_y_axis Then y :* - 1
+			Case "HARDPOINT"
+				offsets = weapon.hardpointOffsets
+				If Not offsets Or i < 0 Or i > offsets.Length - 2 Then Return
+				If reflect_over_y_axis Then y :* - 1
+		EndSelect
+		If Not offsets Then Return
+		offsets[i] =   x
+		offsets[i + 1] = y
+	EndMethod
+
+	'requires subsequent call to update_weapon()	
+	Method remove_nearest_weapon_offset( x#, y#, weapon_display_mode$ )
+		Local nearest_i% = find_nearest_weapon_offset( x, y, weapon_display_mode )
+		If nearest_i <> - 1
+			Select weapon_display_mode
+			Case "TURRET"
+				weapon.turretOffsets = weapon.turretOffsets[..nearest_i] + weapon.turretOffsets[nearest_i + 2..]
+				weapon.turretAngleOffsets = weapon.turretAngleOffsets[..nearest_i / 2] + weapon.turretAngleOffsets[(nearest_i / 2) + 1..]
+			Case "HARDPOINT"
+				weapon.hardpointOffsets = weapon.hardpointOffsets[..nearest_i] + weapon.hardpointOffsets[nearest_i + 2..]
+				weapon.hardpointAngleOffsets = weapon.hardpointAngleOffsets[..nearest_i / 2] + weapon.hardpointAngleOffsets[(nearest_i / 2) + 1..]
+			End Select
 		EndIf
 	EndMethod
 
 	'////////////////
+
+	Method count_builtin_wings%( search_wing_id$ )
+		Local count% = 0
+		For Local wing_id$ = EachIn ship.builtInWings
+			If wing_id = search_wing_id Then count :+ 1
+		Next
+		Return count
+	EndMethod
 
 	Method find_assigned_slot_parent_group:TStarfarerVariantWeaponGroup( ship_weapon_slot_id$ )
 		For Local group:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups

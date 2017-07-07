@@ -7,3 +7,5 @@
 sf-ship-ed.log
 sf-ship-ed-settings.json
 ENG.ini
+npm-debug.log*
+desktop.ini

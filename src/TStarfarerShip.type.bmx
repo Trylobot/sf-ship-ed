@@ -33,7 +33,7 @@ Type TStarfarerShip
 		style = "LOW_TECH"
 		builtInWeapons = CreateMap()
 		builtInMods = New String[0]
-	 builtInWings = New String[0]
+	  builtInWings = New String[0]
 	End Method
 	
 	Method Clone:TStarfarerShip(dst:TStarfarerShip = Null)

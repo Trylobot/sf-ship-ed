@@ -10,6 +10,7 @@ Type Application
 	Field weapon_images_dir$
 	Field data_dir$
 	Field variant_dir$
+	Field skin_dir$
 	Field weapon_dir$
 	Field font_size%
 	Field data_font_size%
@@ -50,9 +51,10 @@ Type Application
 		SetLocalizationMode(LOCALIZATION_ON | LOCALIZATION_OVERRIDE)	
 		'MARK load core files
 		app_obj.get_starfarer_dir()
-		If app_obj.images_dir.length = 0 Then app_obj.images_dir = app_obj.starsector_base_dir
+		If app_obj.images_dir.length = 0        Then app_obj.images_dir = app_obj.starsector_base_dir
 		If app_obj.data_dir.length = 0          Then app_obj.data_dir = app_obj.starsector_base_dir
 		If app_obj.variant_dir.length = 0       Then app_obj.variant_dir = app_obj.starsector_base_dir
+		If app_obj.skin_dir.length = 0          Then app_obj.skin_dir = app_obj.starsector_base_dir
 		If app_obj.weapon_images_dir.length = 0 Then app_obj.weapon_images_dir = app_obj.starsector_base_dir
 		Return app_obj
 	EndFunction
