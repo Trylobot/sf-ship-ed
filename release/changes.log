@@ -1,4 +1,14 @@
 ______________________________________________________________________________
+editor version 2.7.4-beta.1 (starsector 0.8.1a) [Trylobot]
+
+FEATURES
+- Fighter Wing Renderer: wing slots, installed wings
+- Fighter Bay number check to prevent exceeding ship's capacity
+
+BUGFIXES
+- Now saves Ship / Details / coversColor properly
+
+______________________________________________________________________________
 editor version 2.7.3 (starsector 0.8.1a) [Trylobot]
 
 FEATURES
