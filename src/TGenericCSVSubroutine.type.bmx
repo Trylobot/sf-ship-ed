@@ -268,7 +268,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 				EndIf
 			EndSelect			
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
-			If EventSource() = functionMenu[5]
+			If EventSource() = functionMenu[MENU_FUNCTION_EXIT]
 				csv_row_values = Null
 				csv_row_column_i = - 1
 				data.hold_snapshot(False)
@@ -389,7 +389,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 				'update_csv_row_cursor()	
 			EndSelect
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
-			If EventSource() = functionMenu[5]
+			If EventSource() = functionMenu[MENU_FUNCTION_EXIT]
 				loaded_csv_id_list = Null
 				loaded_csv_id_list_item_i = - 1
 				data.hold_snapshot(False)

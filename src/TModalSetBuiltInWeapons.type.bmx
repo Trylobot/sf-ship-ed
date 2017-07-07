@@ -92,7 +92,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 					data.hold_snapshot(False)
 					ed.weapon_lock_i = - 1
 				End If
-			Case functionMenu[5]
+			Case functionMenu[MENU_FUNCTION_EXIT]
 				If ed.weapon_lock_i <> - 1
 					ed.weapon_lock_i = - 1
 					data.hold_snapshot(False)

@@ -768,7 +768,7 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
     
     Case "ship"
       Select EventSource()
-        Case functionMenu[5] 'exit
+        Case functionMenu[MENU_FUNCTION_EXIT] 'exit
           ed.last_mode = ed.mode
           ed.mode = "none"
           ed.field_i = 0  

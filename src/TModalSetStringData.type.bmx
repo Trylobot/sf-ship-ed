@@ -90,114 +90,116 @@ Type TModalSetStringData Extends TSubroutine
 		EndIf
 		'load data from appropriate source
 		Load( ed, data, sprite )
-		If data_types[line_i] = DATATYPE_STRING Then values.lines[line_i] = CONSOLE.Update( values.lines[line_i],, console_cursor_i, modified )
+		If data_types[line_i] = DATATYPE_STRING
+			values.lines[line_i] = CONSOLE.Update( values.lines[line_i],, console_cursor_i, modified )
+		EndIf
 		data.hold_snapshot(True)
 	EndMethod
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		Select EventID()
-		Case EVENT_KEYDOWN, EVENT_KEYREPEAT
-			Select EventData()
-			Case KEY_DOWN, KEY_TAB, KEY_ENTER
-				line_i = Min( line_i + 1, labels.lines.length - 1 )
-				'update_cursor( data, True )
-				reset_cursor_color_period()
-			Case KEY_UP
-				line_i = Max( line_i - 1, 0 )
-				'update_cursor( data, True )
-				reset_cursor_color_period()
-			EndSelect
-			Select data_types[line_i]
-			Case DATATYPE_STRING
-				modified = False
-				values.lines[line_i] = CONSOLE.Update( values.lines[line_i],, console_cursor_i, modified )
-				'update_cursor( data )
-				If modified
-					Save( ed, data, sprite )
-					values.update_size()				
-				EndIf
-			Case DATATYPE_ENUM
-				modified = False
-				If EventData() = KEY_RIGHT
-					For i = 0 Until enum_defs[line_i].Length
-						If enum_defs[line_i][i] = values.lines[line_i]
-							If (i + 1) < enum_defs[line_i].length
-								modified = True
-								values.lines[line_i] = enum_defs[line_i][i + 1]
-								line_enum_i = i + 1
-								Exit
+			Case EVENT_KEYDOWN, EVENT_KEYREPEAT
+				Select EventData()
+					Case KEY_DOWN, KEY_TAB, KEY_ENTER
+						line_i = Min( line_i + 1, labels.lines.length - 1 )
+						'update_cursor( data, True )
+						reset_cursor_color_period()
+					Case KEY_UP
+						line_i = Max( line_i - 1, 0 )
+						'update_cursor( data, True )
+						reset_cursor_color_period()
+				EndSelect
+				Select data_types[line_i]
+					Case DATATYPE_STRING
+						modified = False
+						values.lines[line_i] = CONSOLE.Update( values.lines[line_i],, console_cursor_i, modified )
+						'update_cursor( data )
+						If modified
+							Save( ed, data, sprite )
+							values.update_size()				
+						EndIf
+					Case DATATYPE_ENUM
+						modified = False
+						If EventData() = KEY_RIGHT
+							For i = 0 Until enum_defs[line_i].Length
+								If enum_defs[line_i][i] = values.lines[line_i]
+									If (i + 1) < enum_defs[line_i].length
+										modified = True
+										values.lines[line_i] = enum_defs[line_i][i + 1]
+										line_enum_i = i + 1
+										Exit
+									EndIf
+								EndIf
+							Next
+						EndIf
+						If EventData() = KEY_LEFT
+							For i = 0 Until enum_defs[line_i].Length
+								If enum_defs[line_i][i] = values.lines[line_i]
+									If (i - 1) >= 0
+										modified = True
+										values.lines[line_i] = enum_defs[line_i][i - 1]
+										line_enum_i = i - 1
+										Exit
+									EndIf
+								EndIf
+							Next
+						EndIf
+						If modified
+							'update_cursor( data )
+							Save( ed, data, sprite )
+							reset_cursor_color_period()
+							'///////////////////////
+							'Custom Engines check
+							If subroutine_mode = MODE_SHIP_ENGINE ..
+							And labels.lines[line_i] = "ship.engine.style"
+								If TStarfarerShipEngine(target).style <> "CUSTOM"
+									TStarfarerShipEngine(target).styleId = ""
+									TStarfarerShipEngine(target).styleSpec = Null
+								Else ' style is custom
+									TStarfarerShipEngine(target).styleId = ed.get_default_multiselect_value( "ship.engine.styleId" )
+									If TStarfarerShipEngine(target).styleId <> ""
+										TStarfarerShipEngine(target).styleSpec = Null
+									Else ' style id is blank/null (not specified)
+										TStarfarerShipEngine(target).styleSpec = New TStarfarerCustomEngineStyleSpec
+									EndIf
+								EndIf
+								Load( ed,data,sprite ) 're-create string-editing window
+								'Save( ed,data,sprite )
+							ElseIf subroutine_mode = MODE_SHIP_ENGINE ..
+							And TStarfarerShipEngine(target).style = "CUSTOM" ..
+							And labels.lines[line_i] = "ship.engine.styleId"
+								If TStarfarerShipEngine(target).styleId <> ""
+									TStarfarerShipEngine(target).styleSpec = Null
+								Else ' style id is blank/null (not specified)
+									TStarfarerShipEngine(target).styleSpec = New TStarfarerCustomEngineStyleSpec
+								EndIf
+								Load( ed, data, sprite ) 're-create string-editing window
+								'Save( ed, data, sprite )
+							Else If subroutine_mode = MODE_WEAPON
+								Load( ed, data, sprite ) 're-create string-editing window
+								'Save( ed, data, sprite )
 							EndIf
+							''///////////////////////
+							''Built-In Weapons check
+							'If subroutine_mode = MODE_SHIP_WEAPON ..
+							'And labels.lines[line_i] = "ship.builtInWeapons.id"
+							'	If TStarfarerShipWeapon(target).type_ = "BUILT_IN"
+							'		data.ship.builtInWeapons.Insert( TStarfarerShipWeapon(target).id, ed.get_default_multiselect_value( "ship.builtInWeapons.id" ))
+							'	Else ' not built in
+							'		data.ship.builtInWeapons.Remove( TStarfarerShipWeapon(target).id )
+							'	EndIf
+							'	Load( ed,data,sprite ) 're-create string-editing window
+							'	Save( ed,data,sprite )
+							'EndIf
+							'///////////////////////
 						EndIf
-					Next
-				EndIf
-				If EventData() = KEY_LEFT
-					For i = 0 Until enum_defs[line_i].Length
-						If enum_defs[line_i][i] = values.lines[line_i]
-							If (i - 1) >= 0
-								modified = True
-								values.lines[line_i] = enum_defs[line_i][i - 1]
-								line_enum_i = i - 1
-								Exit
-							EndIf
-						EndIf
-					Next
-				EndIf
-				If modified
-					'update_cursor( data )
-					Save( ed, data, sprite )
-					reset_cursor_color_period()
-					'///////////////////////
-					'Custom Engines check
-					If subroutine_mode = MODE_SHIP_ENGINE ..
-					And labels.lines[line_i] = "ship.engine.style"
-						If TStarfarerShipEngine(target).style <> "CUSTOM"
-							TStarfarerShipEngine(target).styleId = ""
-							TStarfarerShipEngine(target).styleSpec = Null
-						Else ' style is custom
-							TStarfarerShipEngine(target).styleId = ed.get_default_multiselect_value( "ship.engine.styleId" )
-							If TStarfarerShipEngine(target).styleId <> ""
-								TStarfarerShipEngine(target).styleSpec = Null
-							Else ' style id is blank/null (not specified)
-								TStarfarerShipEngine(target).styleSpec = New TStarfarerCustomEngineStyleSpec
-							EndIf
-						EndIf
-						Load( ed,data,sprite ) 're-create string-editing window
-						'Save( ed,data,sprite )
-					ElseIf subroutine_mode = MODE_SHIP_ENGINE ..
-					And TStarfarerShipEngine(target).style = "CUSTOM" ..
-					And labels.lines[line_i] = "ship.engine.styleId"
-						If TStarfarerShipEngine(target).styleId <> ""
-							TStarfarerShipEngine(target).styleSpec = Null
-						Else ' style id is blank/null (not specified)
-							TStarfarerShipEngine(target).styleSpec = New TStarfarerCustomEngineStyleSpec
-						EndIf
-						Load( ed, data, sprite ) 're-create string-editing window
-						'Save( ed, data, sprite )
-					Else If subroutine_mode = MODE_WEAPON
-						Load( ed, data, sprite ) 're-create string-editing window
-						'Save( ed, data, sprite )
-					EndIf
-					''///////////////////////
-					''Built-In Weapons check
-					'If subroutine_mode = MODE_SHIP_WEAPON ..
-					'And labels.lines[line_i] = "ship.builtInWeapons.id"
-					'	If TStarfarerShipWeapon(target).type_ = "BUILT_IN"
-					'		data.ship.builtInWeapons.Insert( TStarfarerShipWeapon(target).id, ed.get_default_multiselect_value( "ship.builtInWeapons.id" ))
-					'	Else ' not built in
-					'		data.ship.builtInWeapons.Remove( TStarfarerShipWeapon(target).id )
-					'	EndIf
-					'	Load( ed,data,sprite ) 're-create string-editing window
-					'	Save( ed,data,sprite )
-					'EndIf
-					'///////////////////////
-				EndIf
-		EndSelect
-		Case EVENT_GADGETACTION, EVENT_MENUACTION
-			Select EventSource()
-			Case functionMenu[5]
-				ed.mode = ed.last_mode
-				Return
-			EndSelect
+				EndSelect
+			Case EVENT_GADGETACTION, EVENT_MENUACTION
+				Select EventSource()
+					Case functionMenu[MENU_FUNCTION_EXIT]
+						ed.mode = ed.last_mode
+						Return
+				EndSelect
 		End Select
 	EndMethod
 
@@ -256,6 +258,7 @@ Type TModalSetStringData Extends TSubroutine
 				TStarfarerShip(target).hullSize = values.lines[i]; i:+1
 				TStarfarerShip(target).style = values.lines[i]; i:+ 1
 				TStarfarerShip(target).spriteName = values.lines[i]; i:+ 1
+				TStarfarerShip(target).coversColor = values.lines[i]; i:+ 1
 				data.update()
 				data.take_snapshot(3)
 			'//////////////////////////////////////
