@@ -2,7 +2,13 @@ ______________________________________________________________________________
 editor version 2.7.3 (starsector 0.8.1a) [Trylobot]
 
 FEATURES
-- add/remove built-in wings from ships
+- SHIP / BUILT-IN WINGS EDITING MODE ADDED
+  press "1" (ship mode), "D" (load), "N" (built-in wings submodule)
+
+OTHER
+- skeleton code / boilerplate necessary for Skin editing has been added,
+    but this mode doesn't do anything yet (so don't get too excited if you see it in the menus)
+- heavy code maintenance / cleanup / refactoring
 
 ______________________________________________________________________________
 editor version 2.7.2 (starsector 0.8.1a) [Trylobot]
