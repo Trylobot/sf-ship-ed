@@ -122,7 +122,7 @@ Type TModalSetBuiltInWings Extends TSubroutine
 			'---------------------------------------------------------
 			' show how many of each wing are currently equipped to this ship
 			Local has_wings_count% = data.count_builtin_wings( wing_id )
-			Local has_wings_count_display$ = ""
+			Local has_wings_count_display$ = "    "
 			If has_wings_count > 0
 				has_wings_count_display = "x" + has_wings_count
 			EndIf

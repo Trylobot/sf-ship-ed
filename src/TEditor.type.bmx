@@ -255,6 +255,7 @@ Type TEditor
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_wing_stats )
 			EndIf
+			stock_wing_stats.Remove("") ' omit this, it is likely a spacer from the raw file data
 			Local row:TMap
 			For Local id$ = EachIn stock_wing_stats.Keys()
 				'scan all rows for multiselect values and save association to variant
