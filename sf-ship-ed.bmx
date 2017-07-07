@@ -187,6 +187,24 @@ json.add_transform( "parse_ship", "$engineSlots:array/:object/$styleSpec:object/
 json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:object/$type_:string", json.XJ_RENAME, "type" )
 json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:object", json.XJ_DELETE,, predicate_omit_styleSpec )
 json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleId:string", json.XJ_DELETE,, predicate_omit_styleId )
+'TStarfarerShip
+json.add_transform( "stringify_skin", "$baseValue:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
+json.add_transform( "stringify_skin", "$baseValueMult:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
+json.add_transform( "stringify_skin", "$fleetPoints:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
+json.add_transform( "stringify_skin", "$ordnancePoints:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
+json.add_transform( "stringify_skin", "$descriptionId:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_skin", "$descriptionPrefix:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_skin", "$systemId:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+json.add_transform( "stringify_skin", "$removeHints:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
+json.add_transform( "stringify_skin", "$addHints:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
+json.add_transform( "stringify_skin", "$removeBuiltInMods:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
+json.add_transform( "stringify_skin", "$builtInMods:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
+json.add_transform( "stringify_skin", "$removeWeaponSlots:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
+json.add_transform( "stringify_skin", "$weaponSlotChanges:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
+json.add_transform( "stringify_skin", "$removeBuiltInWeapons:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
+json.add_transform( "stringify_skin", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
+json.add_transform( "stringify_skin", "$removeEngineSlots:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
+json.add_transform( "stringify_skin", "$engineSlotChanges:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
 'TStarfarerCustomEngineStyleSpec
 json.add_transform( "parse_CustomEngineStyle", "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
 'TStarfarerWeapon
@@ -463,6 +481,8 @@ Repeat
   'MARK Events
   'TODO adding Events
   WaitEvent()
+  'instaquit
+  escape_key_update( data )
 
   'If EventID() <> EVENT_GADGETPAINT And EventID() <> EVENT_TIMERTICK Then Print CurrentEvent.ToString()
   If Not Apprunning And EventID() <> EVENT_APPRESUME Then Continue
@@ -551,7 +571,8 @@ Repeat
       MouseZ :+ EventData()
       check_zoom_and_pan( ed, data, sprite )
     
-    Case EVENT_WINDOWACCEPT   
+    Case EVENT_WINDOWACCEPT
+
     Case EVENT_WINDOWSIZE
       If EventSource() = MainWindow
         H_MAX = MainWindow.ClientHeight()
@@ -564,14 +585,6 @@ Repeat
         AutoMidHandle( True )
         SetBlend( ALPHABLEND )
         ed.bg_scale = Max( W_MAX / Float(ed.bg_image.width), H_MAX / Float(ed.bg_image.height) )  
-      EndIf
-    
-    Case EVENT_WINDOWCLOSE
-      If EventSource() = MainWindow
-        If data.changed
-          If Confirm(LocalizeString("{{msg_unsaved_exit}}") ) Then End
-        Else End      
-        EndIf   
       EndIf
     
     Case EVENT_TIMERTICK
@@ -671,21 +684,32 @@ Repeat
         End If
 
         'instaquit
-        escape_key_update()
         draw_instaquit_progress( W_MAX, H_MAX )
         
         Flip( 1 )
 
       EndIf
+
+    Case EVENT_APPTERMINATE, EVENT_WINDOWCLOSE
+      end_program( data )
+    
   EndSelect
 Until AppTerminate()
-
 
 '//////////////////////////////////////////////////////////////////////////////
 '//////////////////////////////////////////////////////////////////////////////
 '/////// MARK MAIN LOOP END   /////////////////////////////////////////////////
 '//////////////////////////////////////////////////////////////////////////////
 '//////////////////////////////////////////////////////////////////////////////
+
+Function end_program( data:TData )
+  If data.changed
+    If Confirm( LocalizeString("{{msg_unsaved_exit}}") ) Then End
+  Else
+    End
+  EndIf
+EndFunction
+
 
 
 If DEBUG_LOG_FILE
