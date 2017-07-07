@@ -701,11 +701,11 @@ Type TData
 
 	'requires subsequent call to update()
 	Method add_builtin_wing( wing_id$ )
-		'TODO: enforce limits ? or at least warn about limit exceeded
-		'  primary limiter: (int) ship_data.csv["hullId"]["fighter bays"]
-		'  secondary limiter: (count) ship.weaponSlots WHERE type == "LAUNCH_BAY"
-		ship.builtInWings = ship.builtInWings[..ship.builtInWings.length+1]
-		ship.builtInWings[ship.builtInWings.length-1] = wing_id
+		'TODO: warn about limit exceeded?
+		If ship.builtInWings.length < get_fighterbays_count()
+			ship.builtInWings = ship.builtInWings[..ship.builtInWings.length + 1]
+			ship.builtInWings[ship.builtInWings.length - 1] = wing_id
+		EndIf
 	EndMethod
 
 	'requires subsequent call to update()
@@ -715,6 +715,12 @@ Type TData
 		EndIf
 	EndMethod
 
+	'check the number of the fighter bays current ship have
+	Method get_fighterbays_count%()		
+		If csv_row = Null Then Return 0
+		Local count:Object = csv_row.ValueForKey("fighter bays")
+		If count Then Return int(count.ToString() )
+	End Method	
 	'////////////
 	
 	'requires subsequent call to update_variant()
@@ -1325,7 +1331,6 @@ Type TData
 
 			End Select
 		End Select	
-
 	End Method
 	
 	Method take_initshot()
