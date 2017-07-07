@@ -96,6 +96,7 @@ Include "src/TTextCoder.bmx"
 Include "src/WeaponDataCSVFieldTemplate.bmx"
 Include "src/TModalSetWeaponCSV.type.bmx"
 Include "src/TModalShowMore.bmx"
+Include "src/TWingrenderer.bmx"
 
 '/////////////////////////////////////////////
 'MARK init APP var
@@ -251,6 +252,9 @@ Global Timer:TTimer = CreateTimer(Lmt_FPS)
 '////////////////////////////////////////////////
 'MARK init weapon drawer
 Global WD:TWeaponDrawer = New TWeaponDrawer
+
+'MARK inti wing renderer
+Global WR:TWingRenderer = New TWingRenderer
 
 'MARK Enable Polled Input for test
 'EnablePolledInput(Canvas)

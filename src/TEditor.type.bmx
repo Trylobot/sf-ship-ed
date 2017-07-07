@@ -423,6 +423,32 @@ Type TEditor
 				Return 0 'Error
 		EndSelect
 	EndMethod
+	
+	Method getVariantSpritePath$(variantID$)
+		Local variant:TStarfarerVariant = TStarfarerVariant(stock_variants.ValueForKey(variantID) )
+		If variant
+			Local ship:TStarfarerShip = TStarfarerShip(stock_ships.ValueForKey(variant.hullId) )
+			If ship Then Return ship.spriteName
+		EndIf
+		Return False
+	End Method		
 
+	Method getWingSpritePath$(wingID$)
+		Local wingRow:TMap = TMap(stock_wing_stats.ValueForKey(wingID) )
+		If wingRow
+			Local variantID$ = String(wingRow.ValueForKey("variant") )
+			If variantID Then Return getVariantSpritePath(variantID)			
+		EndIf
+		Return False
+	End Method
+	
+	Method getWingFormation$(wingID$)
+		Local wingRow:TMap = TMap(stock_wing_stats.ValueForKey(wingID) )
+		If wingRow
+			Local formation$ = String(wingRow.ValueForKey("formation") )
+			If formation Then Return formation			
+		EndIf
+		Return False
+	End Method
 End Type
 

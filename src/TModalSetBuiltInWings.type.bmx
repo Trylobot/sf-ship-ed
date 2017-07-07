@@ -34,6 +34,7 @@ Type TModalSetBuiltInWings Extends TSubroutine
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
 		draw_hud( ed, data )
 		draw_wings_list( ed, data )
+		draw_wing_icon(ed, data)
 		SetAlpha( 1 )
 	EndMethod
 
@@ -143,13 +144,13 @@ Type TModalSetBuiltInWings Extends TSubroutine
 						data.add_builtin_wing( selected_wing_id )
 						data.update()
 						SS.reset()
-					Case KEY_DOWN 
+					Case KEY_DOWN
 						ed.builtIn_wing_i :+ 1
 					Case KEY_UP
 						ed.builtIn_wing_i :- 1
 					Case KEY_PAGEDOWN 
 						ed.builtIn_wing_i :+ 5
-					Case KEY_PAGEUP 
+					Case KEY_PAGEUP
 						ed.builtIn_wing_i :- 5
 					Case KEY_BACKSPACE
 						data.remove_last_builtin_wing()
@@ -158,7 +159,7 @@ Type TModalSetBuiltInWings Extends TSubroutine
 			Case EVENT_GADGETACTION, EVENT_MENUACTION
 				Select EventSource()
 					Case functionMenu[MENU_FUNCTION_EXIT]
-						ed.builtIn_wing_i = -1
+						ed.builtIn_wing_i = - 1
 				EndSelect
 		End Select
 		'bounds enforce (wrap top/bottom)
@@ -175,7 +176,7 @@ Type TModalSetBuiltInWings Extends TSubroutine
 		Local ox# = 0.5
 		Local oy# = 0.0
 		If wing_chooser_text <> Null
-			wing_chooser_text.draw( x,y, ox,oy )
+			wing_chooser_text.draw( x, y, ox, oy )
 		EndIf
 	EndMethod
 
@@ -196,4 +197,7 @@ Type TModalSetBuiltInWings Extends TSubroutine
 		'	draw_string( op_widget, 10+7, LINE_HEIGHT * 3, fg_color, $000000, 0.0, 0.5 )
 	EndMethod
 
+	Method draw_wing_icon (ed:TEditor, data:TData )
+		WR.draw_all_wings (ed,data,true)
+	End Method	
 EndType

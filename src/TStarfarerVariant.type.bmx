@@ -9,6 +9,7 @@ Type TStarfarerVariant
 	Field permaMods$[]
 	Field weaponGroups:TStarfarerVariantWeaponGroup[]
 	Field quality#
+	Field wings$[]
 	
 	Method New()
 		displayName = "New Variant"
