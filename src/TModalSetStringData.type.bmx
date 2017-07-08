@@ -387,7 +387,7 @@ Type TModalSetStringData Extends TSubroutine
 					Else
 						If Not customBeamTexTmp
 							customBeamTexTmp = New TArray
-							Local s:TString = TString.CreateFormString("graphics/fx/beamfringe.png")
+							Local s:TString = TString.CreateFromString("graphics/fx/beamfringe.png")
 							customBeamTexTmp.elements.AddFirst(s.copy() )
 							s.value = "graphics/fx/beamcore.png"
 							customBeamTexTmp.elements.AddLast(s.copy() )
@@ -398,7 +398,7 @@ Type TModalSetStringData Extends TSubroutine
 						
 					EndIf
 				Else
-					TStarfarerWeapon(target).textureType = TEmun.CreateFormString(values.lines[i]) ; i:+ 1
+					TStarfarerWeapon(target).textureType = TEnum.CreateFromString(values.lines[i]) ; i:+ 1
 				EndIf
 			EndSelect
 				data.update_weapon()
@@ -628,7 +628,7 @@ Type TModalSetStringData Extends TSubroutine
 				Local ttid:TTypeId = TTypeId.ForObject(TStarfarerWeapon(target).textureType)
 '				Print ttid.Name().ToString()
 				Select ttid.Name()
-				Case "TEmun"
+				Case "TEnum"
 					values.append( (TextWidget.Create( TStarfarerWeapon(target).textureType.ToString() ) ) )
 				Case "TArray"
 					labels.append( TextWidget.Create( ..
