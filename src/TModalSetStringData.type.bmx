@@ -308,6 +308,7 @@ Type TModalSetStringData Extends TSubroutine
 				i:+1
 				TStarfarerVariant(target).displayName = values.lines[i]; i:+1
 				TStarfarerVariant(target).goalVariant = stringToBoolean(values.lines[i]); i:+1
+				TStarfarerVariant(target).quality = values.lines[i].ToDouble(); i:+1
 				'variable-length chunk 1
 				For j = 0 Until TStarfarerVariant(target).weaponGroups.length
 					TStarfarerVariant(target).weaponGroups[j].mode = values.lines[i]; i:+1
@@ -480,12 +481,14 @@ Type TModalSetStringData Extends TSubroutine
 				"variant.hullId" +"~n"+..
 				"variant.variantId" +"~n"+..
 				"variant.displayName" +"~n"+..
-				"variant.goalVariant" )
+				"variant.goalVariant" +"~n"+..
+				"variant.quality" )
 			values = TextWidget.Create( ..
 				TStarfarerVariant(target).hullId +"~n"+..
 				TStarfarerVariant(target).variantId +"~n"+..
 				TStarfarerVariant(target).displayName +"~n"+..
-				booleanToString( TStarfarerVariant(target).goalVariant ))
+				booleanToString( TStarfarerVariant(target).goalVariant ) +"~n"+..
+				json.FormatDouble( TStarfarerVariant(target).quality, 3 ))
 			For i = 0 Until TStarfarerVariant(target).weaponGroups.length
 				labels.append( TextWidget.Create( ..
 					"variant.weaponGroup.mode" ))
