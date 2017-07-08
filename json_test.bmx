@@ -629,12 +629,12 @@ Function test_encode_empty_objects_instead_of_nulls()
 EndFunction
 
 Function bug1()
-	Print "*** reported bug 1"
-	Local json_str$ = LoadString( test_dir + "/passes/bug1.json" )
-	Local val:Object = json.parse( json_str )
-	Local check:TNumber = TNumber(TObject(TObject(val).Get("exigencyEngine")).Get("contrailMaxSpeedMult"))
-	Local expected:Double = 0.1:Double
-	verify( expected = check.value, "  EXPECTED: "+expected+"   ACTUAL: "+check.value )
+	'Print "*** reported bug 1"
+	'Local json_str$ = LoadString( test_dir + "/passes/bug1.json" )
+	'Local val:Object = json.parse( json_str )
+	'Local check:TNumber = TNumber(TObject(TObject(val).Get("exigencyEngine")).Get("contrailMaxSpeedMult"))
+	'Local expected:Double = 0.1:Double
+	'verify( expected = check.value, "  EXPECTED: "+expected+"   ACTUAL: "+check.value )
 EndFunction
 
 

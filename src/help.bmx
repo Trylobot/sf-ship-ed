@@ -11,6 +11,8 @@ Const ICON_CTRL_CLICK% = 31
 Const ICON_ALT_CLICK% = 32
 Const ICON_SPACEBAR% = 33
 Const ICON_CTRL_ALT_RIGHT_CLICK% = 34
+Const ICON_ENTER% = 35
+Const CHAR_BACK_ARROW$ = Chr($2190)
 
 Global HELP_WIDGETS:TList
 Global HELP_LINE_HEIGHT%
@@ -80,7 +82,7 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_ship_bounds_insert}}"), ICON_CTRL_CLICK, True, 0, "ship", "bounds" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_ship_bounds_drag}}"), ICON_MS_LEFT, True, 0, "ship", "bounds" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_ship_bounds_dragAll}}"), ICON_CTRL_ALT_RIGHT_CLICK, True, 0, "ship", "bounds" ) )
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190), LocalizeString("{{h_function_ship_bounds_remove}}"), ICON_KB, True, 0, "ship", "bounds" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_ship_bounds_remove}}"), ICON_KB, True, 0, "ship", "bounds" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_global_mirrored}}"), ICON_SPACEBAR, True, 1, "ship", "bounds" ) )
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_weaponSlots_add}}"), ICON_SHIFT_CLICK, True, 0, "ship", "weapon_slots" ))
@@ -88,14 +90,14 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_weaponSlots_dragAll}}"), ICON_CTRL_ALT_RIGHT_CLICK, True, 0, "ship", "weapon_slots" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_weaponSlots_setAngle}}"), ICON_MS_LEFT, True, 0, "ship", "weapon_slots" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_weaponSlots_setFacing}}"), ICON_ALT_CLICK, True, 0, "ship", "weapon_slots" ) )
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190), LocalizeString("{{h_function_weaponSlots_remove}}"), ICON_KB, True, 0, "ship", "weapon_slots" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_weaponSlots_remove}}"), ICON_KB, True, 0, "ship", "weapon_slots" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_global_mirrored}}"), ICON_SPACEBAR, True, 0, "ship", "weapon_slots" ) )
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190) + Chr($2192), LocalizeString("{{h_animation_frame}}"), 0, True, 0, "ship", "weapon_slots" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW + Chr($2192), LocalizeString("{{h_animation_frame}}"), 0, True, 0, "ship", "weapon_slots" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2191) + Chr($2193), LocalizeString("{{h_animation_playStop}}"), 0, True, 1, "ship", "weapon_slots" ) )
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_builtInWeapons_assign}}"), ICON_MS_LEFT, True, 0, "ship", "built_in_weapons" ) )
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190), LocalizeString("{{h_function_builtInWeapons_remove}}"), ICON_KB, True, 0, "ship", "built_in_weapons" ) )
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190) + Chr($2192), LocalizeString("{{h_animation_frame}}"), 0, True, 0, "ship", "built_in_weapons" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_builtInWeapons_remove}}"), ICON_KB, True, 0, "ship", "built_in_weapons" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW + Chr($2192), LocalizeString("{{h_animation_frame}}"), 0, True, 0, "ship", "built_in_weapons" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2191) + Chr($2193), LocalizeString("{{h_animation_playStop}}"), 0, True, 1, "ship", "built_in_weapons" ) )
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_add}}"), ICON_SHIFT_CLICK, True, 0, "ship", "engine_slots" ))
@@ -103,17 +105,21 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_dragAll}}"), ICON_CTRL_ALT_RIGHT_CLICK, True, 0, "ship", "engine_slots" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_setFacing}}"), ICON_MS_LEFT, True, 0, "ship", "engine_slots" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_setSize}}"), ICON_ALT_CLICK, True, 0, "ship", "engine_slots" ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190), LocalizeString("{{h_function_engineSlots_remove}}"), ICON_KB, True, 0, "ship", "engine_slots" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_engineSlots_remove}}"), ICON_KB, True, 0, "ship", "engine_slots" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_global_mirrored}}"), ICON_SPACEBAR, True, 1, "ship", "engine_slots" ))
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_launchBays_addPort}}"), ICON_SHIFT_CLICK, True, 0, "ship", "launch_bays" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_launchBays_addBay}}"), ICON_CTRL_CLICK, True, 0, "ship", "launch_bays" ) )	
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_launchBays_drag}}"), ICON_MS_LEFT, True, 0, "ship", "launch_bays" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_launchBays_dragAll}}"), ICON_CTRL_ALT_RIGHT_CLICK, True, 0, "ship", "launch_bays" ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190), LocalizeString("{{h_function_launchBays_remove}}"), ICON_KB, True, 1, "ship", "launch_bays" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_launchBays_remove}}"), ICON_KB, True, 1, "ship", "launch_bays" ))
+	'//////////// 
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_ship_builtInWings_addWing}}"), ICON_ENTER, True, 0, "ship", "built_in_wings" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_ship_builtInWings_removeWing}}"), ICON_KB, True, 1, "ship", "built_in_wings" ) )
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_variant_assignWeapon}}"), ICON_MS_LEFT, True, 0, "variant" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "G", LocalizeString("{{h_function_variant_weaponGroups}}"), ICON_KB, True, 0, "variant" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", LocalizeString("{{h_function_variant_wings}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "A", LocalizeString("{{h_function_variant_autofire}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F", LocalizeString("{{h_function_variant_addVents}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F", LocalizeString("{{h_function_variant_removeVents}}"), ICON_CTRL_KB, True, 0, "variant" ) )
@@ -121,11 +127,14 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "C", LocalizeString("{{h_function_variant_removeCap}}"), ICON_CTRL_KB, True, 0, "variant" ) )	
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "H", LocalizeString("{{h_function_variant_hullmods}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", LocalizeString("{{h_function_variant_details}}"), ICON_KB, True, 0, "variant" ) )
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190), LocalizeString("{{h_function_variant_remove}}"), ICON_KB, True, 0, "variant" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_variant_remove}}"), ICON_KB, True, 0, "variant" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "/", LocalizeString("{{h_function_variant_removeAll}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "Q", LocalizeString("{{h_function_show_more}}"), ICON_KB, True, 1, "variant" ) )
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190) + Chr($2192), LocalizeString("{{h_animation_frame}}"), 0, True, 0, "variant" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW + Chr($2192), LocalizeString("{{h_animation_frame}}"), 0, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2191) + Chr($2193), LocalizeString("{{h_animation_playStop}}"), 0, True, 1, "variant" ) )
+	'//////////// 
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_ship_variantWings_addWing}}"), ICON_ENTER, True, 0, "variant", "variant_wings" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_ship_variantWings_removeWing}}"), ICON_KB, True, 1, "variant", "variant_wings" ) )
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", LocalizeString("{{h_function_csvEdit}}"), ICON_KB, True, 1, "csv" ) )
 	'////////////
@@ -143,7 +152,7 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_weapon_offset_add}}"), ICON_SHIFT_CLICK, True, 0, "weapon", "offsets" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_weapon_offset_drag}}"), ICON_MS_LEFT, True, 0, "weapon", "offsets" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_weapon_offset_setFacing}}"), ICON_CTRL_CLICK, True, 0, "weapon", "offsets" ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2190), LocalizeString("{{h_function_weapon_offset_remove}}"), ICON_KB, True, 0, "weapon", "offsets" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_weapon_offset_remove}}"), ICON_KB, True, 0, "weapon", "offsets" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_global_mirrored}}"), ICON_SPACEBAR, True, 1, "weapon", "offsets" ) )
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "U", LocalizeString("{{h_file_weapon_loadImage_under}}"), ICON_KB, True, 0, "weapon" ))
@@ -243,8 +252,6 @@ Function draw_help( ed:TEditor )
 						SetImageFont( DATA_FONT )
 						draw_string( "ALT", x-18-18*scale -4,y - 1, $000000,bg_color,,,, True, scale )
 						SetImageFont( FONT )
-					Case ICON_SPACEBAR
-						DrawImage( ed.kb_key_space_image, x-18 - 4, y - 3 )
 					Case ICON_CTRL_ALT_RIGHT_CLICK
 						DrawImage( ed.mouse_right_image, x - 4, y - 3 )
 						DrawImage( ed.kb_key_wide_image, x-30-30*scale -4 - 4, y - 3 )
@@ -252,6 +259,13 @@ Function draw_help( ed:TEditor )
 						SetImageFont( DATA_FONT )
 						draw_string( "CTRL", x-30-30*scale -4,y - 1, $000000,bg_color,,,, True, scale )
 						draw_string( "ALT", x-18-18*scale -4,y - 1, $000000,bg_color,,,, True, scale )
+						SetImageFont( FONT )
+					Case ICON_SPACEBAR
+						DrawImage( ed.kb_key_space_image, x-18 - 4, y - 3 )
+					Case ICON_ENTER
+						DrawImage( ed.kb_key_wide_image, x - 1 - 18 * scale - 4, y - 3 )
+						SetImageFont( DATA_FONT )
+						draw_string( "ENTER", x-1-18*scale, y - 1, $000000,bg_color,,,, True, scale )
 						SetImageFont( FONT )
 					Case ICON_SHIFT_KB
 						DrawImage( ed.kb_key_image, x - 4, y - 3 )

@@ -149,7 +149,7 @@ Type TModalSetBuiltInHullMods Extends TSubroutine
 			EndSelect
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenu[5]
+			Case functionMenu[MENU_FUNCTION_EXIT]
 				ed.builtIn_hullMod_i = - 1
 			EndSelect
 		End Select

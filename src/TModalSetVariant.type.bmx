@@ -112,77 +112,6 @@ Type TModalSetVariant Extends TSubroutine
 
 	'/////////////////////
 
-	Function get_ship_csv_ordnance_points%( ed:TEditor, data:TData )
-		Local ship_stats:TMap = data.csv_row
-		Local value$ = String( ship_stats.ValueForKey( "ordnance points" ))
-		If Not value Then Return 0 'csv row found, but did not contain column
-		Return value.ToInt()
-	EndFunction
-
-	Function calc_variant_used_ordnance_points%( ed:TEditor, data:TData )
-		Local op% = 0
-		'flux vents, flux capacitors, weapons, hullmods
-		op :+ data.variant.fluxVents
-		op :+ data.variant.fluxCapacitors
-		For Local group:TStarfarerVariantWeaponGroup = EachIn data.variant.weaponGroups
-			For Local weapon_slot_id$ = EachIn group.weapons.Keys()
-				Local weapon_id$ = String( group.weapons.ValueForKey( weapon_slot_id ))
-				If weapon_id
-					Local weapon_op% = get_weapon_csv_ordnance_points( ed, data, weapon_id )
-					If Not is_weapon_assigned_to_builtin_weapon_slot( ed, data, weapon_slot_id )
-						op :+ weapon_op
-					EndIf
-				End If
-			Next
-		Next
-		For Local hullMod_id$ = EachIn data.variant.hullMods
-			Local hullMod_op% = get_hullmod_csv_ordnance_points( ed, data, hullMod_id )
-			op :+ hullMod_op
-		Next
-		Return op
-	EndFunction
-
-	Function is_weapon_assigned_to_builtin_weapon_slot%( ed:TEditor, data:TData, weapon_slot_id$ )
-		For Local weapon_slot:TStarfarerShipWeapon = EachIn data.ship.weaponSlots
-			If weapon_slot.id = weapon_slot_id And weapon_slot.is_builtin()
-				Return True
-			EndIf
-		Next
-		Return False
-	EndFunction
-
-	Function get_weapon_csv_ordnance_points%( ed:TEditor, data:TData, weapon_id$ )
-		Local weapon_stats:TMap = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
-		If Not weapon_stats Then Return 0 'ID not found in csv data
-		Local value$ = String( weapon_stats.ValueForKey( "OPs" ))
-		If Not value Then Return 0 'csv row found, but did not contain column
-		Return value.ToInt()
-	EndFunction
-
-	Function get_hullmod_csv_ordnance_points%( ed:TEditor, data:TData, hullMod_id$ )
-		'uses ship size and hullmod data
-		Local hullMod_stats:TMap = TMap( ed.stock_hullmod_stats.ValueForKey( hullMod_id ))
-		If Not hullMod_stats Then Return 0 'ID not found in csv data
-		Local column_key$ = ""
-		Select data.ship.hullSize
-			Case "FRIGATE"
-				column_key = "cost_frigate"
-			Case "DESTROYER"
-				column_key = "cost_dest"
-			Case "CRUISER"
-				column_key = "cost_cruiser"
-			Case "CAPITAL_SHIP"
-				column_key = "cost_capital"
-			Default
-				Return 0 'hullMod cost cannot be found
-		EndSelect
-		Local value$ = String( hullMod_stats.ValueForKey( column_key ))
-		If Not value Then Return 0 'csv row found, but did not contain column
-		Return value.ToInt()
-	EndFunction
-
-	'/////////////////////
-
 	Method initialize_weapon_groups_list( ed:TEditor, data:TData )
 		count = 0
 		Local all_assigned_weapon_slot_ids:TMap = CreateMap()
@@ -330,7 +259,7 @@ Type TModalSetVariant Extends TSubroutine
 		For hullMod = EachIn ed.stock_hullmod_stats.Values()
 			hullmod_id = String( hullMod.ValueForKey("id"))
 			display_str = String( hullMod.ValueForKey("name") )
-			hullmod_op = get_hullmod_csv_ordnance_points( ed, data, hullmod_id )
+			hullmod_op = data.get_hullmod_csv_ordnance_points( hullmod_id )
 
 			display_str = RSet( String.FromInt( hullmod_op ), 3 )+"  "+LSet( display_str, 28 )
 			hullmod_head_str = RSet( "     OP", 7 )+"  "+LSet( "Name", 28 )
@@ -407,11 +336,11 @@ Type TModalSetVariant Extends TSubroutine
 			EndIf
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenu[5]
+			Case functionMenu[MENU_FUNCTION_EXIT]
 				ed.weapon_lock_i = - 1
 				data.hold_snapshot(False)
 				updata_weapondrawermenu(ed)
-			Case functionMenu[4]
+			Case functionMenu[MENU_FUNCTION_REMOVE]
 				data.unassign_weapon_from_slot( weapon_slot.id )
 				data.update_variant()
 				ed.weapon_lock_i = - 1
@@ -568,14 +497,14 @@ Type TModalSetVariant Extends TSubroutine
 	EndMethod
 
 	Method draw_hud( ed:TEditor, data:TData )
-		op_current = calc_variant_used_ordnance_points( ed, data )
-		op_max = get_ship_csv_ordnance_points( ed, data )
+		op_current = data.calc_variant_used_ordnance_points()
+		op_max = data.get_ship_csv_ordnance_points()
 		fg_color = $FFFFFF
 		If op_current > op_max Then fg_color = $FF2020
 		op_str = ..
 			LocalizeString("{{ui_function_variant_opstr1}}") + op_current + "/" + op_max + "~n" + ..
-			LocalizeString("{{ui_function_variant_opstr2}}") + data.variant.fluxVents + "~n" + ..
-			LocalizeString("{{ui_function_variant_opstr3}}") + data.variant.fluxCapacitors + "~n" + ..
+			LocalizeString("{{ui_function_variant_opstr2}}") + data.variant.fluxVents + "/" + fluxMods_max + "~n" + ..
+			LocalizeString("{{ui_function_variant_opstr3}}") + data.variant.fluxCapacitors + "/" + fluxMods_max + "~n" + ..
 			LocalizeString("{{ui_function_variant_opstr4}}") + data.variant.hullMods.length + "x"
 		op_widget = TextWidget.Create( op_str )
 		draw_container( 7, LINE_HEIGHT * 2, op_widget.w + 20, op_widget.h + 20, 0.0, 0.0 )

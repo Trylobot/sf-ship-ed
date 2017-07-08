@@ -457,7 +457,7 @@ Type TModalSetSkin Extends TSubroutine
 '			EndIf
 '		Case EVENT_GADGETACTION, EVENT_MENUACTION
 '			Select EventSource()
-'			Case functionMenu[5]
+'			Case functionMenu[MENU_FUNCTION_EXIT]
 '				ed.weapon_lock_i = - 1
 '				data.hold_snapshot(False)
 '				updata_weapondrawermenu(ed)

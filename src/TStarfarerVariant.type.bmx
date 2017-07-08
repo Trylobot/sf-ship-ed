@@ -1,14 +1,14 @@
 Type TStarfarerVariant
 	Field displayName$
-	Field goalVariant%
 	Field hullId$
 	Field variantId$
 	Field fluxVents%
 	Field fluxCapacitors%
 	Field hullMods$[]
-	Field permaMods$[]
 	Field weaponGroups:TStarfarerVariantWeaponGroup[]
+	Field goalVariant%
 	Field quality#
+	Field permaMods$[]
 	Field wings$[]
 	
 	Method New()
@@ -19,6 +19,10 @@ Type TStarfarerVariant
 		fluxCapacitors = 0
 		hullMods = New String[0]
 		weaponGroups = New TStarfarerVariantWeaponGroup[0]
+		goalVariant = 1
+		quality = 0
+		permaMods = New String[0]
+		wings = New String[0]
 	EndMethod
 
 	Method getAllWeapons:TMap () ' <String,String>  weapon slot id --> weapon id
@@ -34,14 +38,19 @@ Type TStarfarerVariant
 	Method clone:TStarfarerVariant ()
 		Local c:TStarfarerVariant = New TStarfarerVariant
 		c.displayName = displayName + " Copy"
-		c.goalVariant = goalVariant
 		c.hullId = hullId
 		c.variantId = variantId + "_copy"
 		c.fluxVents = fluxVents
 		c.fluxCapacitors = fluxCapacitors
 		c.hullMods = hullMods
-		c.permaMods = permaMods
-		c.weaponGroups = weaponGroups[..]
+		c.weaponGroups = new TStarfarerVariantWeaponGroup[weaponGroups.length] ' deep clone
+		For Local i% = 0 Until weaponGroups.length
+			c.weaponGroups[i] = weaponGroups[i].clone()
+		Next
+		c.goalVariant = goalVariant
+		c.quality = quality
+		c.permaMods = permaMods[..]
+		c.wings = wings[..]
 		Return c
 	End Method
 	

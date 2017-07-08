@@ -84,6 +84,7 @@ Include "src/TModalSetEngineSlots.type.bmx"
 Include "src/TModalSetStringData.type.bmx"
 Include "src/TModalLaunchBays.type.bmx"
 Include "src/TModalSetVariant.type.bmx"
+Include "src/TModalSetVariantWings.type.bmx"
 Include "src/TModalSetSkin.type.bmx"
 Include "src/TModalSetShipCSV.type.bmx"
 Include "src/TModalSetWingCSV.type.bmx"
@@ -234,6 +235,7 @@ Global sub_set_engine_slots:TModalSetEngineSlots = New TModalSetEngineSlots
 Global sub_string_data:TModalSetStringData = New TModalSetStringData
 Global sub_launchbays:TModalLaunchBays = New TModalLaunchBays
 Global sub_set_variant:TModalSetVariant = New TModalSetVariant
+Global sub_set_variant_wings:TModalSetVariantWings = New TModalSetVariantWings
 Global sub_set_skin:TModalSetSkin = New TModalSetSkin
 Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
 Global sub_wing_csv:TModalSetWingCSV = New TModalSetWingCSV
@@ -274,7 +276,7 @@ Repeat
   'TODO adding Events
   WaitEvent()
   'instaquit
-  escape_key_update( data )
+  escape_key_update()
 
   'If EventID() <> EVENT_GADGETPAINT And EventID() <> EVENT_TIMERTICK Then Print CurrentEvent.ToString()
   If Not Apprunning And EventID() <> EVENT_APPRESUME Then Continue
@@ -431,16 +433,18 @@ Repeat
               sub_set_engine_slots.Draw( ed, data, sprite )
             Case "launch_bays"
               sub_launchbays.Draw( ed, data, sprite )
-            'Case "string_data"
-              'performed below
             Case "preview_all"
               sub_preview_all.Draw( ed, data, sprite )
+            'Case "string_data"
+              'performed below
             End Select      
           
           Case "variant"
             Select ed.mode
               Case "normal"
                 sub_set_variant.Draw( ed, data, sprite )
+              Case "variant_wings"
+                sub_set_variant_wings.Draw( ed, data, sprite )
               'Case "string_data"
                 'performed below
             EndSelect
@@ -513,6 +517,70 @@ End
 
 '////////////////////////////////////////////////
 'MARK Function set
+
+Function check_sub_routines% ( ed:TEditor, data:TData, sprite:TSprite )
+  Local hit% = True
+  Select ed.program_mode
+    Case "ship"
+      Select ed.mode
+        Case "center"
+          sub_set_ship_center.Update( ed, data, sprite )
+        Case "bounds"
+          sub_set_bounds.Update( ed, data, sprite )
+        Case "shield_center"
+          sub_set_shield_center.Update( ed, data, sprite )
+        Case "weapon_slots"
+          sub_set_weapon_slots.Update( ed, data, sprite )
+        Case "built_in_weapons"
+          sub_set_built_in_weapons.Update( ed, data, sprite )
+        Case "built_in_hullmods"
+          sub_set_built_in_hullmods.Update( ed, data, sprite )
+        Case "built_in_wings"
+          sub_set_built_in_wings.Update( ed, data, sprite )
+        Case "engine_slots"
+          sub_set_engine_slots.Update( ed, data, sprite )
+        Case "launch_bays"
+          sub_launchbays.Update( ed, data, sprite )
+        Case "string_data"
+          sub_string_data.Update( ed, data, sprite )
+        Case "preview_all"
+          sub_preview_all.Update( ed, data, sprite )
+      End Select    
+    Case "variant"
+      Select ed.mode
+        Case "normal"
+          sub_set_variant.Update( ed, data, sprite )
+        Case "variant_wings"
+          sub_set_variant_wings.Update( ed, data, sprite )
+        Case "string_data"
+          sub_string_data.Update( ed, data, sprite )
+      EndSelect   
+    Case "skin"
+      Select ed.mode
+        Case "normal"
+          sub_set_skin.Update( ed, data, sprite )
+        Case "string_data"
+          sub_string_data.Update( ed, data, sprite )
+      EndSelect   
+    Case "csv"
+      sub_ship_csv.Update( ed, data, sprite )
+    Case "csv_wing"
+      sub_wing_csv.Update( ed, data, sprite )
+    Case "weapon"
+      Select ed.mode
+        Case "string_data"
+          sub_string_data.Update( ed, data, sprite )
+        Default
+          sub_weapon.Update( ed, data, sprite )     
+      EndSelect
+    Case "csv_weapon"
+      sub_weapon_csv.Update( ed, data, sprite )
+    Default
+      hit = False
+  End Select
+  Return hit
+End Function
+
 'MARK GAlist check
 '-----------------------
 ' Return true if the input EventSource(Object) hit the checkes, so we can skip the rest
@@ -768,7 +836,7 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
     
     Case "ship"
       Select EventSource()
-        Case functionMenu[5] 'exit
+        Case functionMenu[MENU_FUNCTION_EXIT] 'exit
           ed.last_mode = ed.mode
           ed.mode = "none"
           ed.field_i = 0  
@@ -802,6 +870,8 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
     
     Case "variant"
       Select EventSource()
+        Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_WINGS] 'variant wings
+          sub_set_variant_wings.Activate( ed, data, sprite )
         Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_STRIPALL]
           load_variant_data( ed, data, sprite, True ) 'strip all  
         Case functionMenu[MENU_FUNCTION_DETAILS]
@@ -826,67 +896,6 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
   End Select
   updata_weapondrawermenu(ed)
 
-  Return hit
-End Function
-
-Function check_sub_routines% ( ed:TEditor, data:TData, sprite:TSprite )
-  Local hit% = True
-  Select ed.program_mode
-    Case "ship"
-      Select ed.mode
-        Case "center"
-          sub_set_ship_center.Update( ed, data, sprite )
-        Case "bounds"
-          sub_set_bounds.Update( ed, data, sprite )
-        Case "shield_center"
-          sub_set_shield_center.Update( ed, data, sprite )
-        Case "weapon_slots"
-          sub_set_weapon_slots.Update( ed, data, sprite )
-        Case "built_in_weapons"
-          sub_set_built_in_weapons.Update( ed, data, sprite )
-        Case "built_in_hullmods"
-          sub_set_built_in_hullmods.Update( ed, data, sprite )
-        Case "built_in_wings"
-          sub_set_built_in_wings.Update( ed, data, sprite )
-        Case "engine_slots"
-          sub_set_engine_slots.Update( ed, data, sprite )
-        Case "launch_bays"
-          sub_launchbays.Update( ed, data, sprite )
-        Case "string_data"
-          sub_string_data.Update( ed, data, sprite )
-        Case "preview_all"
-          sub_preview_all.Update( ed, data, sprite )
-      End Select    
-    Case "variant"
-      Select ed.mode
-        Case "normal"
-          sub_set_variant.Update( ed, data, sprite )
-        Case "string_data"
-          sub_string_data.Update( ed, data, sprite )
-      EndSelect   
-    Case "skin"
-      Select ed.mode
-        Case "normal"
-          sub_set_skin.Update( ed, data, sprite )
-        Case "string_data"
-          sub_string_data.Update( ed, data, sprite )
-      EndSelect   
-    Case "csv"
-      sub_ship_csv.Update( ed, data, sprite )
-    Case "csv_wing"
-      sub_wing_csv.Update( ed, data, sprite )
-    Case "weapon"
-      Select ed.mode
-        Case "string_data"
-          sub_string_data.Update( ed, data, sprite )
-        Default
-          sub_weapon.Update( ed, data, sprite )     
-      EndSelect
-    Case "csv_weapon"
-      sub_weapon_csv.Update( ed, data, sprite )
-    Default
-      hit = False
-  End Select
   Return hit
 End Function
 
