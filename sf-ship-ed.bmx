@@ -1201,10 +1201,10 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
     h = "" + sprite.img.height
     x = json.FormatDouble( img_x - data.ship.center[1], 1 )
     y = json.FormatDouble( - ( img_y - data.ship.center[0] ), 1 )
-  Else
+  Else 'ed.program_mode <> "weapon"
     sprite.get_xy( MouseX, MouseY, img_x, img_y )
-    If sprite.wpimg Then w = "" + sprite.wpimg.width Else w = "N/a"
-    If sprite.wpimg Then h = "" + sprite.wpimg.height Else h = "N/a"
+    If sprite.wpimg Then w = "" + sprite.wpimg.width Else w = "N/A"
+    If sprite.wpimg Then h = "" + sprite.wpimg.height Else h = "N/A"
     x = json.FormatDouble( img_x - sub_weapon.xOffset , 1 )
     y = json.FormatDouble( - img_y , 1 )
   EndIf
