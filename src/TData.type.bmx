@@ -860,6 +860,22 @@ Type TData
 		EndIf
 	EndMethod
 
+	'requires subsequent call to update_variant()
+	Method add_variant_wing( wing_id$ )
+		Local current_wing_count% = variant.wings.length + ship.builtInWings.length
+		If current_wing_count < get_fighterbays_count()
+			variant.wings = variant.wings[..variant.wings.length + 1]
+			variant.wings[variant.wings.length - 1] = wing_id
+		EndIf
+	EndMethod
+
+	'requires subsequent call to update_variant()
+	Method remove_last_variant_wing()
+		If variant.wings.length > 0
+			variant.wings = variant.wings[..variant.wings.length-1]
+		EndIf
+	EndMethod
+
 	'////////////////
 
 	'requires subsequent call to update_weapon()
@@ -912,6 +928,7 @@ Type TData
 
 	'////////////////
 
+	' counts the number of matching wings are equipped on the loaded .ship
 	Method count_builtin_wings%( search_wing_id$ )
 		Local count% = 0
 		For Local wing_id$ = EachIn ship.builtInWings
@@ -919,6 +936,97 @@ Type TData
 		Next
 		Return count
 	EndMethod
+
+	' counts the number of matching wings are equipped on the loaded .variant
+	Method count_variant_wings%( search_wing_id$ )
+		Local count% = 0
+		For Local wing_id$ = EachIn variant.wings
+			If wing_id = search_wing_id Then count :+ 1
+		Next
+		Return count
+	EndMethod
+
+	Method get_wing_op_cost%( wing_id$ )
+		Local wing:TMap = TMap( ed.stock_wing_stats.ValueForKey( wing_id ))
+		Return String( wing.ValueForKey( "op cost" )).ToInt()
+	EndMethod
+
+	'-----------------------------------------
+
+	Method get_ship_csv_ordnance_points%()
+		Local ship_stats:TMap = csv_row
+		Local value$ = String( ship_stats.ValueForKey( "ordnance points" ))
+		If Not value Then Return 0 'csv row found, but did not contain column
+		Return value.ToInt()
+	EndMethod
+
+	Method calc_variant_used_ordnance_points%()
+		Local op% = 0
+		'flux vents, flux capacitors, weapons, hullmods, wings
+		op :+ variant.fluxVents
+		op :+ variant.fluxCapacitors
+		For Local group:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
+			For Local weapon_slot_id$ = EachIn group.weapons.Keys()
+				Local weapon_id$ = String( group.weapons.ValueForKey( weapon_slot_id ))
+				If weapon_id
+					Local weapon_op% = get_weapon_csv_ordnance_points( weapon_id )
+					If Not is_weapon_assigned_to_builtin_weapon_slot( weapon_slot_id )
+						op :+ weapon_op
+					EndIf
+				End If
+			Next
+		Next
+		For Local hullMod_id$ = EachIn variant.hullMods
+			Local hullMod_op% = get_hullmod_csv_ordnance_points( hullMod_id )
+			op :+ hullMod_op
+		Next
+		For Local wing_id$ = EachIn variant.wings
+			Local wing_op% = get_wing_op_cost( wing_id )
+			op :+ wing_op
+		Next
+		Return op
+	EndMethod
+
+	Method is_weapon_assigned_to_builtin_weapon_slot%( weapon_slot_id$ )
+		For Local weapon_slot:TStarfarerShipWeapon = EachIn ship.weaponSlots
+			If weapon_slot.id = weapon_slot_id And weapon_slot.is_builtin()
+				Return True
+			EndIf
+		Next
+		Return False
+	EndMethod
+
+	Method get_weapon_csv_ordnance_points%( weapon_id$ )
+		Local weapon_stats:TMap = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
+		If Not weapon_stats Then Return 0 'ID not found in csv data
+		Local value$ = String( weapon_stats.ValueForKey( "OPs" ))
+		If Not value Then Return 0 'csv row found, but did not contain column
+		Return value.ToInt()
+	EndMethod
+
+	Method get_hullmod_csv_ordnance_points%( hullMod_id$ )
+		'uses ship size and hullmod data
+		Local hullMod_stats:TMap = TMap( ed.stock_hullmod_stats.ValueForKey( hullMod_id ))
+		If Not hullMod_stats Then Return 0 'ID not found in csv data
+		Local column_key$ = ""
+		Select ship.hullSize
+			Case "FRIGATE"
+				column_key = "cost_frigate"
+			Case "DESTROYER"
+				column_key = "cost_dest"
+			Case "CRUISER"
+				column_key = "cost_cruiser"
+			Case "CAPITAL_SHIP"
+				column_key = "cost_capital"
+			Default
+				Return 0 'hullMod cost cannot be found
+		EndSelect
+		Local value$ = String( hullMod_stats.ValueForKey( column_key ))
+		If Not value Then Return 0 'csv row found, but did not contain column
+		Return value.ToInt()
+	EndMethod
+
+	'-----------------------------------------
 
 	Method find_assigned_slot_parent_group:TStarfarerVariantWeaponGroup( ship_weapon_slot_id$ )
 		For Local group:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups

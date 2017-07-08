@@ -1,15 +1,15 @@
 ______________________________________________________________________________
-editor version 2.7.4-beta.1 (starsector 0.8.1a) [Trylobot]
+editor version 2.7.4 (starsector 0.8.1a) [Deathfly & Trylobot]
 
 FEATURES
-- Ship: renders built-in wings and wing slots
-- Ship: prevents adding more wings than ship has capacity for
+- Variant: added "wings" mode (add/remove fighter wings from variant)
+- Ship/Variant: renders fighter wing sprites and available slots
+- Ship/Variant: prevents adding more wings than ship has capacity for
+- Variant: warns if adding more variant wings than variant has OPs for
 - Variant: added "goalVariant", "quality" to details (strings) editor
 
 BUGFIXES
-- Now saves Ship / Details / coversColor properly
-
-
+- Ship: saves coversColor
 
 ______________________________________________________________________________
 editor version 2.7.3 (starsector 0.8.1a) [Trylobot]
@@ -42,7 +42,7 @@ BUGFIXES
 - In variant edit mode it will now try to create an empty new variant called "New" for edit.
 - In weapon edit mode, it will create an new weapon file.
 ______________________________________________________________________________
-editor version 2.7.0 (starsector 0.7.2a)
+editor version 2.7.0 (starsector 0.7.2a) [Deathfly]
 
 MAXGUI MIGRATION
 - Add menu bar.
@@ -113,12 +113,12 @@ BUGFIXES
 - Fixed a issue that the rjson core will mistakenly discard "0" for integer output.
 
 ______________________________________________________________________________
-editor version 2.6.4 (starsector 0.7.1a)
+editor version 2.6.4 (starsector 0.7.1a) [Trylobot]
 - credit to zaphide for pull request!
 - support for HYBRID weapon types
 - support for longer weapon lists
 ______________________________________________________________________________
-editor version 2.6.3 (starsector 0.7a RC1)
+editor version 2.6.3 (starsector 0.7a RC1) [Trylobot]
 - ship variants will no longer assign DECORATIVE, SYSTEM or LAUNCH_BAY weapons
 ______________________________________________________________________________
 editor version 2.6.2 (starsector 0.6.1a)

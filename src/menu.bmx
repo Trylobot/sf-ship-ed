@@ -76,6 +76,7 @@ Global MENU_SUBFUNCTION_SHIP_MORE% = s; s:+1
 Global MENUSIZE_MENU_SUBFUNCTION_SHIP_____% = s
 s = 0
 Global MENU_SUBFUNCTION_VARIANT_WEAPONGROUPS% = s; s:+1
+Global MENU_SUBFUNCTION_VARIANT_WINGS% = s; s:+1
 Global MENU_SUBFUNCTION_VARIANT_VENT% = s; s:+1
 Global MENU_SUBFUNCTION_VARIANT_VENT_ADD% = s; s:+1
 Global MENU_SUBFUNCTION_VARIANT_VENT_REMOVE% = s; s:+1
@@ -210,6 +211,7 @@ Function rebuildFunctionMenu(index%)
   Case MENU_MODE_VARIANT
     functionMenuSub[MENU_MODE_VARIANT] = New TGadget[MENUSIZE_MENU_SUBFUNCTION_VARIANT_____]
     functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_WEAPONGROUPS] = CreateMenu("{{m_function_WeaponGroups}}", 450, functionMenu[MENU_FUNCTION], KEY_G )
+    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_WINGS] = CreateMenu("{{m_function_wings}}", 456, functionMenu[MENU_FUNCTION], KEY_N )
     functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT] = CreateMenu("{{m_function_vent}}", 451, functionMenu[MENU_FUNCTION] )
     functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT_ADD] = CreateMenu("{{m_function_vent_add}}", 4518, functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT], KEY_F )  
     functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT_REMOVE] = CreateMenu("{{m_function_vent_remove}}", 4512, functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT], KEY_F, MODIFIER_CONTROL)

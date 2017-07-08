@@ -57,12 +57,12 @@ Type TWingRenderer
 				If num >= 1 Then DrawImage( wingSprite, f_x, f_y )
 			Case "CLAW"
 				If num > 6 Then num = 6				
-				If num >= 6 Then DrawImage( wingSprite, f_x - Int(0.75 * sep), f_y + Int(2.25 * sep) )
-				If num >= 5 Then DrawImage( wingSprite, f_x - Int(0.75 * sep), f_y - Int(2.25 * sep) )
-				If num >= 4 Then DrawImage( wingSprite, f_x - 2.5 * Int(0.75 * sep), f_y + Int(1.5 * sep) )
-				If num >= 3 Then DrawImage( wingSprite, f_x - 2.5 * Int(0.75 * sep), f_y - Int(1.5 * sep) )
-				If num >= 2 Then DrawImage( wingSprite, f_x - 3 * Int(0.75 * sep), f_y + Int(0.5 * sep) )
-				If num >= 1 Then DrawImage( wingSprite, f_x - 3 * Int(0.75 * sep), f_y - Int(0.5 * sep) )
+				If num >= 6 Then DrawImage( wingSprite, f_x + Int(2.25 * sep), f_y + Int(2.25 * sep) )
+				If num >= 5 Then DrawImage( wingSprite, f_x + Int(2.25 * sep), f_y - Int(2.25 * sep) )
+				If num >= 4 Then DrawImage( wingSprite, f_x + 0.5 * Int(0.75 * sep), f_y + Int(1.5 * sep) )
+				If num >= 3 Then DrawImage( wingSprite, f_x + 0.5 * Int(0.75 * sep), f_y - Int(1.5 * sep) )
+				If num >= 2 Then DrawImage( wingSprite, f_x, f_y + Int(0.5 * sep) )
+				If num >= 1 Then DrawImage( wingSprite, f_x, f_y - Int(0.5 * sep) )
 			Case "BOX"
 				If num > 6 Then num = 6
 				If num >= 6 Then DrawImage( wingSprite, f_x - sep, f_y + Int(0.5 * sep) )

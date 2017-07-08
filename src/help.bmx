@@ -119,6 +119,7 @@ Function load_help()
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_variant_assignWeapon}}"), ICON_MS_LEFT, True, 0, "variant" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "G", LocalizeString("{{h_function_variant_weaponGroups}}"), ICON_KB, True, 0, "variant" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", LocalizeString("{{h_function_variant_wings}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "A", LocalizeString("{{h_function_variant_autofire}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F", LocalizeString("{{h_function_variant_addVents}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "F", LocalizeString("{{h_function_variant_removeVents}}"), ICON_CTRL_KB, True, 0, "variant" ) )
@@ -131,6 +132,9 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "Q", LocalizeString("{{h_function_show_more}}"), ICON_KB, True, 1, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW + Chr($2192), LocalizeString("{{h_animation_frame}}"), 0, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( Chr($2191) + Chr($2193), LocalizeString("{{h_animation_playStop}}"), 0, True, 1, "variant" ) )
+	'//////////// 
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_ship_variantWings_addWing}}"), ICON_ENTER, True, 0, "variant", "variant_wings" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_ship_variantWings_removeWing}}"), ICON_KB, True, 1, "variant", "variant_wings" ) )
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", LocalizeString("{{h_function_csvEdit}}"), ICON_KB, True, 1, "csv" ) )
 	'////////////

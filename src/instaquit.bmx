@@ -7,9 +7,12 @@ Global instaquit_time_required% = 1000
 
 '-----------------------
 
-Function escape_key_update( data:TData )
+Function escape_key_update()
 	If esc_held And (MilliSecs() - esc_press_ts) >= instaquit_time_required
-		end_program( data )
+		' This is intentional.
+		' Instaquit is just that: instaquit
+		' Meaning: Quit Now
+		End
 	EndIf
 	'escape key state
 	If EventData() = KEY_ESCAPE

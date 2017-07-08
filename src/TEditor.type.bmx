@@ -17,6 +17,7 @@ Type TEditor
 	Field builtIn_hullMod_i%
 	Field builtIn_wing_i%
 	Field variant_hullMod_i%
+	Field variant_wing_i%
 	Field group_field_i%
 	'mouse states
 	Field mouse_1%
