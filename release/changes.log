@@ -7,6 +7,8 @@ FEATURES
 
 BUGFIXES
 - Now saves Ship / Details / coversColor properly
+- Variant: added goalVariant to details edit
+
 
 ______________________________________________________________________________
 editor version 2.7.3 (starsector 0.8.1a) [Trylobot]

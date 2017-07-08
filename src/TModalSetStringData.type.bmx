@@ -307,6 +307,7 @@ Type TModalSetStringData Extends TSubroutine
 				If line_i = i Then data.set_variantId( TStarfarerVariant(target).variantId, values.lines[i] )
 				i:+1
 				TStarfarerVariant(target).displayName = values.lines[i]; i:+1
+				TStarfarerVariant(target).goalVariant = stringToBoolean(values.lines[i]); i:+1
 				'variable-length chunk 1
 				For j = 0 Until TStarfarerVariant(target).weaponGroups.length
 					TStarfarerVariant(target).weaponGroups[j].mode = values.lines[i]; i:+1
@@ -478,11 +479,13 @@ Type TModalSetStringData Extends TSubroutine
 			labels = TextWidget.Create( ..
 				"variant.hullId" +"~n"+..
 				"variant.variantId" +"~n"+..
-				"variant.displayName" )
+				"variant.displayName" +"~n"+..
+				"variant.goalVariant" )
 			values = TextWidget.Create( ..
 				TStarfarerVariant(target).hullId +"~n"+..
 				TStarfarerVariant(target).variantId +"~n"+..
-				TStarfarerVariant(target).displayName )
+				TStarfarerVariant(target).displayName +"~n"+..
+				booleanToString( TStarfarerVariant(target).goalVariant ))
 			For i = 0 Until TStarfarerVariant(target).weaponGroups.length
 				labels.append( TextWidget.Create( ..
 					"variant.weaponGroup.mode" ))
@@ -710,6 +713,6 @@ Function booleanToString:String (input%)
 End Function
 
 Function stringToBoolean:Int (input$)
-	If input = "False" Then Return False Else Return True
+	If input.ToLower() = "false" Then Return False Else Return True
 	
 End Function

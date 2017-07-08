@@ -13,6 +13,7 @@ Type TStarfarerVariant
 	
 	Method New()
 		displayName = "New Variant"
+		goalVariant = 1
 		hullId = "new_hull"
 		variantId = "new_hull_variant"
 		fluxVents = 0
