@@ -20,6 +20,29 @@ Global CONTEXT_HELP:TMap
 
 Global mouse_str$
 
+Type TKeyboardHelpWidget
+	Field key$
+	Field desc$
+	Field show_key_as_icon%
+	Field enabled%
+	Field margin_bottom%
+	Field program_mode$
+	Field sub_mode$
+	
+	Function Create:TKeyboardHelpWidget( key$, desc$, show_key_as_icon%, enabled%, margin_bottom%, program_mode$=Null, sub_mode$=Null )
+		Local w:TKeyboardHelpWidget = New TKeyboardHelpWidget
+		w.key = key
+		w.desc = desc
+		w.show_key_as_icon = show_key_as_icon
+		w.enabled = enabled
+		w.margin_bottom = margin_bottom
+		w.program_mode = program_mode
+		w.sub_mode = sub_mode
+		Return w
+	End Function
+End Type
+
+
 Function load_help()
 	LocalizeString("{{}}")
 	HELP_WIDGETS = CreateList()
@@ -140,7 +163,8 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "B", LocalizeString("{{h_mode_skin_builtInweapons}}"), ICON_KB, True, 0, "skin" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "E", LocalizeString("{{h_mode_skin_engineSlots}}"), ICON_KB, True, 0, "skin" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "H", LocalizeString("{{h_mode_skin_builtInhullmods}}"), ICON_KB, True, 0, "skin" ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "A", LocalizeString("{{h_mode_skin_aiHints}}"), ICON_KB, True, 1, "skin" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "A", LocalizeString("{{h_mode_skin_aiHints}}"), ICON_KB, True, 0, "skin" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", LocalizeString("{{h_mode_skin_details}}"), ICON_KB, True, 1, "skin" ) )
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", LocalizeString("{{h_function_csvEdit}}"), ICON_KB, True, 1, "csv" ) )
 	'////////////

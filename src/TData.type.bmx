@@ -6,13 +6,13 @@ Type TData
 	Field json_str$
 	Field json_view:TList'<TextWidget>
 
-	Field skin:TStarfarerSkin
-	Field json_str_skin$
-	Field json_view_skin:TList'<TextWidget>
-
 	Field variant:TStarfarerVariant
 	Field json_str_variant$
 	Field json_view_variant:TList'<TextWidget>
+
+	Field skin:TStarfarerSkin
+	Field json_str_skin$
+	Field json_view_skin:TList'<TextWidget>
 
 	Field csv_row:TMap'<String,String>  'column name --> value
 	Field csv_row_wing:TMap'<String,String>  'column name --> value
@@ -30,8 +30,8 @@ Type TData
 	Field snapshot_shouldhold% = False
 	Field snapshot_holdcurr% = False
 	Field snapshot_undoing% = False
-	Field snapshot_curr:Tsnapshot
-	Field snapshot_init:Tsnapshot
+	Field snapshot_curr:TSnapshot
+	Field snapshot_init:TSnapshot
 
 
 	Method New()
@@ -44,6 +44,7 @@ Type TData
 	Method Clear()
 		ship = New TStarfarerShip
 		variant = New TStarfarerVariant
+		skin = New TStarfarerSkin
 		csv_row = ship_data_csv_field_template.Copy()
 		csv_row_wing = wing_data_csv_field_template.Copy()
 		csv_row_weapon = weapon_data_csv_field_template.Copy()
@@ -120,7 +121,7 @@ Type TData
 		json_str_skin = json.stringify( skin, "stringify_skin" )
 		json_view_skin = columnize_text( json_str_skin )
 		changed = True
-		take_snapshot(2)
+		take_snapshot(3)
 	End Method
 
 	'requires subsequent call to update_variant()
@@ -1396,53 +1397,58 @@ Type TData
 		If snapshot_undoing Then Return
 		If Not snapshot_inited Then Return
 		If Not snapshot_curr
-			snapshot_curr = New Tsnapshot
+			snapshot_curr = New TSnapshot
 		Else If Not snapshot_holdcurr
 			snapshots_undo.AddFirst(snapshot_curr)
 			snapshots_redo.Clear()
-			snapshot_curr = New Tsnapshot
+			snapshot_curr = New TSnapshot
 		EndIf
 		If snapshot_shouldhold Then snapshot_holdcurr = True
 		snapshot_curr.program_mode = ed.program_mode
 		snapshot_curr.mode = ed.mode
 		snapshot_curr.last_mode = ed.last_mode
+		
 		Select input
-		Case 1
-			snapshot_curr.json_str = json_str
-		Case 2
-			snapshot_curr.json_str_variant = json_str_variant
-		Case 3
-			snapshot_curr.csv_row = CopyMap(csv_row)
-		Case 4
-			snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
-		Case 5
-			snapshot_curr.json_str_weapon = json_str_weapon
-
-		Case 6
-			snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
-
-		Default
-			Select snapshot_curr.program_mode
-			Case "ship"
+			
+			Case 1
 				snapshot_curr.json_str = json_str
-			Case "variant"
+			Case 2
 				snapshot_curr.json_str_variant = json_str_variant
-			Case "csv"
+			Case 3
+				snapshot_curr.json_str_skin = json_str_skin
+			Case 4
 				snapshot_curr.csv_row = CopyMap(csv_row)
-			Case "csv_wing"
+			Case 5
 				snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
-			Case "weapon"
+			Case 6
 				snapshot_curr.json_str_weapon = json_str_weapon
-
-			Case "csv_weapon"
+			Case 7
 				snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
 
-			End Select
-		End Select	
+			Default
+				Select snapshot_curr.program_mode
+					
+					Case "ship"
+						snapshot_curr.json_str = json_str
+					Case "variant"
+						snapshot_curr.json_str_variant = json_str_variant
+					Case "skin"
+						snapshot_curr.json_str_skin = json_str_skin
+					Case "csv"
+						snapshot_curr.csv_row = CopyMap(csv_row)
+					Case "csv_wing"
+						snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
+					Case "weapon"
+						snapshot_curr.json_str_weapon = json_str_weapon
+					Case "csv_weapon"
+						snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
+
+				EndSelect
+		EndSelect	
 	End Method
 	
 	Method take_initshot()
-		snapshot_init = New Tsnapshot
+		snapshot_init = New TSnapshot
 		snapshot_init.program_mode = ed.program_mode
 		snapshot_init.mode = ed.mode
 		snapshot_init.last_mode = ed.last_mode
@@ -1471,19 +1477,21 @@ Type TData
 
 	
 End Type	
-Type Tsnapshot	
+
+
+Type TSnapshot	
+	'
 	Field program_mode$
 	Field mode$
 	Field last_mode$
+	'
 	Field json_str$
 	Field json_str_variant$
+	Field json_str_skin$
 	Field csv_row:TMap'<String,String>  'column name --> value
 	Field csv_row_wing:TMap'<String,String>  'column name --> value
-
 	Field csv_row_weapon:TMap'<String,String>  'column name --> value
-
 	Field json_str_weapon$
-	'for string editing mode.
 	'Field values:TextWidget
-	
+
 End Type
