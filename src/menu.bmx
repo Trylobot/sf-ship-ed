@@ -88,6 +88,13 @@ Global MENU_SUBFUNCTION_VARIANT_STRIPALL% = s; s:+1
 Global MENU_SUBFUNCTION_VARIANT_MORE% = s; s:+1
 Global MENUSIZE_MENU_SUBFUNCTION_VARIANT_____% = s
 s = 0
+Global MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_WEAPONSLOTS% = s; s:+1
+Global MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_WEAPONS% = s; s:+1
+Global MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_ENGINES% = s; s:+1
+Global MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_HULLMODS% = s; s:+1
+Global MENU_SUBFUNCTION_SKIN_ADDREMOVE_HINTS% = s; s:+1
+Global MENUSIZE_MENU_SUBFUNCTION_SKIN_____% = s
+s = 0
 Global MENU_SUBFUNCTION_WEAPON_WEAPON_OFFSETS% = s; s:+1
 Global MENU_SUBFUNCTION_WEAPON_WEAPON_DISPLAYMODE% = s; s:+1
 Global MENU_SUBFUNCTION_WEAPON_WPIMG_MAIN% = s; s:+1
@@ -186,52 +193,56 @@ Function init_gui_menus()
 EndFunction
 
 Function rebuildFunctionMenu(index%)
-  'nuke them first
   For Local i:TGadget[] = EachIn functionMenuSub
     For Local j:TGadget = EachIn i
       FreeGadget(j)
     Next
   Next
-  'then rebuile it
+  'rebuild it
   Select Index
-  Case MENU_MODE_SHIP
-    functionMenuSub[MENU_MODE_SHIP] = New TGadget[MENUSIZE_MENU_SUBFUNCTION_SHIP_____]
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_CENTER] = CreateMenu("{{m_function_center}}", 410, functionMenu[MENU_FUNCTION], KEY_C )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_SHIELD] = CreateMenu("{{m_function_shield}}", 411, functionMenu[MENU_FUNCTION], KEY_S )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BOUNDS] = CreateMenu("{{m_function_bounds}}", 412, functionMenu[MENU_FUNCTION], KEY_B )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_WEAPONSLOTS] = CreateMenu("{{m_function_weaponSlots}}", 413, functionMenu[MENU_FUNCTION], KEY_W )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINWEAPONS] = CreateMenu("{{m_function_builtInWeapons}}", 414, functionMenu[MENU_FUNCTION], KEY_U )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_DECORATIVE] = CreateMenu("{{m_function_decorate}}", 415, functionMenu[MENU_FUNCTION], KEY_R )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINHULLMODS] = CreateMenu("{{m_function_builtInHullmods}}", 416, functionMenu[MENU_FUNCTION], KEY_H )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINWINGS] = CreateMenu("{{m_function_builtInWings}}", 421, functionMenu[MENU_FUNCTION], KEY_N )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_ENGINE] = CreateMenu("{{m_function_engine}}", 417, functionMenu[MENU_FUNCTION], KEY_E )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_LAUNCHBAYS] = CreateMenu("{{m_function_launchBays}}", 418, functionMenu[MENU_FUNCTION], KEY_L )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_PREVIEW] = CreateMenu("{{m_function_preview}}", 419, functionMenu[MENU_FUNCTION], KEY_P )
-    functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_MORE] = CreateMenu("{{m_function_more}}", 420, functionMenu[MENU_FUNCTION], KEY_Q )
-  Case MENU_MODE_VARIANT
-    functionMenuSub[MENU_MODE_VARIANT] = New TGadget[MENUSIZE_MENU_SUBFUNCTION_VARIANT_____]
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_WEAPONGROUPS] = CreateMenu("{{m_function_WeaponGroups}}", 450, functionMenu[MENU_FUNCTION], KEY_G )
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_WINGS] = CreateMenu("{{m_function_wings}}", 456, functionMenu[MENU_FUNCTION], KEY_N )
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT] = CreateMenu("{{m_function_vent}}", 451, functionMenu[MENU_FUNCTION] )
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT_ADD] = CreateMenu("{{m_function_vent_add}}", 4518, functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT], KEY_F )  
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT_REMOVE] = CreateMenu("{{m_function_vent_remove}}", 4512, functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT], KEY_F, MODIFIER_CONTROL)
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP] = CreateMenu("{{m_function_cap}}", 452, functionMenu[MENU_FUNCTION])
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP_ADD] = CreateMenu("{{m_function_cap_add}}", 4528, functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP], KEY_C)
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP_REMOVE] = CreateMenu("{{m_function_cap_remove}}", 4522, functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP], KEY_C, MODIFIER_CONTROL)   
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_HULLMOD] = CreateMenu("{{m_function_hullmod}}", 453, functionMenu[MENU_FUNCTION], KEY_H )
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_STRIPALL] = CreateMenu("{{m_function_stripAll}}", 454, functionMenu[MENU_FUNCTION], KEY_SLASH )
-    functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_MORE] = CreateMenu("{{m_function_more}}", 455, functionMenu[MENU_FUNCTION], KEY_Q )
-  Case MENU_MODE_SKIN
-    ' ...
-  Case MENU_MODE_WEAPON
-    functionMenuSub[MENU_MODE_WEAPON] = New TGadget[MENUSIZE_MENU_SUBFUNCTION_WEAPON_____]
-    functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_OFFSETS] = CreateMenu("{{m_function_weapon_offsets}}", 500, functionMenu[MENU_FUNCTION], KEY_O )
-    functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_DISPLAYMODE] = CreateMenu("{{m_function_weapon_displaymode}}", 501, functionMenu[MENU_FUNCTION], KEY_H )
-    functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_MAIN] = CreateMenu("{{m_function_wpimg_main}}", 502, fileMenu[MENU_FILE_LOAD_IMAGE], KEY_A ) 
-    functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_BARREL] = CreateMenu("{{m_function_wpimg_barrel}}", 503, fileMenu[MENU_FILE_LOAD_IMAGE], KEY_G)    
-    functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_UNDER] = CreateMenu("{{m_function_wpimg_under}}", 504, fileMenu[MENU_FILE_LOAD_IMAGE], KEY_U)
-    functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_GLOW] = CreateMenu("{{m_function_wpimg_glow}}", 505, fileMenu[MENU_FILE_LOAD_IMAGE], KEY_L)
-    functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_GLOWTOGGLE] = CreateMenu("{{m_function_weapon_glowtoggle}}", 506, functionMenu[MENU_FUNCTION], KEY_W)     
+    Case MENU_MODE_SHIP
+      functionMenuSub[MENU_MODE_SHIP] = New TGadget[MENUSIZE_MENU_SUBFUNCTION_SHIP_____]
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_CENTER] = CreateMenu("{{m_function_center}}", 410, functionMenu[MENU_FUNCTION], KEY_C )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_SHIELD] = CreateMenu("{{m_function_shield}}", 411, functionMenu[MENU_FUNCTION], KEY_S )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BOUNDS] = CreateMenu("{{m_function_bounds}}", 412, functionMenu[MENU_FUNCTION], KEY_B )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_WEAPONSLOTS] = CreateMenu("{{m_function_weaponSlots}}", 413, functionMenu[MENU_FUNCTION], KEY_W )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINWEAPONS] = CreateMenu("{{m_function_builtInWeapons}}", 414, functionMenu[MENU_FUNCTION], KEY_U )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_DECORATIVE] = CreateMenu("{{m_function_decorate}}", 415, functionMenu[MENU_FUNCTION], KEY_R )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINHULLMODS] = CreateMenu("{{m_function_builtInHullmods}}", 416, functionMenu[MENU_FUNCTION], KEY_H )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_BUILTINWINGS] = CreateMenu("{{m_function_builtInWings}}", 421, functionMenu[MENU_FUNCTION], KEY_N )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_ENGINE] = CreateMenu("{{m_function_engine}}", 417, functionMenu[MENU_FUNCTION], KEY_E )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_LAUNCHBAYS] = CreateMenu("{{m_function_launchBays}}", 418, functionMenu[MENU_FUNCTION], KEY_L )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_PREVIEW] = CreateMenu("{{m_function_preview}}", 419, functionMenu[MENU_FUNCTION], KEY_P )
+      functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_MORE] = CreateMenu("{{m_function_more}}", 420, functionMenu[MENU_FUNCTION], KEY_Q )
+    Case MENU_MODE_VARIANT
+      functionMenuSub[MENU_MODE_VARIANT] = New TGadget[MENUSIZE_MENU_SUBFUNCTION_VARIANT_____]
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_WEAPONGROUPS] = CreateMenu("{{m_function_WeaponGroups}}", 450, functionMenu[MENU_FUNCTION], KEY_G )
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_WINGS] = CreateMenu("{{m_function_wings}}", 456, functionMenu[MENU_FUNCTION], KEY_N )
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT] = CreateMenu("{{m_function_vent}}", 451, functionMenu[MENU_FUNCTION] )
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT_ADD] = CreateMenu("{{m_function_vent_add}}", 4518, functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT], KEY_F )  
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT_REMOVE] = CreateMenu("{{m_function_vent_remove}}", 4512, functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_VENT], KEY_F, MODIFIER_CONTROL)
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP] = CreateMenu("{{m_function_cap}}", 452, functionMenu[MENU_FUNCTION])
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP_ADD] = CreateMenu("{{m_function_cap_add}}", 4528, functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP], KEY_C)
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP_REMOVE] = CreateMenu("{{m_function_cap_remove}}", 4522, functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_CAP], KEY_C, MODIFIER_CONTROL)   
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_HULLMOD] = CreateMenu("{{m_function_hullmod}}", 453, functionMenu[MENU_FUNCTION], KEY_H )
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_STRIPALL] = CreateMenu("{{m_function_stripAll}}", 454, functionMenu[MENU_FUNCTION], KEY_SLASH )
+      functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_MORE] = CreateMenu("{{m_function_more}}", 455, functionMenu[MENU_FUNCTION], KEY_Q )
+    Case MENU_MODE_SKIN
+      functionMenuSub[MENU_MODE_SKIN] = New TGadget[MENUSIZE_MENU_SUBFUNCTION_SKIN_____]
+      functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_WEAPONSLOTS] = CreateMenu("{{m_function_skin_changeremove_weaponslots}}", 600, functionMenu[MENU_FUNCTION], KEY_W )
+      functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_WEAPONS] = CreateMenu("{{m_function_skin_addremove_builtin_weapons}}", 601, functionMenu[MENU_FUNCTION], KEY_B )
+      functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_ENGINES] = CreateMenu("{{m_function_skin_changeremove_engines}}", 602, functionMenu[MENU_FUNCTION], KEY_E )
+      functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_HULLMODS] = CreateMenu("{{m_function_skin_addremove_builtin_hullmods}}", 603, functionMenu[MENU_FUNCTION], KEY_H )
+      functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_HINTS] = CreateMenu("{{m_function_skin_addremove_hints}}", 604, functionMenu[MENU_FUNCTION], KEY_A )
+    Case MENU_MODE_WEAPON
+      functionMenuSub[MENU_MODE_WEAPON] = New TGadget[MENUSIZE_MENU_SUBFUNCTION_WEAPON_____]
+      functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_OFFSETS] = CreateMenu("{{m_function_weapon_offsets}}", 500, functionMenu[MENU_FUNCTION], KEY_O )
+      functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_DISPLAYMODE] = CreateMenu("{{m_function_weapon_displaymode}}", 501, functionMenu[MENU_FUNCTION], KEY_H )
+      functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_MAIN] = CreateMenu("{{m_function_wpimg_main}}", 502, fileMenu[MENU_FILE_LOAD_IMAGE], KEY_A ) 
+      functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_BARREL] = CreateMenu("{{m_function_wpimg_barrel}}", 503, fileMenu[MENU_FILE_LOAD_IMAGE], KEY_G)    
+      functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_UNDER] = CreateMenu("{{m_function_wpimg_under}}", 504, fileMenu[MENU_FILE_LOAD_IMAGE], KEY_U)
+      functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_GLOW] = CreateMenu("{{m_function_wpimg_glow}}", 505, fileMenu[MENU_FILE_LOAD_IMAGE], KEY_L)
+      functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_GLOWTOGGLE] = CreateMenu("{{m_function_weapon_glowtoggle}}", 506, functionMenu[MENU_FUNCTION], KEY_W)     
   End Select
 EndFunction
 

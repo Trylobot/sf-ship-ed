@@ -709,53 +709,62 @@ End Function
 Function check_mode_menu%(ed:TEditor, data:TData, sprite:TSprite)
   Local hit% = True
   Select EventSource()
-  Case modeMenu[MENU_MODE_SHIP] 'm_mode_ship
-    If ed.program_mode = "ship" Then Return True
-    'if coming from variant editing, go right into weapons mode editing
-    If ed.program_mode = "variant" Then ed.mode = "weapon_slots" Else ed.mode = "none"
-    ed.last_mode = "none"
-    ed.program_mode = "ship"
-    ed.weapon_lock_i = - 1
-    ed.field_i = 0
-    RadioMenuArray( MENU_MODE_SHIP, modeMenu )
-    rebuildFunctionMenu(MENU_MODE_SHIP)
-  Case modeMenu[MENU_MODE_VARIANT] 'm_mode_variant
-    If ed.program_mode = "variant" Then Return True
-    sub_set_variant.Activate( ed, data, sprite )
-    RadioMenuArray( MENU_MODE_VARIANT, modeMenu )
-    rebuildFunctionMenu(MENU_MODE_VARIANT)
-  Case modeMenu[MENU_MODE_SKIN] 'm_mode_skin
-    If ed.program_mode = "skin" Then Return True
-    sub_set_skin.Activate( ed, data, sprite )
-    RadioMenuArray( MENU_MODE_SKIN, modeMenu )
-    rebuildFunctionMenu(MENU_MODE_SKIN)
-  Case modeMenu[MENU_MODE_SHIPSTATS] 'm_mode_ship_stats
-    If ed.program_mode = "csv" Then Return True
-    sub_ship_csv.Activate( ed, data, sprite )
-    RadioMenuArray( MENU_MODE_SHIPSTATS, modeMenu )
-    rebuildFunctionMenu(MENU_MODE_SHIPSTATS)
-  Case modeMenu[MENU_MODE_WING] 'm_mode_wing
-    If ed.program_mode = "csv_wing" Then Return True
-    sub_wing_csv.Activate( ed, data, sprite )
-    RadioMenuArray( MENU_MODE_WING, modeMenu )
-    rebuildFunctionMenu(MENU_MODE_WING)
-  Case modeMenu[MENU_MODE_WEAPON] 'm_mode_weapon
-    If ed.program_mode = "weapon" Then Return True
-    sub_weapon.Activate( ed, data, sprite )
-    RadioMenuArray( MENU_MODE_WEAPON, modeMenu )
-    rebuildFunctionMenu(MENU_MODE_WEAPON)
-  Case modeMenu[MENU_MODE_WEAPONSTATS] 'm_mode_weapon_stats
-    If ed.program_mode = "csv_weapon" Then Return True
-    sub_weapon_csv.Activate( ed, data, sprite )
-    RadioMenuArray( MENU_MODE_WEAPONSTATS, modeMenu )
-    rebuildFunctionMenu(MENU_MODE_WEAPONSTATS)
-  ' Case modeMenu[MENU_MODE_PROJECTILE] 'm_mode_projectile
-  '   If ed.program_mode = "proj" Then Return True
-  '   sub_projectile.Activate( ed, data, sprite )
-  '   RadioMenuArray( MENU_MODE_PROJECTILE, modeMenu )
-  '   rebuildFunctionMenu(MENU_MODE_PROJECTILE)
-  Default
-    hit = False
+    
+    Case modeMenu[MENU_MODE_SHIP] 'm_mode_ship
+      If ed.program_mode = "ship" Then Return True
+      'if coming from variant editing, go right into weapons mode editing
+      If ed.program_mode = "variant" Then ed.mode = "weapon_slots" Else ed.mode = "none"
+      ed.last_mode = "none"
+      ed.program_mode = "ship"
+      ed.weapon_lock_i = - 1
+      ed.field_i = 0
+      RadioMenuArray( MENU_MODE_SHIP, modeMenu )
+      rebuildFunctionMenu(MENU_MODE_SHIP)
+   
+    Case modeMenu[MENU_MODE_VARIANT] 'm_mode_variant
+      If ed.program_mode = "variant" Then Return True
+      sub_set_variant.Activate( ed, data, sprite )
+      RadioMenuArray( MENU_MODE_VARIANT, modeMenu )
+      rebuildFunctionMenu(MENU_MODE_VARIANT)
+    
+    Case modeMenu[MENU_MODE_SKIN] 'm_mode_skin
+      If ed.program_mode = "skin" Then Return True
+      sub_set_skin.Activate( ed, data, sprite )
+      RadioMenuArray( MENU_MODE_SKIN, modeMenu )
+      rebuildFunctionMenu(MENU_MODE_SKIN)
+    
+    Case modeMenu[MENU_MODE_SHIPSTATS] 'm_mode_ship_stats
+      If ed.program_mode = "csv" Then Return True
+      sub_ship_csv.Activate( ed, data, sprite )
+      RadioMenuArray( MENU_MODE_SHIPSTATS, modeMenu )
+      rebuildFunctionMenu(MENU_MODE_SHIPSTATS)
+    
+    Case modeMenu[MENU_MODE_WING] 'm_mode_wing
+      If ed.program_mode = "csv_wing" Then Return True
+      sub_wing_csv.Activate( ed, data, sprite )
+      RadioMenuArray( MENU_MODE_WING, modeMenu )
+      rebuildFunctionMenu(MENU_MODE_WING)
+    
+    Case modeMenu[MENU_MODE_WEAPON] 'm_mode_weapon
+      If ed.program_mode = "weapon" Then Return True
+      sub_weapon.Activate( ed, data, sprite )
+      RadioMenuArray( MENU_MODE_WEAPON, modeMenu )
+      rebuildFunctionMenu(MENU_MODE_WEAPON)
+    
+    Case modeMenu[MENU_MODE_WEAPONSTATS] 'm_mode_weapon_stats
+      If ed.program_mode = "csv_weapon" Then Return True
+      sub_weapon_csv.Activate( ed, data, sprite )
+      RadioMenuArray( MENU_MODE_WEAPONSTATS, modeMenu )
+      rebuildFunctionMenu(MENU_MODE_WEAPONSTATS)
+    
+    ' Case modeMenu[MENU_MODE_PROJECTILE] 'm_mode_projectile
+    '   If ed.program_mode = "proj" Then Return True
+    '   sub_projectile.Activate( ed, data, sprite )
+    '   RadioMenuArray( MENU_MODE_PROJECTILE, modeMenu )
+    '   rebuildFunctionMenu(MENU_MODE_PROJECTILE)
+
+    Default
+      hit = False
   End Select
   updata_weapondrawermenu(ed) 
   Return hit
@@ -1185,6 +1194,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
   Local ico_w% = 18
   Local ico_h% = 18
   Local w$, h$, x$, y$
+  
   If ed.program_mode <> "weapon"
     If Not sprite.img Then Return
     sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
@@ -1199,9 +1209,11 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
     x = json.FormatDouble( img_x - sub_weapon.xOffset , 1 )
     y = json.FormatDouble( - img_y , 1 )
   EndIf
+  
   Local a$ = json.FormatDouble( 0, 1 )
   Local z$ = Int(100.0 * sprite.scale)
   Local m% = ed.bounds_symmetrical
+  
   If ed.program_mode = "ship" ..
   And ed.mode = "weapon_slots" 
     Local ni% = data.find_nearest_weapon_slot( img_x, img_y )
@@ -1211,6 +1223,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
       ang_relevant = True
       a = json.FormatDouble( calc_angle( weapon.locations[0], weapon.locations[1], img_x - data.ship.center[1], - ( img_y - data.ship.center[0] ) ), 1 )
     EndIf
+  
   ElseIf ed.program_mode = "ship" ..
   And    ed.mode = "engine_slots" 
     Local ni% = data.find_nearest_engine( img_x, img_y )
@@ -1220,6 +1233,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
       ang_relevant = True
       a = json.FormatDouble( calc_angle( engine.location[0], engine.location[1], img_x - data.ship.center[1], - ( img_y - data.ship.center[0] ) ), 1 )
     EndIf
+  
   ElseIf ed.program_mode = "weapon" ..
   And ed.mode = "offsets"
     Local offsets#[]
@@ -1267,6 +1281,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
   DrawImage( ed.ico_mirr, Int(4.2*Float(W_MAX)/5.0)+20,        H_MAX - ico_h - 4 )
   draw_string( mirr_w,    Int(4.2*Float(W_MAX)/5.0)+20+ico_w+4,H_MAX - LINE_HEIGHT - 4 )
   SetAlpha( 1 )
+  
   'if not showing the json data (which would be obscured):
   If Not ed.show_data
     '  From Left to Right along top:
@@ -1276,6 +1291,8 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
         title_w = TextWidget.Create( data.ship.hullId + ".ship" )
       Case "variant"
         title_w = TextWidget.Create( data.variant.variantId + ".variant" )
+      Case "skin"
+        title_w = TextWidget.Create( data.skin.skinHullId + ".skin" )
       Case "csv"
         If data.csv_row
           title_w = TextWidget.Create( "ship_data.csv : " + String( data.csv_row.ValueForKey( "id" )))
@@ -1300,6 +1317,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
     EndSelect
     draw_string( title_w, 4, 4 )
   EndIf
+
 EndFunction
 
 Function draw_weapons( ed:TEditor, data:TData, sprite:TSprite, wd:TWeaponDrawer )
