@@ -66,7 +66,7 @@ Type TData
 		json_str = json.stringify( ship, "stringify_ship" )
 		json_view = columnize_text( json_str )
 		changed = True
-		take_snapshot(1)
+		take_snapshot(MENU_MODE_SHIP)
 	End Method
 
 	'requires subsequent call to update()
@@ -106,7 +106,7 @@ Type TData
 		json_str_variant = json.stringify( variant, "stringify_variant" )
 		json_view_variant = columnize_text( json_str_variant )
 		changed = True
-		take_snapshot(2)
+		take_snapshot(MENU_MODE_VARIANT)
 	End Method
 
 	'requires subsequent call to update_skin()
@@ -121,7 +121,7 @@ Type TData
 		json_str_skin = json.stringify( skin, "stringify_skin" )
 		json_view_skin = columnize_text( json_str_skin )
 		changed = True
-		take_snapshot(3)
+		take_snapshot(MENU_MODE_SKIN)
 	End Method
 
 	'requires subsequent call to update_variant()
@@ -188,7 +188,7 @@ Type TData
 		json_str_weapon = json.stringify( weapon, "stringify_weapon" )
 		json_view_weapon = columnize_text( json_str_weapon )
 		changed = True
-		take_snapshot(5)
+		take_snapshot(MENU_MODE_WEAPON)
 	EndMethod
 
 	Method set_hullId( old_hullId$, hullId$ )
@@ -1410,19 +1410,19 @@ Type TData
 		
 		Select input
 			
-			Case 1
+			Case MENU_MODE_SHIP
 				snapshot_curr.json_str = json_str
-			Case 2
+			Case MENU_MODE_VARIANT
 				snapshot_curr.json_str_variant = json_str_variant
-			Case 3
+			Case MENU_MODE_SKIN
 				snapshot_curr.json_str_skin = json_str_skin
-			Case 4
+			Case MENU_MODE_SHIPSTATS
 				snapshot_curr.csv_row = CopyMap(csv_row)
-			Case 5
+			Case MENU_MODE_WING
 				snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
-			Case 6
+			Case MENU_MODE_WEAPON
 				snapshot_curr.json_str_weapon = json_str_weapon
-			Case 7
+			Case MENU_MODE_WEAPONSTATS
 				snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
 
 			Default
