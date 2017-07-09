@@ -101,6 +101,17 @@ Function test_number_literal2()
 	verify( val.Equals( json.parse( json_str )) )
 EndFunction
 
+Function test_number_literal3()
+	Print "*** test_number_literal starting with decimal point"
+	Local json_str$ = ".8"
+	Local test_val:TNumber = New TNumber
+	test_val.value = 0.8;
+	Local decoded_val:TNumber = TNumber( json.parse( json_str ))
+	Local test_val_str$ = json.FormatDouble( test_val.value )
+	Local decoded_val_str$ = json.FormatDouble( decoded_val.value )
+	verify( test_val_str = decoded_val_str, ""+test_val_str+" <> "+decoded_val_str )
+EndFunction
+
 Function test_null_literal()
 	Print "*** test_null_literal"
 	Local json_str$ = "null"
@@ -539,7 +550,9 @@ Function test_pass_starfarer()
 	Print "*** test_pass_starfarer"
 	Local json_str$ = LoadString( test_dir + "/passes/starfarer.json" )
 	Local decoded:Object = json.parse( json_str )
-	verify( TObject(decoded).fields.ValueForKey( "enum1" ).ToString() = "~qENUM_VALUE~q", "~qENUM_VALUE~q <> "+TObject(decoded).fields.ValueForKey( "enum1" ).ToString() )
+	verify( ..
+		TObject(decoded).fields.ValueForKey( "enum1" ).ToString() = "ENUM_VALUE", ..
+		"ENUM_VALUE <> "+TObject(decoded).fields.ValueForKey( "enum1" ).ToString()  )
 EndFunction
 
 Function test_encode_TList()
@@ -674,6 +687,7 @@ Function Main()
 	run_test( test_string_literal )
 	run_test( test_number_literal )
 	run_test( test_number_literal2 )
+	run_test( test_number_literal3 )
 	run_test( test_null_literal )
 	run_test( test_boolean_literal )
 	run_test( test_unclosed_array )

@@ -40,35 +40,37 @@ Type TModalSetSkin Extends TSubroutine
 		ed.group_field_i = -1
 		ed.edit_strings_weapon_i = -1
 		ed.edit_strings_engine_i = -1
+		ed.skin_hullMod_i = -1
 		' set sprite
 		sprite.img = Null
     autoload_skin_image( ed, data, sprite )
     If sprite.img = Null
     	Rem
-    	  TODO: much like how variant mode does it,
-    	    if the sprite failed to load, it indicates this is likely not data loaded from disk
-    	      attempt to automatically load a default skin
-    	      based on the current ship; then, retry loading the skin image
+    	  TODO: if the sprite failed to load, it indicates this is likely not data loaded from disk;
+    	    much like how variant mode does it,
+  	      attempt to automatically load a "default skin"
+  	      based on the current ship; then, retry loading the skin image
     	EndRem
     EndIf
     ' menus
     RadioMenuArray( MENU_MODE_SKIN, modeMenu )
     rebuildFunctionMenu( MENU_MODE_SKIN )
-    ' debug
-		DebugLogFile(" Activate Skin Editor")
-		' smooth-scroll
-		SS.reset()
 		' info verbosity [0=min|1=lots|2=all]
 		SHOW_MORE_cached = SHOW_MORE
+    ' debug
+		DebugLogFile(" ed.program_mode=~q"+ed.program_mode+"~q; ed.mode=~q"+ed.mode+"~q")
 	EndMethod
 
 	Method SetEditorMode( ed:TEditor, data:TData, sprite:TSprite, new_mode$ )
 		Select new_mode
 
 			Case "addremove_hullmods"
+				ed.last_mode = ed.mode
 				ed.mode = new_mode
 				ed.skin_hullMod_i = -1
-				initialize_hullmods_chooser( ed, data )
+				initialize_hullmod_chooser( ed, data )
+				SS.reset()
+				DebugLogFile(" ed.program_mode=~q"+ed.program_mode+"~q; ed.mode=~q"+ed.mode+"~q")
 
 		EndSelect
 	EndMethod
@@ -79,7 +81,7 @@ Type TModalSetSkin Extends TSubroutine
 			' number of visible columns changed; reconstruct table
 			SHOW_MORE_cached = SHOW_MORE
 			hullmod_count = count_keys( ed.stock_hullmod_stats )
-			initialize_hullmods_chooser( ed, data )
+			initialize_hullmod_chooser( ed, data )
 			' TODO: re-count, re-init anything else that changes as a result of SHOW_MORE toggling
 			' ...
 		EndIf
@@ -100,7 +102,7 @@ Type TModalSetSkin Extends TSubroutine
 			
 			Case "addremove_hullmods"
 				process_input_addremove_hullmods( ed, data )
-				update_hullmods_chooser( ed, data )
+				update_hullmod_chooser( ed, data )
 		
 			Case "addremove_hints"
 				'process_input_addremove_hints( ed, data )
@@ -140,7 +142,7 @@ Type TModalSetSkin Extends TSubroutine
 
 	'/////////////////////////////////////
 
-	Method initialize_hullmods_chooser( ed:TEditor, data:TData )
+	Method initialize_hullmod_chooser( ed:TEditor, data:TData )
 		hullmod_count = count_keys( ed.stock_hullmod_stats )
 		'
 		Local rows% =    1 + hullmod_count ' header, data
@@ -183,10 +185,10 @@ Type TModalSetSkin Extends TSubroutine
 			i :+ 1
 		Next
 		'
-		update_hullmods_chooser( ed, data )
+		update_hullmod_chooser( ed, data )
 	EndMethod
 
-	Method update_hullmods_chooser( ed:TEditor, data:TData )
+	Method update_hullmod_chooser( ed:TEditor, data:TData )
 		' render table into text widget with precalculated dimensions in screen pixels
 		'
 		' assume: the chooser table is already the correct number of cells
@@ -209,9 +211,9 @@ Type TModalSetSkin Extends TSubroutine
 			'---------------------------------------------------------
 			' show status of each hullmod as it relates to this skin (and, its "base hull" (ship))
 			Local hullmod_status$ = "   "
-			If data.has_builtin_hullmod( hullmod_id ) Then hullmod_status = " b "
-			If data.skin_adds_hullmod( hullmod_id ) Then hullmod_status = "[+]"
-			If data.skin_removes_hullmod( hullmod_id ) Then hullmod_status = "---"
+			If data.has_builtin_hullmod( hullmod_id ) Then hullmod_status = " b  "
+			If data.skin_adds_hullmod( hullmod_id ) Then hullmod_status = "[+] "
+			If data.skin_removes_hullmod( hullmod_id ) Then hullmod_status = "--- "
 			hullmod_chooser.set_cell(r,c, hullmod_status); c :+ 1
 			i :+ 1
 		Next

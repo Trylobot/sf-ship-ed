@@ -63,12 +63,13 @@ Supported transformation type selectors:
 Supported transformation imperatives:
 * XJ_DELETE 
 * XJ_RENAME( new_field_name )
-* XJ_CONVERT( new_json_type_code ) 
+* XJ_CONVERT( new_json_type_code )
 
 
 EndRem
 
 SuperStrict
+'Module twrc.rjson ' local copy of actual module, for convenience
 Import brl.reflection
 Import brl.retro
 Import brl.linkedlist
@@ -87,7 +88,7 @@ Type json
 	Global formatted_array% = True 'false: compact,   true: indented; global setting
 	Global empty_container_as_null% = False 'false: [] {} "",   true: null
 	Global indent_size% = 2 'spaces per indent level, if formatted is true; global setting
-	Global precision% = 6 'default floating-point precision, can be overridden per field/object/instance/item/value
+	Global precision% = 6 'cstdio.h default floating-point precision; can be overridden per field/object/instance/item/value
 	
 	'Transformations
 	Global transformations:TMap = CreateMap()
@@ -436,7 +437,7 @@ Type json
 
 	'////////////////////////////////////////////////////////////////////////////
 
-	Function FormatDouble:String( value:Double, precision:Int )
+	Function FormatDouble:String( value:Double, precision:Int=-1 )
 		'trims trailing zeroes and decimal separator
 		Extern "C"
 			Function snprintf_:Int( s:Byte Ptr, n:Int, Format$z, p:Int, v1:Double) = "snprintf"
@@ -444,7 +445,7 @@ Type json
 		Const CHAR_0:Byte = Asc("0")
 		Const CHAR_DOT:Byte = Asc(".")
 		Const STR_FMT:String = "%.*f"
-		If precision = -1 Then precision = 6 'cstdio.h default
+		If precision = -1 Then precision = json.precision
 		Local i:Double
 		Local buf:Byte[256]
 		Local sz:Int = snprintf_( buf, buf.Length, STR_FMT, precision, value)
@@ -863,14 +864,19 @@ Type TNumber Extends TValue
 	EndMethod
 
 	Method Decode( encoded$, cursor% Var )
+		'(untested) roughly equivalent regular expression:
+		'  [+-.]?\d+(:?[.]\d+)?(:?[eE][+-]?\d+)?f?
 		json.EatWhitespace( encoded, cursor )
 		Local cursor_start% = cursor
 		Local floating_point% = False
 		json.EatSpecific( encoded, cursor, "+-", 1 ) 'positive/negative
-		json.EatSpecific( encoded, cursor, "0123456789",, 1 )
-		If json.EatSpecific( encoded, cursor, ".", 1 ) 'decimal pt.
+		If json.EatSpecific( encoded, cursor, ".", 1 ) 'leading decimal pt.
 			floating_point = True
-			json.EatSpecific( encoded, cursor, "0123456789",, 1 )
+		End If
+		json.EatSpecific( encoded, cursor, "0123456789",, 1 )
+		If Not floating_point And json.EatSpecific( encoded, cursor, ".", 1 ) 'middle decimal pt.
+			floating_point = True
+			json.EatSpecific( encoded, cursor, "0123456789",, 1 ) 'digits following decimal point
 		End If
 		If json.EatSpecific( encoded, cursor, "eE", 1 ) 'scientific notation
 			floating_point = True

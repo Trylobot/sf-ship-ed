@@ -56,21 +56,25 @@ Type TEditor
 	Field ico_exit:TImage
 	Field engineflame:TImage
 	Field engineflamecore:TImage
-	'stock data
-	Field stock_ships:TMap 'String (hullId) --> TStarfarerShip
-	Field stock_variants:TMap 'String (variantId) --> TStarfarerVariant
-	Field stock_hull_variants_assoc:TMap 'String (TList) --> List of variant_id's asssociated with the hullid
-	Field stock_weapons:TMap 'String(id) --> TStarfarerWeapon
-	Field stock_engine_styles:TMap'<String,TStarfarerCustomEngineStyleSpec>  'CUSTOM Engine styleId --> engine data object
-	Field stock_ship_stats:TMap 'String (id:hullId) --> TMap (csv stats keys --> values)
-	Field stock_wing_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
-	Field stock_variant_wing_stats_assoc:TMap 'String (TList) --> List of wing_id's associated with the variantId
-	Field stock_weapon_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
-	Field stock_hullmod_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
-	Field stock_ship_stats_field_order:TList'<String> 'column names
-	Field stock_wing_stats_field_order:TList'<String> 'column names
-	Field stock_weapon_stats_field_order:TList'<String> 'column names
-	Field multiselect_values:TMap 'String (field) --> TMap (set of valid values)
+	'stock (and mod) data
+	Field stock_ships:TMap                      '<String,Object>   hullId --> TStarfarerShip
+	Field stock_variants:TMap                   '<String,Object>   variantId --> TStarfarerVariant
+	Field stock_hull_variants_assoc:TMap        '<String,TList>    hullId --> TList of variantIds (referencing the hullId)
+	Field stock_skins:TMap                      '<String,Object>   skinHullId --> TStarfarerSkin
+	Field stock_hull_skins_assoc:TMap           '<String,TList>    hullId --> TList of skinHullIds (referencing the hullId)
+	Field stock_skins_variants_assoc:TMap       '<String,TList>    skinHullId --> TList of variantIds (referencing the hullId, not knowing it is a skinHullId)
+	Field stock_weapons:TMap                    '<String,Object>   weaponId --> TStarfarerWeapon
+	Field stock_engine_styles:TMap              '<String,Object>   engine style spec id --> TStarfarerCustomEngineStyleSpec
+	Field stock_ship_stats:TMap                 '<String,TMap>     hullId --> TMap (csv columns --> values)
+	Field stock_wing_stats:TMap                 '<String,TMap>     wingId --> TMap (csv columns --> values)
+	Field stock_variant_wing_stats_assoc:TMap   '<String,TList>    variantId --> TList of wingId (referencing the variantId)
+	Field stock_weapon_stats:TMap               '<String,TMap>     weaponId --> TMap (csv columns --> values)
+	Field stock_hullmod_stats:TMap              '<String,TMap>     hullmodId --> TMap (csv columns --> values)
+	'metadata
+	Field stock_ship_stats_field_order:TList    '<String>          csv column (ordered)
+	Field stock_wing_stats_field_order:TList    '<String>          csv column (ordered)
+	Field stock_weapon_stats_field_order:TList  '<String>          csv column (ordered)
+	Field multiselect_values:TMap               '<String,TMap>     field (enum) --> [value set] (TMap <value,value>)
 
 	Method New()
 		program_mode = "ship"
@@ -88,6 +92,9 @@ Type TEditor
 		stock_ships = CreateMap()
 		stock_variants = CreateMap()
 		stock_hull_variants_assoc = CreateMap()
+		stock_skins = CreateMap()
+		stock_hull_skins_assoc = CreateMap()
+		stock_skins_variants_assoc = CreateMap()
 		stock_weapons = CreateMap()
 		stock_engine_styles = CreateMap()
 		stock_engine_styles.Insert( "", "" ) 'NULL engine style means "use the included styleSpec data"
@@ -109,7 +116,7 @@ Type TEditor
 		Try
 			Local input_json_str$ = LoadString( dir + file )
 			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ) )
-			Fix_Map_TStrings( ship.builtInWeapons ) 'TEMPORARY
+			Fix_Map_TStrings( ship.builtInWeapons ) 'TEMPORARY (yeah, right)
 			stock_ships.Insert( ship.hullId, ship )
 			load_multiselect_value( "ship.hullSize", ship.hullSize )
 			load_multiselect_value( "ship.style", ship.style )
@@ -159,6 +166,44 @@ Type TEditor
 			Return Null
 		EndTry
 	End Method
+
+	Method load_stock_skin:TStarfarerSkin( dir$, file$ )
+		Try
+			' stock_skins
+			' stock_hull_skins_assoc
+			' stock_skins_variants_assoc
+			Local input_json_str$ = LoadString( dir + file )
+			Local skin:TStarfarerSkin = TStarfarerSkin( json.parse( input_json_str, "TStarfarerSkin" ))
+			'Fix_Map_TStrings ?
+			'
+			'save variant data
+			stock_skins.Insert( skin.skinHullId, skin )
+			'save association to hull that it references
+			Local assoc:TList = TList( stock_hull_skins_assoc.ValueForKey( skin.baseHullId ))
+			If Not assoc
+				assoc = CreateList()
+				stock_hull_skins_assoc.Insert( skin.baseHullId, assoc )
+			EndIf
+			assoc.AddLast( skin.skinHullId )
+			Rem
+				TODO: find variants that reference skin.skinHullId
+					OPTION 1: move them to stock_skins_variants_assoc
+					OPTION 2: copy them to stock_skins_variants_assoc
+					OPTION 3: create "ghost" TStarfarerShip that represents the merging of
+					  the skin file grafted on top of its base hull ship
+					  for the variant to reference, not knowing it's a virtual/ghost datafile
+			EndRem
+			'scan for multiselect values ?
+			'For ...
+			'	load_multiselect_value( "skin.path.to.value", valueref )
+			'Next
+			DebugLogFile " LOADED "+file
+			Return skin
+		Catch ex$ 'capture errors, print & continue
+			DebugLogFile " Error: "+file+" "+ex
+			Return Null
+		EndTry
+	EndMethod
 
 	Method get_default_variant:TStarfarerVariant( hullId$ )
 		Local assoc:TList = TList( stock_hull_variants_assoc.ValueForKey( hullId ))

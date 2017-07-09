@@ -15,7 +15,7 @@ Import BRL.JPGLoader
 Import BRL.FreeTypeFont
 Import BRL.event
 Import BRL.eventqueue
-Import Maxgui.MaxGUI
+Import maxgui.MaxGUI
 Import maxgui.drivers
 Import maxgui.win32maxguiex
 Import maxgui.localization
@@ -904,6 +904,8 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
 
     Case "skin"
       Select EventSource()
+        Case functionMenu[MENU_FUNCTION_EXIT] 'exit
+          sub_set_skin.SetEditorMode( ed, data, sprite, "none" )
         Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_HULLMODS]
           sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_hullmods" )
         Case functionMenu[MENU_FUNCTION_DETAILS]
@@ -1337,6 +1339,7 @@ Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla% = False )
   Local stock_variants_dir$ = data_dir+"data/variants/"
   Local stock_variants_fighters_dir$ = data_dir+"data/variants/fighters/"
   Local stock_variants_drones_dir$ = data_dir+"data/variants/drones/"
+  Local stock_skins_dir$ =    data_dir+"data/hulls/skins/"
   Local stock_weapons_dir$ =  data_dir+"data/weapons/"
   Local stock_hullmods_dir$ = data_dir + "data/hullmods/"
   Local stock_config_dir$ = data_dir + "data/config/"
@@ -1361,6 +1364,11 @@ Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla% = False )
   For Local stock_variant_file$ = EachIn stock_variants_drones_files
     If ExtractExt( stock_variant_file ) <> "variant" Then Continue
     ed.load_stock_variant( stock_variants_drones_dir, stock_variant_file )
+  Next
+  Local stock_skins_files$[] = LoadDir( stock_skins_dir )
+  For Local stock_skin_file$ = EachIn stock_skins_files
+    If ExtractExt( stock_skin_file ) <> "skin" Then Continue
+    ed.load_stock_skin( stock_skins_dir, stock_skin_file )
   Next
   Local stock_weapons_files$[] = LoadDir( stock_weapons_dir )
   For Local stock_weapon_file$ = EachIn stock_weapons_files
@@ -1426,7 +1434,7 @@ EndFunction
 Function DebugLogFile( msg$ )
   Try
     WriteLine( DEBUG_LOG_FILE, CurrentDate() + " " + CurrentTime() + " :" + msg )
-    
+    DebugLog( msg )
   Catch ex$
   EndTry
 EndFunction
