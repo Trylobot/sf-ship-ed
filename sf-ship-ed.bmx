@@ -190,9 +190,6 @@ sprite.scale = ZOOM_LEVELS[ed.selected_zoom_level]
 ed.target_sprite_scale = sprite.scale
 
 Local data:TData = New TData
-data.update()
-data.update_variant()
-data.update_weapon()
 
 'MARK init UI
 init_gui_menus()

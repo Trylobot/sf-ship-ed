@@ -10,6 +10,7 @@ Type TModalSetSkin Extends TSubroutine
 		ed.weapon_lock_i = - 1
 		ed.variant_hullMod_i = - 1
 		ed.group_field_i = - 1
+    autoload_skin_image( ed, data, sprite )
     RadioMenuArray( MENU_MODE_SKIN, modeMenu )
     rebuildFunctionMenu(MENU_MODE_SKIN)
 		DebugLogFile(" Activate Skin Editor")
@@ -84,6 +85,43 @@ Function load_skin_data( ed:TEditor, data:TData, sprite:TSprite, use_new% = Fals
     APP.skin_dir = ExtractDir( skin_path ) + "/"
     APP.save()
     data.decode_skin( LoadTextAs( skin_path, CODE_MODE ) )
+    'try to load the associated image, if one can be found
+    autoload_skin_image( ed, data, sprite )
+    Rem
+
+    TODO: Variants of Skins
+    	
+    	variant data will probably need to know whether it is:
+      - a variant of a "normal" *.ship file (TStarfarerShip)
+      - or a variant of a "skin" *.skin file (TStarfarerSkin -> TStarfarerShip)
+      
+      SOLUTION 1: perhaps we could create a "virtual" TStarfarerShip that mirrors what we would get
+        if we in theory loaded the skin into the game?
+        something to look into anyway, possibly will need to for v3.0.0 anyhow
+        - we could "automatically" create these "ghost ships"
+          for all skin files, and flag them as skins so we know not to save them
+          that way variants don't even have to know the difference
+      
+      SOLUTION 2: create a new TStarfarerSkinVariant "meta" type
+      	its only purpose would be to manage the interactions
+	      	  between a ship, its skin, and a variant on top of that skin
+	      	  (variants normally assume they point at "real" ships)
+        it could have the following fields:
+					Field baseHull:TStarfarerShip ' regular file, stand-alone
+					Field hullSkin:TStarfarerSkin ' regular file, references baseHull
+					Field mergedHull:TStarfarerShip ' points to and merges <baseHull,hullSkin>, creating a (temporary) "ghost ship"
+					Field mergedHullVariant:TStarfarerVariant ' points to mergedHull
+
+    ' code transplanted from  load_ship_data(...)
+    'VARIANT data
+    'if the currently loaded variant doesn't reference the loaded hull, load one that does if possible
+    If Not ed.verify_variant_association( data.ship.hullId, data.variant.variantId )
+      data.variant = ed.get_default_variant( data.ship.hullId )
+    EndIf
+    data.update_variant_enforce_hull_compatibility( ed )
+    data.update_variant()
+
+    EndRem
   Else
     data.skin = New TStarfarerSkin
     data.skin.baseHullId = data.ship.hullId
