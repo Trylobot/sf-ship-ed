@@ -884,6 +884,60 @@ Type TData
 
 	'////////////////
 
+	'requires subsequent call to update_skin()
+	Method toggle_skin_builtin_hullmod( hullmod_id$ )
+		If skin.builtInMods.length > 0
+			Local found% = False
+			For Local i% = 0 Until skin.builtInMods.length
+				If skin.builtInMods[i] = hullmod_id
+					'Found, Remove
+					found = True
+					For i = i Until skin.builtInMods.Length-1
+						skin.builtInMods[i] = skin.builtInMods[i+1]
+					Next
+					skin.builtInMods = skin.builtInMods[..skin.builtInMods.length-1]
+				EndIf
+			Next
+			If Not found
+				'Non-Empty but Not Found, Add
+				skin.builtInMods = skin.builtInMods[..skin.builtInMods.length+1]
+				skin.builtInMods[skin.builtInMods.length-1] = hullmod_id
+			EndIf
+		Else
+			'Empty, Add
+			skin.builtInMods = New String[1]
+			skin.builtInMods[0] = hullmod_id
+		EndIf
+	EndMethod
+
+	'requires subsequent call to update_skin()
+	Method toggle_skin_removeBuiltInMods_hullmod( hullmod_id$ )
+		If skin.removeBuiltInMods.length > 0
+			Local found% = False
+			For Local i% = 0 Until skin.removeBuiltInMods.length
+				If skin.removeBuiltInMods[i] = hullmod_id
+					'Found, Remove
+					found = True
+					For i = i Until skin.removeBuiltInMods.Length-1
+						skin.removeBuiltInMods[i] = skin.removeBuiltInMods[i+1]
+					Next
+					skin.removeBuiltInMods = skin.removeBuiltInMods[..skin.removeBuiltInMods.length-1]
+				EndIf
+			Next
+			If Not found
+				'Non-Empty but Not Found, Add
+				skin.removeBuiltInMods = skin.removeBuiltInMods[..skin.removeBuiltInMods.length+1]
+				skin.removeBuiltInMods[skin.removeBuiltInMods.length-1] = hullmod_id
+			EndIf
+		Else
+			'Empty, Add
+			skin.removeBuiltInMods = New String[1]
+			skin.removeBuiltInMods[0] = hullmod_id
+		EndIf
+	EndMethod
+
+	'////////////////
+
 	'requires subsequent call to update_weapon()
 	Method append_weapon_offset( x#, y#, mount_type$, reflect_over_y_axis% = False )
 		If Not weapon Then Return
@@ -1382,6 +1436,22 @@ Type TData
 			Return False
 		EndIf
 	EndMethod
+
+	Method skin_adds_hullmod%( hullmod_id$ )
+		For Local scan_hullmod_id$ = EachIn skin.builtInMods
+			If scan_hullmod_id = hullmod_id Then Return True
+		Next
+		Return False
+	EndMethod
+
+	Method skin_removes_hullmod%( hullmod_id$ )
+		For Local scan_hullmod_id$ = EachIn skin.removeBuiltInMods
+			If scan_hullmod_id = hullmod_id Then Return True
+		Next
+		Return False
+	EndMethod
+
+	'/////////////////////
 
 	Method columnize_text:TList( text$, wrap_width% = 60 )
 		'break the data into viewport-sized column-chunks for condensed

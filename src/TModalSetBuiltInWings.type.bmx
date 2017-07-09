@@ -13,11 +13,11 @@ Type TModalSetBuiltInWings Extends TSubroutine
 		ed.last_mode = ed.mode
 		ed.mode = "built_in_wings"
 		ed.builtIn_wing_i = 0
-		SHOW_MORE_cached = SHOW_MORE
 		wing_count = count_keys( ed.stock_wing_stats )
 		initialize_wing_chooser( ed, data )
 		update_wing_chooser( ed, data )
 		SS.reset()
+		SHOW_MORE_cached = SHOW_MORE
 	EndMethod
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
@@ -135,7 +135,6 @@ Type TModalSetBuiltInWings Extends TSubroutine
 	EndMethod
 
 	Method process_input( ed:TEditor, data:TData )
-		'process input
 		Select EventID()
 			Case EVENT_KEYDOWN, EVENT_KEYREPEAT	
 				Select EventData()
@@ -167,7 +166,7 @@ Type TModalSetBuiltInWings Extends TSubroutine
 			ed.builtIn_wing_i = 0
 		ElseIf ed.builtIn_wing_i < 0
 			ed.builtIn_wing_i = (wing_count - 1)
-		EndIf		
+		EndIf
 	EndMethod
 
 	Method draw_wings_list( ed:TEditor, data:TData )

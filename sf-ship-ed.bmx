@@ -1,7 +1,6 @@
 Rem
 
 STARSECTOR Ship&Weapon Editor
-  Formerly: Starfarer ship data editor
 Created by Trylobot
 Updated by Deathfly
 
@@ -323,13 +322,15 @@ Repeat
 
     Case EVENT_GADGETACTION , EVENT_MENUACTION
       'DebugLog (EventSource().ToString() )
-      If EventSource() = optionMenu[MENU_OPTION_ABOUT] Then Notify("STARSECTOR Ship&Weapon Editor ~nv2.7.2~n(Formerly Trylobot's ship editor) ~n ~nCreated by Trylobot ~nUpdated by Deathfly ~n~n" + LocalizeString("{{msg_localisation_credits}}") )
+      If EventSource() = optionMenu[MENU_OPTION_ABOUT]
+        Notify("STARSECTOR Ship&Weapon Editor~nCreated by Trylobot~nUpdated by Deathfly~n~n" + LocalizeString("{{msg_localisation_credits}}") )
+      EndIf
       check_zoom_and_pan( ed, data, sprite )
       If check_undo( ed, data, sprite ) Then Continue
       'skip most hotkeys when we are in string edit mode or so.
       If (ed.mode = "string_data" ..
-      Or (ed.program_mode = "csv" And (sub_ship_csv.loaded_csv_id_list Or sub_ship_csv.csv_row_values) )..
-      Or (ed.program_mode = "csv_wing" And (sub_wing_csv.loaded_csv_id_list Or sub_wing_csv.csv_row_values) ) ..
+      Or (ed.program_mode = "csv"        And (sub_ship_csv.loaded_csv_id_list   Or sub_ship_csv.csv_row_values) )..
+      Or (ed.program_mode = "csv_wing"   And (sub_wing_csv.loaded_csv_id_list   Or sub_wing_csv.csv_row_values) ) ..
       Or (ed.program_mode = "csv_weapon" And (sub_weapon_csv.loaded_csv_id_list Or sub_weapon_csv.csv_row_values) ) )
         If check_sub_routines( ed, data, sprite) Then Continue
       Else
@@ -560,7 +561,7 @@ Function check_sub_routines% ( ed:TEditor, data:TData, sprite:TSprite )
     
     Case "skin"
       Select ed.mode
-        Case "normal"
+        Case "none"
           sub_set_skin.Update( ed, data, sprite )
         Case "string_data"
           sub_string_data.Update( ed, data, sprite )
@@ -903,6 +904,8 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
 
     Case "skin"
       Select EventSource()
+        Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_HULLMODS]
+          sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_hullmods" )
         Case functionMenu[MENU_FUNCTION_DETAILS]
           sub_string_data.Activate( ed, data, sprite ) ' string edit
       EndSelect
