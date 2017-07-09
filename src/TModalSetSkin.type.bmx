@@ -6,7 +6,7 @@ Type TModalSetSkin Extends TSubroutine
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		ed.program_mode = "skin"
 		ed.last_mode = "normal"
-		ed.mode = "normal"
+		ed.mode = "normal" ' normal mode: basically preview mode, just show the sprite
 		ed.weapon_lock_i = - 1
 		ed.variant_hullMod_i = - 1
 		ed.group_field_i = - 1

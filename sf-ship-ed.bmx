@@ -618,7 +618,7 @@ Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
     Case "weapon", "csv_weapon"
       data.weapon = New TStarfarerWeapon
       data.csv_row_weapon = weapon_data_csv_field_template.Copy()
-      sprite.wpimg = Null
+      sprite.img = Null
       data.update_weapon()
       data.changed = False
       data.snapshots_undo:TList = CreateList()
@@ -1136,15 +1136,11 @@ End Function
 
 Function draw_debug( ed:TEditor, data:TData, sprite:TSprite )
   If ed.show_debug And sprite
-    Local reference:TImage
     Select ed.program_mode
-    Case "ship", "variant", "csv", "csv_wing"
-      reference = sprite.img
-    Case "weapon", "csv_weapon"
-      reference = sprite.wpimg
-      draw_crosshairs(sprite.asx + sub_weapon.xOffset * sprite.scale, sprite.asy, 6, True)
+      Case "weapon", "csv_weapon"
+        draw_crosshairs(sprite.asx + sub_weapon.xOffset * sprite.scale, sprite.asy, 6, True)
     End Select
-    If Not reference Then Return
+    If Not sprite.img Then Return
     Local img_x#, img_y#
     sprite.get_img_xy( MouseX, MouseY, img_x, img_y, False )
     Local col# = RoundFloat(img_x - 0.5, 1)
@@ -1153,12 +1149,12 @@ Function draw_debug( ed:TEditor, data:TData, sprite:TSprite )
     SetRotation( 0 )
     SetScale( 1, 1 )
     SetColor( 255, 255, 255 )
-    If col >= 0 And col < reference.height And row >= 0 And row < reference.width
+    If col >= 0 And col < sprite.img.height And row >= 0 And row < sprite.img.width
       SetAlpha( 0.25 )
       If col > 0 Then DrawRect( sprite.sx, sprite.sy + Float(row) * sprite.scale, Float(col) * sprite.scale, sprite.scale )
-      If col < reference.height - 1 Then DrawRect( sprite.sx + Float(col + 1) * sprite.scale, sprite.sy + Float(row) * sprite.scale, Float(reference.height - 1 - col) * sprite.scale, sprite.scale )
+      If col < sprite.img.height - 1 Then DrawRect( sprite.sx + Float(col + 1) * sprite.scale, sprite.sy + Float(row) * sprite.scale, Float(sprite.img.height - 1 - col) * sprite.scale, sprite.scale )
       If row > 0 Then DrawRect( sprite.sx + Float(col)*sprite.scale, sprite.sy, sprite.scale, Float(row)*sprite.scale )
-      If row < reference.width - 1 Then DrawRect( sprite.sx + Float(col) * sprite.scale, sprite.sy + Float(row + 1) * sprite.scale, sprite.scale, Float(reference.width - 1 - row) * sprite.scale )
+      If row < sprite.img.width - 1 Then DrawRect( sprite.sx + Float(col) * sprite.scale, sprite.sy + Float(row + 1) * sprite.scale, sprite.scale, Float(sprite.img.width - 1 - row) * sprite.scale )
       SetAlpha( 1 )
       SetColor( 0, 0, 0 )
       DrawRectLines( sprite.sx - 2 + Float(col) * sprite.scale, sprite.sy - 2 + Float(row) * sprite.scale, sprite.scale + 4, sprite.scale + 4, 3 )
@@ -1197,10 +1193,10 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
     h = "" + sprite.img.height
     x = json.FormatDouble( img_x - data.ship.center[1], 1 )
     y = json.FormatDouble( - ( img_y - data.ship.center[0] ), 1 )
-  Else 'ed.program_mode <> "weapon"
+  Else 'ed.program_mode == "weapon"
     sprite.get_xy( MouseX, MouseY, img_x, img_y )
-    If sprite.wpimg Then w = "" + sprite.wpimg.width Else w = "N/A"
-    If sprite.wpimg Then h = "" + sprite.wpimg.height Else h = "N/A"
+    If sprite.img Then w = "" + sprite.img.width Else w = "N/A"
+    If sprite.img Then h = "" + sprite.img.height Else h = "N/A"
     x = json.FormatDouble( img_x - sub_weapon.xOffset , 1 )
     y = json.FormatDouble( - img_y , 1 )
   EndIf

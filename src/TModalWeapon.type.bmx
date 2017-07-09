@@ -100,7 +100,7 @@ Type TModalWeapon Extends TSubroutine
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
 		
 		'DRAW SPRITES
-		If sprite.wpimg <> Null And weapon_display_mode = "HARDPOINT" Then xOffset = sprite.wpimg.height * - 0.25 Else xOffset = 0
+		If sprite.img <> Null And weapon_display_mode = "HARDPOINT" Then xOffset = sprite.img.height * - 0.25 Else xOffset = 0
 		If WD.show_weapon <> 0
 			If WD.show_weapon = 1 Then SetAlpha( 1 )
 			If WD.show_weapon = 2 Then SetAlpha( 0.5 )
@@ -183,20 +183,20 @@ Type TModalWeapon Extends TSubroutine
 		Select weapon_display_mode
 			Case "TURRET"
 				If data.weapon.numFrames <= 1
-					sprite.wpimg = turret_img
+					sprite.img = turret_img
 				Else ' data.weapon.numFrames > 1
-					sprite.wpimg = turret_img_seq[0]
+					sprite.img = turret_img_seq[0]
 				EndIf
 			Case "HARDPOINT"
 				If data.weapon.numFrames <= 1
-					sprite.wpimg = hardpoint_img
+					sprite.img = hardpoint_img
 				Else ' data.weapon.numFrames > 1
-					sprite.wpimg = hardpoint_img_seq[0]
+					sprite.img = hardpoint_img_seq[0]
 				EndIf
 		EndSelect
-		If sprite.wpimg
-			spr_w = sprite.wpimg.width
-			spr_h = sprite.wpimg.height
+		If sprite.img
+			spr_w = sprite.img.width
+			spr_h = sprite.img.height
 		Else
 			spr_w = 0
 			spr_h = 0
@@ -204,7 +204,7 @@ Type TModalWeapon Extends TSubroutine
 	EndMethod
 
 	Method update_offsets( ed:TEditor, data:TData, sprite:TSprite )
-		If Not sprite.wpimg Then Return
+		If Not sprite.img Then Return
 		sprite.get_xy( MouseX, MouseY, img_x, img_y, False)
 		x = RoundFloat( img_x - xOffset, DO_ROUND)
 		y = RoundFloat( - img_y, DO_ROUND )
