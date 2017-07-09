@@ -1,8 +1,7 @@
 Rem
 
-
-STARSECTOR Modding Kit 2.8.0
-  Former Starfarer ship data editor
+STARSECTOR Ship&Weapon Editor
+  Formerly: Starfarer ship data editor
 Created by Trylobot
 Updated by Deathfly
 
@@ -51,8 +50,10 @@ Include "src/functions_misc.bmx"
 Include "src/drawing_misc.bmx"
 Include "src/instaquit.bmx"
 Include "src/menu.bmx"
+
 Include "src/TextWidget.type.bmx"
 Include "src/TableWidget.type.bmx"
+
 Include "src/TStarfarerShip.type.bmx"
 Include "src/TStarfarerSkin.type.bmx"
 Include "src/TStarfarerShipWeapon.type.bmx"
@@ -63,39 +64,46 @@ Include "src/TStarfarerVariantWeaponGroup.type.bmx"
 Include "src/TStarfarerWeapon.type.bmx"
 Include "src/TStarfarerWeaponMuzzleFlashSpec.type.bmx"
 Include "src/TStarfarerWeaponSmokeSpec.type.bmx"
+
+Include "src/TCSVLoader.type.bmx"
 Include "src/ShipDataCSVFieldTemplate.bmx"
 Include "src/WingDataCSVFieldTemplate.bmx"
-Include "src/TCSVLoader.type.bmx"
+Include "src/WeaponDataCSVFieldTemplate.bmx"
+Include "src/TModalSetWeaponCSV.type.bmx"
+
 Include "src/TData.type.bmx"
 Include "src/TSprite.type.bmx"
 Include "src/TEditor.type.bmx"
+
 Include "src/TSubroutine.type.bmx"
 Include "src/TGenericCSVSubroutine.type.bmx"
-Include "src/TModalPreviewAll.type.bmx"
+Include "src/TModalSetShip.type.bmx"
 Include "src/TModalSetShipCenter.type.bmx"
-Include "src/TModalSetBounds.type.bmx"
 Include "src/TModalSetShieldCenter.type.bmx"
+Include "src/TModalSetBounds.type.bmx"
 Include "src/TModalSetWeaponSlots.type.bmx"
 Include "src/TModalSetBuiltInWeapons.type.bmx"
 Include "src/TModalSetBuiltInHullMods.type.bmx"
 Include "src/TModalSetBuiltInWings.type.bmx"
 Include "src/TModalSetEngineSlots.type.bmx"
+Include "src/TModalSetLaunchBays.type.bmx"
 Include "src/TModalSetStringData.type.bmx"
-Include "src/TModalLaunchBays.type.bmx"
+Include "src/TModalPreviewAll.type.bmx"
 Include "src/TModalSetVariant.type.bmx"
 Include "src/TModalSetVariantWings.type.bmx"
 Include "src/TModalSetSkin.type.bmx"
 Include "src/TModalSetShipCSV.type.bmx"
 Include "src/TModalSetWingCSV.type.bmx"
-Include "src/TModalWeapon.type.bmx"
+Include "src/TModalSetWeapon.type.bmx"
+
 Include "src/Application.type.bmx"
+
 Include "src/help.bmx"
 Include "src/multiselect_values.bmx"
-Include "src/TWeaponDrawer.bmx"
 Include "src/TTextCoder.bmx"
-Include "src/WeaponDataCSVFieldTemplate.bmx"
-Include "src/TModalSetWeaponCSV.type.bmx"
 Include "src/TModalShowMore.bmx"
+
+Include "src/TWeaponDrawer.bmx"
 Include "src/TWingrenderer.bmx"
 
 '/////////////////////////////////////////////
@@ -222,7 +230,7 @@ load_starfarer_data( ed, data )
 
 '////////////////////////////////////////////////
 'MARK init modals
-Global sub_preview_all:TModalPreviewAll = New TModalPreviewAll
+Global sub_set_ship:TModalSetShip = New TModalSetShip
 Global sub_set_ship_center:TModalSetShipCenter = New TModalSetShipCenter
 Global sub_set_bounds:TModalSetBounds = New TModalSetBounds
 Global sub_set_shield_center:TModalSetShieldCenter = New TModalSetShieldCenter
@@ -232,13 +240,14 @@ Global sub_set_built_in_hullmods:TModalSetBuiltInHullMods = New TModalSetBuiltIn
 Global sub_set_built_in_wings:TModalSetBuiltInWings = New TModalSetBuiltInWings
 Global sub_set_engine_slots:TModalSetEngineSlots = New TModalSetEngineSlots
 Global sub_string_data:TModalSetStringData = New TModalSetStringData
-Global sub_launchbays:TModalLaunchBays = New TModalLaunchBays
+Global sub_set_launchbays:TModalSetLaunchBays = New TModalSetLaunchBays
+Global sub_preview_all:TModalPreviewAll = New TModalPreviewAll
 Global sub_set_variant:TModalSetVariant = New TModalSetVariant
 Global sub_set_variant_wings:TModalSetVariantWings = New TModalSetVariantWings
 Global sub_set_skin:TModalSetSkin = New TModalSetSkin
 Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
 Global sub_wing_csv:TModalSetWingCSV = New TModalSetWingCSV
-Global sub_weapon:TModalWeapon = New TModalWeapon
+Global sub_set_weapon:TModalSetWeapon = New TModalSetWeapon
 Global sub_weapon_csv:TModalSetWeaponCSV = New TModalSetWeaponCSV
 Global sub_show_more:TModalShowMore = New TModalShowMore
 
@@ -388,22 +397,12 @@ Repeat
         Cls
         'display string for mouse (usually context-help)
         mouse_str = ""    
+
         'update
         update_zoom(ed, data, sprite)
         updatUndo(data)
         sprite.update()
         update_menu ()    
-    '   Select ed.program_mode    
-    '   Case "csv"
-    '     sub_ship_csv.Update( ed, data, sprite )
-    '   Case "csv_wing"
-    '     sub_wing_csv.Update( ed, data, sprite )
-    '   Case "weapon"
-    '     sub_weapon.Update( ed, data, sprite )
-    '   Case "csv_weapon"
-    '     sub_weapon_csv.Update( ed, data, sprite )
-    '   End Select
-        'update end
 
         'draw
         draw_bg( ed )
@@ -411,31 +410,33 @@ Repeat
         draw_weapons(ed, data, sprite, WD)      
         
         Select ed.program_mode      
-          
+
           Case "ship"
             Select ed.mode
-            Case "center"
-              sub_set_ship_center.Draw( ed, data, sprite )
-            Case "bounds"
-              sub_set_bounds.Draw( ed, data, sprite )
-            Case "shield_center"
-              sub_set_shield_center.Draw( ed, data, sprite )
-            Case "weapon_slots"
-              sub_set_weapon_slots.Draw( ed, data, sprite )
-            Case "built_in_weapons"
-              sub_set_built_in_weapons.Draw( ed, data, sprite )
-            Case "built_in_hullmods"
-              sub_set_built_in_hullmods.Draw( ed, data, sprite )
-            Case "built_in_wings"
-              sub_set_built_in_wings.Draw( ed, data, sprite )
-            Case "engine_slots"
-              sub_set_engine_slots.Draw( ed, data, sprite )
-            Case "launch_bays"
-              sub_launchbays.Draw( ed, data, sprite )
-            Case "preview_all"
-              sub_preview_all.Draw( ed, data, sprite )
-            'Case "string_data"
-              'performed below
+              Case "none"
+                sub_set_ship.Draw( ed, data, sprite )
+              Case "center"
+                sub_set_ship_center.Draw( ed, data, sprite )
+              Case "bounds"
+                sub_set_bounds.Draw( ed, data, sprite )
+              Case "shield_center"
+                sub_set_shield_center.Draw( ed, data, sprite )
+              Case "weapon_slots"
+                sub_set_weapon_slots.Draw( ed, data, sprite )
+              Case "built_in_weapons"
+                sub_set_built_in_weapons.Draw( ed, data, sprite )
+              Case "built_in_hullmods"
+                sub_set_built_in_hullmods.Draw( ed, data, sprite )
+              Case "built_in_wings"
+                sub_set_built_in_wings.Draw( ed, data, sprite )
+              Case "engine_slots"
+                sub_set_engine_slots.Draw( ed, data, sprite )
+              Case "launch_bays"
+                sub_set_launchbays.Draw( ed, data, sprite )
+              Case "preview_all"
+                sub_preview_all.Draw( ed, data, sprite )
+              'Case "string_data"
+                'performed below
             End Select      
           
           Case "variant"
@@ -463,7 +464,7 @@ Repeat
             sub_wing_csv.Draw( ed, data, sprite )
 
           Case "weapon"
-            sub_weapon.Draw( ed, data, sprite ) 
+            sub_set_weapon.Draw( ed, data, sprite ) 
           
           Case "csv_weapon"
             sub_weapon_csv.Draw( ed, data, sprite ) 
@@ -519,9 +520,13 @@ End
 
 Function check_sub_routines% ( ed:TEditor, data:TData, sprite:TSprite )
   Local hit% = True
+  
   Select ed.program_mode
+   
     Case "ship"
       Select ed.mode
+        Case "none"
+          sub_set_ship.Update( ed, data, sprite )
         Case "center"
           sub_set_ship_center.Update( ed, data, sprite )
         Case "bounds"
@@ -539,12 +544,13 @@ Function check_sub_routines% ( ed:TEditor, data:TData, sprite:TSprite )
         Case "engine_slots"
           sub_set_engine_slots.Update( ed, data, sprite )
         Case "launch_bays"
-          sub_launchbays.Update( ed, data, sprite )
+          sub_set_launchbays.Update( ed, data, sprite )
         Case "string_data"
           sub_string_data.Update( ed, data, sprite )
         Case "preview_all"
           sub_preview_all.Update( ed, data, sprite )
       End Select    
+    
     Case "variant"
       Select ed.mode
         Case "normal"
@@ -554,6 +560,7 @@ Function check_sub_routines% ( ed:TEditor, data:TData, sprite:TSprite )
         Case "string_data"
           sub_string_data.Update( ed, data, sprite )
       EndSelect   
+    
     Case "skin"
       Select ed.mode
         Case "normal"
@@ -561,21 +568,27 @@ Function check_sub_routines% ( ed:TEditor, data:TData, sprite:TSprite )
         Case "string_data"
           sub_string_data.Update( ed, data, sprite )
       EndSelect   
+    
     Case "csv"
       sub_ship_csv.Update( ed, data, sprite )
+    
     Case "csv_wing"
       sub_wing_csv.Update( ed, data, sprite )
+    
     Case "weapon"
       Select ed.mode
         Case "string_data"
           sub_string_data.Update( ed, data, sprite )
         Default
-          sub_weapon.Update( ed, data, sprite )     
+          sub_set_weapon.Update( ed, data, sprite )     
       EndSelect
+    
     Case "csv_weapon"
       sub_weapon_csv.Update( ed, data, sprite )
+    
     Default
       hit = False
+
   End Select
   Return hit
 End Function
@@ -586,181 +599,184 @@ End Function
 Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
   Local hit% = True
   Select EventSource()
-  Case fileMenu[MENU_FILE_NEW] 'new file
-    If data.changed
-      If Not Confirm(LocalizeString("{{msg_unsaved_open_new}}") ) Then Return hit
-    EndIf
-    WD.restAllAnimes()
-    Select ed.program_mode
-    Case "ship", "csv", "csv_wing"
-      data.ship = New TStarfarerShip
-      data.variant = New TStarfarerVariant
-      data.csv_row = ship_data_csv_field_template.Copy()
-      data.csv_row_wing = wing_data_csv_field_template.Copy() 
-      sprite.img = Null
-      data.update()
-      data.update_variant()
+    
+    Case fileMenu[MENU_FILE_NEW] 'new file
+      If data.changed
+        If Not Confirm(LocalizeString("{{msg_unsaved_open_new}}") ) Then Return hit
+      EndIf
+      WD.restAllAnimes()
+      
+      Select ed.program_mode
+        
+        Case "ship", "csv", "csv_wing"
+          data.ship = New TStarfarerShip
+          data.variant = New TStarfarerVariant
+          data.csv_row = ship_data_csv_field_template.Copy()
+          data.csv_row_wing = wing_data_csv_field_template.Copy() 
+          sprite.img = Null
+          data.update()
+          data.update_variant()
+          data.changed = False
+          data.snapshots_undo:TList = CreateList()
+          data.snapshots_redo:TList = CreateList()
+        
+        Case "variant"
+          data.variant = New TStarfarerVariant
+          data.variant.hullId = data.ship.hullId
+          data.variant.displayName = "New"
+          data.variant.variantId = data.ship.hullId + "_new"
+          data.update()
+          data.update_variant()
+          data.changed = False
+          data.snapshots_undo:TList = CreateList()
+          data.snapshots_redo:TList = CreateList()
+        
+        Case "skin"
+          data.ship = New TStarfarerShip
+          data.variant = New TStarfarerVariant
+          data.skin = New TStarfarerSkin
+          sprite.img = Null
+          data.update()
+          data.update_variant()
+          data.update_skin()
+          data.changed = False
+          data.snapshots_undo:TList = CreateList()
+          data.snapshots_redo:TList = CreateList()
+        
+        Case "weapon", "csv_weapon"
+          data.weapon = New TStarfarerWeapon
+          data.csv_row_weapon = weapon_data_csv_field_template.Copy()
+          sprite.img = Null
+          data.update_weapon()
+          data.changed = False
+          data.snapshots_undo:TList = CreateList()
+          data.snapshots_redo:TList = CreateList()
+
+      EndSelect
+    
+    Case fileMenu[MENU_FILE_LOAD_MOD] 'load mod
+      load_mod( ed, data )
+    
+    Case fileMenu[MENU_FILE_LOAD_DATA] 'load data
+      If data.changed
+        If Not Confirm(LocalizeString("{{msg_unsaved_open_new}}") ) Then Return hit
+      EndIf
+      data.snapshot_inited = False
+      Select ed.program_mode
+      Case "ship"
+        load_ship_data( ed, data, sprite )
+      Case "variant"
+        load_variant_data( ed, data, sprite )
+      Case "skin"
+        load_skin_data( ed, data, sprite )
+      Case "csv"
+        sub_ship_csv.Load( ed, data, sprite )
+      Case "csv_wing"
+        sub_wing_csv.Load( ed, data, sprite )
+      Case "weapon"
+        sub_set_weapon.Load( ed, data, sprite )
+      Case "csv_weapon"
+        sub_weapon_csv.Load( ed, data, sprite )
+      EndSelect
+      data.take_initshot()
       data.changed = False
-      data.snapshots_undo:TList = CreateList()
-      data.snapshots_redo:TList = CreateList()
-    Case "skin"
-      ' ?
-    Case "variant"
-      data.variant = New TStarfarerVariant
-      data.variant.hullId = data.ship.hullId
-      data.variant.displayName = "New"
-      data.variant.variantId = data.ship.hullId + "_new"
-      data.update()
-      data.update_variant()
-      data.changed = False
-      data.snapshots_undo:TList = CreateList()
-      data.snapshots_redo:TList = CreateList()
-    Case "weapon", "csv_weapon"
-      data.weapon = New TStarfarerWeapon
-      data.csv_row_weapon = weapon_data_csv_field_template.Copy()
-      sprite.img = Null
-      data.update_weapon()
-      data.changed = False
-      data.snapshots_undo:TList = CreateList()
-      data.snapshots_redo:TList = CreateList()
-    EndSelect
-  Case fileMenu[MENU_FILE_LOAD_MOD] 'load mod
-    load_mod( ed, data )
-  Case fileMenu[MENU_FILE_LOAD_DATA] 'load data
-    If data.changed
-      If Not Confirm(LocalizeString("{{msg_unsaved_open_new}}") ) Then Return hit
-    EndIf
-    data.snapshot_inited = False
-    Select ed.program_mode
-    Case "ship"
-      load_ship_data( ed, data, sprite )
-    Case "variant"
-      load_variant_data( ed, data, sprite )
-    Case "skin"
-      load_skin_data( ed, data, sprite )
-    Case "csv"
-      sub_ship_csv.Load( ed, data, sprite )
-    Case "csv_wing"
-      sub_wing_csv.Load( ed, data, sprite )
-    Case "weapon"
-      sub_weapon.Load( ed, data, sprite )
-    Case "csv_weapon"
-      sub_weapon_csv.Load( ed, data, sprite )
-    EndSelect
-    data.take_initshot()
-    data.changed = False
-  Case fileMenu[MENU_FILE_LOAD_IMAGE] 'load image
-    Select ed.program_mode
-      Case "ship", "skin", "variant", "csv", "csv_wing"
-      load_ship_image( ed, data, sprite )
-    EndSelect
-  Case fileMenu[MENU_FILE_SAVE] 'save data
-    Select ed.program_mode
-    Case "ship"
-      Local data_path$ = RequestFile( LocalizeString( "{{wt_save_ship}}"), "ship", True, APP.data_dir + data.ship.hullId + ".ship" )
-      FlushKeys()
-      If data_path
-        APP.data_dir = ExtractDir( data_path ) + "/"
-        APP.Save()
-        'SaveString( data.json_str, data_path )
-        SaveTextAs(data.json_str, data_path, CODE_MODE)
-        data.changed = False
-      End If
-    Case "variant"
-      Local variant_path$ = RequestFile( LocalizeString("{{wt_save_variant}}"), "variant", True, APP.variant_dir + data.variant.variantId + ".variant" )
-      FlushKeys()
-      If variant_path
-        APP.variant_dir = ExtractDir( variant_path ) + "/"
-        APP.Save()
-        'SaveString( data.json_str_variant, variant_path )
-        SaveTextAs(data.json_str_variant, variant_path, CODE_MODE)
-        data.changed = False
-      End If
-    Case "skin"
-      Local skin_path$ = RequestFile( LocalizeString("{{wt_save_skin}}"), "skin", True, APP.skin_dir + data.skin.skinHullId + ".skin" )
-      FlushKeys()
-      If skin_path
-        APP.skin_dir = ExtractDir( skin_path ) + "/"
-        APP.Save()
-        'SaveString( data.json_str_variant, variant_path )
-        SaveTextAs(data.json_str_skin, skin_path, CODE_MODE)
-        data.changed = False
-      End If
-    Case "csv"  
-      sub_ship_csv.Save( ed, data, sprite )
-    Case "csv_wing" 
-      sub_wing_csv.Save( ed, data, sprite )
-    Case "weapon"
-      sub_weapon.Save( ed, data, sprite )
-    Case "csv_weapon"
-      sub_weapon_csv.Save( ed, data, sprite )
-    EndSelect
-  Case fileMenu[MENU_FILE_EXIT] 'exit
-    end_program( data )
-  Default
-    hit = False
+    
+    Case fileMenu[MENU_FILE_LOAD_IMAGE] 'load image
+      Select ed.program_mode
+        Case "ship", "skin", "variant", "csv", "csv_wing"
+        load_ship_image( ed, data, sprite )
+      EndSelect
+    
+    Case fileMenu[MENU_FILE_SAVE] 'save data
+      
+      Select ed.program_mode
+        
+        Case "ship"
+          Local data_path$ = RequestFile( LocalizeString( "{{wt_save_ship}}"), "ship", True, APP.data_dir + data.ship.hullId + ".ship" )
+          FlushKeys()
+          If data_path
+            APP.data_dir = ExtractDir( data_path ) + "/"
+            APP.Save()
+            'SaveString( data.json_str, data_path )
+            SaveTextAs(data.json_str, data_path, CODE_MODE)
+            data.changed = False
+          End If
+        
+        Case "variant"
+          Local variant_path$ = RequestFile( LocalizeString("{{wt_save_variant}}"), "variant", True, APP.variant_dir + data.variant.variantId + ".variant" )
+          FlushKeys()
+          If variant_path
+            APP.variant_dir = ExtractDir( variant_path ) + "/"
+            APP.Save()
+            'SaveString( data.json_str_variant, variant_path )
+            SaveTextAs(data.json_str_variant, variant_path, CODE_MODE)
+            data.changed = False
+          End If
+        
+        Case "skin"
+          Local skin_path$ = RequestFile( LocalizeString("{{wt_save_skin}}"), "skin", True, APP.skin_dir + data.skin.skinHullId + ".skin" )
+          FlushKeys()
+          If skin_path
+            APP.skin_dir = ExtractDir( skin_path ) + "/"
+            APP.Save()
+            'SaveString( data.json_str_variant, variant_path )
+            SaveTextAs(data.json_str_skin, skin_path, CODE_MODE)
+            data.changed = False
+          End If
+        
+        Case "csv"  
+          sub_ship_csv.Save( ed, data, sprite )
+        
+        Case "csv_wing" 
+          sub_wing_csv.Save( ed, data, sprite )
+        
+        Case "weapon"
+          sub_set_weapon.Save( ed, data, sprite )
+        
+        Case "csv_weapon"
+          sub_weapon_csv.Save( ed, data, sprite )
+      EndSelect
+    
+    Case fileMenu[MENU_FILE_EXIT] 'exit
+      end_program( data )
+    
+    Default
+      hit = False
+
   End Select
   Return hit
 End Function
 '-----------------------
 
-' Return true if the input EventSource(Object) hit the checkes, so we can skip the rest
+' if the input EventSource(Object) "hits," it is consumed and nothing that would normally follow gets to process it
+'   sort of like {Event}.preventDefault() in Javascript
 Function check_mode_menu%(ed:TEditor, data:TData, sprite:TSprite)
   Local hit% = True
   Select EventSource()
     
     Case modeMenu[MENU_MODE_SHIP] 'm_mode_ship
-      If ed.program_mode = "ship" Then Return True
-      'if coming from variant editing, go right into weapons mode editing
-      If ed.program_mode = "variant" Then ed.mode = "weapon_slots" Else ed.mode = "none"
-      ed.last_mode = "none"
-      ed.program_mode = "ship"
-      ed.weapon_lock_i = - 1
-      ed.field_i = 0
-      RadioMenuArray( MENU_MODE_SHIP, modeMenu )
-      rebuildFunctionMenu(MENU_MODE_SHIP)
+      sub_set_ship.Activate( ed, data, sprite)
    
     Case modeMenu[MENU_MODE_VARIANT] 'm_mode_variant
-      If ed.program_mode = "variant" Then Return True
       sub_set_variant.Activate( ed, data, sprite )
-      RadioMenuArray( MENU_MODE_VARIANT, modeMenu )
-      rebuildFunctionMenu(MENU_MODE_VARIANT)
     
     Case modeMenu[MENU_MODE_SKIN] 'm_mode_skin
-      If ed.program_mode = "skin" Then Return True
       sub_set_skin.Activate( ed, data, sprite )
-      RadioMenuArray( MENU_MODE_SKIN, modeMenu )
-      rebuildFunctionMenu(MENU_MODE_SKIN)
     
     Case modeMenu[MENU_MODE_SHIPSTATS] 'm_mode_ship_stats
-      If ed.program_mode = "csv" Then Return True
       sub_ship_csv.Activate( ed, data, sprite )
-      RadioMenuArray( MENU_MODE_SHIPSTATS, modeMenu )
-      rebuildFunctionMenu(MENU_MODE_SHIPSTATS)
     
     Case modeMenu[MENU_MODE_WING] 'm_mode_wing
-      If ed.program_mode = "csv_wing" Then Return True
       sub_wing_csv.Activate( ed, data, sprite )
-      RadioMenuArray( MENU_MODE_WING, modeMenu )
-      rebuildFunctionMenu(MENU_MODE_WING)
     
     Case modeMenu[MENU_MODE_WEAPON] 'm_mode_weapon
-      If ed.program_mode = "weapon" Then Return True
-      sub_weapon.Activate( ed, data, sprite )
-      RadioMenuArray( MENU_MODE_WEAPON, modeMenu )
-      rebuildFunctionMenu(MENU_MODE_WEAPON)
+      sub_set_weapon.Activate( ed, data, sprite )
     
     Case modeMenu[MENU_MODE_WEAPONSTATS] 'm_mode_weapon_stats
-      If ed.program_mode = "csv_weapon" Then Return True
       sub_weapon_csv.Activate( ed, data, sprite )
-      RadioMenuArray( MENU_MODE_WEAPONSTATS, modeMenu )
-      rebuildFunctionMenu(MENU_MODE_WEAPONSTATS)
     
     ' Case modeMenu[MENU_MODE_PROJECTILE] 'm_mode_projectile
-    '   If ed.program_mode = "proj" Then Return True
     '   sub_projectile.Activate( ed, data, sprite )
-    '   RadioMenuArray( MENU_MODE_PROJECTILE, modeMenu )
-    '   rebuildFunctionMenu(MENU_MODE_PROJECTILE)
 
     Default
       hit = False
@@ -843,7 +859,7 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
         Case functionMenu[MENU_FUNCTION_EXIT] 'exit
           ed.last_mode = ed.mode
           ed.mode = "none"
-          ed.field_i = 0  
+          ed.field_i = 0
         Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_CENTER] 'mass center
           sub_set_ship_center.Activate( ed, data, sprite )
         Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_SHIELD] 'shield center
@@ -861,7 +877,7 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
         Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_ENGINE] 'engine slots
           sub_set_engine_slots.Activate( ed, data, sprite )
         Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_LAUNCHBAYS] 'launch bays
-          sub_launchbays.Activate( ed, data, sprite )
+          sub_set_launchbays.Activate( ed, data, sprite )
         Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_PREVIEW] 'preview
           sub_preview_all.Activate( ed, data, sprite )
         Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_MORE] 'show more
@@ -902,69 +918,6 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
 
   Return hit
 End Function
-
-'Function check_mode( ed:TEditor, data:TData, sprite:TSprite )
-' If ed.program_mode = "ship"
-'   'If not selecting a weapon for a built-in slot, check ESCAPE key
-'   If Not( ed.mode = "built_in_weapons" And ed.weapon_lock_i <> - 1 ) ..
-'   .. 'And Not(ed.mode = "built_in_hullmods" AND ed.builtIn_hullmod_i <> -1 ) ..
-'   And (KeyHit( KEY_ESCAPE ) Or KeyHit( KEY_HOME ) )
-'     ed.last_mode = ed.mode
-'     ed.mode = "none"
-'     ed.field_i = 0
-'   EndIf
-'   If KeyHit( KEY_B )
-'     sub_set_bounds.Activate( ed, data, sprite )
-'   EndIf
-'   If KeyHit( KEY_E )
-'     sub_set_engine_slots.Activate( ed, data, sprite )
-'   EndIf
-'   If KeyHit( KEY_W )
-'     sub_set_weapon_slots.Activate( ed, data, sprite )
-'   EndIf
-'   If KeyHit( KEY_U )
-'     sub_set_built_in_weapons.Activate( ed, data, sprite )
-'   EndIf
-'   If KeyHit( KEY_H )
-'     sub_set_built_in_hullmods.Activate( ed, data, sprite )
-'   EndIf
-'   If KeyHit( KEY_L )
-'     sub_launchbays.Activate( ed, data, sprite )
-'   EndIf
-'   If KeyHit( KEY_P )
-'     sub_preview_all.Activate( ed, data, sprite )
-'   End If
-'   
-' ElseIf ed.program_mode = "variant"
-'   If KeyHit( KEY_SLASH )
-'     load_variant_data( ed, data, sprite, True )
-'   EndIf
-' EndIf
-'
-' 'STRING data editor, context-sensitive (has sub-object target)
-' 'TODO: move this to TSubroutines
-' If ed.program_mode = "ship" ..
-' Or ed.program_mode = "variant" ..
-' Or ed.program_mode = "weapon"
-'   If KeyHit( KEY_T )
-'     ed.last_mode = ed.mode
-'     ed.mode = "string_data"
-'     FlushKeys()
-'     ed.edit_strings_weapon_i = -1
-'     ed.edit_strings_engine_i = -1
-'     If sprite 'context-sensitive editing
-'       Local img_x#, img_y#
-'       sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
-'       If ed.last_mode = "weapon_slots"
-'         ed.edit_strings_weapon_i = data.find_nearest_weapon_slot( img_x, img_y )
-'       ElseIf ed.last_mode = "engine_slots"
-'         ed.edit_strings_engine_i = data.find_nearest_engine( img_x, img_y )
-'       EndIf
-'     EndIf
-'     sub_string_data.Activate( ed, data, sprite )
-'   EndIf
-' EndIf
-'End Function
 
 '-----------------------
 
@@ -1138,7 +1091,7 @@ Function draw_debug( ed:TEditor, data:TData, sprite:TSprite )
   If ed.show_debug And sprite
     Select ed.program_mode
       Case "weapon", "csv_weapon"
-        draw_crosshairs(sprite.asx + sub_weapon.xOffset * sprite.scale, sprite.asy, 6, True)
+        draw_crosshairs(sprite.asx + sub_set_weapon.xOffset * sprite.scale, sprite.asy, 6, True)
     End Select
     If Not sprite.img Then Return
     Local img_x#, img_y#
@@ -1197,7 +1150,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
     sprite.get_xy( MouseX, MouseY, img_x, img_y )
     If sprite.img Then w = "" + sprite.img.width Else w = "N/A"
     If sprite.img Then h = "" + sprite.img.height Else h = "N/A"
-    x = json.FormatDouble( img_x - sub_weapon.xOffset , 1 )
+    x = json.FormatDouble( img_x - sub_set_weapon.xOffset , 1 )
     y = json.FormatDouble( - img_y , 1 )
   EndIf
   
@@ -1228,7 +1181,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
   ElseIf ed.program_mode = "weapon" ..
   And ed.mode = "offsets"
     Local offsets#[]
-    Select sub_weapon.weapon_display_mode
+    Select sub_set_weapon.weapon_display_mode
       Case "TURRET"
         offsets = data.weapon.turretOffsets
       Case "HARDPOINT"
@@ -1238,7 +1191,7 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
       a = "0.0"
     Else
       ang_relevant = True 
-      Local slot_i% = data.find_nearest_weapon_offset(x.ToFloat(), y.ToFloat(), sub_weapon.weapon_display_mode)
+      Local slot_i% = data.find_nearest_weapon_offset(x.ToFloat(), y.ToFloat(), sub_set_weapon.weapon_display_mode)
       a = json.FormatDouble( calc_angle( offsets[slot_i], offsets[slot_i + 1], x.ToFloat(), - y.ToFloat() ), 1 )
     EndIf
   EndIf
@@ -1656,7 +1609,7 @@ Function RadioMenuArray ( i%, MenuArray:TGadget[])
 EndFunction
 
 Rem
-'hind and disable menu in a hacky way
+'find and disable menu in a hacky way
 Function MenuSetHidden(menu:TGadget, hidden%, parent:TGadget = Null)
   If hidden
     menu.SetEnabled(False)
@@ -1668,14 +1621,14 @@ Function MenuSetHidden(menu:TGadget, hidden%, parent:TGadget = Null)
   mainMenuNeedUpdate = True
 End Function
 
-'hind and disable menus array in a hacky way.
+'find and disable menus array in a hacky way.
 Function MenusArraySetHidden(menusArray:TGadget[], hidden%, parent:TGadget = Null)
   For Local i% = 0 Until menusArray.Length
     MenuSetHidden(menusArray[i], hidden, parent)
   Next
 EndFunction
 
-'hind and disable other menus arrays while enable the selected one 
+'find and disable other menus arrays while enable the selected one 
 Function RadioMenuArrayArray ( i%, MenuArrayArray:TGadget[][], parent:TGadget = Null)
   For Local j% = 0 Until MenuArrayArray.Length
     If j = i Then MenusArraySetHidden(MenuArrayArray[j], False, parent) Else MenusArraySetHidden(MenuArrayArray[j], True, parent)

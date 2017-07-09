@@ -1,5 +1,5 @@
 
-Type TModalLaunchBays Extends TSubroutine
+Type TModalSetLaunchBays Extends TSubroutine
 	
 	Field n_LB:TStarfarerShipWeapon 'nearest launch bay location's weapon object
 	Field n_LB_i% 'index of launch bay in data

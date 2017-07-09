@@ -40,6 +40,8 @@ Type TModalSetWingCSV Extends TGenericCSVSubroutine
 		stock_stats_field_order = ed.stock_wing_stats_field_order
 		data_csv_row = data.csv_row_wing
 		hide_main_ship = False
+    RadioMenuArray( MENU_MODE_WING, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_WING)
 		DebugLogFile(" Activate Wing CSV Editor")
 	EndMethod
 

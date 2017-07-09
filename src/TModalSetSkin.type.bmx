@@ -10,6 +10,8 @@ Type TModalSetSkin Extends TSubroutine
 		ed.weapon_lock_i = - 1
 		ed.variant_hullMod_i = - 1
 		ed.group_field_i = - 1
+    RadioMenuArray( MENU_MODE_SKIN, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_SKIN)
 		DebugLogFile(" Activate Skin Editor")
 	EndMethod
 

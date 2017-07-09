@@ -1,5 +1,5 @@
 
-Type TModalWeapon Extends TSubroutine
+Type TModalSetWeapon Extends TSubroutine
 	'images
 	Field turret_img:TImage
 	Field turretUnder_img:TImage
@@ -46,6 +46,8 @@ Type TModalWeapon Extends TSubroutine
 		ws.mount = "TURRET"
 		WD.weaponEditorAnime = Null
 		ni = si = - 1
+    RadioMenuArray( MENU_MODE_WEAPON, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_WEAPON)
 		DebugLogFile(" Activate Weapon Editor")
 	EndMethod
 
@@ -55,28 +57,28 @@ Type TModalWeapon Extends TSubroutine
 		Select EventID()
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_OFFSETS] 'offset mode Toggle
-				If ed.mode = "offsets" Then ed.mode = "images" Else ed.mode = "offsets"
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_DISPLAYMODE] 'TURRET/HARDPOINT Toggle
-				If weapon_display_mode = "TURRET" Then weapon_display_mode = "HARDPOINT" Else weapon_display_mode = "TURRET"
-				ws.mount = weapon_display_mode
-				WD.weaponEditorAnime = Null
-				update_sprite_img( data, sprite )
-			'IMAGES
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_MAIN]
-				try_load_sprite( ed, data, sprite, weapon_display_mode, "main" )
-				load_weapon_images( data, sprite )
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_BARREL]
-				try_load_sprite( ed, data, sprite, weapon_display_mode, "gun" )
-				load_weapon_images( data, sprite )	
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_UNDER]
-				try_load_sprite( ed, data, sprite, weapon_display_mode, "under" )
-				load_weapon_images( data, sprite )
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_GLOW]
-				try_load_sprite( ed, data, sprite, weapon_display_mode, "glow" )
-				load_weapon_images( data, sprite )
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_GLOWTOGGLE]
-				do_draw_glow = Not do_draw_glow
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_OFFSETS] 'offset mode Toggle
+					If ed.mode = "offsets" Then ed.mode = "images" Else ed.mode = "offsets"
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_DISPLAYMODE] 'TURRET/HARDPOINT Toggle
+					If weapon_display_mode = "TURRET" Then weapon_display_mode = "HARDPOINT" Else weapon_display_mode = "TURRET"
+					ws.mount = weapon_display_mode
+					WD.weaponEditorAnime = Null
+					update_sprite_img( data, sprite )
+				'IMAGES
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_MAIN]
+					try_load_sprite( ed, data, sprite, weapon_display_mode, "main" )
+					load_weapon_images( data, sprite )
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_BARREL]
+					try_load_sprite( ed, data, sprite, weapon_display_mode, "gun" )
+					load_weapon_images( data, sprite )	
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_UNDER]
+					try_load_sprite( ed, data, sprite, weapon_display_mode, "under" )
+					load_weapon_images( data, sprite )
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_GLOW]
+					try_load_sprite( ed, data, sprite, weapon_display_mode, "glow" )
+					load_weapon_images( data, sprite )
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_GLOWTOGGLE]
+					do_draw_glow = Not do_draw_glow
 			EndSelect
 		EndSelect
 		'MODE-SPECIFIC UPDATE CALL

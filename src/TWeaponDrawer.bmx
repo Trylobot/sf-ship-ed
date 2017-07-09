@@ -236,7 +236,7 @@ Type TWeaponDrawer
 			Case "weapon"
 				If data.weapon.numFrames <= 1 Then Return Null
 				weaponEditorAnime = New TAnime
-				weaponEditorAnime.init( 0, sub_weapon.ws, data.weapon.id, data.weapon )
+				weaponEditorAnime.init( 0, sub_set_weapon.ws, data.weapon.id, data.weapon )
 				Return weaponEditorAnime
 		EndSelect
 	End Method 

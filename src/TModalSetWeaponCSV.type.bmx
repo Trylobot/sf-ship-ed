@@ -22,6 +22,8 @@ Type TModalSetWeaponCSV Extends TGenericCSVSubroutine
 		stock_stats = ed.stock_weapon_stats
 		stock_stats_field_order = ed.stock_weapon_stats_field_order
 		data_csv_row = data.csv_row_weapon
+    RadioMenuArray( MENU_MODE_WEAPONSTATS, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_WEAPONSTATS)
 		DebugLogFile(" Activate Weapon CSV Editor")
 	EndMethod
 

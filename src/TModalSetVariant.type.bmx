@@ -72,6 +72,8 @@ Type TModalSetVariant Extends TSubroutine
 		ed.variant_hullMod_i = - 1
 		ed.group_field_i = - 1
 		ni = - 1
+    RadioMenuArray( MENU_MODE_VARIANT, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_VARIANT)
 		DebugLogFile(" Activate Variant Editor")
 	EndMethod
 
