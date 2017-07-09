@@ -900,6 +900,12 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
         Default
           hit = False
       EndSelect
+
+    Case "skin"
+      Select EventSource()
+        Case functionMenu[MENU_FUNCTION_DETAILS]
+          sub_string_data.Activate( ed, data, sprite ) ' string edit
+      EndSelect
     
     Case "weapon"
       Select EventSource()
@@ -912,11 +918,11 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
     Default
       hit = False
 
-  End Select
+  EndSelect
   updata_weapondrawermenu(ed)
 
   Return hit
-End Function
+EndFunction
 
 '-----------------------
 

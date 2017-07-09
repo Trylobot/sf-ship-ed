@@ -51,6 +51,7 @@ Type TModalSetStringData Extends TSubroutine
 		line_enum_i = 0
 		modified = False
 		DebugLogFile(" Activate String Data Editor")
+		
 		If ed.program_mode = "ship"
 			If ed.edit_strings_weapon_i <> - 1
 				subroutine_mode = MODE_SHIP_WEAPON
@@ -65,6 +66,7 @@ Type TModalSetStringData Extends TSubroutine
 				target = data.ship
 				DebugLogFile(" Editing Ship " + data.ship.hullId)					
 			EndIf
+		
 		Else If ed.program_mode = "skin"
 			If ed.edit_strings_weapon_i <> - 1
 				subroutine_mode = MODE_SKIN_WEAPON_CHANGE
@@ -79,14 +81,17 @@ Type TModalSetStringData Extends TSubroutine
 				target = data.skin
 				DebugLogFile(" Editing Ship " + data.skin.skinHullId + "("+data.skin.baseHullId+")")
 			EndIf
+		
 		Else If ed.program_mode = "variant"
 			subroutine_mode = MODE_VARIANT
 			target = data.variant
 			DebugLogFile(" Editing Variant " + data.variant.variantId)
+		
 		Else If ed.program_mode = "weapon"
 			subroutine_mode = MODE_WEAPON
 			target = data.weapon
 			DebugLogFile(" Editing Weapon " + data.weapon.id)
+		
 		EndIf
 		'load data from appropriate source
 		Load( ed, data, sprite )
@@ -315,6 +320,22 @@ Type TModalSetStringData Extends TSubroutine
 				Next
 				data.update_variant()
 			'//////////////////////////////////////
+			Case MODE_SKIN
+				i = 0
+				' TODO: better interactions between the Skin's baseHullId/skinHullId and ship, variant, CSV, etc.
+				TStarfarerSkin(target).baseHullId = values.lines[i]; i:+1
+				TStarfarerSkin(target).skinHullId = values.lines[i]; i:+1
+				TStarfarerSkin(target).hullName = values.lines[i]; i:+1
+				TStarfarerSkin(target).spriteName = values.lines[i]; i:+1
+				TStarfarerSkin(target).systemId = values.lines[i]; i:+1
+				TStarfarerSkin(target).fleetPoints = values.lines[i].ToInt(); i:+1
+				TStarfarerSkin(target).ordnancePoints = values.lines[i].ToInt(); i:+1
+				TStarfarerSkin(target).baseValue = values.lines[i].ToInt(); i:+1
+				TStarfarerSkin(target).baseValueMult = values.lines[i].ToDouble(); i:+1
+				TStarfarerSkin(target).descriptionId = values.lines[i]; i:+1
+				TStarfarerSkin(target).descriptionPrefix = values.lines[i]; i:+1
+				data.update_skin()				
+			'//////////////////////////////////////
 			Case MODE_WEAPON
 				i = 0
 				TStarfarerWeapon(target).id = values.lines[i]; i:+ 1
@@ -495,6 +516,32 @@ Type TModalSetStringData Extends TSubroutine
 				values.append( TextWidget.Create( ..
 					TStarfarerVariant(target).weaponGroups[i].mode ))
 			Next
+		'//////////////////////////////////////
+		Case MODE_SKIN
+			labels = TextWidget.Create( ..
+				"skin.baseHullId" +"~n"+..
+				"skin.skinHullId" +"~n"+..
+				"skin.hullName" +"~n"+..
+				"skin.spriteName" +"~n"+..
+				"skin.systemId" +"~n"+..
+				"skin.fleetPoints" +"~n"+..
+				"skin.ordnancePoints" +"~n"+..
+				"skin.baseValue" +"~n"+..
+				"skin.baseValueMult" +"~n"+..
+				"skin.descriptionId" +"~n"+..
+				"skin.descriptionPrefix" )
+			values = TextWidget.Create( ..
+				TStarfarerSkin(target).baseHullId +"~n"+..
+				TStarfarerSkin(target).skinHullId +"~n"+..
+				TStarfarerSkin(target).hullName +"~n"+..
+				TStarfarerSkin(target).spriteName +"~n"+..
+				TStarfarerSkin(target).systemId +"~n"+..
+				TStarfarerSkin(target).fleetPoints +"~n"+..
+				TStarfarerSkin(target).ordnancePoints +"~n"+..
+				TStarfarerSkin(target).baseValue +"~n"+..
+				json.FormatDouble( TStarfarerSkin(target).baseValueMult, 3 ) +"~n"+..
+				TStarfarerSkin(target).descriptionId +"~n"+..
+				TStarfarerSkin(target).descriptionPrefix )
 		'//////////////////////////////////////
 		Case MODE_WEAPON
 			labels = TextWidget.Create( ..
