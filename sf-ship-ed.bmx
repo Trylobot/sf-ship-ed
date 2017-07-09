@@ -683,8 +683,10 @@ Function check_file_menu%(ed:TEditor, data:TData, sprite:TSprite)
     
     Case fileMenu[MENU_FILE_LOAD_IMAGE] 'load image
       Select ed.program_mode
-        Case "ship", "skin", "variant", "csv", "csv_wing"
-        load_ship_image( ed, data, sprite )
+        Case "ship", "variant", "csv", "csv_wing"
+          load_ship_image( ed, data, sprite )
+        Case "skin"
+          load_skin_image( ed, data, sprite )
       EndSelect
     
     Case fileMenu[MENU_FILE_SAVE] 'save data
@@ -1264,45 +1266,6 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
 
 EndFunction
 
-Function draw_weapons( ed:TEditor, data:TData, sprite:TSprite, wd:TWeaponDrawer )
-
-  wd.update( ed, data ) 
-  If wd.show_weapon = 0 Then Return
-  SetColor( 255, 255, 255 )
-  If wd.show_weapon = 1 Then SetAlpha( 1 )
-  If wd.show_weapon = 2 Then SetAlpha( 0.5 )
-  Select ed.program_mode
-    Case "ship"
-      For Local i% = 0 Until data.ship.weaponSlots.length * 6
-        Local j% = i Mod data.ship.weaponSlots.length
-        Local k% = i / data.ship.weaponSlots.length
-        Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[j]
-        If weaponslot.is_builtin() Or weaponslot.is_decorative()
-          Local weaponID$ = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) )
-          Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) )
-          If weapon And weapon.draw_order() + weaponslot.draw_order() = k Then wd.draw_weaponInSlot(weaponslot, weapon, data, sprite)
-        EndIf
-      Next    
-    Case "variant"
-      Local weapons:TMap = data.variant.getAllWeapons()
-      For Local i% = 0 Until data.ship.weaponSlots.length * 6
-        Local j% = i Mod data.ship.weaponSlots.length
-        Local k% = i / data.ship.weaponSlots.length
-        Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[j]
-        'well, I did the null check later so don't needs in these part...i hope
-        Local weaponID$
-        If data.ship.builtInWeapons.ValueForKey(weaponslot.id)
-          weaponID = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id))
-        Else 
-          weaponID  = String(weapons.ValueForKey(weaponslot.id)) ' could be null but it's ok
-        End If
-        Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID)) ' could be null but it's ok
-        If weapon And weapon.draw_order() + weaponslot.draw_order() = k Then wd.draw_weaponInSlot(weaponslot, weapon, data, sprite)
-      Next    
-  EndSelect
-  SetAlpha( 1 )
-End Function
-
 Function load_ui( ed:TEditor )
   AutoMidHandle( True )
   'try to load custom_bg_image
@@ -1440,51 +1403,6 @@ Function resource_search$( relative_path$ )
   Return Null
 EndFunction
 
-Function load_variant_data( ed:TEditor, data:TData, sprite:TSprite, use_new% = False, data_path$ = Null )
-  'VARIANT data
-  If Not use_new
-    Local variant_path$ = RequestFile( LocalizeString("{{wt_load_variant}}"), "variant", False, APP.variant_dir )
-    FlushKeys()
-    If FileType( variant_path ) <> FILETYPE_FILE Then Return
-    APP.variant_dir = ExtractDir( variant_path ) + "/"
-    APP.save()
-    data.decode_variant( LoadTextAs( variant_path, CODE_MODE ) )
-    data.update_variant_enforce_hull_compatibility( ed )
-    data.update_variant()
-  Else
-    data.variant = New TStarfarerVariant
-    data.variant.hullId = data.ship.hullId
-    data.variant.variantId = data.ship.hullId+"_variant"
-    data.update_variant_enforce_hull_compatibility( ed )
-    data.update_variant()
-  EndIf
-  'FIGHTER WING CSV/STATS data'
-  'if the current wing data doesn't reference the loaded variant, load one that does if possible
-  If Not ed.verify_wing_data_association( data.variant.variantId, String(data.csv_row_wing.ValueForKey("id")))
-    data.csv_row_wing = ed.get_default_wing( data.variant.variantId )
-  EndIf
-End Function
-
-Function load_skin_data( ed:TEditor, data:TData, sprite:TSprite, use_new% = False, data_path$ = Null )
-  'SKIN data
-  If Not use_new
-    Local skin_path$ = RequestFile( LocalizeString("{{wt_load_skin}}"), "skin", False, APP.skin_dir )
-    FlushKeys()
-    If FileType( skin_path ) <> FILETYPE_FILE Then Return
-    APP.skin_dir = ExtractDir( skin_path ) + "/"
-    APP.save()
-    data.decode_skin( LoadTextAs( skin_path, CODE_MODE ) )
-    data.update_skin()
-  Else
-    data.skin = New TStarfarerSkin
-    data.skin.baseHullId = data.ship.hullId
-    data.skin.skinHullId = data.ship.hullId+"_skin"
-    data.skin.hullName = data.ship.hullName+" Skin"
-    data.skin.spriteName = data.ship.spriteName
-    data.update_skin()
-  EndIf
-End Function
-
 Function load_mod( ed:TEditor, data:TData )
   Local mod_dir$ = RequestDir( LocalizeString("{{wt_load_mod}}"), APP.starsector_base_dir )
   If FileType( mod_dir ) = FILETYPE_DIR
@@ -1579,13 +1497,17 @@ Function undo(ed:TEditor, data:TData, sprite:TSprite, redo% = False)
   EndIf
   If snap.json_str_variant
     data.json_str_variant = snap.json_str_variant
-    data.decode_variant(data.json_str_variant)  
+    data.decode_variant(data.json_str_variant)
+  EndIf
+  If snap.json_str_skin
+    data.json_str_skin = snap.json_str_skin
+    data.decode_skin(data.json_str_skin)
   EndIf
   If snap.csv_row
     data.csv_row = CopyMap(snap.csv_row)
   EndIf
   If snap.csv_row_wing
-    data.csv_row_wing = CopyMap(snap.csv_row_wing)  
+    data.csv_row_wing = CopyMap(snap.csv_row_wing)
   EndIf
   If snap.json_str_weapon
     data.json_str_weapon = snap.json_str_weapon

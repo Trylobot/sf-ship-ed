@@ -49,6 +49,11 @@ Type TData
 		csv_row_wing = wing_data_csv_field_template.Copy()
 		csv_row_weapon = weapon_data_csv_field_template.Copy()
 		weapon = New TStarfarerWeapon
+		update()
+		update_variant()
+		update_skin()
+		update_weapon()
+
 		changed = False
 		snapshots_undo:TList = CreateList()
 		snapshots_redo:TList = CreateList()
@@ -64,7 +69,7 @@ Type TData
 		json.formatted = True
 		'encode ship object as json data
 		json_str = json.stringify( ship, "stringify_ship" )
-		json_view = columnize_text( json_str )
+		json_view = columnize_text( json_str, APP.raw_json_view_max_column_width )
 		changed = True
 		take_snapshot(MENU_MODE_SHIP)
 	End Method
@@ -104,7 +109,7 @@ Type TData
 		json.formatted = True
 		'encode object as json data
 		json_str_variant = json.stringify( variant, "stringify_variant" )
-		json_view_variant = columnize_text( json_str_variant )
+		json_view_variant = columnize_text( json_str_variant, APP.raw_json_view_max_column_width )
 		changed = True
 		take_snapshot(MENU_MODE_VARIANT)
 	End Method
@@ -119,7 +124,7 @@ Type TData
 		json.formatted = True
 		'encode object as json data
 		json_str_skin = json.stringify( skin, "stringify_skin" )
-		json_view_skin = columnize_text( json_str_skin )
+		json_view_skin = columnize_text( json_str_skin, APP.raw_json_view_max_column_width )
 		changed = True
 		take_snapshot(MENU_MODE_SKIN)
 	End Method
@@ -186,7 +191,7 @@ Type TData
 	Method update_weapon()
 		json.formatted = True
 		json_str_weapon = json.stringify( weapon, "stringify_weapon" )
-		json_view_weapon = columnize_text( json_str_weapon )
+		json_view_weapon = columnize_text( json_str_weapon, APP.raw_json_view_max_column_width )
 		changed = True
 		take_snapshot(MENU_MODE_WEAPON)
 	EndMethod
@@ -1378,10 +1383,13 @@ Type TData
 		EndIf
 	EndMethod
 
-	Method columnize_text:TList( text$ )
+	Method columnize_text:TList( text$, wrap_width% = 60 )
 		'break the data into viewport-sized column-chunks for condensed
 		Local columns:TList = CreateList()
 		Local lines$[] = text.Split("~n")
+		For Local L% = 0 Until lines.length
+			lines[L] = lines[L][..wrap_width]+" " ' truncate characters after 50
+		Next
 		Local lines_per_col% = H_MAX / DATA_LINE_HEIGHT - 2 'factor in status bar height at bottom, bout 2 lines or so
 		Local cols% = Ceil( Float(lines.length) / Float(lines_per_col) )
 		SetImageFont( DATA_FONT ) 'TextWidget uses TextWidth() to determine size, which uses current TImageFont

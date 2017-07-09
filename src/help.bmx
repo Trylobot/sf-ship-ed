@@ -71,6 +71,7 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", LocalizeString("{{h_file_variant_saveData}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", LocalizeString("{{h_file_newData}}"), ICON_CTRL_ALT_KB, True, 1, "variant" ) )
 	'//////////// 
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "I", LocalizeString("{{h_file_skin_loadImage}}"), ICON_KB, True, 0, "skin" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "D", LocalizeString("{{h_file_skin_loadData}}"), ICON_KB, True, 0, "skin" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", LocalizeString("{{h_file_skin_saveData}}"), ICON_KB, True, 0, "skin" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", LocalizeString("{{h_file_newData}}"), ICON_CTRL_ALT_KB, True, 1, "skin" ) )

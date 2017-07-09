@@ -43,5 +43,11 @@ Type TStarfarerSkin
 		engineSlotChanges = CreateMap()
 	End Method
 
+	Method Clone:TStarfarerSkin(dst:TStarfarerSkin = Null)
+		If Not dst Then dst = New TStarfarerSkin
+		MemMove(Byte Ptr (dst), Byte Ptr (Self), SizeOf(Self) )
+		Return dst
+	End Method
+
 End Type
 

@@ -92,7 +92,9 @@ Type TModalSetVariant Extends TSubroutine
 
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite ) 
 		If Not data.ship.center Then Return
-		draw_hud( ed, data )
+		If Not ed.show_data ' would obscure raw data view
+			draw_hud( ed, data )
+		EndIf
 		If ed.weapon_lock_i <> - 1
 			draw_weapon_assignment_list()
 		ElseIf ed.variant_hullMod_i <> -1
@@ -687,3 +689,30 @@ Type TModalSetVariant Extends TSubroutine
 	EndMethod
 
 EndType
+
+
+Function load_variant_data( ed:TEditor, data:TData, sprite:TSprite, use_new% = False, data_path$ = Null )
+  'VARIANT data
+  If Not use_new
+    Local variant_path$ = RequestFile( LocalizeString("{{wt_load_variant}}"), "variant", False, APP.variant_dir )
+    FlushKeys()
+    If FileType( variant_path ) <> FILETYPE_FILE Then Return
+    APP.variant_dir = ExtractDir( variant_path ) + "/"
+    APP.save()
+    data.decode_variant( LoadTextAs( variant_path, CODE_MODE ) )
+    data.update_variant_enforce_hull_compatibility( ed )
+    data.update_variant()
+  Else
+    data.variant = New TStarfarerVariant
+    data.variant.hullId = data.ship.hullId
+    data.variant.variantId = data.ship.hullId+"_variant"
+    data.update_variant_enforce_hull_compatibility( ed )
+    data.update_variant()
+  EndIf
+  'FIGHTER WING CSV/STATS data'
+  'if the current wing data doesn't reference the loaded variant, load one that does if possible
+  If Not ed.verify_wing_data_association( data.variant.variantId, String(data.csv_row_wing.ValueForKey("id")))
+    data.csv_row_wing = ed.get_default_wing( data.variant.variantId )
+  EndIf
+End Function
+

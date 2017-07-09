@@ -100,7 +100,6 @@ Type TModalSetWeapon Extends TSubroutine
 	EndMethod
 
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
-		
 		'DRAW SPRITES
 		If sprite.img <> Null And weapon_display_mode = "HARDPOINT" Then xOffset = sprite.img.height * - 0.25 Else xOffset = 0
 		If WD.show_weapon <> 0
@@ -153,7 +152,9 @@ Type TModalSetWeapon Extends TSubroutine
 				draw_barrel_offsets( ed, data, sprite )
 			Case "images"
 		EndSelect
-		draw_hud(ed, data)
+		If Not ed.show_data
+			draw_hud(ed, data)
+		EndIf
 	EndMethod
 
 	Method Save( ed:TEditor, data:TData, sprite:TSprite )
@@ -502,3 +503,43 @@ Type TModalSetWeapon Extends TSubroutine
 	EndMethod
 
 EndType
+
+
+Function draw_weapons( ed:TEditor, data:TData, sprite:TSprite, wd:TWeaponDrawer )
+  wd.update( ed, data ) 
+  If wd.show_weapon = 0 Then Return
+  SetColor( 255, 255, 255 )
+  If wd.show_weapon = 1 Then SetAlpha( 1 )
+  If wd.show_weapon = 2 Then SetAlpha( 0.5 )
+  Select ed.program_mode
+    Case "ship"
+      For Local i% = 0 Until data.ship.weaponSlots.length * 6
+        Local j% = i Mod data.ship.weaponSlots.length
+        Local k% = i / data.ship.weaponSlots.length
+        Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[j]
+        If weaponslot.is_builtin() Or weaponslot.is_decorative()
+          Local weaponID$ = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) )
+          Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) )
+          If weapon And weapon.draw_order() + weaponslot.draw_order() = k Then wd.draw_weaponInSlot(weaponslot, weapon, data, sprite)
+        EndIf
+      Next    
+    Case "variant"
+      Local weapons:TMap = data.variant.getAllWeapons()
+      For Local i% = 0 Until data.ship.weaponSlots.length * 6
+        Local j% = i Mod data.ship.weaponSlots.length
+        Local k% = i / data.ship.weaponSlots.length
+        Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[j]
+        'well, I did the null check later so don't needs in these part...i hope
+        Local weaponID$
+        If data.ship.builtInWeapons.ValueForKey(weaponslot.id)
+          weaponID = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id))
+        Else 
+          weaponID  = String(weapons.ValueForKey(weaponslot.id)) ' could be null but it's ok
+        End If
+        Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID)) ' could be null but it's ok
+        If weapon And weapon.draw_order() + weaponslot.draw_order() = k Then wd.draw_weaponInSlot(weaponslot, weapon, data, sprite)
+      Next    
+  EndSelect
+  SetAlpha( 1 )
+End Function
+
