@@ -100,7 +100,7 @@ Type TModalSetEngineSlots Extends TSubroutine
 			End Select
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenu[4]
+			Case functionMenu[MENU_FUNCTION_REMOVE]
 				data.remove_engine( ni, ed.bounds_symmetrical )
 				data.update()
 			EndSelect

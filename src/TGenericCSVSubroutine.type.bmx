@@ -64,7 +64,7 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		ElseIf csv_row_values
 			update_csv_editor( data )
 
-		ElseIf data_csv_row And EventSource() = functionMenu[3]
+		ElseIf data_csv_row And EventSource() = functionMenu[MENU_FUNCTION_DETAILS]
 
 			initialize_csv_editor( ed, data )
 			data.hold_snapshot(True)

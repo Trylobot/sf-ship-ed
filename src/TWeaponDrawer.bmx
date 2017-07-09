@@ -53,15 +53,15 @@ Type TWeaponDrawer
 		Select EventID()
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case optionMenu[4]
+			Case optionMenu[MENU_OPTION_WEAPONDRAWER]
 				switchDraw()
-			Case optionMenu[5]
+			Case optionMenu[MENU_OPTION_PLAYANIMATE]
 				setAllAnimes( True, ed, data )
 				_needCheckPlaying = True
-			Case optionMenu[6]
+			Case optionMenu[MENU_OPTION_STOPANIMATE]
 				setAllAnimes( False, ed, data )
 				playingAnime = 0
-			Case optionMenu[7]
+			Case optionMenu[MENU_OPTION_RESETANIMATE]
 				restAllAnimes()
 				playingAnime = 0			
 			EndSelect
@@ -96,15 +96,15 @@ Type TWeaponDrawer
 			EndIf
 			If anime
 				Select EventSource()
-				Case animateMenu[1] ' = CreateMenu("{{m_function_Animate_play}}", 461, animateMenu[0], KEY_UP )
+				Case animateMenu[MENU_ANIMATE_PLAY] ' = CreateMenu("{{m_function_Animate_play}}", 461, animateMenu[0], KEY_UP )
 					_needCheckPlaying = True
 					anime.isPlaying = True
-				Case animateMenu[2] ' = CreateMenu("{{m_function_Animate_stop}}", 462, animateMenu[0], KEY_DOWN )
+				Case animateMenu[MENU_ANIMATE_STOP] ' = CreateMenu("{{m_function_Animate_stop}}", 462, animateMenu[0], KEY_DOWN )
 					_needCheckPlaying = True
 					anime.isPlaying = False
-				Case animateMenu[3] ' = CreateMenu("{{m_function_Animate_next}}", 463, animateMenu[0], KEY_LEFT )
+				Case animateMenu[MENU_ANIMATE_NEXT] ' = CreateMenu("{{m_function_Animate_next}}", 463, animateMenu[0], KEY_LEFT )
 					anime.Backward()
-				Case animateMenu[4] ' = CreateMenu("{{m_function_Animate_back}}", 464, animateMenu[0], KEY_RIGHT )	
+				Case animateMenu[MENU_ANIMATE_BACK] ' = CreateMenu("{{m_function_Animate_back}}", 464, animateMenu[0], KEY_RIGHT )	
 					anime.Forward()
 				EndSelect			
 			EndIf			

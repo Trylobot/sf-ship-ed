@@ -317,7 +317,7 @@ Repeat
 
     Case EVENT_GADGETACTION , EVENT_MENUACTION
       'DebugLog (EventSource().ToString() )
-      If EventSource() = optionMenu[11] Then Notify("STARSECTOR Ship&Weapon Editor ~nv2.7.2~n(Formerly Trylobot's ship editor) ~n ~nCreated by Trylobot ~nUpdated by Deathfly ~n~n" + LocalizeString("{{msg_localisation_credits}}") )
+      If EventSource() = optionMenu[MENU_OPTION_ABOUT] Then Notify("STARSECTOR Ship&Weapon Editor ~nv2.7.2~n(Formerly Trylobot's ship editor) ~n ~nCreated by Trylobot ~nUpdated by Deathfly ~n~n" + LocalizeString("{{msg_localisation_credits}}") )
       check_zoom_and_pan( ed, data, sprite )
       If check_undo( ed, data, sprite ) Then Continue
       'skip most hotkeys when we are in string edit mode or so.
@@ -773,36 +773,33 @@ End Function
 Function check_option_menu%(ed:TEditor, data:TData)
   Local hit% = True
   Select EventSource()
-  Case optionMenu[1]
-    ed.show_help = Not ed.show_help
-  Case optionMenu[2]
-    ed.show_data = Not ed.show_data
-  Case optionMenu[3]
-    ed.show_debug = Not ed.show_debug
-    If ed.show_debug Then SetPointer(POINTER_CROSS) Else SetPointer(POINTER_DEFAULT)
-  Case optionMenu[10]
-    APP.hide_vanilla_data = Not APP.hide_vanilla_data
-    load_starfarer_data( ed, data )
-  Case optionMenu[9]
-    ed.bounds_symmetrical = Not ed.bounds_symmetrical
-  Default
-    hit = False
+    Case optionMenu[MENU_OPTION_HELP]
+      ed.show_help = Not ed.show_help
+    Case optionMenu[MENU_OPTION_JSON]
+      ed.show_data = Not ed.show_data
+    Case optionMenu[MENU_OPTION_GUIDES]
+      ed.show_debug = Not ed.show_debug
+      If ed.show_debug Then SetPointer(POINTER_CROSS) Else SetPointer(POINTER_DEFAULT)
+    Case optionMenu[MENU_OPTION_MIRROR]
+      ed.bounds_symmetrical = Not ed.bounds_symmetrical
+    Case optionMenu[MENU_OPTION_VANILLA]
+      APP.hide_vanilla_data = Not APP.hide_vanilla_data
+      load_starfarer_data( ed, data )
+    Default
+      hit = False
   End Select
   Return hit
 End Function
 
 Function check_undo%(ed:TEditor, data:TData, sprite:TSprite)
-
   Local hit% = True
   Select EventSource()
-  Case functionMenu[1]
-  
-  DebugStop
-    undo(ed, data, sprite, False)
-  Case functionMenu[2]
-    undo(ed, data, sprite, True)
-  Default
-    hit = False
+    Case functionMenu[MENU_FUNCTION_UNDO]
+      undo(ed, data, sprite, False)
+    Case functionMenu[MENU_FUNCTION_REDO]
+      undo(ed, data, sprite, True)
+    Default
+      hit = False
   End Select
   Return hit
 End Function
@@ -816,7 +813,7 @@ Function updata_weapondrawermenu(ed:TEditor)
           And ( (ed.program_mode = "ship" And ( ed.mode = "built_in_weapons" Or ed.mode = "weapon_slots") ) ..
             Or (ed.program_mode = "variant" And ed.variant_hullMod_i = - 1 And ed.group_field_i = - 1)..
             Or (ed.program_mode = "weapon") ) )           
-  If MenuEnabled(animateMenu[0]) <> flag
+  If MenuEnabled(animateMenu[MENU_ANIMATE]) <> flag
     For Local i# = 0 Until animateMenu.length
       animateMenu[i].SetEnabled(flag)
     Next
@@ -825,13 +822,12 @@ Function updata_weapondrawermenu(ed:TEditor)
 End Function
 
 Function updatUndo(data:TData)
-  If (data.snapshots_undo.IsEmpty() And Not data.changed) = MenuEnabled(functionMenu[1])
-    functionMenu[1].setenabled(Not (data.snapshots_undo.IsEmpty() And Not data.changed) )
+  If (data.snapshots_undo.IsEmpty() And Not data.changed) = MenuEnabled(functionMenu[MENU_FUNCTION_UNDO])
+    functionMenu[MENU_FUNCTION_UNDO].setenabled(Not (data.snapshots_undo.IsEmpty() And Not data.changed) )
     mainMenuNeedUpdate = True
-
   EndIf
-  If (data.snapshots_redo.IsEmpty() ) = MenuEnabled(functionMenu[2])
-    functionMenu[2].setenabled(Not data.snapshots_redo.IsEmpty() )
+  If (data.snapshots_redo.IsEmpty() ) = MenuEnabled(functionMenu[MENU_FUNCTION_REDO])
+    functionMenu[MENU_FUNCTION_REDO].setenabled(Not data.snapshots_redo.IsEmpty() )
     mainMenuNeedUpdate = True
   EndIf
 
@@ -1005,9 +1001,9 @@ Function check_zoom_and_pan(ed:TEditor, data:TData, sprite:TSprite)
     Case EVENT_GADGETACTION, EVENT_MENUACTION
       Select EventSource()
       'zoom CONTROL, by key
-        Case functionMenu[7] ' = CreateMenu("{{m_function_zoomin}}", 407, functionMenu[6], KEY_EQUALS, MODIFIER_CONTROL )
+        Case functionMenu[MENU_FUNCTION_ZOOMIN] ' = CreateMenu("{{m_function_zoomin}}", 407, functionMenu[6], KEY_EQUALS, MODIFIER_CONTROL )
           z_delta :+ 1
-        Case functionMenu[8] ' = CreateMenu("{{m_function_zoomout}}", 408, functionMenu[6], KEY_MINUS, MODIFIER_CONTROL )
+        Case functionMenu[MENU_FUNCTION_ZOOMOUT] ' = CreateMenu("{{m_function_zoomout}}", 408, functionMenu[6], KEY_MINUS, MODIFIER_CONTROL )
           z_delta :- 1
       EndSelect
     EndSelect

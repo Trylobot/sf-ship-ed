@@ -256,7 +256,7 @@ Type TModalWeapon Extends TSubroutine
 			EndSelect
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenu[4]
+			Case functionMenu[MENU_FUNCTION_REMOVE]
 				'remove
 				data.remove_nearest_weapon_offset( x, y, weapon_display_mode )
 				data.update_weapon()

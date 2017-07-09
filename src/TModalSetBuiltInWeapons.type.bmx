@@ -73,7 +73,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 			EndIf
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenu[4] 'remove weapon from slot
+			Case functionMenu[MENU_FUNCTION_REMOVE] 'remove weapon from slot
 				If ni <> - 1
 					weapon_slot = data.ship.weaponSlots[ni]
 					data.unassign_builtin_weapon_from_slot( weapon_slot.id )

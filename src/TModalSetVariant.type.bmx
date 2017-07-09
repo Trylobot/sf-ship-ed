@@ -456,7 +456,7 @@ Type TModalSetVariant Extends TSubroutine
 			EndIf
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenu[4] ' backsapce
+			Case functionMenu[MENU_FUNCTION_REMOVE] ' backsapce
 				'strip non built-in weapon in slot
 				If ni = - 1 Then Return
 				If Not weapon_slot.is_builtin()

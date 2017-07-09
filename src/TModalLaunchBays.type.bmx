@@ -81,7 +81,7 @@ Type TModalLaunchBays Extends TSubroutine
 			End Select
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenu[4]
+			Case functionMenu[MENU_FUNCTION_REMOVE]
 					data.remove_launch_bay_port( n_LB_i, n_LB_loc_i, ed.bounds_symmetrical )
 					data.update()
 			EndSelect

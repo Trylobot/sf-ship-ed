@@ -70,7 +70,7 @@ Type TModalSetBounds Extends TSubroutine
 			End Select
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenu[4] 'm_function_remove remove nearest
+			Case functionMenu[MENU_FUNCTION_REMOVE] 'm_function_remove remove nearest
 				data.remove_nearest_bound( img_x, img_y, ed.bounds_symmetrical )
 				data.update()
 			EndSelect

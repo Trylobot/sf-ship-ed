@@ -133,17 +133,17 @@ Function init_gui_menus()
   '[0]root; [1]undo Ctrl+Z; [2]redo Ctrl+Y; [3]details T; [4]remove BACKSPACE; [5]exit ESCAPE[]
   functionMenu[MENU_FUNCTION] = CreateMenu("{{m_function}}", 0, WindowMenu(MainWindow) )
   functionMenu[MENU_FUNCTION_UNDO] = CreateMenu("{{m_function_undo}}", 401, functionMenu[MENU_FUNCTION], KEY_Z, MODIFIER_CONTROL )
-  DisableMenu(functionMenu[1])
+  DisableMenu(functionMenu[MENU_FUNCTION_UNDO])
   functionMenu[MENU_FUNCTION_REDO] = CreateMenu("{{m_function_redo}}", 402, functionMenu[MENU_FUNCTION], KEY_Y, MODIFIER_CONTROL )
-  DisableMenu(functionMenu[2])
+  DisableMenu(functionMenu[MENU_FUNCTION_REDO])
   CreateMenu"", 0, functionMenu[MENU_FUNCTION]
   functionMenu[MENU_FUNCTION_DETAILS] = CreateMenu("{{m_function_details}}", 403, functionMenu[MENU_FUNCTION], KEY_T )
   functionMenu[MENU_FUNCTION_REMOVE] = CreateMenu("{{m_function_remove}}", 404, functionMenu[MENU_FUNCTION], KEY_BACKSPACE )
   'Exit
   functionMenu[MENU_FUNCTION_EXIT] = CreateMenu("{{m_function_exit}}", 405, functionMenu[MENU_FUNCTION], KEY_ESCAPE )
   functionMenu[MENU_FUNCTION_ZOOM] = CreateMenu("{{m_function_zoom}}", 406, functionMenu[MENU_FUNCTION] )
-  functionMenu[MENU_FUNCTION_ZOOMIN] = CreateMenu("{{m_function_zoomin}}", 407, functionMenu[6], KEY_EQUALS, MODIFIER_CONTROL )
-  functionMenu[MENU_FUNCTION_ZOOMOUT] = CreateMenu("{{m_function_zoomout}}", 408, functionMenu[6], KEY_MINUS, MODIFIER_CONTROL )
+  functionMenu[MENU_FUNCTION_ZOOMIN] = CreateMenu("{{m_function_zoomin}}", 407, functionMenu[MENU_FUNCTION_ZOOM], KEY_EQUALS, MODIFIER_CONTROL )
+  functionMenu[MENU_FUNCTION_ZOOMOUT] = CreateMenu("{{m_function_zoomout}}", 408, functionMenu[MENU_FUNCTION_ZOOM], KEY_MINUS, MODIFIER_CONTROL )
   CreateMenu"", 0, functionMenu[MENU_FUNCTION]
   'animateMene, dock on the end of functionMenu for now.
   animateMenu[MENU_ANIMATE] = CreateMenu("{{m_function_Animate}}", 460, functionMenu[MENU_FUNCTION] )
