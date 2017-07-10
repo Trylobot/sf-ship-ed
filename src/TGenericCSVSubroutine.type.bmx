@@ -101,7 +101,8 @@ Type TGenericCSVSubroutine Extends TSubroutine
 		If FILETYPE_FILE = FileType( loaded_csv_fullpath )
 			APP.data_dir = ExtractDir( loaded_csv_fullpath )+"/"
 			APP.save()
-			loaded_csv = TCSVLoader.Load( loaded_csv_fullpath, csv_identifier_field )
+			Local loaded_csv:TMap = CreateMap()
+			TCSVLoader.Load( loaded_csv_fullpath, csv_identifier_field, loaded_csv )
 			If loaded_csv
 				'if loaded csv data contains a row with the same ID as the loaded ship, use it
 				'else prompt the user to choose one

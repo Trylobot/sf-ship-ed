@@ -49,10 +49,8 @@ Include "src/functions_misc.bmx"
 Include "src/drawing_misc.bmx"
 Include "src/instaquit.bmx"
 Include "src/menu.bmx"
-
 Include "src/TextWidget.type.bmx"
 Include "src/TableWidget.type.bmx"
-
 Include "src/TStarfarerShip.type.bmx"
 Include "src/TStarfarerSkin.type.bmx"
 Include "src/TStarfarerShipWeapon.type.bmx"
@@ -63,17 +61,14 @@ Include "src/TStarfarerVariantWeaponGroup.type.bmx"
 Include "src/TStarfarerWeapon.type.bmx"
 Include "src/TStarfarerWeaponMuzzleFlashSpec.type.bmx"
 Include "src/TStarfarerWeaponSmokeSpec.type.bmx"
-
 Include "src/TCSVLoader.type.bmx"
 Include "src/ShipDataCSVFieldTemplate.bmx"
 Include "src/WingDataCSVFieldTemplate.bmx"
 Include "src/WeaponDataCSVFieldTemplate.bmx"
 Include "src/TModalSetWeaponCSV.type.bmx"
-
 Include "src/TData.type.bmx"
 Include "src/TSprite.type.bmx"
 Include "src/TEditor.type.bmx"
-
 Include "src/TSubroutine.type.bmx"
 Include "src/TGenericCSVSubroutine.type.bmx"
 Include "src/TModalSetShip.type.bmx"
@@ -94,14 +89,10 @@ Include "src/TModalSetSkin.type.bmx"
 Include "src/TModalSetShipCSV.type.bmx"
 Include "src/TModalSetWingCSV.type.bmx"
 Include "src/TModalSetWeapon.type.bmx"
-
 Include "src/Application.type.bmx"
-
 Include "src/help.bmx"
 Include "src/multiselect_values.bmx"
 Include "src/TTextCoder.bmx"
-Include "src/TModalShowMore.bmx"
-
 Include "src/TWeaponDrawer.bmx"
 Include "src/TWingrenderer.bmx"
 
@@ -120,7 +111,11 @@ Global DATA_FONT:TImageFont = Null
 Global LINE_HEIGHT% = APP.font_size + 1
 Global DATA_LINE_HEIGHT% = APP.data_font_size
 Global CODE_MODE% = 1' LATIN1
+
 Global SHOW_MORE% = 0
+Function cycle_show_more()
+  SHOW_MORE :+ 1; If SHOW_MORE > 2 Then SHOW_MORE = 0
+EndFunction
 
 Global DO_ROUND% = 1
 
@@ -184,11 +179,11 @@ config_json_transforms()
 Global ed:TEditor = New TEditor
 ed.show_help = True
 
-Local sprite:TSprite = New TSprite
+Global sprite:TSprite = New TSprite
 sprite.scale = ZOOM_LEVELS[ed.selected_zoom_level]
 ed.target_sprite_scale = sprite.scale
 
-Local data:TData = New TData
+Global data:TData = New TData
 
 'MARK init UI
 init_gui_menus()
@@ -245,8 +240,6 @@ Global sub_ship_csv:TModalSetShipCSV = New TModalSetShipCSV
 Global sub_wing_csv:TModalSetWingCSV = New TModalSetWingCSV
 Global sub_set_weapon:TModalSetWeapon = New TModalSetWeapon
 Global sub_weapon_csv:TModalSetWeaponCSV = New TModalSetWeaponCSV
-Global sub_show_more:TModalShowMore = New TModalShowMore
-
 Global SS:TSmoothScroll = New TSmoothScroll
 
 '////////////////////////////////////////////////
@@ -407,7 +400,7 @@ Repeat
         draw_sprite( ed, sprite )
         draw_weapons( ed, data, sprite, WD )      
         
-        Select ed.program_mode      
+        Select ed.program_mode
 
           Case "ship"
             Select ed.mode
@@ -448,12 +441,11 @@ Repeat
             EndSelect
 
           Case "skin"
-            Select ed.mode
-              Case "normal"
-                sub_set_skin.Draw( ed, data, sprite )
-              'Case "string_data"
-                'performed below
-            EndSelect
+            If ed.mode <> "string_data"
+              sub_set_skin.Draw( ed, data, sprite )
+            EndIf
+            'string_data
+            '  performed below          
           
           Case "csv"
             sub_ship_csv.Draw( ed, data, sprite )
@@ -560,12 +552,11 @@ Function check_sub_routines% ( ed:TEditor, data:TData, sprite:TSprite )
       EndSelect   
     
     Case "skin"
-      Select ed.mode
-        Case "none"
-          sub_set_skin.Update( ed, data, sprite )
-        Case "string_data"
-          sub_string_data.Update( ed, data, sprite )
-      EndSelect   
+      If ed.mode <> "string_data"
+        sub_set_skin.Update( ed, data, sprite )
+      Else
+        sub_string_data.Update( ed, data, sprite )
+      EndIf
     
     Case "csv"
       sub_ship_csv.Update( ed, data, sprite )
@@ -881,7 +872,7 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
         Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_PREVIEW] 'preview
           sub_preview_all.Activate( ed, data, sprite )
         Case functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_MORE] 'show more
-          sub_show_more.Activate( ed, data, sprite )
+          cycle_show_more()
         Case functionMenu[MENU_FUNCTION_DETAILS] 'string edit
           sub_string_data.Activate( ed, data, sprite )
         Default
@@ -897,7 +888,7 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
         Case functionMenu[MENU_FUNCTION_DETAILS]
           sub_string_data.Activate( ed, data, sprite ) 'string edit
         Case functionMenuSub[MENU_MODE_VARIANT][MENU_SUBFUNCTION_VARIANT_MORE] 'show more
-          sub_show_more.Activate( ed, data, sprite )
+          cycle_show_more()
         Default
           hit = False
       EndSelect
@@ -908,6 +899,8 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
           sub_set_skin.SetEditorMode( ed, data, sprite, "none" )
         Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_HULLMODS]
           sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_hullmods" )
+        Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_MORE]
+          cycle_show_more()
         Case functionMenu[MENU_FUNCTION_DETAILS]
           sub_string_data.Activate( ed, data, sprite ) ' string edit
       EndSelect
@@ -1532,6 +1525,15 @@ Function undo(ed:TEditor, data:TData, sprite:TSprite, redo% = False)
   ed.last_mode = snap.last_mode
   data.snapshot_undoing = False
 End Function
+
+' specialized sorting functions requiring context that has to be global due to language limitations
+  ' makes the same assumption as TData::get_hullmod_csv_ordnance_points 
+Function compare_hullmod_ids%( h0:Object, h1:Object )
+  Local ops0% = Int( data.get_hullmod_csv_ordnance_points( String(h0) ))
+  Local ops1% = Int( data.get_hullmod_csv_ordnance_points( String(h1) ))
+  Return (ops1 - ops0)
+EndFunction
+
 
 'Clean out the eventQueue, then return how many events we nuked
 Function FlushEvent%()

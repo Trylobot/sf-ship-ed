@@ -1064,23 +1064,27 @@ Type TData
 		Return value.ToInt()
 	EndMethod
 
-	Method get_hullmod_csv_ordnance_points%( hullMod_id$ )
+	Method get_hullmod_csv_ordnance_points%( hullMod_id$, hullSize$=Null )
 		'uses ship size and hullmod data
 		Local hullMod_stats:TMap = TMap( ed.stock_hullmod_stats.ValueForKey( hullMod_id ))
 		If Not hullMod_stats Then Return 0 'ID not found in csv data
-		Local column_key$ = ""
-		Select ship.hullSize
-			Case "FRIGATE"
-				column_key = "cost_frigate"
-			Case "DESTROYER"
-				column_key = "cost_dest"
-			Case "CRUISER"
-				column_key = "cost_cruiser"
-			Case "CAPITAL_SHIP"
-				column_key = "cost_capital"
-			Default
-				Return 0 'hullMod cost cannot be found
-		EndSelect
+		Local column_key$
+		If hullSize ' explicit
+			column_key = hullSize
+		Else 'Not hullSize
+			Select ship.hullSize ' fallback to the currently-loaded ship
+				Case "FRIGATE"
+					column_key = "cost_frigate"
+				Case "DESTROYER"
+					column_key = "cost_dest"
+				Case "CRUISER"
+					column_key = "cost_cruiser"
+				Case "CAPITAL_SHIP"
+					column_key = "cost_capital"
+				Default
+					Return 0 'hullMod cost cannot be found
+			EndSelect
+		EndIf
 		Local value$ = String( hullMod_stats.ValueForKey( column_key ))
 		If Not value Then Return 0 'csv row found, but did not contain column
 		Return value.ToInt()

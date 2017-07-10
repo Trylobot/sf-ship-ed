@@ -57,24 +57,27 @@ Type TEditor
 	Field engineflame:TImage
 	Field engineflamecore:TImage
 	'stock (and mod) data
-	Field stock_ships:TMap                      '<String,Object>   hullId --> TStarfarerShip
-	Field stock_variants:TMap                   '<String,Object>   variantId --> TStarfarerVariant
-	Field stock_hull_variants_assoc:TMap        '<String,TList>    hullId --> TList of variantIds (referencing the hullId)
-	Field stock_skins:TMap                      '<String,Object>   skinHullId --> TStarfarerSkin
-	Field stock_hull_skins_assoc:TMap           '<String,TList>    hullId --> TList of skinHullIds (referencing the hullId)
-	Field stock_skins_variants_assoc:TMap       '<String,TList>    skinHullId --> TList of variantIds (referencing the hullId, not knowing it is a skinHullId)
-	Field stock_weapons:TMap                    '<String,Object>   weaponId --> TStarfarerWeapon
-	Field stock_engine_styles:TMap              '<String,Object>   engine style spec id --> TStarfarerCustomEngineStyleSpec
-	Field stock_ship_stats:TMap                 '<String,TMap>     hullId --> TMap (csv columns --> values)
-	Field stock_wing_stats:TMap                 '<String,TMap>     wingId --> TMap (csv columns --> values)
-	Field stock_variant_wing_stats_assoc:TMap   '<String,TList>    variantId --> TList of wingId (referencing the variantId)
-	Field stock_weapon_stats:TMap               '<String,TMap>     weaponId --> TMap (csv columns --> values)
-	Field stock_hullmod_stats:TMap              '<String,TMap>     hullmodId --> TMap (csv columns --> values)
+	Field stock_ships:TMap                    '<String,Object>  hullId --> TStarfarerShip
+	Field stock_variants:TMap                 '<String,Object>  variantId --> TStarfarerVariant
+	Field stock_hull_variants_assoc:TMap      '<String,TList>   hullId --> TList of variantIds (referencing the hullId)
+	Field stock_skins:TMap                    '<String,Object>  skinHullId --> TStarfarerSkin
+	Field stock_hull_skins_assoc:TMap         '<String,TList>   hullId --> TList of skinHullIds (referencing the hullId)
+	Field stock_skins_variants_assoc:TMap     '<String,TList>   skinHullId --> TList of variantIds (referencing the hullId, not knowing it is a skinHullId)
+	Field stock_weapons:TMap                  '<String,Object>  weaponId --> TStarfarerWeapon
+	Field stock_engine_styles:TMap            '<String,Object>  engine style spec id --> TStarfarerCustomEngineStyleSpec
+	Field stock_ship_stats:TMap               '<String,TMap>    hullId --> TMap (csv columns --> values)
+	Field stock_wing_stats:TMap               '<String,TMap>    wingId --> TMap (csv columns --> values)
+	Field stock_variant_wing_stats_assoc:TMap '<String,TList>   variantId --> TList of wingId (referencing the variantId)
+	Field stock_weapon_stats:TMap             '<String,TMap>    weaponId --> TMap (csv columns --> values)
+	Field stock_hullmod_stats:TMap            '<String,TMap>    hullmodId --> TMap (csv columns --> values)
 	'metadata
-	Field stock_ship_stats_field_order:TList    '<String>          csv column (ordered)
-	Field stock_wing_stats_field_order:TList    '<String>          csv column (ordered)
-	Field stock_weapon_stats_field_order:TList  '<String>          csv column (ordered)
-	Field multiselect_values:TMap               '<String,TMap>     field (enum) --> [value set] (TMap <value,value>)
+	Field stock_ship_stats_field_order:TList     '<String>  csv column (ordered)
+	Field stock_wing_stats_field_order:TList     '<String>  csv column (ordered)
+	Field stock_weapon_stats_field_order:TList   '<String>  csv column (ordered)
+	Field stock_hullmod_count%            
+	Field stock_hullmod_ids_sorted:TList         '<String>  csv row id value
+	'
+	Field multiselect_values:TMap                '<String,TMap>     field (enum) --> [value set] (TMap <value,value>)
 
 	Method New()
 		program_mode = "ship"
@@ -108,6 +111,8 @@ Type TEditor
 		stock_ship_stats_field_order = ship_data_csv_field_order_template.Copy()
 		stock_wing_stats_field_order = wing_data_csv_field_order_template.Copy()
 		stock_weapon_stats_field_order = weapon_data_csv_field_order_template.Copy()
+		stock_hullmod_count = 0
+		stock_hullmod_ids_sorted = CreateList()
 		'scraped enum values
 		multiselect_values = CreateMap()
 	EndMethod
@@ -270,10 +275,11 @@ Type TEditor
 		Try
 			If save_field_order
 				stock_ship_stats_field_order = CreateList()
-				TCSVLoader.Load( dir + file, "id", stock_ship_stats, stock_ship_stats_field_order )
+				TCSVLoader.Load( dir+file, "id", stock_ship_stats, stock_ship_stats_field_order )
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_ship_stats )
 			EndIf
+			stock_ship_stats.Remove("") ' omit blanks and spacers
 			Local row:TMap
 			For Local id$ = EachIn stock_ship_stats.Keys()
 				'scan all rows for multiselect values
@@ -302,7 +308,7 @@ Type TEditor
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_wing_stats )
 			EndIf
-			stock_wing_stats.Remove("") ' omit this, it is likely a spacer from the raw file data
+			stock_wing_stats.Remove("") ' omit blanks and spacers
 			Local row:TMap
 			For Local id$ = EachIn stock_wing_stats.Keys()
 				'scan all rows for multiselect values and save association to variant
@@ -342,12 +348,14 @@ Type TEditor
 
 	Method load_stock_weapon_stats( dir$, file$, save_field_order% = False )
 		Try
-			If save_field_order
+			'If save_field_order
 				'stock_weapon_stats_field_order = CreateList()
+				' QUESTION: why was stock_weapon_stats_field_order omitted unconditionally? 
 				TCSVLoader.Load( dir+file, "id", stock_weapon_stats )', stock_weapon_stats_field_order )
-			Else
-				TCSVLoader.Load( dir+file, "id", stock_weapon_stats )
-			EndIf
+			'Else
+			'	TCSVLoader.Load( dir+file, "id", stock_weapon_stats )
+			'EndIf
+			stock_weapon_stats.Remove("") ' omit blanks and spacers
 			Local row:TMap
 			For Local id$ = EachIn stock_weapon_stats.Keys()
 				'scan all rows for multiselect values
@@ -370,12 +378,21 @@ Type TEditor
 
 	Method load_stock_hullmod_stats( dir$, file$, save_field_order%=False )
 		Try
-			TCSVLoader.Load( dir+file, "id", stock_hullmod_stats )
+			stock_hullmod_count :+ TCSVLoader.Load( dir+file, "id", stock_hullmod_stats )
+			If stock_hullmod_stats.Remove("") Then stock_hullmod_count :- 1 ' omit blanks and spacers
 			DebugLogFile " LOADED "+file
 		Catch ex$ 'ignore parsing errors and continue
 			DebugLogFile " Error: "+file+" "+ex
 		EndTry
 	End Method
+
+	Method sort_hullmods_by_ordnance_points( ascending%=True )
+		stock_hullmod_ids_sorted.Clear()
+		For Local hullmod_id$ = EachIn stock_hullmod_stats.Keys()
+			stock_hullmod_ids_sorted.AddLast( hullmod_id )
+		Next
+		stock_hullmod_ids_sorted.Sort( ascending, compare_hullmod_ids )' global fn
+	EndMethod
 
 	'//////////////
 

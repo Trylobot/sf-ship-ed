@@ -5,6 +5,7 @@ Type TModalSetSkin Extends TSubroutine
 	'shared
 	Field CURSOR_STR$ = ">>"
 	Field SHOW_MORE_cached%
+	Field ship_hullSize_cached$
 
 	'------------------------------------
 	'mode: "changeremove_weaponslots"
@@ -20,7 +21,6 @@ Type TModalSetSkin Extends TSubroutine
 
 	'------------------------------------
 	'mode: "addremove_hullmods"
-	Field hullmod_count%
 	Field hullmod_chooser:TableWidget
 	Field selected_hullmod_id$
 	Field hullmod_chooser_text:TextWidget
@@ -57,6 +57,7 @@ Type TModalSetSkin Extends TSubroutine
     rebuildFunctionMenu( MENU_MODE_SKIN )
 		' info verbosity [0=min|1=lots|2=all]
 		SHOW_MORE_cached = SHOW_MORE
+		ship_hullSize_cached = data.ship.hullSize
     ' debug
 		DebugLogFile(" ed.program_mode=~q"+ed.program_mode+"~q; ed.mode=~q"+ed.mode+"~q")
 	EndMethod
@@ -67,7 +68,7 @@ Type TModalSetSkin Extends TSubroutine
 			Case "addremove_hullmods"
 				ed.last_mode = ed.mode
 				ed.mode = new_mode
-				ed.skin_hullMod_i = -1
+				ed.skin_hullMod_i = 0
 				initialize_hullmod_chooser( ed, data )
 				SS.reset()
 				DebugLogFile(" ed.program_mode=~q"+ed.program_mode+"~q; ed.mode=~q"+ed.mode+"~q")
@@ -77,12 +78,14 @@ Type TModalSetSkin Extends TSubroutine
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		'-----
-		If SHOW_MORE <> SHOW_MORE_cached
-			' number of visible columns changed; reconstruct table
+		' check for external data changes which can affect this mode's UI
+		If SHOW_MORE_cached <> SHOW_MORE ..
+		Or ship_hullSize_cached <> data.ship.hullSize
+			' update cache
 			SHOW_MORE_cached = SHOW_MORE
-			hullmod_count = count_keys( ed.stock_hullmod_stats )
+			ship_hullSize_cached = data.ship.hullSize
+			'
 			initialize_hullmod_chooser( ed, data )
-			' TODO: re-count, re-init anything else that changes as a result of SHOW_MORE toggling
 			' ...
 		EndIf
 		'-----
@@ -143,35 +146,36 @@ Type TModalSetSkin Extends TSubroutine
 	'/////////////////////////////////////
 
 	Method initialize_hullmod_chooser( ed:TEditor, data:TData )
-		hullmod_count = count_keys( ed.stock_hullmod_stats )
-		'
-		Local rows% =    1 + hullmod_count ' header, data
-		Local columns% = 1 + 1 + 1 + 1     ' cursor, status, id, name
+		Local rows% =    1 + ed.stock_hullmod_count
+		Local columns% = 1 + 1 + 1 + 1     ' cursor, status, ops (contextual), name
 		If SHOW_MORE = 1 Or SHOW_MORE = 2
 			columns :+ 1 ' description
 		EndIf
 		hullmod_chooser = New TableWidget
 		hullmod_chooser.resize(rows, columns)
+		hullmod_chooser.justify_col(2, JUSTIFY_RIGHT) ' ops
 		'---------------------------------------------------------
 		' setup header row
 		Local r% = 0
-		Local c% = 1 + 1 + 0 + 0 ' skip: cursor, status
-		hullmod_chooser.set_cell(r,c, "ID"); c :+ 1
+		Local c% = 1 + 1 + 0 ' skip: cursor, status
+		hullmod_chooser.set_cell(r,c, "OPs"); c :+ 1
 		hullmod_chooser.set_cell(r,c, "Name"); c :+ 1
 		If SHOW_MORE = 1 Or SHOW_MORE = 2
 			hullmod_chooser.set_cell(r,c, "Description"); c :+ 1
 		EndIf
 		'---------------------------------------------------------
 		' create list of known data to choose from
+		ed.sort_hullmods_by_ordnance_points()
 		Local i% = 0
-		For Local hullmod:TMap = EachIn ed.stock_hullmod_stats.Values()
+		For Local hullmod_id$ = EachIn ed.stock_hullmod_ids_sorted
+			Local hullmod:TMap = TMap( ed.stock_hullmod_stats.ValueForKey( hullmod_id ))
 			' table pointer
 			r = 1 + i     ' skip: header
 			c = 1 + 1 + 0 ' skip: cursor, status
 			'---------------------------------------------------------
 			' data cells
-			Local hullmod_id$ = String( hullmod.ValueForKey("id")) 
-			hullmod_chooser.set_cell(r,c, hullmod_id); c :+ 1
+			Local op_cost$ = String( data.get_hullmod_csv_ordnance_points( hullmod_id ))
+			hullmod_chooser.set_cell(r,c, op_cost); c :+ 1
 			Local hullmod_name$ = String( hullmod.ValueForKey("name"))
 			hullmod_chooser.set_cell(r,c, hullmod_name); c :+ 1
 			' additional data (toggle-able with Q)
@@ -195,15 +199,15 @@ Type TModalSetSkin Extends TSubroutine
 		'   and, that all the data fields contain static data
 		' update only: cursor row, status (columns: 0, 1)
 		Local i% = 0
-		For Local hullmod:TMap = EachIn ed.stock_hullmod_stats.Values()
+		For Local hullmod_id$ = EachIn ed.stock_hullmod_ids_sorted
+			Local hullmod:TMap = TMap( ed.stock_hullmod_stats.ValueForKey( hullmod_id ))
 			' table pointer
 			Local r% = 1 + i ' skip: header
 			Local c% = 0
 			'---------------------------------------------------------
 			' retain ID of selected hullmod
-			Local hullmod_id$ = String( hullmod.ValueForKey("id"))
 			Local cursor$ = ""
-			If i = ed.builtIn_hullmod_i
+			If i = ed.skin_hullMod_i
 				selected_hullmod_id = hullmod_id
 				cursor = CURSOR_STR
 			EndIf
@@ -211,9 +215,9 @@ Type TModalSetSkin Extends TSubroutine
 			'---------------------------------------------------------
 			' show status of each hullmod as it relates to this skin (and, its "base hull" (ship))
 			Local hullmod_status$ = "   "
-			If data.has_builtin_hullmod( hullmod_id ) Then hullmod_status = " b  "
-			If data.skin_adds_hullmod( hullmod_id ) Then hullmod_status = "[+] "
-			If data.skin_removes_hullmod( hullmod_id ) Then hullmod_status = "--- "
+			If data.has_builtin_hullmod( hullmod_id )  Then hullmod_status = " b "
+			If data.skin_adds_hullmod( hullmod_id )    Then hullmod_status = "[+]"
+			If data.skin_removes_hullmod( hullmod_id ) Then hullmod_status = "---"
 			hullmod_chooser.set_cell(r,c, hullmod_status); c :+ 1
 			i :+ 1
 		Next
@@ -252,10 +256,10 @@ Type TModalSetSkin Extends TSubroutine
 				EndSelect
 		End Select
 		'bounds enforce (wrap top/bottom)
-		If ed.skin_hullMod_i > (hullmod_count - 1)
+		If ed.skin_hullMod_i > (ed.stock_hullmod_count - 1)
 			ed.skin_hullMod_i = 0
 		ElseIf ed.skin_hullMod_i < 0
-			ed.skin_hullMod_i = (hullmod_count - 1)
+			ed.skin_hullMod_i = (ed.stock_hullmod_count - 1)
 		EndIf
 	EndMethod
 
@@ -385,4 +389,3 @@ Function load_skin_data( ed:TEditor, data:TData, sprite:TSprite, use_new% = Fals
   EndIf
   data.update_skin()
 End Function
-
