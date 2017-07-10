@@ -120,13 +120,15 @@ Type TData
 		'enforce_skin_internal_consistency()
 	End Method
 	
-	Method update_skin()
+	Method update_skin( suppress_change_detection%=False )
 		json.formatted = True
 		'encode object as json data
 		json_str_skin = json.stringify( skin, "stringify_skin" )
 		json_view_skin = columnize_text( json_str_skin, APP.raw_json_view_max_column_width )
-		changed = True
-		take_snapshot(MENU_MODE_SKIN)
+		If Not suppress_change_detection
+			changed = True
+			take_snapshot(MENU_MODE_SKIN)
+		EndIf
 	End Method
 
 	'requires subsequent call to update_variant()

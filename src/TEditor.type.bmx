@@ -215,12 +215,22 @@ Type TEditor
 		Local variant:TStarfarerVariant
 		If assoc And Not assoc.IsEmpty()
 			variant = TStarfarerVariant( stock_variants.ValueForKey( assoc.First() ))
-		Else
+		Else ' is this behavior even desirable? we can't tell if it worked o
 			variant = New TStarfarerVariant
 			variant.hullId = hullId
 			variant.variantId = hullId+"_variant"
 		EndIf
 		Return variant
+	EndMethod
+
+	Method get_default_skin:TStarfarerSkin( hullId$ )
+		Local assoc:TList = TList( stock_hull_skins_assoc.ValueForKey( hullId ))
+		Local skin:TStarfarerSkin
+		If assoc And Not assoc.IsEmpty()
+			skin = TStarfarerSkin( stock_skins.ValueForKey( assoc.First() ))
+		EndIf
+		' it's entirely normal for there to be no skins, so don't just make one up if there aren't any
+		Return skin
 	EndMethod
 
 	Method verify_variant_association%( hullId$, variantId$ )

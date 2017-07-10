@@ -44,13 +44,13 @@ Type TModalSetSkin Extends TSubroutine
 		' set sprite
 		sprite.img = Null
     autoload_skin_image( ed, data, sprite )
-    If sprite.img = Null
-    	Rem
-    	  TODO: if the sprite failed to load, it indicates this is likely not data loaded from disk;
-    	    much like how variant mode does it,
-  	      attempt to automatically load a "default skin"
-  	      based on the current ship; then, retry loading the skin image
-    	EndRem
+    If Not sprite.img
+    	Local skin:TStarfarerSkin = ed.get_default_skin( data.ship.hullId )
+    	If skin
+    		data.skin = skin
+    		data.update_skin( True )
+    		autoload_skin_image( ed, data, sprite )
+    	EndIf
     EndIf
     ' menus
     RadioMenuArray( MENU_MODE_SKIN, modeMenu )
@@ -77,7 +77,8 @@ Type TModalSetSkin Extends TSubroutine
 	EndMethod
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
-		'-----
+		'
+		process_input_default( ed, data )
 		' check for external data changes which can affect this mode's UI
 		If SHOW_MORE_cached <> SHOW_MORE ..
 		Or ship_hullSize_cached <> data.ship.hullSize
@@ -92,24 +93,20 @@ Type TModalSetSkin Extends TSubroutine
 		Select ed.mode
 			
 			Case "changeremove_weaponslots"
-				'process_input_changeremove_weaponslots( ed, data )
-				'update_X( ed, data )
+				process_input_changeremove_weaponslots( ed, data )
 			
 			Case "addremove_builtin_weapons"
-				'process_input_addremove_builtin_weapons( ed, data )
-				'update_X( ed, data )
+				process_input_addremove_builtin_weapons( ed, data )
 			
 			Case "changeremove_engines"
-				'process_input_changeremove_engines( ed, data )
-				'update_X( ed, data )
+				process_input_changeremove_engines( ed, data )
 			
 			Case "addremove_hullmods"
 				process_input_addremove_hullmods( ed, data )
 				update_hullmod_chooser( ed, data )
 		
 			Case "addremove_hints"
-				'process_input_addremove_hints( ed, data )
-				'update_X( ed, data )
+				process_input_addremove_hints( ed, data )
 
 		EndSelect
 	End Method
@@ -225,6 +222,40 @@ Type TModalSetSkin Extends TSubroutine
 		hullmod_chooser_text = hullmod_chooser.to_TextWidget()
 	EndMethod
 
+	Method process_input_default( ed:TEditor, data:TData )
+		Select EventID()
+			Case EVENT_GADGETACTION, EVENT_MENUACTION
+				Select EventSource()
+					Case functionMenu[MENU_FUNCTION_EXIT] 'exit
+						sub_set_skin.SetEditorMode( ed, data, sprite, "none" )
+					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_WEAPONSLOTS]
+						sub_set_skin.SetEditorMode( ed, data, sprite, "changeremove_weaponslots" )
+					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_WEAPONS]
+						sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_builtin_weapons" )
+					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_ENGINES]
+						sub_set_skin.SetEditorMode( ed, data, sprite, "changeremove_engines" )
+					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_HULLMODS]
+						sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_hullmods" )
+					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_HINTS]
+						sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_hints" )
+					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_MORE]
+						cycle_show_more()
+				EndSelect
+		EndSelect
+	EndMethod
+
+	Method process_input_changeremove_weaponslots( ed:TEditor, data:TData )
+		
+	EndMethod
+
+	Method process_input_addremove_builtin_weapons( ed:TEditor, data:TData )
+		
+	EndMethod
+
+	Method process_input_changeremove_engines( ed:TEditor, data:TData )
+		
+	EndMethod
+
 	Method process_input_addremove_hullmods( ed:TEditor, data:TData )
 		Select EventID()
 			Case EVENT_KEYDOWN, EVENT_KEYREPEAT	
@@ -262,6 +293,11 @@ Type TModalSetSkin Extends TSubroutine
 			ed.skin_hullMod_i = (ed.stock_hullmod_count - 1)
 		EndIf
 	EndMethod
+
+	Method process_input_addremove_hints( ed:TEditor, data:TData )
+		
+	EndMethod
+
 
 	Method draw_hud( ed:TEditor, data:TData )
 	EndMethod

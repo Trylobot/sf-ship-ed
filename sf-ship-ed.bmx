@@ -741,12 +741,12 @@ End Function
 
 ' if the input EventSource(Object) "hits," it is consumed and nothing that would normally follow gets to process it
 '   sort of like {Event}.preventDefault() in Javascript
-Function check_mode_menu%(ed:TEditor, data:TData, sprite:TSprite)
+Function check_mode_menu%( ed:TEditor, data:TData, sprite:TSprite )
   Local hit% = True
   Select EventSource()
     
     Case modeMenu[MENU_MODE_SHIP] 'm_mode_ship
-      sub_set_ship.Activate( ed, data, sprite)
+      sub_set_ship.Activate( ed, data, sprite )
    
     Case modeMenu[MENU_MODE_VARIANT] 'm_mode_variant
       sub_set_variant.Activate( ed, data, sprite )
@@ -895,12 +895,6 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
 
     Case "skin"
       Select EventSource()
-        Case functionMenu[MENU_FUNCTION_EXIT] 'exit
-          sub_set_skin.SetEditorMode( ed, data, sprite, "none" )
-        Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_HULLMODS]
-          sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_hullmods" )
-        Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_MORE]
-          cycle_show_more()
         Case functionMenu[MENU_FUNCTION_DETAILS]
           sub_string_data.Activate( ed, data, sprite ) ' string edit
       EndSelect
@@ -933,35 +927,35 @@ End Function
 
 Function check_zoom_and_pan(ed:TEditor, data:TData, sprite:TSprite)
     Select EventID()
-    Case EVENT_MOUSEDOWN, EVENT_MOUSEUP, EVENT_MOUSEMOVE
-      Select ModKeyAndMouseKey
-      Case 32 '(MODIFIER_RMOUSE)
-      'pan CONTROL
-        Select EventID()
-        Case EVENT_MOUSEDOWN
-          ed.pan_start_x = sprite.pan_x
-          ed.pan_start_y = sprite.pan_y
-          ed.pan_start_mouse_x = MouseX
-          ed.pan_start_mouse_y = MouseY
-        Case EVENT_MOUSEMOVE
-          sprite.pan_x = ed.pan_start_x + (MouseX - ed.pan_start_mouse_x)
-          sprite.pan_y = ed.pan_start_y + (MouseY - ed.pan_start_mouse_y)
+      Case EVENT_MOUSEDOWN, EVENT_MOUSEUP, EVENT_MOUSEMOVE
+        Select ModKeyAndMouseKey
+        Case 32 '(MODIFIER_RMOUSE)
+        'pan CONTROL
+          Select EventID()
+          Case EVENT_MOUSEDOWN
+            ed.pan_start_x = sprite.pan_x
+            ed.pan_start_y = sprite.pan_y
+            ed.pan_start_mouse_x = MouseX
+            ed.pan_start_mouse_y = MouseY
+          Case EVENT_MOUSEMOVE
+            sprite.pan_x = ed.pan_start_x + (MouseX - ed.pan_start_mouse_x)
+            sprite.pan_y = ed.pan_start_y + (MouseY - ed.pan_start_mouse_y)
+          EndSelect
         EndSelect
-      EndSelect
-    Case EVENT_MOUSEWHEEL
-      'zoom CONTROL, by MOUSEWHEEL
-      If MouseZ <> ed.mouse_z
-        z_delta = MouseZ - ed.mouse_z
-        ed.mouse_z = MouseZ
-      EndIf
-    Case EVENT_GADGETACTION, EVENT_MENUACTION
-      Select EventSource()
-      'zoom CONTROL, by key
-        Case functionMenu[MENU_FUNCTION_ZOOMIN] ' = CreateMenu("{{m_function_zoomin}}", 407, functionMenu[6], KEY_EQUALS, MODIFIER_CONTROL )
-          z_delta :+ 1
-        Case functionMenu[MENU_FUNCTION_ZOOMOUT] ' = CreateMenu("{{m_function_zoomout}}", 408, functionMenu[6], KEY_MINUS, MODIFIER_CONTROL )
-          z_delta :- 1
-      EndSelect
+      Case EVENT_MOUSEWHEEL
+        'zoom CONTROL, by MOUSEWHEEL
+        If MouseZ <> ed.mouse_z
+          z_delta = MouseZ - ed.mouse_z
+          ed.mouse_z = MouseZ
+        EndIf
+      Case EVENT_GADGETACTION, EVENT_MENUACTION
+        Select EventSource()
+        'zoom CONTROL, by key
+          Case functionMenu[MENU_FUNCTION_ZOOMIN]
+            z_delta :+ 1
+          Case functionMenu[MENU_FUNCTION_ZOOMOUT]
+            z_delta :- 1
+        EndSelect
     EndSelect
 End Function
 
