@@ -3,6 +3,11 @@ Type TModalSetSkin Extends TSubroutine
 	
 	'------------------------------------
 	'shared
+	Rem
+		TODO: don't render the CURSOR_STR as part of the text widget
+	    instead, render a thick rectangle with a pointer in the middle of the screen
+	    on top of the text widget; that way the widget doesn't need to be rebuilt when the cursor moves
+	EndRem
 	Field CURSOR_STR$ = ">>"
 	Field SHOW_MORE_cached%
 	Field ship_hullSize_cached$
@@ -17,11 +22,12 @@ Type TModalSetSkin Extends TSubroutine
 
 	'------------------------------------
 	'mode: "changeremove_engines"
-
+	Field engine_links:EngineLink[]
 
 	'------------------------------------
 	'mode: "addremove_hullmods"
 	Field hullmod_chooser:TableWidget
+	Field selected_hullmod_idx%
 	Field selected_hullmod_id$
 	Field hullmod_chooser_text:TextWidget
 
@@ -32,15 +38,12 @@ Type TModalSetSkin Extends TSubroutine
 	
 	'--------------------------------------------
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
-		' global editor state
+		' global editor state (minimize)
 		ed.program_mode = "skin"
 		ed.last_mode = "none"
-		ed.mode = "none" ' none mode: basically preview mode, just draw some basics
-		ed.weapon_lock_i = -1
-		ed.group_field_i = -1
-		ed.edit_strings_weapon_i = -1
-		ed.edit_strings_engine_i = -1
-		ed.skin_hullMod_i = -1
+		ed.mode = "none"
+		'-------
+		selected_hullmod_idx = -1
 		' set sprite
 		sprite.img = Null
     autoload_skin_image( ed, data, sprite )
@@ -63,22 +66,32 @@ Type TModalSetSkin Extends TSubroutine
 	EndMethod
 
 	Method SetEditorMode( ed:TEditor, data:TData, sprite:TSprite, new_mode$ )
+		ed.last_mode = ed.mode
+		ed.mode = new_mode	
 		Select new_mode
+			
+			Case "changeremove_weaponslots"
 
+			
+			Case "addremove_builtin_weapons"
+
+			
+			Case "changeremove_engines"
+				initialize_engine_links( ed, data )
+			
 			Case "addremove_hullmods"
-				ed.last_mode = ed.mode
-				ed.mode = new_mode
-				ed.skin_hullMod_i = 0
+				selected_hullmod_idx = 0
 				initialize_hullmod_chooser( ed, data )
-				SS.reset()
-				DebugLogFile(" ed.program_mode=~q"+ed.program_mode+"~q; ed.mode=~q"+ed.mode+"~q")
+			
+			Case "addremove_hints"
+
 
 		EndSelect
+		DebugLogFile(" ed.program_mode=~q"+ed.program_mode+"~q; ed.mode=~q"+ed.mode+"~q")
+		SS.reset()
 	EndMethod
 
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
-		'
-		process_input_default( ed, data )
 		' check for external data changes which can affect this mode's UI
 		If SHOW_MORE_cached <> SHOW_MORE ..
 		Or ship_hullSize_cached <> data.ship.hullSize
@@ -100,6 +113,7 @@ Type TModalSetSkin Extends TSubroutine
 			
 			Case "changeremove_engines"
 				process_input_changeremove_engines( ed, data )
+				update_engine_links( ed, data )
 			
 			Case "addremove_hullmods"
 				process_input_addremove_hullmods( ed, data )
@@ -122,7 +136,7 @@ Type TModalSetSkin Extends TSubroutine
 				'draw_weapons_chooser( ed, data )
 			
 			Case "changeremove_engines"
-				'draw_engines( ed, data )
+				draw_engines( ed, data )
 			
 			Case "addremove_hullmods"
 				draw_hullmods_chooser( ed, data )
@@ -141,6 +155,25 @@ Type TModalSetSkin Extends TSubroutine
 	EndMethod
 
 	'/////////////////////////////////////
+
+	'--------------------------------------
+	' init functions
+
+	Method initialize_engine_links( ed:TEditor, data:TData )
+		Rem
+		  start with the ship's engines
+		    deep copy all of them
+		  for each engine index in the skin,
+		    update the copy with the skin engine data
+		  cache the result in a field of this TSubroutine, for fast drawing
+		EndRem
+		engine_links = New EngineLink[data.ship.engineSlots.length]
+		For Local idx% = 0 Until engine_links.length
+			engine_links[idx] = EngineLink.Create( idx, data.ship.engineSlots[idx] )
+		Next
+		' TODO: examine the skin and update the engine links as necessary
+		update_engine_links( ed, data )
+	EndMethod
 
 	Method initialize_hullmod_chooser( ed:TEditor, data:TData )
 		Local rows% =    1 + ed.stock_hullmod_count
@@ -189,11 +222,13 @@ Type TModalSetSkin Extends TSubroutine
 		update_hullmod_chooser( ed, data )
 	EndMethod
 
+	'--------------------------------------
+	' update functions
+
+	Method update_engine_links( ed:TEditor, data:TData )
+	EndMethod
+
 	Method update_hullmod_chooser( ed:TEditor, data:TData )
-		' render table into text widget with precalculated dimensions in screen pixels
-		'
-		' assume: the chooser table is already the correct number of cells
-		'   and, that all the data fields contain static data
 		' update only: cursor row, status (columns: 0, 1)
 		Local i% = 0
 		For Local hullmod_id$ = EachIn ed.stock_hullmod_ids_sorted
@@ -204,7 +239,7 @@ Type TModalSetSkin Extends TSubroutine
 			'---------------------------------------------------------
 			' retain ID of selected hullmod
 			Local cursor$ = ""
-			If i = ed.skin_hullMod_i
+			If i = selected_hullmod_idx
 				selected_hullmod_id = hullmod_id
 				cursor = CURSOR_STR
 			EndIf
@@ -222,27 +257,8 @@ Type TModalSetSkin Extends TSubroutine
 		hullmod_chooser_text = hullmod_chooser.to_TextWidget()
 	EndMethod
 
-	Method process_input_default( ed:TEditor, data:TData )
-		Select EventID()
-			Case EVENT_GADGETACTION, EVENT_MENUACTION
-				Select EventSource()
-					Case functionMenu[MENU_FUNCTION_EXIT] 'exit
-						sub_set_skin.SetEditorMode( ed, data, sprite, "none" )
-					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_WEAPONSLOTS]
-						sub_set_skin.SetEditorMode( ed, data, sprite, "changeremove_weaponslots" )
-					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_WEAPONS]
-						sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_builtin_weapons" )
-					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_ENGINES]
-						sub_set_skin.SetEditorMode( ed, data, sprite, "changeremove_engines" )
-					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_HULLMODS]
-						sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_hullmods" )
-					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_HINTS]
-						sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_hints" )
-					Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_MORE]
-						cycle_show_more()
-				EndSelect
-		EndSelect
-	EndMethod
+	'--------------------------------------
+	' input handler functions	
 
 	Method process_input_changeremove_weaponslots( ed:TEditor, data:TData )
 		
@@ -272,25 +288,25 @@ Type TModalSetSkin Extends TSubroutine
 						data.update_skin()
 						SS.reset()
 					Case KEY_DOWN
-						ed.skin_hullMod_i :+ 1
+						selected_hullmod_idx :+ 1
 					Case KEY_UP
-						ed.skin_hullMod_i :- 1
+						selected_hullmod_idx :- 1
 					Case KEY_PAGEDOWN 
-						ed.skin_hullMod_i :+ 5
+						selected_hullmod_idx :+ 5
 					Case KEY_PAGEUP
-						ed.skin_hullMod_i :- 5
+						selected_hullmod_idx :- 5
 				EndSelect
 			Case EVENT_GADGETACTION, EVENT_MENUACTION
 				Select EventSource()
 					Case functionMenu[MENU_FUNCTION_EXIT]
-						ed.skin_hullMod_i = - 1
+						selected_hullmod_idx = - 1
 				EndSelect
 		End Select
 		'bounds enforce (wrap top/bottom)
-		If ed.skin_hullMod_i > (ed.stock_hullmod_count - 1)
-			ed.skin_hullMod_i = 0
-		ElseIf ed.skin_hullMod_i < 0
-			ed.skin_hullMod_i = (ed.stock_hullmod_count - 1)
+		If selected_hullmod_idx > (ed.stock_hullmod_count - 1)
+			selected_hullmod_idx = 0
+		ElseIf selected_hullmod_idx < 0
+			selected_hullmod_idx = (ed.stock_hullmod_count - 1)
 		EndIf
 	EndMethod
 
@@ -298,13 +314,29 @@ Type TModalSetSkin Extends TSubroutine
 		
 	EndMethod
 
+	'--------------------------------------
+	' draw functions
 
 	Method draw_hud( ed:TEditor, data:TData )
 	EndMethod
 
+	Method draw_engines( ed:TEditor, data:TData )
+		If Not data.ship.center Then Return
+		' draw engines
+		For Local engine_link:EngineLink = EachIn engine_links
+			Local engine:TStarfarerShipEngine = engine_link.baseEngine
+			draw_engine( ..
+				sprite.sx + sprite.scale*(data.ship.center[1] + engine.location[0]), ..
+				sprite.sy + sprite.scale*(data.ship.center[0] - engine.location[1]), ..
+				engine.length, engine.width, engine.angle, sprite.scale, ..
+				False, .. ' is current ?  (nearest cursor) ?
+				getEngineColor(engine, ed) )
+		Next
+	EndMethod
+
 	Method draw_hullmods_chooser( ed:TEditor, data:TData )
 		Local x# = W_MID
-		Local y# = SS.ScrollTo(H_MID - LINE_HEIGHT*(ed.skin_hullMod_i + 0.5))
+		Local y# = SS.ScrollTo(H_MID - LINE_HEIGHT*(selected_hullmod_idx + 0.5))
 		Local ox# = 0.5
 		Local oy# = 0.0
 		If hullmod_chooser_text <> Null
@@ -314,8 +346,58 @@ Type TModalSetSkin Extends TSubroutine
 
 
 
+
 EndType
 
+'--------------------------------------
+' supporting types
+
+' should this method alter the data.ship or data.skin ?
+'   not decided yet
+Type EngineLink
+	Field idx% ' the index of the engine definition in the base hull data
+	Field baseEngine:TStarfarerShipEngine ' base hull engine object
+	Field skinEngine:TStarfarerShipEngine ' skin engine object (only present when changed==True)
+	Field changed% ' if True, indicates that this skin specifies an object within skin.engineSlotChanges corresponding to this idx and base engine
+	Field removed%
+	Rem
+	  EngineLink must be created with, at minimum, knowledge of the source engine
+	    and its location contextually. Everything else would generally be created
+	    afterward. At least, on a new skin; if this is an existing skin, it's
+	    entirely possible every engine defined in the base hull was touched
+	    (changed, or removed) in the skin.
+	EndRem
+	Function Create:EngineLink( idx%, baseEngine:TStarfarerShipEngine, skinEngine:TStarfarerShipEngine=Null, changed%=False, removed%=False )
+		Local EL:EngineLink = New EngineLink
+		EL.idx = idx
+		EL.baseEngine = baseEngine
+		EL.skinEngine = skinEngine
+		EL.changed = changed
+		EL.removed = removed
+		Return EL
+	EndFunction
+	' remove any references in the skin to the base engine. aka "clean"
+	Method ResetSkin()
+		Self.skinEngine = Null
+		Self.changed = False
+		Self.removed = False
+	EndMethod
+	' register an altered version of the base version, in the skin.
+	Method ChangeSkin( skinEngine:TStarfarerShipEngine )
+		Self.skinEngine = skinEngine
+		Self.changed = True
+		Self.removed = False
+	EndMethod
+	' register that in the skin, this base engine should be removed.
+	Method RemoveSkin()
+		Self.skinEngine = Null
+		Self.changed = False
+		Self.removed = True
+	EndMethod
+EndType
+
+'--------------------------------------
+' loader functions and misc.
 
 Function load_skin_image( ed:TEditor, data:TData, sprite:TSprite, image_path$ = Null )
   image_path$ = RequestFile( LocalizeString("{{wt_load_image_skin}}"), "png", False, APP.skin_images_dir )

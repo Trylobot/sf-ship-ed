@@ -895,6 +895,20 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
 
     Case "skin"
       Select EventSource()
+        Case functionMenu[MENU_FUNCTION_EXIT] 'exit
+          sub_set_skin.SetEditorMode( ed, data, sprite, "none" )
+        Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_WEAPONSLOTS]
+          sub_set_skin.SetEditorMode( ed, data, sprite, "changeremove_weaponslots" )
+        Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_WEAPONS]
+          sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_builtin_weapons" )
+        Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_ENGINES]
+          sub_set_skin.SetEditorMode( ed, data, sprite, "changeremove_engines" )
+        Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_HULLMODS]
+          sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_hullmods" )
+        Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_HINTS]
+          sub_set_skin.SetEditorMode( ed, data, sprite, "addremove_hints" )
+        Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_MORE]
+          cycle_show_more()
         Case functionMenu[MENU_FUNCTION_DETAILS]
           sub_string_data.Activate( ed, data, sprite ) ' string edit
       EndSelect
