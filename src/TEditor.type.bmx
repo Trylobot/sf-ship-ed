@@ -121,8 +121,8 @@ Type TEditor
 	Method load_stock_ship:TStarfarerShip( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir + file )
-			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ) )
-			Fix_Map_TStrings( ship.builtInWeapons ) 'TEMPORARY (yeah, right)
+			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ))
+			ship.CoerceTypes()
 			stock_ships.Insert( ship.hullId, ship )
 			load_multiselect_value( "ship.hullSize", ship.hullSize )
 			load_multiselect_value( "ship.style", ship.style )
@@ -148,10 +148,8 @@ Type TEditor
 	Method load_stock_variant:TStarfarerVariant( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir + file )
-			Local variant:TStarfarerVariant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
-			For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
-				Fix_Map_TStrings( weaponGroup.weapons ) 'TEMPORARY
-			Next
+			Local variant:TStarfarerVariant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant", "parse_variant" ))
+			variant.CoerceTypes()
 			'save variant data
 			stock_variants.Insert( variant.variantId, variant )
 			'save association to hull that it references
@@ -180,9 +178,8 @@ Type TEditor
 			' stock_skins_variants_assoc
 			Local input_json_str$ = LoadString( dir + file )
 			Local skin:TStarfarerSkin = TStarfarerSkin( json.parse( input_json_str, "TStarfarerSkin" ))
-			'Fix_Map_TStrings ?
-			'
-			'save variant data
+			skin.CoerceTypes()
+			'save data
 			stock_skins.Insert( skin.skinHullId, skin )
 			'save association to hull that it references
 			Local assoc:TList = TList( stock_hull_skins_assoc.ValueForKey( skin.baseHullId ))

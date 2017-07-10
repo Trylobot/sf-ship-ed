@@ -324,7 +324,13 @@ Type TModalSetSkin Extends TSubroutine
 		If Not data.ship.center Then Return
 		' draw engines
 		For Local engine_link:EngineLink = EachIn engine_links
-			Local engine:TStarfarerShipEngine = engine_link.baseEngine
+			If engine_link.removed Then Continue
+			Local engine:TStarfarerShipEngine
+			If Not engine_link.changed
+				engine = engine_link.baseEngine
+			Else
+				engine = engine_link.skinEngine
+			EndIf
 			draw_engine( ..
 				sprite.sx + sprite.scale*(data.ship.center[1] + engine.location[0]), ..
 				sprite.sy + sprite.scale*(data.ship.center[0] - engine.location[1]), ..

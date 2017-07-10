@@ -158,12 +158,28 @@ EndFunction
 ' That functionality should also address forcing null arrays to [] and null objects to {}
 Function Fix_Map_TStrings( map:TMap )
 	If map And Not map.IsEmpty()
-		For Local key$ = EachIn map.Keys()
+		For Local key:Object = EachIn map.Keys()
 			Local val:TString = TString( map.ValueForKey( key ))
 			If val
 				map.Insert( key, val.value )
 			EndIf
 		Next
+	EndIf
+EndFunction
+
+' semi-reflective version of Fix_Map_TStrings
+'   intended for use with intermediate JSON data, to get it the rest of the way there
+' does not modify keys
+Function Fix_Map_Arbitrary( map:TMap, target_type$ )
+	If map And Not map.IsEmpty()
+		Local destination_type_id:TTypeId = TTypeId.ForName( target_type )
+		If destination_type_id
+			For Local key:Object = EachIn map.Keys()
+				Local val:TValue = TValue( map.ValueForKey( key ))
+				Local destination_object:Object = json.initialize_object( val, destination_type_id )
+				map.Insert( key, destination_object )
+			Next
+		EndIf
 	EndIf
 EndFunction
 

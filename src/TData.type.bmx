@@ -61,7 +61,8 @@ Type TData
 	
 	'requires subsequent call to update()
 	Method decode( input_json_str$ )
-		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ) )
+		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ))
+		ship.CoerceTypes()
 		enforce_ship_internal_consistency()
 	End Method
 	
@@ -76,8 +77,6 @@ Type TData
 
 	'requires subsequent call to update()
 	Method enforce_ship_internal_consistency()
-		'TEMPORARY fix for not properly initializing this data
-		Fix_Map_TStrings( ship.builtInWeapons )
 		'Ensure built-in weapons data is internally consistent
 		For Local weapon_slot_id$ = EachIn ship.builtInWeapons.Keys()
 			'to do
@@ -101,7 +100,8 @@ Type TData
 
 	'requires subsequent call to update_variant()
 	Method decode_variant( input_json_str$ )
-		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
+		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant", "parse_variant" ))
+		variant.CoerceTypes()
 		enforce_variant_internal_consistency()
 	End Method
 	
@@ -116,7 +116,8 @@ Type TData
 
 	'requires subsequent call to update_skin()
 	Method decode_skin( input_json_str$ )
-		skin = TStarfarerSkin( json.parse( input_json_str, "TStarfarerSkin" ))
+		skin = TStarfarerSkin( json.parse( input_json_str, "TStarfarerSkin", "parse_skin" ))
+		skin.CoerceTypes()
 		'enforce_skin_internal_consistency()
 	End Method
 	
@@ -133,10 +134,7 @@ Type TData
 
 	'requires subsequent call to update_variant()
 	Method enforce_variant_internal_consistency()
-		'TEMPORARY fix for not properly initializing this data
-		For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
-			Fix_Map_TStrings( weaponGroup.weapons )
-		Next
+		variant.CoerceTypes()
 	EndMethod
 
 	'requires subsequent call to update_variant()

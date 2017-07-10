@@ -19,7 +19,7 @@ Type TStarfarerSkin
 	Field removeBuiltInWeapons$[] ' weapon slot id's
 	Field builtInWeapons:TMap'<String,String>  weapon slot id --> weapon id
 	Field removeEngineSlots%[] ' engine slot indices (no id's)
-	Field engineSlotChanges:TMap'<String,TStarfarerShipEngine>  engine slot index --> TStarfarerShipEngine
+	Field engineSlotChanges:TMap'<String,TStarfarerShipEngine>  engine slot index (as string) --> TStarfarerShipEngine
 	
 	Method New()
 		baseHullId = "base_hull"
@@ -48,6 +48,13 @@ Type TStarfarerSkin
 		MemMove(Byte Ptr (dst), Byte Ptr (Self), SizeOf(Self) )
 		Return dst
 	End Method
+
+	' primitive, manual type hinting (ugh)
+	Method CoerceTypes()
+		Fix_Map_Arbitrary( weaponSlotChanges, "TStarfarerShipWeapon" )
+		Fix_Map_TStrings( builtInWeapons )
+		Fix_Map_Arbitrary( weaponSlotChanges, "TStarfarerShipEngine" )
+	EndMethod
 
 End Type
 

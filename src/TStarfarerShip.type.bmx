@@ -18,7 +18,6 @@ Type TStarfarerShip
 	Field builtInMods$[]
 	Field coversColor$
 	Field builtInWings$[]
-
 	
 	Method New()
 		bounds = New Float[0]
@@ -41,6 +40,10 @@ Type TStarfarerShip
 		MemMove(Byte Ptr (dst), Byte Ptr (Self), SizeOf(Self) )
 		Return dst
 	End Method
+
+	Method CoerceTypes()
+		Fix_Map_TStrings( builtInWeapons )
+	EndMethod
 
 End Type
 
