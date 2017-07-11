@@ -331,8 +331,8 @@ Type TModalSetSkin Extends TSubroutine
 			If engine_link.removed Then Continue
 			Local eX# = engine_link.baseEngine.location[0]
 			Local eY# = engine_link.baseEngine.location[1]
-			Local eL% = engine_link.baseEngine.length
-			Local eW% = engine_link.baseEngine.width
+			Local eL# = engine_link.baseEngine.length
+			Local eW# = engine_link.baseEngine.width
 			Local eA# = engine_link.baseEngine.angle
 			Local emphasize% = False ' TODO (check mouse x,y ) for whether to emphasize
 			Local eColor%[] = ed.get_engine_color( engine_link.baseEngine )
@@ -357,10 +357,9 @@ Type TModalSetSkin Extends TSubroutine
 					eColor = ed.get_engine_color( engine_link.skinEngine ) ' every skin engine is also an engine
 				EndIf
 			EndIf
-			draw_engine( ..
-				sprite.sx + sprite.scale*(data.ship.center[1] + eX), ..
-				sprite.sy + sprite.scale*(data.ship.center[0] - eY), ..
-				eL, eW, eA, sprite.scale, emphasize, eColor )
+			Local x# = sprite.sx + sprite.scale*(data.ship.center[1] + eX)
+			Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - eY)
+			draw_engine( x,y, eL,eW,eA, sprite.scale, emphasize, eColor )
 		Next
 	EndMethod
 

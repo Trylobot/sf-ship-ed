@@ -2,6 +2,8 @@ Type TStarfarerSkin
 	Field baseHullId$
 	Field skinHullId$
 	Field hullName$
+	Field restoreToBaseHull%
+	Field hullDesignation$
 	Field spriteName$
 	Field descriptionId$
 	Field descriptionPrefix$
@@ -20,11 +22,14 @@ Type TStarfarerSkin
 	Field builtInWeapons:TMap'<String,String>  weapon slot id --> weapon id
 	Field removeEngineSlots%[] ' engine slot indices (no id's)
 	Field engineSlotChanges:TMap'<String,TStarfarerShipEngineChange>  engine slot index (as string) --> TStarfarerShipEngine
+	Field coversColor$
 	
 	Method New()
 		baseHullId = "base_hull"
 		skinHullId = "base_hull_skin"
 		hullName = "Hull Skin"
+		restoreToBaseHull = False
+		hullDesignation = "FRIGATE"
 		spriteName = "graphics/ships/skins/new_skin.png"
 		descriptionId = "base_hull"
 		descriptionPrefix = ""
@@ -41,6 +46,7 @@ Type TStarfarerSkin
 		builtInWeapons = CreateMap()
 		removeEngineSlots = New Int[0]
 		engineSlotChanges = CreateMap()
+		coversColor = ""
 	End Method
 
 	Method Clone:TStarfarerSkin(dst:TStarfarerSkin = Null)

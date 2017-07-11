@@ -258,6 +258,14 @@ Type TEditor
 	Method load_stock_engine_styles( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir + file )
+			Local engine_styles:TMap = TMap( json.parse( input_json_str, "TMap" ))
+			' this (type hinting within TMap/TList) needs to be supported by rjson.bmx, badly
+			Fix_Map_Arbitrary( engine_styles, "TStarfarerCustomEngineStyleSpec", "parse_custom_engine_style" )
+			For Local styleId$ = EachIn engine_styles.Keys()
+				load_multiselect_value( "ship.engine.styleId", styleId )
+				stock_engine_styles.Insert( styleId, TStarfarerCustomEngineStyleSpec( engine_styles.ValueForKey( styleId )))
+			Next
+			Rem
 			Local intermediate_objects:TObject = TObject(json.parse( input_json_str, Null, "parse_CustomEngineStyle") )
 			For Local styleId$ = EachIn intermediate_objects.fields.Keys()
 				load_multiselect_value( "ship.engine.styleId", styleId )
@@ -267,13 +275,15 @@ Type TEditor
 				stock_engine_styles.Insert(styleId, engine_style)
 				'Print intermediate_object.ToString()
 			Next	
-'			Local engine_styles:TMap = TMap( json.parse( input_json_str, "TMap" ) )
-'			For Local styleId$ = EachIn engine_styles.Keys()
-'				load_multiselect_value( "ship.engine.styleId", styleId )
-'				Local str$ = String(MapValueForKey(engine_styles, styleId) )
-'				Local style:TStarfarerCustomEngineStyleSpec = TStarfarerCustomEngineStyleSpec (MapValueForKey(engine_styles, styleId) )
-'				stock_engine_styles.Insert(styleId, style)
-'			Next
+			''''
+			Local engine_styles:TMap = TMap( json.parse( input_json_str, "TMap" ) )
+			For Local styleId$ = EachIn engine_styles.Keys()
+				load_multiselect_value( "ship.engine.styleId", styleId )
+				Local str$ = String(MapValueForKey(engine_styles, styleId) )
+				Local style:TStarfarerCustomEngineStyleSpec = TStarfarerCustomEngineStyleSpec (MapValueForKey(engine_styles, styleId) )
+				stock_engine_styles.Insert(styleId, style)
+			Next
+			EndRem
 		Catch ex$ 'ignore parsing errors and continue
 			DebugLogFile " Error: "+file+" "+ex
 		EndTry

@@ -14,8 +14,8 @@ Type TStarfarerShipWeaponChange Extends TStarfarerShipWeapon
 	  This is useful because in the context of a skin,
 	    it tells us which values to inherit from the base hull.
 	EndRem
-	Const __angle#       = 10e308:Double
-	Const __arc#         = 10e308:Double
+	Const __angle#       = 10e38:Float
+	Const __arc#         = 10e38:Float
 	Const __id$          = Null
 	Const __locations#[] = Null
 	Const __position#[]  = Null

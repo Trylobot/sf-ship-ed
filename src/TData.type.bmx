@@ -134,7 +134,7 @@ Type TData
 
 	'requires subsequent call to update_variant()
 	Method enforce_variant_internal_consistency()
-		variant.CoerceTypes()
+		'
 	EndMethod
 
 	'requires subsequent call to update_variant()

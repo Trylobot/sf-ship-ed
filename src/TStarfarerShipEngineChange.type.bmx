@@ -15,14 +15,14 @@ Type TStarfarerShipEngineChange Extends TStarfarerShipEngine
 	  This is useful because in the context of a skin,
 	    it tells us which values to inherit from the base hull.
 	EndRem
-	Const __angle#        = 10e308:Double
-	Const __contrailSize# = 10e308:Double
-	Const __length#       = 10e308:Double
+	Const __angle#        = 10e38:Float
+	Const __contrailSize# = 10e38:Float
+	Const __length#       = 10e38:Float
 	Const __location#[]   = Null
 	Const __style$        = Null
 	Const __styleId$      = Null
 	Const __styleSpec:TStarfarerCustomEngineStyleSpec = Null
-	Const __width#        = 10e308:Double
+	Const __width#        = 10e38:Float
 	
 	Method New()
 		angle        = __angle
