@@ -651,6 +651,23 @@ Function bug1()
 EndFunction
 
 
+Type base_type_1
+	Field str$
+EndType
+
+Type extended_type_1 Extends base_type_1
+EndType
+
+Function test_encode_extended_type()
+	Print "*** test_encode_extended_type"
+	Local e:extended_type_1 = New extended_type_1
+	e.str = "strvalue"
+	Local json_str$ = json.stringify( e )
+	Local test_str$ = "{~qstr~q:~qstrvalue~q}"
+	verify( test_str = json_str, "  EXPECTED:~n"+test_str+"~n   ACTUAL:~n"+json_str )
+EndFunction
+
+
 '/////////////////////////////////////////////////////////////////
 
 Function calc_hash%(s:String)
@@ -736,6 +753,7 @@ Function Main()
 	run_test( test_pass_sf_2 )
 	run_test( test_encode_empty_objects_instead_of_nulls )
 	run_test( bug1 )
+	run_test( test_encode_extended_type )
 EndFunction
 
 Main()

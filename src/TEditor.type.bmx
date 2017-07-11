@@ -279,6 +279,15 @@ Type TEditor
 		EndTry
 	EndMethod
 
+	Method get_engine_color%[]( engine:TStarfarerShipEngine )
+		If engine.styleSpec Then Return engine.styleSpec.engineColor
+		Local styleID$ = engine.style
+		If styleID = "CUSTOM" Then styleID = engine.styleId
+		Local Value:Object = stock_engine_styles.ValueForKey( styleID )
+		If Value Then Return (TStarfarerCustomEngineStyleSpec (Value) ).engineColor..
+		Else Return [255, 255, 255, 255]
+	EndMethod
+
 	Method load_stock_ship_stats( dir$, file$, save_field_order%=False )
 		Try
 			If save_field_order

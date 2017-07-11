@@ -62,7 +62,7 @@ Type TModalSetSkin Extends TSubroutine
 		SHOW_MORE_cached = SHOW_MORE
 		ship_hullSize_cached = data.ship.hullSize
     ' debug
-		DebugLogFile(" ed.program_mode=~q"+ed.program_mode+"~q; ed.mode=~q"+ed.mode+"~q")
+		DebugLogFile(" Activate Skin Editor")
 	EndMethod
 
 	Method SetEditorMode( ed:TEditor, data:TData, sprite:TSprite, new_mode$ )
@@ -87,7 +87,6 @@ Type TModalSetSkin Extends TSubroutine
 
 
 		EndSelect
-		DebugLogFile(" ed.program_mode=~q"+ed.program_mode+"~q; ed.mode=~q"+ed.mode+"~q")
 		SS.reset()
 	EndMethod
 
@@ -169,7 +168,12 @@ Type TModalSetSkin Extends TSubroutine
 		EndRem
 		engine_links = New EngineLink[data.ship.engineSlots.length]
 		For Local idx% = 0 Until engine_links.length
-			engine_links[idx] = EngineLink.Create( idx, data.ship.engineSlots[idx] )
+			Local str_idx$ = String.FromInt(idx)
+			Local shipEngine:TStarfarerShipEngine = data.ship.engineSlots[idx]
+			Local skinEngine:TStarfarerShipEngineChange = TStarfarerShipEngineChange( data.skin.engineSlotChanges.ValueForKey( str_idx ))
+			Local changed% = (skinEngine <> Null)
+			Local removed% = in_int_array( idx, data.skin.removeEngineSlots )
+			engine_links[idx] = EngineLink.Create( idx, shipEngine, skinEngine, changed, removed )
 		Next
 		' TODO: examine the skin and update the engine links as necessary
 		update_engine_links( ed, data )
@@ -325,18 +329,38 @@ Type TModalSetSkin Extends TSubroutine
 		' draw engines
 		For Local engine_link:EngineLink = EachIn engine_links
 			If engine_link.removed Then Continue
-			Local engine:TStarfarerShipEngine
-			If Not engine_link.changed
-				engine = engine_link.baseEngine
-			Else
-				engine = engine_link.skinEngine
+			Local eX# = engine_link.baseEngine.location[0]
+			Local eY# = engine_link.baseEngine.location[1]
+			Local eL% = engine_link.baseEngine.length
+			Local eW% = engine_link.baseEngine.width
+			Local eA# = engine_link.baseEngine.angle
+			Local emphasize% = False ' TODO (check mouse x,y ) for whether to emphasize
+			Local eColor%[] = ed.get_engine_color( engine_link.baseEngine )
+			'
+			If engine_link.changed And engine_link.skinEngine
+				If engine_link.skinEngine.location <> TStarfarerShipEngineChange.__location
+					eX = engine_link.skinEngine.location[0]
+					eY = engine_link.skinEngine.location[1]
+				EndIf
+				If engine_link.skinEngine.length <> TStarfarerShipEngineChange.__length
+					eL = engine_link.skinEngine.length
+				EndIf
+				If engine_link.skinEngine.width <> TStarfarerShipEngineChange.__width
+					eL = engine_link.skinEngine.width
+				EndIf
+				If engine_link.skinEngine.angle <> TStarfarerShipEngineChange.__angle
+					eL = engine_link.skinEngine.angle
+				EndIf
+				If engine_link.skinEngine.style <> TStarfarerShipEngineChange.__style ..
+				Or engine_link.skinEngine.styleId <> TStarfarerShipEngineChange.__styleId ..
+				Or engine_link.skinEngine.styleSpec <> TStarfarerShipEngineChange.__styleSpec
+					eColor = ed.get_engine_color( engine_link.skinEngine ) ' every skin engine is also an engine
+				EndIf
 			EndIf
 			draw_engine( ..
-				sprite.sx + sprite.scale*(data.ship.center[1] + engine.location[0]), ..
-				sprite.sy + sprite.scale*(data.ship.center[0] - engine.location[1]), ..
-				engine.length, engine.width, engine.angle, sprite.scale, ..
-				False, .. ' is current ?  (nearest cursor) ?
-				getEngineColor(engine, ed) )
+				sprite.sx + sprite.scale*(data.ship.center[1] + eX), ..
+				sprite.sy + sprite.scale*(data.ship.center[0] - eY), ..
+				eL, eW, eA, sprite.scale, emphasize, eColor )
 		Next
 	EndMethod
 
@@ -363,7 +387,7 @@ EndType
 Type EngineLink
 	Field idx% ' the index of the engine definition in the base hull data
 	Field baseEngine:TStarfarerShipEngine ' base hull engine object
-	Field skinEngine:TStarfarerShipEngine ' skin engine object (only present when changed==True)
+	Field skinEngine:TStarfarerShipEngineChange ' skin engine object (only present when changed==True)
 	Field changed% ' if True, indicates that this skin specifies an object within skin.engineSlotChanges corresponding to this idx and base engine
 	Field removed%
 	Rem
@@ -373,7 +397,7 @@ Type EngineLink
 	    entirely possible every engine defined in the base hull was touched
 	    (changed, or removed) in the skin.
 	EndRem
-	Function Create:EngineLink( idx%, baseEngine:TStarfarerShipEngine, skinEngine:TStarfarerShipEngine=Null, changed%=False, removed%=False )
+	Function Create:EngineLink( idx%, baseEngine:TStarfarerShipEngine, skinEngine:TStarfarerShipEngineChange=Null, changed%=False, removed%=False )
 		Local EL:EngineLink = New EngineLink
 		EL.idx = idx
 		EL.baseEngine = baseEngine
@@ -389,7 +413,7 @@ Type EngineLink
 		Self.removed = False
 	EndMethod
 	' register an altered version of the base version, in the skin.
-	Method ChangeSkin( skinEngine:TStarfarerShipEngine )
+	Method ChangeSkin( skinEngine:TStarfarerShipEngineChange )
 		Self.skinEngine = skinEngine
 		Self.changed = True
 		Self.removed = False
@@ -468,7 +492,6 @@ Function load_skin_data( ed:TEditor, data:TData, sprite:TSprite, use_new% = Fals
     EndIf
     'load skin's sprite
     autoload_skin_image( ed, data, sprite )
-    
     Rem
 
     TODO: Variants of Skins
@@ -504,6 +527,7 @@ Function load_skin_data( ed:TEditor, data:TData, sprite:TSprite, use_new% = Fals
     data.update_variant()
 
     EndRem
+
   Else
     data.skin = New TStarfarerSkin
     data.skin.baseHullId = data.ship.hullId

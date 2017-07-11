@@ -15,11 +15,11 @@ Type TStarfarerSkin
 	Field removeBuiltInMods$[] ' hullmod ids
 	Field builtInMods$[] ' hullmod ids
 	Field removeWeaponSlots$[] ' weapon slot id's
-	Field weaponSlotChanges:TMap'<String,TStarfarerShipWeapon>  weapon slot id --> TStarfarerShipWeapon
+	Field weaponSlotChanges:TMap'<String,TStarfarerShipWeaponChange>  weapon slot id --> TStarfarerShipWeapon
 	Field removeBuiltInWeapons$[] ' weapon slot id's
 	Field builtInWeapons:TMap'<String,String>  weapon slot id --> weapon id
 	Field removeEngineSlots%[] ' engine slot indices (no id's)
-	Field engineSlotChanges:TMap'<String,TStarfarerShipEngine>  engine slot index (as string) --> TStarfarerShipEngine
+	Field engineSlotChanges:TMap'<String,TStarfarerShipEngineChange>  engine slot index (as string) --> TStarfarerShipEngine
 	
 	Method New()
 		baseHullId = "base_hull"
@@ -51,9 +51,9 @@ Type TStarfarerSkin
 
 	' primitive, manual type hinting (ugh)
 	Method CoerceTypes()
-		Fix_Map_Arbitrary( weaponSlotChanges, "TStarfarerShipWeapon" )
+		Fix_Map_Arbitrary( weaponSlotChanges, "TStarfarerShipWeaponChange", "parse_skin_weapon" )
 		Fix_Map_TStrings( builtInWeapons )
-		Fix_Map_Arbitrary( weaponSlotChanges, "TStarfarerShipEngine" )
+		Fix_Map_Arbitrary( engineSlotChanges, "TStarfarerShipEngineChange" )
 	EndMethod
 
 End Type

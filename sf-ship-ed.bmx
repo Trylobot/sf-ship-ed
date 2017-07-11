@@ -54,8 +54,10 @@ Include "src/TableWidget.type.bmx"
 Include "src/TStarfarerShip.type.bmx"
 Include "src/TStarfarerSkin.type.bmx"
 Include "src/TStarfarerShipWeapon.type.bmx"
+Include "src/TStarfarerShipWeaponChange.type.bmx" 'thin extension for skins
 Include "src/TStarfarerCustomEngineStyleSpec.type.bmx"
 Include "src/TStarfarerShipEngine.type.bmx"
+Include "src/TStarfarerShipEngineChange.type.bmx" 'thin extension for skins
 Include "src/TStarfarerVariant.type.bmx"
 Include "src/TStarfarerVariantWeaponGroup.type.bmx"
 Include "src/TStarfarerWeapon.type.bmx"

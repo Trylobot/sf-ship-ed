@@ -145,6 +145,14 @@ Function zero_pad$( num%, length% )
 	Return str
 EndFunction
 
+Function in_int_array%( val%, arr%[] )
+	If Not arr Then Return False
+	For Local i% = 0 Until arr.Length
+		If arr[i] = val Then Return True
+	Next
+	Return False
+EndFunction
+
 Function in_str_array%( val$, arr$[] )
 	If Not arr Then Return False
 	For Local i% = 0 Until arr.Length
@@ -170,13 +178,20 @@ EndFunction
 ' semi-reflective version of Fix_Map_TStrings
 '   intended for use with intermediate JSON data, to get it the rest of the way there
 ' does not modify keys
-Function Fix_Map_Arbitrary( map:TMap, target_type$ )
+Function Fix_Map_Arbitrary( map:TMap, target_type$, transforms_set$=Null )
 	If map And Not map.IsEmpty()
 		Local destination_type_id:TTypeId = TTypeId.ForName( target_type )
 		If destination_type_id
+			'DebugLog("  "+destination_type_id.Name())
 			For Local key:Object = EachIn map.Keys()
-				Local val:TValue = TValue( map.ValueForKey( key ))
-				Local destination_object:Object = json.initialize_object( val, destination_type_id )
+				' TODO: self: fucking implement this in rjson for fucks sake, it's getting ridiculous
+				Local intermediate_object:TValue = TValue( map.ValueForKey( key ))
+				'DebugLog("    "+String(key)+":"+TTypeId.ForObject(intermediate_object).Name())
+				If transforms_set
+					json.execute_transforms( transforms_set, intermediate_object )
+				EndIf
+				Local destination_object:Object = json.initialize_object( intermediate_object, destination_type_id )
+				'DebugLog("      --> "+String(key)+":"+TTypeId.ForObject(destination_object).Name())
 				map.Insert( key, destination_object )
 			Next
 		EndIf

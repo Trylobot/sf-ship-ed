@@ -23,6 +23,8 @@ Function config_json_transforms()
   'TStarfarerVariant
   json.add_transform( "stringify_variant", "$goalVariant", json.XJ_CONVERT, "boolean" )
   'TStarfarerSkin
+  json.add_transform( "parse_skin", "$weaponSlotChanges:object/:object/$type:string", json.XJ_RENAME, "type_" )
+  json.add_transform( "stringify_skin", "$weaponSlotChanges:object/:object/$type_:string", json.XJ_RENAME, "type" )
   json.add_transform( "stringify_skin", "$baseValue:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
   json.add_transform( "stringify_skin", "$baseValueMult:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
   json.add_transform( "stringify_skin", "$fleetPoints:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
@@ -40,6 +42,9 @@ Function config_json_transforms()
   json.add_transform( "stringify_skin", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
   json.add_transform( "stringify_skin", "$removeEngineSlots:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
   json.add_transform( "stringify_skin", "$engineSlotChanges:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
+  'TStarfarerShipWeaponChange (for deep type coercion within skin parsing)
+  json.add_transform( "parse_skin_weapon", "$type:string", json.XJ_RENAME, "type_" )
+  json.add_transform( "stringify_skin_weapon", "$type_:string", json.XJ_RENAME, "type" )
   'TStarfarerCustomEngineStyleSpec
   json.add_transform( "parse_CustomEngineStyle", "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
   'TStarfarerWeapon
