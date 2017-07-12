@@ -23,6 +23,7 @@ Type TModalSetSkin Extends TSubroutine
 	'------------------------------------
 	'mode: "changeremove_engines"
 	Field engine_links:EngineLink[]
+	Field locked_engine_slot%
 
 	'------------------------------------
 	'mode: "addremove_hullmods"
@@ -44,6 +45,7 @@ Type TModalSetSkin Extends TSubroutine
 		ed.mode = "none"
 		'-------
 		selected_hullmod_idx = -1
+		locked_engine_slot = -1
 		' set sprite
 		sprite.img = Null
     autoload_skin_image( ed, data, sprite )
@@ -77,6 +79,7 @@ Type TModalSetSkin Extends TSubroutine
 
 			
 			Case "changeremove_engines"
+				locked_engine_slot = -1
 				initialize_engine_links( ed, data )
 			
 			Case "addremove_hullmods"
@@ -326,53 +329,68 @@ Type TModalSetSkin Extends TSubroutine
 
 	Method draw_engines( ed:TEditor, data:TData )
 		'---------------
-		'DebugDrawReset()
+		DebugDrawReset()
 		'---------------
 		If Not data.ship.center Then Return
+		' get mouse position on screen, mapped to sprite's coordinate space
+		Local img_x#, img_y#
+		sprite.get_img_xy( MouseX,MouseY, img_x,img_y )
+		Local ship_mx#, ship_my#
+		ship_mx = +img_x - data.ship.center[1]
+		ship_my = -img_y + data.ship.center[0]
+		' get location of nearest engine, unless it is currently locked (due to button input)
+		Local emphasized_engine_slot%
+		If locked_engine_slot = -1
+			Local nearest_engine_slot% = -1, nearest_engine_distance# = 10e38:Float
+			For Local idx% = 0 Until engine_links.length
+				Local engine_location#[] = engine_links[idx].get_location()
+				If engine_location
+					Local distance# = calc_distance( ship_mx,ship_my, engine_location[0],engine_location[1] )
+					''---------------------------
+					'DebugDraw("engine["+idx+"] d="+RSet(json.FormatDouble(distance,1),4), ..
+					'	W_MID,0, 0.5,0.0)
+					''---------------------------
+					If distance < nearest_engine_distance
+						nearest_engine_slot = idx
+						nearest_engine_distance = distance
+					EndIf
+				EndIf
+			Next
+			emphasized_engine_slot = nearest_engine_slot
+		Else
+			emphasized_engine_slot = locked_engine_slot
+		EndIf
+		''---------------------------
+		'DebugDraw("nearest: "+emphasized_engine_slot, ..
+		'	W_MID,0, 0.5,0.0)
+		''---------------------------
 		' draw engines
-		For Local engine_link:EngineLink = EachIn engine_links
+		For Local idx% = 0 Until engine_links.length
+			Local engine_link:EngineLink = engine_links[idx]
 			If engine_link.removed Then Continue
-			Local engine_X# = engine_link.baseEngine.location[0]
-			Local engine_Y# = engine_link.baseEngine.location[1]
-			Local engine_Length# = engine_link.baseEngine.length
-			Local engine_Width# = engine_link.baseEngine.width
-			Local engine_Angle# = engine_link.baseEngine.angle
-			Local emphasize% = False ' TODO (check mouse x,y ) for whether to emphasize
-			Local engine_Color%[] = ed.get_engine_color( engine_link.baseEngine )
-			'
-			If engine_link.changed And engine_link.skinEngine
-				If engine_link.skinEngine.location <> TStarfarerShipEngineChange.__location
-					engine_X = engine_link.skinEngine.location[0]
-					engine_Y = engine_link.skinEngine.location[1]
-				EndIf
-				If engine_link.skinEngine.length <> TStarfarerShipEngineChange.__length
-					engine_Length = engine_link.skinEngine.length
-				EndIf
-				If engine_link.skinEngine.width <> TStarfarerShipEngineChange.__width
-					engine_Width = engine_link.skinEngine.width
-				EndIf
-				If engine_link.skinEngine.angle <> TStarfarerShipEngineChange.__angle
-					engine_Angle = engine_link.skinEngine.angle
-				EndIf
-				If engine_link.skinEngine.style <> TStarfarerShipEngineChange.__style ..
-				Or engine_link.skinEngine.styleId <> TStarfarerShipEngineChange.__styleId ..
-				Or engine_link.skinEngine.styleSpec <> TStarfarerShipEngineChange.__styleSpec
-					engine_Color = ed.get_engine_color( engine_link.skinEngine ) ' every skin engine is also an engine
-				EndIf
-			EndIf
-			Local x# = sprite.sx + sprite.scale*(data.ship.center[1] + engine_X)
-			Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - engine_Y)
-			draw_engine( x,y, engine_Length,engine_Width,engine_Angle, sprite.scale, emphasize, engine_Color )
+			Local engine_location#[] = engine_link.get_location()
+			Local engine_length# = engine_link.get_length()
+			Local engine_width# = engine_link.get_width()
+			Local engine_angle# = engine_link.get_angle()
+			Local emphasize% = (idx = emphasized_engine_slot)
+			Local engine_color%[] = engine_link.get_color(ed)
+			Local x# = sprite.sx + sprite.scale*(data.ship.center[1] + engine_location[0])
+			Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - engine_location[1])
+			draw_engine( x,y, engine_length,engine_width,engine_angle, sprite.scale, emphasize, engine_color )
 			'---------------------------
-			'DebugDraw( "draw_engine( "..
+			'DebugDraw("draw_engine( "..
 			'	+  "x="+json.FormatDouble(x,1)..
 			'	+", y="+json.FormatDouble(y,1)..
 			'	+", L="+json.FormatDouble(eL,1)..
 			'	+", W="+json.FormatDouble(eW,1)..
 			'	+", A="+json.FormatDouble(eA,1)..
-			'	+")", W_MID,0, 0.5,0.0 )
+			'	+")", W_MID,0, 0.5,0.0)
 			'-------------------------
 		Next
+		' draw crosshairs
+		Local mx# = sprite.sx + img_x*sprite.scale
+		Local my# = sprite.sy + img_y*sprite.scale
+		draw_crosshairs( mx,my, 16 )
 	EndMethod
 
 	Method draw_hullmods_chooser( ed:TEditor, data:TData )
@@ -418,23 +436,68 @@ Type EngineLink
 		Return EL
 	EndFunction
 	' remove any references in the skin to the base engine. aka "clean"
-	Method ResetSkin()
+	Method reset_to_base()
 		Self.skinEngine = Null
 		Self.changed = False
 		Self.removed = False
 	EndMethod
 	' register an altered version of the base version, in the skin.
-	Method ChangeSkin( skinEngine:TStarfarerShipEngineChange )
+	Method skin_changes( skinEngine:TStarfarerShipEngineChange )
 		Self.skinEngine = skinEngine
 		Self.changed = True
 		Self.removed = False
 	EndMethod
 	' register that in the skin, this base engine should be removed.
-	Method RemoveSkin()
+	Method skin_removes()
 		Self.skinEngine = Null
 		Self.changed = False
 		Self.removed = True
 	EndMethod
+	
+	' derived (virtual) getters
+	Method get_location#[]()
+		If changed And Not removed And skinEngine <> Null ..
+		And skinEngine.location <> TStarfarerShipEngineChange.__location
+			Return skinEngine.location
+		Else
+			Return baseEngine.location
+		EndIf
+	EndMethod
+	Method get_length#()		
+		If changed And Not removed And skinEngine <> Null ..
+		And skinEngine.length <> TStarfarerShipEngineChange.__length
+			Return skinEngine.length
+		Else
+			Return baseEngine.length
+		EndIf
+	EndMethod
+	Method get_width#()		
+		If changed And Not removed And skinEngine <> Null ..
+		And skinEngine.width <> TStarfarerShipEngineChange.__width
+			Return skinEngine.width
+		Else
+			Return baseEngine.width
+		EndIf
+	EndMethod
+	Method get_angle#()		
+		If changed And Not removed And skinEngine <> Null ..
+		And skinEngine.angle <> TStarfarerShipEngineChange.__angle
+			Return skinEngine.angle
+		Else
+			Return baseEngine.angle
+		EndIf
+	EndMethod
+	Method get_color%[]( ed:TEditor )		
+		If changed And Not removed And skinEngine <> Null ..
+		And ( skinEngine.style <> TStarfarerShipEngineChange.__style ..
+		Or    skinEngine.styleId <> TStarfarerShipEngineChange.__styleId ..
+		Or    skinEngine.styleSpec <> TStarfarerShipEngineChange.__styleSpec )
+			Return ed.get_engine_color( skinEngine )
+		Else
+			Return ed.get_engine_color( baseEngine )
+		EndIf
+	EndMethod
+
 EndType
 
 '--------------------------------------
@@ -527,6 +590,12 @@ Function load_skin_data( ed:TEditor, data:TData, sprite:TSprite, use_new% = Fals
 					Field hullSkin:TStarfarerSkin ' regular file, references baseHull
 					Field mergedHull:TStarfarerShip ' points to and merges <baseHull,hullSkin>, creating a (temporary) "ghost ship"
 					Field mergedHullVariant:TStarfarerVariant ' points to mergedHull
+
+			SOLUTION 3: don't create anything new; instead, add conditional branches
+			  to the variant modal's logic, that fires when the hull ID is not found among the stock ship data
+			  falling back to skin data, and proceeding; after all, the link need not be explicit
+			  only duck-typed.
+
 
     ' code transplanted from  load_ship_data(...)
     'VARIANT data

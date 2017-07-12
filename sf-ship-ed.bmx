@@ -44,6 +44,8 @@ Incbin "assets/engineflame32.png"
 Incbin "assets/engineflamecore32.png"
 Incbin "release/ENG.ini"
 
+Const FLOAT_MAX# = 10e38:Float
+
 Include "src/config_json_transforms.bmx"
 Include "src/functions_misc.bmx"
 Include "src/drawing_misc.bmx"

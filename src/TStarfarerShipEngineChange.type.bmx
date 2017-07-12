@@ -16,13 +16,13 @@ Type TStarfarerShipEngineChange Extends TStarfarerShipEngine
 	    it tells us which values to inherit from the base hull.
 	EndRem
 	Const __location#[]   = Null
-	Const __length#       = 10e38:Float
-	Const __width#        = 10e38:Float
-	Const __angle#        = 10e38:Float
+	Const __length#       = FLOAT_MAX
+	Const __width#        = FLOAT_MAX
+	Const __angle#        = FLOAT_MAX
 	Const __style$        = Null
 	Const __styleId$      = Null
 	Const __styleSpec:TStarfarerCustomEngineStyleSpec = Null
-	Const __contrailSize# = 10e38:Float
+	Const __contrailSize# = FLOAT_MAX
 	
 	Method New()
 		location     = __location
@@ -37,3 +37,6 @@ Type TStarfarerShipEngineChange Extends TStarfarerShipEngine
 
 EndType
 
+Function predicate_omit_if_equals_FLOAT_MAX%( val:TValue, root:TValue )
+	Return TNumber (val) And TNumber(val).value = FLOAT_MAX
+EndFunction
