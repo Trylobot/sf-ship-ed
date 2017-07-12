@@ -262,6 +262,8 @@ Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36,
 	SetAlpha( a )
 End Function
 
+
+
 Function draw_engine( eX#, eY#, eL#, eW#, eA#, sZ#, emphasis% = False, eC%[], drawPoint% = True)
 	Local alpha# = GetAlpha()
 	Local outer_r% = 5
@@ -579,3 +581,14 @@ Type TSmoothScroll
 		currLevel = Null
 	End Method
 End Type
+
+
+Global DEBUG_BUFFER_OFFSET% = 0
+Function DebugDraw( str$, x%=0,y%=0, ox#=0.0:Float,oy#=0.0:Float )
+  'Function draw_string( source:Object, x%, y%, fg% = $FFFFFF, bg% = $000000, origin_x# = 0.0, origin_y# = 0.0, line_height_override% = - 1, draw_bg% = False, s# = 1.0 )
+	draw_string( str, x+0,y+DEBUG_BUFFER_OFFSET,,, ox,oy,, True )
+	DEBUG_BUFFER_OFFSET :+ LINE_HEIGHT
+EndFunction
+Function DebugDrawReset()
+	DEBUG_BUFFER_OFFSET = 0
+EndFunction

@@ -203,3 +203,4 @@ Function CurveValue:Float(Current:Float, Destination:Float, Curve:Int)
 	Return Current
 End Function
 
+

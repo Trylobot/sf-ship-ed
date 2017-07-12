@@ -325,41 +325,53 @@ Type TModalSetSkin Extends TSubroutine
 	EndMethod
 
 	Method draw_engines( ed:TEditor, data:TData )
+		'---------------
+		'DebugDrawReset()
+		'---------------
 		If Not data.ship.center Then Return
 		' draw engines
 		For Local engine_link:EngineLink = EachIn engine_links
 			If engine_link.removed Then Continue
-			Local eX# = engine_link.baseEngine.location[0]
-			Local eY# = engine_link.baseEngine.location[1]
-			Local eL# = engine_link.baseEngine.length
-			Local eW# = engine_link.baseEngine.width
-			Local eA# = engine_link.baseEngine.angle
+			Local engine_X# = engine_link.baseEngine.location[0]
+			Local engine_Y# = engine_link.baseEngine.location[1]
+			Local engine_Length# = engine_link.baseEngine.length
+			Local engine_Width# = engine_link.baseEngine.width
+			Local engine_Angle# = engine_link.baseEngine.angle
 			Local emphasize% = False ' TODO (check mouse x,y ) for whether to emphasize
-			Local eColor%[] = ed.get_engine_color( engine_link.baseEngine )
+			Local engine_Color%[] = ed.get_engine_color( engine_link.baseEngine )
 			'
 			If engine_link.changed And engine_link.skinEngine
 				If engine_link.skinEngine.location <> TStarfarerShipEngineChange.__location
-					eX = engine_link.skinEngine.location[0]
-					eY = engine_link.skinEngine.location[1]
+					engine_X = engine_link.skinEngine.location[0]
+					engine_Y = engine_link.skinEngine.location[1]
 				EndIf
 				If engine_link.skinEngine.length <> TStarfarerShipEngineChange.__length
-					eL = engine_link.skinEngine.length
+					engine_Length = engine_link.skinEngine.length
 				EndIf
 				If engine_link.skinEngine.width <> TStarfarerShipEngineChange.__width
-					eL = engine_link.skinEngine.width
+					engine_Width = engine_link.skinEngine.width
 				EndIf
 				If engine_link.skinEngine.angle <> TStarfarerShipEngineChange.__angle
-					eL = engine_link.skinEngine.angle
+					engine_Angle = engine_link.skinEngine.angle
 				EndIf
 				If engine_link.skinEngine.style <> TStarfarerShipEngineChange.__style ..
 				Or engine_link.skinEngine.styleId <> TStarfarerShipEngineChange.__styleId ..
 				Or engine_link.skinEngine.styleSpec <> TStarfarerShipEngineChange.__styleSpec
-					eColor = ed.get_engine_color( engine_link.skinEngine ) ' every skin engine is also an engine
+					engine_Color = ed.get_engine_color( engine_link.skinEngine ) ' every skin engine is also an engine
 				EndIf
 			EndIf
-			Local x# = sprite.sx + sprite.scale*(data.ship.center[1] + eX)
-			Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - eY)
-			draw_engine( x,y, eL,eW,eA, sprite.scale, emphasize, eColor )
+			Local x# = sprite.sx + sprite.scale*(data.ship.center[1] + engine_X)
+			Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - engine_Y)
+			draw_engine( x,y, engine_Length,engine_Width,engine_Angle, sprite.scale, emphasize, engine_Color )
+			'---------------------------
+			'DebugDraw( "draw_engine( "..
+			'	+  "x="+json.FormatDouble(x,1)..
+			'	+", y="+json.FormatDouble(y,1)..
+			'	+", L="+json.FormatDouble(eL,1)..
+			'	+", W="+json.FormatDouble(eW,1)..
+			'	+", A="+json.FormatDouble(eA,1)..
+			'	+")", W_MID,0, 0.5,0.0 )
+			'-------------------------
 		Next
 	EndMethod
 
