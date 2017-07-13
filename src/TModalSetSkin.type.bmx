@@ -22,8 +22,7 @@ Type TModalSetSkin Extends TSubroutine
 
 	'------------------------------------
 	'mode: "changeremove_engines"
-	Field engine_links:EngineLink[]
-	Field locked_engine_slot%
+	Field engine_lock_i%
 
 	'------------------------------------
 	'mode: "addremove_hullmods"
@@ -45,7 +44,7 @@ Type TModalSetSkin Extends TSubroutine
 		ed.mode = "none"
 		'-------
 		selected_hullmod_idx = -1
-		locked_engine_slot = -1
+		engine_lock_i = -1
 		' set sprite
 		sprite.img = Null
     autoload_skin_image( ed, data, sprite )
@@ -79,8 +78,8 @@ Type TModalSetSkin Extends TSubroutine
 
 			
 			Case "changeremove_engines"
-				locked_engine_slot = -1
-				initialize_engine_links( ed, data )
+				engine_lock_i = -1
+				'initialize_engine_links( ed, data )
 			
 			Case "addremove_hullmods"
 				selected_hullmod_idx = 0
@@ -161,26 +160,8 @@ Type TModalSetSkin Extends TSubroutine
 	'--------------------------------------
 	' init functions
 
-	Method initialize_engine_links( ed:TEditor, data:TData )
-		Rem
-		  start with the ship's engines
-		    deep copy all of them
-		  for each engine index in the skin,
-		    update the copy with the skin engine data
-		  cache the result in a field of this TSubroutine, for fast drawing
-		EndRem
-		engine_links = New EngineLink[data.ship.engineSlots.length]
-		For Local idx% = 0 Until engine_links.length
-			Local str_idx$ = String.FromInt(idx)
-			Local shipEngine:TStarfarerShipEngine = data.ship.engineSlots[idx]
-			Local skinEngine:TStarfarerShipEngineChange = TStarfarerShipEngineChange( data.skin.engineSlotChanges.ValueForKey( str_idx ))
-			Local changed% = (skinEngine <> Null)
-			Local removed% = in_int_array( idx, data.skin.removeEngineSlots )
-			engine_links[idx] = EngineLink.Create( idx, shipEngine, skinEngine, changed, removed )
-		Next
-		' TODO: examine the skin and update the engine links as necessary
-		update_engine_links( ed, data )
-	EndMethod
+	'Method initialize_engine_links( ed:TEditor, data:TData )
+	'EndMethod
 
 	Method initialize_hullmod_chooser( ed:TEditor, data:TData )
 		Local rows% =    1 + ed.stock_hullmod_count
@@ -276,7 +257,91 @@ Type TModalSetSkin Extends TSubroutine
 	EndMethod
 
 	Method process_input_changeremove_engines( ed:TEditor, data:TData )
-		
+		If Not data.ship.center Then Return
+		'
+		Local img_x#, img_y#
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+		Local focus_i% = engine_lock_i
+		If focus_i = -1 Then focus_i = data.find_nearest_skin_engine( img_x,img_y )
+		'
+		Select EventID()
+			Case EVENT_MOUSEMOVE, EVENT_MOUSEDOWN, EVENT_MOUSEUP
+				'process input
+				Select ModKeyAndMouseKey
+					Case 16 '(MODIFIER_LMOUSE)
+						'set angle
+						Select EventID()
+							Case EVENT_MOUSEDOWN
+								engine_lock_i = focus_i
+								data.skin_engine_set_angle( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEMOVE
+								data.skin_engine_set_angle( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEUP
+								engine_lock_i = - 1
+								data.update_skin()
+						EndSelect
+					'Case 17 '(MODIFIER_SHIFT|MODIFIER_LMOUSE)
+					'	'add new
+					'	If EventID() = EVENT_MOUSEDOWN	
+					'		' copy nearest
+					'		If ni <> - 1 Then source_engine = data.ship.engineSlots[ni] Else source_engine = New TStarfarerShipEngine
+					'		'add new engine slot
+					'		data.add_engine( img_x, img_y, source_engine )
+					'		If ( ed.bounds_symmetrical ) Then data.add_engine( img_x, img_y, source_engine, True )
+					'		data.update()				
+					'	EndIf
+					'Case 18 '(MODIFIER_CONTROL|MODIFIER_LMOUSE)
+					'	'set location
+					'	Select EventID()
+					'		Case EVENT_MOUSEDOWN
+					'			ed.engine_lock_i = ni
+					'			data.set_engine_location( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
+					'		Case EVENT_MOUSEMOVE
+					'			data.set_engine_location( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
+					'		Case EVENT_MOUSEUP
+					'			ed.engine_lock_i = - 1
+					'			data.update()
+					'	EndSelect
+					'Case 20 '(MODIFIER_ALT|MODIFIER_LMOUSE)
+					'	'set size
+					'	Select EventID()
+					'		Case EVENT_MOUSEDOWN
+					'			ed.engine_lock_i = ni
+					'			data.set_engine_size( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
+					'		Case EVENT_MOUSEMOVE
+					'			data.set_engine_size( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
+					'		Case EVENT_MOUSEUP
+					'			ed.engine_lock_i = - 1
+					'			data.update()
+					'	EndSelect
+					'Case 38 '(MODIFIER_CONTROL|MODIFIER_ALT|MODIFIER_RMOUSE)
+					'	'dragging everything
+					'	If data.ship.engineSlots.length
+					'		Select EventID()
+					'			Case EVENT_MOUSEDOWN
+					'				'drag start
+					'				ed.last_img_x = img_x
+					'				ed.last_img_y = img_y
+					'			Case EVENT_MOUSEMOVE
+					'				'dragging
+					'				For Local i% = 0 Until data.ship.engineSlots.length
+					'					data.ship.engineSlots[i].location[0] :+ img_x - ed.last_img_x
+					'					data.ship.engineSlots[i].location[1] :- img_y - ed.last_img_y
+					'				Next
+					'				ed.last_img_x = img_x
+					'				ed.last_img_y = img_y
+					'			Case EVENT_MOUSEUP
+					'				data.update()
+					'		EndSelect
+					'	EndIf
+				End Select
+			Case EVENT_GADGETACTION, EVENT_MENUACTION
+				Select EventSource()
+					'Case functionMenu[MENU_FUNCTION_REMOVE]
+					'	data.remove_engine( ni, ed.bounds_symmetrical )
+					'	data.update()
+				EndSelect
+		EndSelect
 	EndMethod
 
 	Method process_input_addremove_hullmods( ed:TEditor, data:TData )
@@ -328,83 +393,73 @@ Type TModalSetSkin Extends TSubroutine
 	EndMethod
 
 	Method draw_engines( ed:TEditor, data:TData )
-		'---------------
-		DebugDrawReset()
-		'---------------
 		If Not data.ship.center Then Return
-		' get mouse position on screen, mapped to sprite's coordinate space
-		Local img_x#, img_y#
-		sprite.get_img_xy( MouseX,MouseY, img_x,img_y )
-		Local ship_mx#, ship_my#
-		ship_mx = +img_x - data.ship.center[1]
-		ship_my = -img_y + data.ship.center[0]
+		''---------------
+		'DebugDrawReset()
+		''---------------
 		' get location of nearest engine, unless it is currently locked (due to button input)
-		Local emphasized_engine_slot%
-		If locked_engine_slot = -1
-			Local nearest_engine_slot% = -1, nearest_engine_distance# = 10e38:Float
-			For Local idx% = 0 Until engine_links.length
-				Local engine_location#[] = engine_links[idx].get_location()
-				If engine_location
-					Local distance# = calc_distance( ship_mx,ship_my, engine_location[0],engine_location[1] )
-					''---------------------------
-					'DebugDraw("engine["+idx+"] d="+RSet(json.FormatDouble(distance,1),4), ..
-					'	W_MID,0, 0.5,0.0)
-					''---------------------------
-					If distance < nearest_engine_distance
-						nearest_engine_slot = idx
-						nearest_engine_distance = distance
-					EndIf
-				EndIf
-			Next
-			emphasized_engine_slot = nearest_engine_slot
-		Else
-			emphasized_engine_slot = locked_engine_slot
-		EndIf
+		Local img_x#, img_y#
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+		Local focus_i% = engine_lock_i
+		If focus_i = -1 Then focus_i = data.find_nearest_skin_engine( img_x,img_y )
 		''---------------------------
-		'DebugDraw("nearest: "+emphasized_engine_slot, ..
+		'DebugDraw("nearest: "+focus_i, ..
 		'	W_MID,0, 0.5,0.0)
 		''---------------------------
 		' draw engines
-		For Local idx% = 0 Until engine_links.length
-			Local engine_link:EngineLink = engine_links[idx]
-			If engine_link.removed Then Continue
-			Local engine_location#[] = engine_link.get_location()
-			Local engine_length# = engine_link.get_length()
-			Local engine_width# = engine_link.get_width()
-			Local engine_angle# = engine_link.get_angle()
-			Local emphasize% = (idx = emphasized_engine_slot)
-			Local engine_color%[] = engine_link.get_color(ed)
-			Local x# = sprite.sx + sprite.scale*(data.ship.center[1] + engine_location[0])
-			Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - engine_location[1])
-			draw_engine( x,y, engine_length,engine_width,engine_angle, sprite.scale, emphasize, engine_color )
-			'---------------------------
-			'DebugDraw("draw_engine( "..
-			'	+  "x="+json.FormatDouble(x,1)..
-			'	+", y="+json.FormatDouble(y,1)..
-			'	+", L="+json.FormatDouble(eL,1)..
-			'	+", W="+json.FormatDouble(eW,1)..
-			'	+", A="+json.FormatDouble(eA,1)..
-			'	+")", W_MID,0, 0.5,0.0)
-			'-------------------------
-		Next
+		If data.ship.engineSlots
+			For Local slot% = 0 Until data.ship.engineSlots.length
+				Local engine_location#[] = data.skin_engine_get_location( slot )
+				Local engine_length# = data.skin_engine_get_length( slot )
+				Local engine_width# = data.skin_engine_get_width( slot )
+				Local engine_angle# = data.skin_engine_get_angle( slot )
+				Local focused% = (slot = focus_i)
+				Local engine_color%[] = data.skin_engine_get_color( ed, slot )
+				Local x# = sprite.sx + sprite.scale*(data.ship.center[1] + engine_location[0])
+				Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - engine_location[1])
+				draw_engine( x,y, engine_length,engine_width,engine_angle, sprite.scale, focused, engine_color )
+				'---------------------------
+				'DebugDraw("draw_engine( "..
+				'	+  "x="+json.FormatDouble(engine_location[0],1)..
+				'	+", y="+json.FormatDouble(engine_location[1],1)..
+				'	+", L="+json.FormatDouble(engine_length,1)..
+				'	+", W="+json.FormatDouble(engine_width,1)..
+				'	+", A="+json.FormatDouble(engine_angle,1)..
+				'	+")", W_MID,0, 0.5,0.0)
+				'-------------------------
+			Next
+		EndIf
+
+		' get mouse position on screen, mapped to ship's coordinate space
+		Local ship_mx#, ship_my#
+		ship_mx = +img_x - data.ship.center[1]
+		ship_my = -img_y + data.ship.center[0]
 		' draw crosshairs
 		Local mx# = sprite.sx + img_x*sprite.scale
 		Local my# = sprite.sy + img_y*sprite.scale
 		draw_crosshairs( mx,my, 16 )
-
-		'update mouse text (contextual)
-		Local engine_link:EngineLink
-		If emphasized_engine_slot <> - 1 Then engine_link = engine_links[emphasized_engine_slot]
+		' update contextual mouse text readouts
 		Select ModKeyAndMouseKey
 			Case 0, 16 ' 0=???, (MODIFIER_LMOUSE)
-				If engine_link Then mouse_str :+ json.FormatDouble(engine_link.get_angle(), 2) + Chr($00B0) + "~n"
+				If focus_i <> -1
+					mouse_str :+ json.FormatDouble(data.skin_engine_get_angle( focus_i ), 2) + Chr($00B0) + "~n"
+				EndIf
 			Case 1, 17 ' 1=???, (MODIFIER_SHIFT|MODIFIER_LMOUSE)
-				If engine_link Then mouse_str :+ coord_string( ship_mx, ship_my ) + "~n"
+				If focus_i <> -1
+					mouse_str :+ coord_string( ship_mx, ship_my ) + "~n"
+				EndIf
 			Case 2, 18 ' 2=???, (MODIFIER_CONTROL|MODIFIER_LMOUSE)
-				If engine_link Then mouse_str :+ coord_string( engine_link.get_location()[0], engine_link.get_location()[1] ) + "~n" ..
-				Else mouse_str :+ coord_string( ship_mx, ship_my ) + "~n"
+				If focus_i <> -1
+					Local location#[] = data.skin_engine_get_location( focus_i )
+					mouse_str :+ coord_string( location[0],location[1] ) + "~n" ..
+				Else
+					mouse_str :+ coord_string( ship_mx, ship_my ) + "~n"
+				EndIf
 			Case 4, 20 ' 4=???, (MODIFIER_ALT|MODIFIER_LMOUSE)
-				If engine_link Then mouse_str :+ json.FormatDouble(engine_link.get_width(), 1) + "x" + json.FormatDouble(engine_link.get_length(), 1) + "~n"
+				If focus_i <> -1
+					mouse_str :+ json.FormatDouble(data.skin_engine_get_width( focus_i ), 1) ..
+					  + "x" +    json.FormatDouble(data.skin_engine_get_length( focus_i ), 1) + "~n"
+				EndIf
 			Case    38 ' ?=???, (MODIFIER_CONTROL|MODIFIER_ALT|MODIFIER_RMOUSE)
 				' ???
 		End Select
@@ -422,101 +477,8 @@ Type TModalSetSkin Extends TSubroutine
 	EndMethod
 
 
-
-
 EndType
 
-'--------------------------------------
-' supporting types
-
-' should this method alter the data.ship or data.skin ?
-'   not decided yet
-Type EngineLink
-	Field idx% ' the index of the engine definition in the base hull data
-	Field baseEngine:TStarfarerShipEngine ' base hull engine object
-	Field skinEngine:TStarfarerShipEngineChange ' skin engine object (only present when changed==True)
-	Field changed% ' if True, indicates that this skin specifies an object within skin.engineSlotChanges corresponding to this idx and base engine
-	Field removed%
-	Rem
-	  EngineLink must be created with, at minimum, knowledge of the source engine
-	    and its location contextually. Everything else would generally be created
-	    afterward. At least, on a new skin; if this is an existing skin, it's
-	    entirely possible every engine defined in the base hull was touched
-	    (changed, or removed) in the skin.
-	EndRem
-	Function Create:EngineLink( idx%, baseEngine:TStarfarerShipEngine, skinEngine:TStarfarerShipEngineChange=Null, changed%=False, removed%=False )
-		Local EL:EngineLink = New EngineLink
-		EL.idx = idx
-		EL.baseEngine = baseEngine
-		EL.skinEngine = skinEngine
-		EL.changed = changed
-		EL.removed = removed
-		Return EL
-	EndFunction
-	' remove any references in the skin to the base engine. aka "clean"
-	Method reset_to_base()
-		Self.skinEngine = Null
-		Self.changed = False
-		Self.removed = False
-	EndMethod
-	' register an altered version of the base version, in the skin.
-	Method skin_changes( skinEngine:TStarfarerShipEngineChange )
-		Self.skinEngine = skinEngine
-		Self.changed = True
-		Self.removed = False
-	EndMethod
-	' register that in the skin, this base engine should be removed.
-	Method skin_removes()
-		Self.skinEngine = Null
-		Self.changed = False
-		Self.removed = True
-	EndMethod
-	
-	' derived (virtual) getters
-	Method get_location#[]()
-		If changed And Not removed And skinEngine <> Null ..
-		And skinEngine.location <> TStarfarerShipEngineChange.__location
-			Return skinEngine.location
-		Else
-			Return baseEngine.location
-		EndIf
-	EndMethod
-	Method get_length#()		
-		If changed And Not removed And skinEngine <> Null ..
-		And skinEngine.length <> TStarfarerShipEngineChange.__length
-			Return skinEngine.length
-		Else
-			Return baseEngine.length
-		EndIf
-	EndMethod
-	Method get_width#()		
-		If changed And Not removed And skinEngine <> Null ..
-		And skinEngine.width <> TStarfarerShipEngineChange.__width
-			Return skinEngine.width
-		Else
-			Return baseEngine.width
-		EndIf
-	EndMethod
-	Method get_angle#()		
-		If changed And Not removed And skinEngine <> Null ..
-		And skinEngine.angle <> TStarfarerShipEngineChange.__angle
-			Return skinEngine.angle
-		Else
-			Return baseEngine.angle
-		EndIf
-	EndMethod
-	Method get_color%[]( ed:TEditor )		
-		If changed And Not removed And skinEngine <> Null ..
-		And ( skinEngine.style <> TStarfarerShipEngineChange.__style ..
-		Or    skinEngine.styleId <> TStarfarerShipEngineChange.__styleId ..
-		Or    skinEngine.styleSpec <> TStarfarerShipEngineChange.__styleSpec )
-			Return ed.get_engine_color( skinEngine )
-		Else
-			Return ed.get_engine_color( baseEngine )
-		EndIf
-	EndMethod
-
-EndType
 
 '--------------------------------------
 ' loader functions and misc.

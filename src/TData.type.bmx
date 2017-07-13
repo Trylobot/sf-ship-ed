@@ -544,7 +544,7 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method set_engine_angle( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=False )
+	Method set_engine_angle( slot_i%, img_x#,img_y#, update_symmetrical_counterpart_if_any%=False )
 		If Not ship.engineSlots Or Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
@@ -1316,19 +1316,34 @@ Type TData
 		If Not ship.engineSlots Or Not ship.center Then Return -1
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
-		Local nearest_i% = -1
-		Local nearest_dist# = -1
-		Local dist#
-		For Local i% = 0 Until ship.engineSlots.length
-			dist = calc_distance( img_x, img_y, ship.engineSlots[i].location[0], ship.engineSlots[i].location[1] )
-			If nearest_i = -1 Or dist < nearest_dist
+		Local nearest_i% = -1, nearest_dist# = 10e38:Float, dist#, engine_location#[]
+		For Local slot% = 0 Until ship.engineSlots.length
+			engine_location = ship.engineSlots[slot].location
+			dist = calc_distance( img_x,img_y, engine_location[0],engine_location[1] )
+			If dist < nearest_dist
+				nearest_i = slot
 				nearest_dist = dist
-				nearest_i = i
 			End If
 		Next
 		Return nearest_i
 	End Method
-	
+
+	Method find_nearest_skin_engine%( img_x#, img_y# )
+		If Not ship.engineSlots Or Not data.ship.center Then Return -1
+		img_x = img_x - ship.center[1]
+		img_y = ship.center[0] - img_y
+		Local nearest_i% = -1, nearest_dist# = 10e38:Float, dist#, engine_location#[]
+		For Local slot% = 0 Until ship.engineSlots.length
+			engine_location = skin_engine_get_location( slot )
+			dist = calc_distance( img_x,img_y, engine_location[0],engine_location[1] )
+			If dist < nearest_dist
+				nearest_i = slot
+				nearest_dist = dist
+			EndIf
+		Next
+		Return nearest_i
+	EndMethod
+
 	Method get_launch_bay_by_contextual_index:TStarfarerShipWeapon( LB_i% )
 		If Not ship.weaponSlots Or LB_i = - 1 Then Return Null
 		Local c_i% = 0
@@ -1413,6 +1428,23 @@ Type TData
 		Return Null
 	End Method
 
+	'TODO
+	Method find_symmetrical_skin_engine_counterpart:TStarfarerShipEngine( engine:TStarfarerShipEngine )
+		'Local cp_engine:TStarfarerShipEngine
+		'For Local si% = 0 Until ship.engineSlots.length
+		'	cp_engine = ship.engineSlots[si]
+		'	If  cp_engine <> engine ..
+		'	And cp_engine.location[0] = engine.location[0] ..
+		'	And cp_engine.location[1] = -engine.location[1] ..
+		'	And cp_engine.angle = -engine.angle ..
+		'	And cp_engine.length = engine.length ..
+		'	And cp_engine.width = engine.width
+		'		Return cp_engine
+		'	End If
+		'Next
+		Return Null
+	End Method
+
 	Method has_hullmod%( hullmod_id$ )
 		If variant.hullMods.length > 0
 			Local found% = False
@@ -1441,6 +1473,8 @@ Type TData
 		EndIf
 	EndMethod
 
+	'/////////////////////
+
 	Method skin_adds_hullmod%( hullmod_id$ )
 		For Local scan_hullmod_id$ = EachIn skin.builtInMods
 			If scan_hullmod_id = hullmod_id Then Return True
@@ -1453,6 +1487,142 @@ Type TData
 			If scan_hullmod_id = hullmod_id Then Return True
 		Next
 		Return False
+	EndMethod
+
+	'----
+	' returns the skin's engine slot (if set), or Null if marked for removal
+	Method get_skin_engine_slot:TStarfarerShipEngineChange( slot% )
+		If in_int_array( slot, skin.removeEngineSlots ) Then Return Null
+		Return TStarfarerShipEngineChange( skin.engineSlotChanges.ValueForKey( String.FromInt( slot )) )
+	EndMethod
+
+	' does not do anything if the given skin engine slot is not marked for removal, or already has changes
+	' returns the prepped engine
+	Method prep_skin_engine_slot_change:TStarfarerShipEngineChange( slot% )
+		' clear the removed flag, if set
+		If in_int_array( slot, skin.removeEngineSlots )
+			skin.removeEngineSlots = remove_first_val_from_intarray( skin.removeEngineSlots, slot )
+		EndIf
+		' add a new ship-engine-change obj to the skin's engine slot map, if it doesn't already have one
+		Local skinEngine:TStarfarerShipEngineChange = TStarfarerShipEngineChange( ..
+			skin.engineSlotChanges.ValueForKey( String.FromInt( slot )) )
+		If Not skinEngine
+			skinEngine = New TStarfarerShipEngineChange
+			skin.engineSlotChanges.Insert( String.FromInt( slot ), skinEngine )
+		EndIf
+		Return skinEngine
+	EndMethod
+
+	'----
+	Method skin_engine_get_location#[]( slot% )
+		If Not ship.engineSlots Then Return Null
+		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
+		If skinEngine And skinEngine.location <> TStarfarerShipEngineChange.__location
+			Return skinEngine.location
+		Else
+			Local baseEngine:TStarfarerShipEngine = ship.engineSlots[slot]
+			Return baseEngine.location
+		EndIf
+	EndMethod
+
+	Method skin_engine_get_length#( slot% )
+		If Not ship.engineSlots Then Return 0
+		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
+		If skinEngine And skinEngine.length <> TStarfarerShipEngineChange.__length
+			Return skinEngine.length
+		Else
+			Local baseEngine:TStarfarerShipEngine = ship.engineSlots[slot]
+			Return baseEngine.length
+		EndIf
+	EndMethod
+
+	Method skin_engine_get_width#( slot% )		
+		If Not ship.engineSlots Then Return 0
+		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
+		If skinEngine And skinEngine.width <> TStarfarerShipEngineChange.__width
+			Return skinEngine.width
+		Else
+			Local baseEngine:TStarfarerShipEngine = ship.engineSlots[slot]
+			Return baseEngine.width
+		EndIf
+	EndMethod
+
+	Method skin_engine_get_angle#( slot% )	
+		If Not ship.engineSlots Then Return 0	
+		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
+		If skinEngine And skinEngine.angle <> TStarfarerShipEngineChange.__angle
+			Return skinEngine.angle
+		Else
+			Local baseEngine:TStarfarerShipEngine = ship.engineSlots[slot]
+			Return baseEngine.angle
+		EndIf
+	EndMethod
+
+	Method skin_engine_get_color%[]( ed:TEditor, slot% )		
+		If Not ship.engineSlots Then Return Null
+		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
+		If skinEngine And ..
+		(    skinEngine.style <> TStarfarerShipEngineChange.__style ..
+		Or   skinEngine.styleId <> TStarfarerShipEngineChange.__styleId ..
+		Or   skinEngine.styleSpec <> TStarfarerShipEngineChange.__styleSpec )
+			Return ed.get_engine_color( skinEngine )
+		Else
+			Local baseEngine:TStarfarerShipEngine = ship.engineSlots[slot]
+			Return ed.get_engine_color( baseEngine )
+		EndIf
+	EndMethod
+
+	'----
+	Method skin_engine_set_location( slot%, location#[] )
+		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+		skinEngine.location = location[..]
+	EndMethod
+
+	Method skin_engine_set_length( slot%, length# )		
+		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+		skinEngine.length = length
+	EndMethod
+
+	Method skin_engine_set_width( slot%, width# )		
+		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+		skinEngine.width = width
+	EndMethod
+
+	Method skin_engine_set_angle( slot%, img_x#,img_y#, mirror%=False )		
+		If Not ship.engineSlots Or Not ship.center Then Return
+		Local ship_mx# = img_x - ship.center[1], ..
+		      ship_my# = ship.center[0] - img_y
+		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+		Local skinEngine_mirrored:TStarfarerShipEngine
+		If mirror Then skinEngine_mirrored = find_symmetrical_skin_engine_counterpart( skinEngine )
+		Local skinEngine_location#[] = skin_engine_get_location( slot )
+		skinEngine.angle = calc_angle( skinEngine_location[0],skinEngine_location[1], ship_mx,ship_my )
+		If mirror And skinEngine_mirrored
+			skinEngine_mirrored.angle = -skinEngine.angle
+		EndIf
+	EndMethod
+
+	Method skin_engine_set_style( slot%, style$=Null,styleId$=Null,styleSpec:TStarfarerCustomEngineStyleSpec=Null )
+		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+		skinEngine.style = style
+		skinEngine.styleId = styleId
+		skinEngine.styleSpec = styleSpec
+	EndMethod
+
+	' removes data about this engine slot from the skin (fallback to base hull, no modification)
+	Method skin_engine_clear_data( slot% )
+		' clear removal flag
+		skin.removeEngineSlots = remove_first_val_from_intarray( skin.removeEngineSlots, slot )
+		' remove engine data
+		skin.engineSlotChanges.Remove( String.FromInt( slot ))
+	EndMethod
+
+	' mark the base engine slot as removed in the skin
+	Method skin_engine_mark_removal( slot% )
+		' set removal flag
+		skin.removeEngineSlots = intarray_append( skin.removeEngineSlots, slot )
+		' remove engine data
+		skin.engineSlotChanges.Remove( String.FromInt( slot ))
 	EndMethod
 
 	'/////////////////////
