@@ -391,6 +391,24 @@ Type TModalSetSkin Extends TSubroutine
 		Local mx# = sprite.sx + img_x*sprite.scale
 		Local my# = sprite.sy + img_y*sprite.scale
 		draw_crosshairs( mx,my, 16 )
+
+		'update mouse text (contextual)
+		Local engine_link:EngineLink
+		If emphasized_engine_slot <> - 1 Then engine_link = engine_links[emphasized_engine_slot]
+		Select ModKeyAndMouseKey
+			Case 0, 16 ' 0=???, (MODIFIER_LMOUSE)
+				If engine_link Then mouse_str :+ json.FormatDouble(engine_link.get_angle(), 2) + Chr($00B0) + "~n"
+			Case 1, 17 ' 1=???, (MODIFIER_SHIFT|MODIFIER_LMOUSE)
+				If engine_link Then mouse_str :+ coord_string( ship_mx, ship_my ) + "~n"
+			Case 2, 18 ' 2=???, (MODIFIER_CONTROL|MODIFIER_LMOUSE)
+				If engine_link Then mouse_str :+ coord_string( engine_link.get_location()[0], engine_link.get_location()[1] ) + "~n" ..
+				Else mouse_str :+ coord_string( ship_mx, ship_my ) + "~n"
+			Case 4, 20 ' 4=???, (MODIFIER_ALT|MODIFIER_LMOUSE)
+				If engine_link Then mouse_str :+ json.FormatDouble(engine_link.get_width(), 1) + "x" + json.FormatDouble(engine_link.get_length(), 1) + "~n"
+			Case    38 ' ?=???, (MODIFIER_CONTROL|MODIFIER_ALT|MODIFIER_RMOUSE)
+				' ???
+		End Select
+
 	EndMethod
 
 	Method draw_hullmods_chooser( ed:TEditor, data:TData )
