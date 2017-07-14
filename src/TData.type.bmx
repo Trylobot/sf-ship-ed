@@ -1192,7 +1192,7 @@ Type TData
 		Return nearest_i
 	End Method
 	
-	Method find_nearest_bound_segment_i (img_x#, img_y#, x1_i# Var, y1_i# Var, x2_i#var, y2_i# Var)
+	Method find_nearest_bound_segment_i( img_x#,img_y#,  x1_i# Var,y1_i# Var,  x2_i# Var,y2_i# Var )
 		If Not ship.bounds Or Not ship.center Then x1_i = y1_i = x2_i = y2_i = - 1
 		x1_i = find_nearest_bound_segment_1st_i(img_x, img_y)
 		y1_i = x1_i + 1
@@ -1428,21 +1428,22 @@ Type TData
 		Return Null
 	End Method
 
-	'TODO
-	Method find_symmetrical_skin_engine_counterpart:TStarfarerShipEngine( engine:TStarfarerShipEngine )
-		'Local cp_engine:TStarfarerShipEngine
-		'For Local si% = 0 Until ship.engineSlots.length
-		'	cp_engine = ship.engineSlots[si]
-		'	If  cp_engine <> engine ..
-		'	And cp_engine.location[0] = engine.location[0] ..
-		'	And cp_engine.location[1] = -engine.location[1] ..
-		'	And cp_engine.angle = -engine.angle ..
-		'	And cp_engine.length = engine.length ..
-		'	And cp_engine.width = engine.width
-		'		Return cp_engine
-		'	End If
-		'Next
-		Return Null
+	Method find_symmetrical_skin_engine_counterpart_slot%( slot% )
+		Local location#[] = skin_engine_get_location( slot )
+		Local length# = skin_engine_get_length( slot )
+		Local width# = skin_engine_get_width( slot )
+		Local angle# = skin_engine_get_angle( slot )
+		'
+		For Local idx% = 0 Until ship.engineSlots.length
+			If  location[0] = skin_engine_get_location( idx )[0] ..
+			And location[1] = - skin_engine_get_location( idx )[1] ..
+			And length = skin_engine_get_length( idx ) ..
+			And width = skin_engine_get_width( idx ) ..
+			And angle = - skin_engine_get_angle( idx )
+				Return idx
+			End If
+		Next
+		Return -1
 	End Method
 
 	Method has_hullmod%( hullmod_id$ )
@@ -1573,19 +1574,64 @@ Type TData
 	EndMethod
 
 	'----
-	Method skin_engine_set_location( slot%, location#[] )
+	Method skin_engine_set_location( slot%, img_x#,img_y#, mirror%=False )
+		If Not ship.engineSlots Or Not ship.center Then Return
+		Local ship_mx# = img_x - ship.center[1], ..
+		      ship_my# = ship.center[0] - img_y
 		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
-		skinEngine.location = location[..]
+		Local mirrored_slot%
+		Local skinEngine_mirrored:TStarfarerShipEngine
+		If mirror
+			mirrored_slot = find_symmetrical_skin_engine_counterpart_slot( slot )
+			If mirrored_slot <> -1
+				skinEngine_mirrored = prep_skin_engine_slot_change( slot )
+			EndIf
+		EndIf
+		skinEngine.location = New Float[2]
+		skinEngine.location[0] = ship_mx
+		skinEngine.location[1] = ship_my
+		If mirror And skinEngine_mirrored
+			skinEngine_mirrored.location = New Float[2]
+			skinEngine_mirrored.location[0] = ship_mx
+			skinEngine_mirrored.location[1] = - ship_my
+		EndIf
 	EndMethod
 
-	Method skin_engine_set_length( slot%, length# )		
+	Method skin_engine_set_size( slot%, img_x#,img_y#, mirror%=False )		
+		If Not ship.engineSlots Or Not ship.center Then Return
+		Local ship_mx# = img_x - ship.center[1], ..
+		      ship_my# = ship.center[0] - img_y
 		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
-		skinEngine.length = length
-	EndMethod
-
-	Method skin_engine_set_width( slot%, width# )		
-		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
-		skinEngine.width = width
+		Local mirrored_slot%
+		Local skinEngine_mirrored:TStarfarerShipEngine
+		If mirror
+			mirrored_slot = find_symmetrical_skin_engine_counterpart_slot( slot )
+			If mirrored_slot <> -1
+				skinEngine_mirrored = prep_skin_engine_slot_change( slot )
+			EndIf
+		EndIf
+		Local skinEngine_location#[] = skin_engine_get_location( slot )
+		Local skinEngine_angle# = skin_engine_get_angle( slot )
+		' mouse relative to engine location
+		Local mouse#[] = New Float[2]
+		mouse[0] = ship_mx - skinEngine_location[0]
+		mouse[1] = ship_my - skinEngine_location[1]
+		' new length, by line segment along current angle of engine
+		Local norm#[] = New Float[2]
+		norm[0] = Cos( skinEngine_angle )
+		norm[1] = Sin( skinEngine_angle )
+		skinEngine.length = Max( 0, norm[0]*mouse[0] + norm[1]*mouse[1])
+		' new width, by line segment along angle perpendicular to angle of engine
+		Local perp_norm#[] = New Float[2]
+		perp_norm[0] = Cos( skinEngine_angle + 90 )
+		perp_norm[1] = Sin( skinEngine_angle + 90 )
+		skinEngine.width = Abs( 2*(perp_norm[0]*mouse[0] + perp_norm[1]*mouse[1]) )
+		skinEngine.contrailSize = skinEngine.width
+		If mirror And skinEngine_mirrored
+			skinEngine_mirrored.length = skinEngine.length
+			skinEngine_mirrored.width = skinEngine.width
+			skinEngine_mirrored.contrailSize = skinEngine.contrailSize
+		EndIf
 	EndMethod
 
 	Method skin_engine_set_angle( slot%, img_x#,img_y#, mirror%=False )		
@@ -1593,8 +1639,14 @@ Type TData
 		Local ship_mx# = img_x - ship.center[1], ..
 		      ship_my# = ship.center[0] - img_y
 		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+		Local mirrored_slot%
 		Local skinEngine_mirrored:TStarfarerShipEngine
-		If mirror Then skinEngine_mirrored = find_symmetrical_skin_engine_counterpart( skinEngine )
+		If mirror
+			mirrored_slot = find_symmetrical_skin_engine_counterpart_slot( slot )
+			If mirrored_slot <> -1
+				skinEngine_mirrored = prep_skin_engine_slot_change( slot )
+			EndIf
+		EndIf
 		Local skinEngine_location#[] = skin_engine_get_location( slot )
 		skinEngine.angle = calc_angle( skinEngine_location[0],skinEngine_location[1], ship_mx,ship_my )
 		If mirror And skinEngine_mirrored
@@ -1602,27 +1654,35 @@ Type TData
 		EndIf
 	EndMethod
 
-	Method skin_engine_set_style( slot%, style$=Null,styleId$=Null,styleSpec:TStarfarerCustomEngineStyleSpec=Null )
-		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
-		skinEngine.style = style
-		skinEngine.styleId = styleId
-		skinEngine.styleSpec = styleSpec
+	'Method skin_engine_set_style( slot%, style$=Null,styleId$=Null,styleSpec:TStarfarerCustomEngineStyleSpec=Null )
+	'	Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+	'	skinEngine.style = style
+	'	skinEngine.styleId = styleId
+	'	skinEngine.styleSpec = styleSpec
+	'EndMethod
+
+	Method is_skin_engine_removed%( slot% )
+		Return in_int_array( slot, skin.removeEngineSlots )
+	EndMethod
+
+	Method is_skin_engine_changed%( slot% )
+		Local slot_str$ = String.FromInt( slot )
+		Return (skin.engineSlotChanges.Contains( slot_str ) ..
+			 And TStarfarerShipEngineChange( skin.engineSlotChanges.ValueForKey( slot_str )) <> Null)
 	EndMethod
 
 	' removes data about this engine slot from the skin (fallback to base hull, no modification)
-	Method skin_engine_clear_data( slot% )
-		' clear removal flag
+	Method skin_engine_clear_data( slot%, mirror%=False )
 		skin.removeEngineSlots = remove_first_val_from_intarray( skin.removeEngineSlots, slot )
-		' remove engine data
 		skin.engineSlotChanges.Remove( String.FromInt( slot ))
+		'TODO: mirror
 	EndMethod
 
 	' mark the base engine slot as removed in the skin
-	Method skin_engine_mark_removal( slot% )
-		' set removal flag
+	Method skin_engine_mark_removal( slot%, mirror%=False )
 		skin.removeEngineSlots = intarray_append( skin.removeEngineSlots, slot )
-		' remove engine data
 		skin.engineSlotChanges.Remove( String.FromInt( slot ))
+		'TODO: mirror
 	EndMethod
 
 	'/////////////////////

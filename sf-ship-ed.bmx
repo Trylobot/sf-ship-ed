@@ -915,6 +915,8 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
           cycle_show_more()
         Case functionMenu[MENU_FUNCTION_DETAILS]
           sub_string_data.Activate( ed, data, sprite ) ' string edit
+        Default
+          hit = False
       EndSelect
     
     Case "weapon"

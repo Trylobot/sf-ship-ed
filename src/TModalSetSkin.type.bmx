@@ -277,69 +277,43 @@ Type TModalSetSkin Extends TSubroutine
 							Case EVENT_MOUSEMOVE
 								data.skin_engine_set_angle( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEUP
-								engine_lock_i = - 1
+								engine_lock_i = -1
 								data.update_skin()
 						EndSelect
-					'Case 17 '(MODIFIER_SHIFT|MODIFIER_LMOUSE)
-					'	'add new
-					'	If EventID() = EVENT_MOUSEDOWN	
-					'		' copy nearest
-					'		If ni <> - 1 Then source_engine = data.ship.engineSlots[ni] Else source_engine = New TStarfarerShipEngine
-					'		'add new engine slot
-					'		data.add_engine( img_x, img_y, source_engine )
-					'		If ( ed.bounds_symmetrical ) Then data.add_engine( img_x, img_y, source_engine, True )
-					'		data.update()				
-					'	EndIf
-					'Case 18 '(MODIFIER_CONTROL|MODIFIER_LMOUSE)
-					'	'set location
-					'	Select EventID()
-					'		Case EVENT_MOUSEDOWN
-					'			ed.engine_lock_i = ni
-					'			data.set_engine_location( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
-					'		Case EVENT_MOUSEMOVE
-					'			data.set_engine_location( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
-					'		Case EVENT_MOUSEUP
-					'			ed.engine_lock_i = - 1
-					'			data.update()
-					'	EndSelect
-					'Case 20 '(MODIFIER_ALT|MODIFIER_LMOUSE)
-					'	'set size
-					'	Select EventID()
-					'		Case EVENT_MOUSEDOWN
-					'			ed.engine_lock_i = ni
-					'			data.set_engine_size( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
-					'		Case EVENT_MOUSEMOVE
-					'			data.set_engine_size( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
-					'		Case EVENT_MOUSEUP
-					'			ed.engine_lock_i = - 1
-					'			data.update()
-					'	EndSelect
-					'Case 38 '(MODIFIER_CONTROL|MODIFIER_ALT|MODIFIER_RMOUSE)
-					'	'dragging everything
-					'	If data.ship.engineSlots.length
-					'		Select EventID()
-					'			Case EVENT_MOUSEDOWN
-					'				'drag start
-					'				ed.last_img_x = img_x
-					'				ed.last_img_y = img_y
-					'			Case EVENT_MOUSEMOVE
-					'				'dragging
-					'				For Local i% = 0 Until data.ship.engineSlots.length
-					'					data.ship.engineSlots[i].location[0] :+ img_x - ed.last_img_x
-					'					data.ship.engineSlots[i].location[1] :- img_y - ed.last_img_y
-					'				Next
-					'				ed.last_img_x = img_x
-					'				ed.last_img_y = img_y
-					'			Case EVENT_MOUSEUP
-					'				data.update()
-					'		EndSelect
-					'	EndIf
+					Case 18 '(MODIFIER_CONTROL|MODIFIER_LMOUSE)
+						'set location
+						Select EventID()
+							Case EVENT_MOUSEDOWN
+								engine_lock_i = focus_i
+								data.skin_engine_set_location( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEMOVE
+								data.skin_engine_set_location( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEUP
+								engine_lock_i = -1
+								data.update_skin()
+						EndSelect
+					Case 20 '(MODIFIER_ALT|MODIFIER_LMOUSE)
+						'set size
+						Select EventID()
+							Case EVENT_MOUSEDOWN
+								engine_lock_i = focus_i
+								data.skin_engine_set_size( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEMOVE
+								data.skin_engine_set_size( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEUP
+								engine_lock_i = -1
+								data.update_skin()
+						EndSelect
 				End Select
 			Case EVENT_GADGETACTION, EVENT_MENUACTION
 				Select EventSource()
-					'Case functionMenu[MENU_FUNCTION_REMOVE]
-					'	data.remove_engine( ni, ed.bounds_symmetrical )
-					'	data.update()
+					Case functionMenu[MENU_FUNCTION_REMOVE]
+						If data.is_skin_engine_changed( focus_i )
+							data.skin_engine_clear_data( focus_i, ed.bounds_symmetrical )
+						ElseIf Not data.is_skin_engine_removed( focus_i )
+							data.skin_engine_mark_removal( focus_i, ed.bounds_symmetrical )
+						EndIf
+						data.update_skin()
 				EndSelect
 		EndSelect
 	EndMethod
@@ -417,7 +391,8 @@ Type TModalSetSkin Extends TSubroutine
 				Local engine_color%[] = data.skin_engine_get_color( ed, slot )
 				Local x# = sprite.sx + sprite.scale*(data.ship.center[1] + engine_location[0])
 				Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - engine_location[1])
-				draw_engine( x,y, engine_length,engine_width,engine_angle, sprite.scale, focused, engine_color )
+				Local is_removed% = data.is_skin_engine_removed( slot )
+				draw_engine( x,y, engine_length,engine_width,engine_angle, sprite.scale, focused, engine_color,, is_removed )
 				'---------------------------
 				'DebugDraw("draw_engine( "..
 				'	+  "x="+json.FormatDouble(engine_location[0],1)..
@@ -444,10 +419,6 @@ Type TModalSetSkin Extends TSubroutine
 				If focus_i <> -1
 					mouse_str :+ json.FormatDouble(data.skin_engine_get_angle( focus_i ), 2) + Chr($00B0) + "~n"
 				EndIf
-			Case 1, 17 ' 1=???, (MODIFIER_SHIFT|MODIFIER_LMOUSE)
-				If focus_i <> -1
-					mouse_str :+ coord_string( ship_mx, ship_my ) + "~n"
-				EndIf
 			Case 2, 18 ' 2=???, (MODIFIER_CONTROL|MODIFIER_LMOUSE)
 				If focus_i <> -1
 					Local location#[] = data.skin_engine_get_location( focus_i )
@@ -460,8 +431,6 @@ Type TModalSetSkin Extends TSubroutine
 					mouse_str :+ json.FormatDouble(data.skin_engine_get_width( focus_i ), 1) ..
 					  + "x" +    json.FormatDouble(data.skin_engine_get_length( focus_i ), 1) + "~n"
 				EndIf
-			Case    38 ' ?=???, (MODIFIER_CONTROL|MODIFIER_ALT|MODIFIER_RMOUSE)
-				' ???
 		End Select
 
 	EndMethod

@@ -264,7 +264,7 @@ End Function
 
 
 
-Function draw_engine( eX#, eY#, eL#, eW#, eA#, sZ#, emphasis% = False, eC%[], drawPoint% = True)
+Function draw_engine( eX#, eY#, eL#, eW#, eA#, sZ#, emphasis%=False, eC%[], drawPoint%=True, is_removed%=False)
 	Local alpha# = GetAlpha()
 	Local outer_r% = 5
 	Local inner_r% = 4
@@ -284,10 +284,14 @@ Function draw_engine( eX#, eY#, eL#, eW#, eA#, sZ#, emphasis% = False, eC%[], dr
 	If emphasis Then SetAlpha( alpha * 0.25 ) Else SetAlpha( alpha * 0.75 )
 	SetScale ( (eL / 32.0) * sZ, (eW / 32.0) * sZ)
 	SetColor(eC[0], eC[1], eC[2])
-	DrawImage(ed.engineflame, eX + sZ * (eW / 2) * Cos(eA + 90), eY - sZ * (eW / 2) * Sin(eA + 90) )
+	If Not is_removed
+		DrawImage(ed.engineflame, eX + sZ * (eW / 2) * Cos(eA + 90), eY - sZ * (eW / 2) * Sin(eA + 90) )
+	EndIf
 	SetColor( 255, 255, 255 )
 	SetBlend(LIGHTBLEND)
-	DrawImage(ed.engineflamecore, eX + sZ * (eW / 2) * Cos(eA + 90), eY - sZ * (eW / 2) * Sin(eA + 90) )	
+	If Not is_removed
+		DrawImage(ed.engineflamecore, eX + sZ * (eW / 2) * Cos(eA + 90), eY - sZ * (eW / 2) * Sin(eA + 90) )	
+	EndIf
 	SetBlend(ALPHABLEND)
 	SetRotation( 0 )
 	SetScale( 1, 1 )

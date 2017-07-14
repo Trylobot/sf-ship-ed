@@ -168,7 +168,6 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", LocalizeString("{{h_mode_skin_details}}"), ICON_KB, True, 1, "skin" ) )
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_drag}}"), ICON_CTRL_CLICK, True, 0, "skin", "changeremove_engines" ) )
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_dragAll}}"), ICON_CTRL_ALT_RIGHT_CLICK, True, 0, "skin", "changeremove_engines" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_setFacing}}"), ICON_MS_LEFT, True, 0, "skin", "changeremove_engines" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_setSize}}"), ICON_ALT_CLICK, True, 0, "skin", "changeremove_engines" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_engineSlots_remove}}"), ICON_KB, True, 0, "skin", "changeremove_engines" ))
