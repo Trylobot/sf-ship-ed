@@ -1,11 +1,20 @@
 ______________________________________________________________________________
-editor version 3.0.0-pre-alpha-1 (starsector 0.8.1a) [Trylobot]
+editor version 3.0.0-pre-alpha-2 (starsector 0.8.1a) [Trylobot & Deathfly]
 
-SKIN EDITOR (PARTIALLY COMPLETE)
+SKIN EDITOR
 - Change/Remove Engines
 - Add/Remove Built-In Hullmods
 - Edit Details (Strings)
 - Render Skin Sprite
+
+VARIANT EDITOR / STATION_MODULE support
+- Show installed module (variant) in slot.
+- Module selector for STATION_MODULE slots.
+- stock_variants loader looks for variants in subdirectories
+
+WEAPON RENDERING
+- Render order now more closely follows the in-game render order
+- Foundations laid for for STATION_MODULE rendering
 
 ______________________________________________________________________________
 editor version 2.7.4 (starsector 0.8.1a) [Deathfly & Trylobot]
