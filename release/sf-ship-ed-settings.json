@@ -6,6 +6,7 @@
   "data_font_size": 10,
   "fluxmod_limit_override": 0,
   "font_size": 14,
+  "raw_json_view_max_column_width": 60,
   "fps_limit": 60,
   "hide_vanilla_data": 0,
   "images_dir": "",
@@ -17,6 +18,7 @@
   "starsector_base_dir": "",
   "variant_dir": "",
   "skin_dir": "",
+  "skin_images_dir": "",
   "weapon_dir": "",
   "weapon_images_dir": "",
   "window_size": [

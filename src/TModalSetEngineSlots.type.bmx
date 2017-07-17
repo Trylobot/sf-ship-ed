@@ -24,86 +24,86 @@ Type TModalSetEngineSlots Extends TSubroutine
 		If Not data.ship.center Then Return
 		'get input
 		Select EventID()
-		Case EVENT_MOUSEDOWN, EVENT_MOUSEUP, EVENT_MOUSEMOVE
-			sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
-			'locate nearest entity
-			ni = data.find_nearest_engine( img_x, img_y )
-			If ed.engine_lock_i <> - 1 Then ni = ed.engine_lock_i
-			'process input
-			Select ModKeyAndMouseKey
-			Case 16 '(MODIFIER_LMOUSE)
-				'set angle
-				Select EventID()
-				Case EVENT_MOUSEDOWN
-					ed.engine_lock_i = ni
-					data.set_engine_angle( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
-				Case EVENT_MOUSEMOVE
-					data.set_engine_angle( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
-				Case EVENT_MOUSEUP
-					ed.engine_lock_i = - 1
-					data.update()
-				EndSelect
-			Case 17 '(MODIFIER_SHIFT|MODIFIER_LMOUSE)
-				'add new
-				If EventID() = EVENT_MOUSEDOWN	
-					' copy nearest
-					If ni <> - 1 Then source_engine = data.ship.engineSlots[ni] Else source_engine = New TStarfarerShipEngine
-					'add new engine slot
-					data.add_engine( img_x, img_y, source_engine )
-					If ( ed.bounds_symmetrical ) Then data.add_engine( img_x, img_y, source_engine, True )
-					data.update()				
-				EndIf
-			Case 18 '(MODIFIER_CONTROL|MODIFIER_LMOUSE)
-				'set location
-				Select EventID()
-				Case EVENT_MOUSEDOWN
-					ed.engine_lock_i = ni
-					data.set_engine_location( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
-				Case EVENT_MOUSEMOVE
-					data.set_engine_location( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
-				Case EVENT_MOUSEUP
-					ed.engine_lock_i = - 1
-					data.update()
-				EndSelect
-			Case 20 '(MODIFIER_ALT|MODIFIER_LMOUSE)
-				'set size
-				Select EventID()
-				Case EVENT_MOUSEDOWN
-					ed.engine_lock_i = ni
-					data.set_engine_size( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
-				Case EVENT_MOUSEMOVE
-					data.set_engine_size( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
-				Case EVENT_MOUSEUP
-					ed.engine_lock_i = - 1
-					data.update()
-				EndSelect
-			Case 38 '(MODIFIER_CONTROL|MODIFIER_ALT|MODIFIER_RMOUSE)
-				'dragging everything
-				If data.ship.engineSlots.length
-					Select EventID()
-					Case EVENT_MOUSEDOWN
-						'drag start
-						ed.last_img_x = img_x
-						ed.last_img_y = img_y
-					Case EVENT_MOUSEMOVE
-						'dragging
-						For Local i% = 0 Until data.ship.engineSlots.length
-							data.ship.engineSlots[i].location[0] :+ img_x - ed.last_img_x
-							data.ship.engineSlots[i].location[1] :- img_y - ed.last_img_y
-						Next
-						ed.last_img_x = img_x
-						ed.last_img_y = img_y
-					Case EVENT_MOUSEUP
+			Case EVENT_MOUSEDOWN, EVENT_MOUSEUP, EVENT_MOUSEMOVE
+				sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+				'locate nearest entity
+				ni = data.find_nearest_engine( img_x, img_y )
+				If ed.engine_lock_i <> - 1 Then ni = ed.engine_lock_i
+				'process input
+				Select ModKeyAndMouseKey
+					Case 16 '(MODIFIER_LMOUSE)
+						'set angle
+						Select EventID()
+							Case EVENT_MOUSEDOWN
+								ed.engine_lock_i = ni
+								data.set_engine_angle( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEMOVE
+								data.set_engine_angle( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEUP
+								ed.engine_lock_i = - 1
+								data.update()
+						EndSelect
+					Case 17 '(MODIFIER_SHIFT|MODIFIER_LMOUSE)
+						'add new
+						If EventID() = EVENT_MOUSEDOWN	
+							' copy nearest
+							If ni <> - 1 Then source_engine = data.ship.engineSlots[ni] Else source_engine = New TStarfarerShipEngine
+							'add new engine slot
+							data.add_engine( img_x, img_y, source_engine )
+							If ( ed.bounds_symmetrical ) Then data.add_engine( img_x, img_y, source_engine, True )
+							data.update()				
+						EndIf
+					Case 18 '(MODIFIER_CONTROL|MODIFIER_LMOUSE)
+						'set location
+						Select EventID()
+							Case EVENT_MOUSEDOWN
+								ed.engine_lock_i = ni
+								data.set_engine_location( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEMOVE
+								data.set_engine_location( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEUP
+								ed.engine_lock_i = - 1
+								data.update()
+						EndSelect
+					Case 20 '(MODIFIER_ALT|MODIFIER_LMOUSE)
+						'set size
+						Select EventID()
+							Case EVENT_MOUSEDOWN
+								ed.engine_lock_i = ni
+								data.set_engine_size( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEMOVE
+								data.set_engine_size( ed.engine_lock_i, img_x, img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEUP
+								ed.engine_lock_i = - 1
+								data.update()
+						EndSelect
+					Case 38 '(MODIFIER_CONTROL|MODIFIER_ALT|MODIFIER_RMOUSE)
+						'dragging everything
+						If data.ship.engineSlots.length
+							Select EventID()
+								Case EVENT_MOUSEDOWN
+									'drag start
+									ed.last_img_x = img_x
+									ed.last_img_y = img_y
+								Case EVENT_MOUSEMOVE
+									'dragging
+									For Local i% = 0 Until data.ship.engineSlots.length
+										data.ship.engineSlots[i].location[0] :+ img_x - ed.last_img_x
+										data.ship.engineSlots[i].location[1] :- img_y - ed.last_img_y
+									Next
+									ed.last_img_x = img_x
+									ed.last_img_y = img_y
+								Case EVENT_MOUSEUP
+									data.update()
+							EndSelect
+						EndIf
+				End Select
+			Case EVENT_GADGETACTION, EVENT_MENUACTION
+				Select EventSource()
+					Case functionMenu[MENU_FUNCTION_REMOVE]
+						data.remove_engine( ni, ed.bounds_symmetrical )
 						data.update()
-					EndSelect
-				EndIf
-			End Select
-		Case EVENT_GADGETACTION, EVENT_MENUACTION
-			Select EventSource()
-			Case functionMenu[4]
-				data.remove_engine( ni, ed.bounds_symmetrical )
-				data.update()
-			EndSelect
+				EndSelect
 		EndSelect
 	EndMethod
 
@@ -125,7 +125,7 @@ Type TModalSetEngineSlots Extends TSubroutine
 				engine = data.ship.engineSlots[i]	
 				Local wx# = sprite.sx + (engine.location[0] + data.ship.center[1]) * sprite.scale
 				Local wy# = sprite.sy + ( - engine.location[1] + data.ship.center[0]) * sprite.scale
-				draw_engine( wx, wy, engine.length, engine.width, engine.angle, sprite.scale, (i = ni), getEngineColor(engine, ed) )	
+				draw_engine( wx, wy, engine.length, engine.width, engine.angle, sprite.scale, (i = ni), ed.get_engine_color( engine ) )	
 			Next
 		EndIf 
 		'ghost preview
@@ -135,13 +135,13 @@ Type TModalSetEngineSlots Extends TSubroutine
 			length = engine.length
 			width = engine.width
 			angle = engine.angle
-			draw_engine( x, y, length, width, angle, sprite.scale, False , getEngineColor(engine, ed) )
+			draw_engine( x, y, length, width, angle, sprite.scale, False , ed.get_engine_color( engine ) )
 			If ed.bounds_symmetrical 'reflected twin
 				wyr = img_y - data.ship.center[0] 'simulating TData math
 				angle = -angle
 				xr = x
 				yr = sprite.sy + ( - wyr + data.ship.center[0]) * sprite.scale
-				draw_engine( xr, yr, length, width, angle, sprite.scale, False, getEngineColor(engine, ed) )
+				draw_engine( xr, yr, length, width, angle, sprite.scale, False, ed.get_engine_color( engine ) )
 			EndIf
 			SetAlpha(1)
 		EndIf
@@ -172,13 +172,4 @@ Type TModalSetEngineSlots Extends TSubroutine
 	EndMethod
 
 EndType
-Function getEngineColor%[]( engine:TStarfarerShipEngine, ed:TEditor )
-	If engine.styleSpec Then Return engine.styleSpec.engineColor
-	Local styleID$ = engine.style
-	If styleID = "CUSTOM" Then styleID = engine.styleId
-	Local Value:Object = ed.stock_engine_styles.ValueForKey( styleID )
-	If Value Then Return (TStarfarerCustomEngineStyleSpec (Value) ).engineColor..
-	Else Return [255, 255, 255, 255]
-	
-End Function
 

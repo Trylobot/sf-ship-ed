@@ -125,7 +125,7 @@ Type TModalPreviewAll Extends TSubroutine
 					engine = data.ship.engineSlots[i]	
 					Local wx# = sprite.sx + (engine.location[0] + data.ship.center[1]) * sprite.scale
 					Local wy# = sprite.sy + ( - engine.location[1] + data.ship.center[0]) * sprite.scale
-					draw_engine( wx, wy, engine.length, engine.width, engine.angle, sprite.scale, False, getEngineColor(engine, ed) , False )	
+					draw_engine( wx, wy, engine.length, engine.width, engine.angle, sprite.scale, False, ed.get_engine_color( engine ), False )	
 				Next
 			EndIf 
 			SetAlpha( 0.75 )

@@ -2,6 +2,8 @@ Type TStarfarerSkin
 	Field baseHullId$
 	Field skinHullId$
 	Field hullName$
+	Field restoreToBaseHull%
+	Field hullDesignation$
 	Field spriteName$
 	Field descriptionId$
 	Field descriptionPrefix$
@@ -15,16 +17,19 @@ Type TStarfarerSkin
 	Field removeBuiltInMods$[] ' hullmod ids
 	Field builtInMods$[] ' hullmod ids
 	Field removeWeaponSlots$[] ' weapon slot id's
-	Field weaponSlotChanges:TMap'<String,TStarfarerShipWeapon>  weapon slot id --> TStarfarerShipWeapon
+	Field weaponSlotChanges:TMap'<String,TStarfarerShipWeaponChange>  weapon slot id --> TStarfarerShipWeapon
 	Field removeBuiltInWeapons$[] ' weapon slot id's
 	Field builtInWeapons:TMap'<String,String>  weapon slot id --> weapon id
 	Field removeEngineSlots%[] ' engine slot indices (no id's)
-	Field engineSlotChanges:TMap'<String,TStarfarerShipEngine>  engine slot index --> TStarfarerShipEngine
+	Field engineSlotChanges:TMap'<String,TStarfarerShipEngineChange>  engine slot index (as string) --> TStarfarerShipEngine
+	Field coversColor$
 	
 	Method New()
 		baseHullId = "base_hull"
 		skinHullId = "base_hull_skin"
 		hullName = "Hull Skin"
+		restoreToBaseHull = False
+		hullDesignation = "FRIGATE"
 		spriteName = "graphics/ships/skins/new_skin.png"
 		descriptionId = "base_hull"
 		descriptionPrefix = ""
@@ -41,7 +46,21 @@ Type TStarfarerSkin
 		builtInWeapons = CreateMap()
 		removeEngineSlots = New Int[0]
 		engineSlotChanges = CreateMap()
+		coversColor = ""
 	End Method
+
+	Method Clone:TStarfarerSkin(dst:TStarfarerSkin = Null)
+		If Not dst Then dst = New TStarfarerSkin
+		MemMove(Byte Ptr (dst), Byte Ptr (Self), SizeOf(Self) )
+		Return dst
+	End Method
+
+	' primitive, manual type hinting (ugh)
+	Method CoerceTypes()
+		Fix_Map_Arbitrary( weaponSlotChanges, "TStarfarerShipWeaponChange", "parse_skin_weapon" )
+		Fix_Map_TStrings( builtInWeapons )
+		Fix_Map_Arbitrary( engineSlotChanges, "TStarfarerShipEngineChange" )
+	EndMethod
 
 End Type
 

@@ -8,11 +8,13 @@ Type Application
 	Field window_size#[]
 	Field images_dir$
 	Field weapon_images_dir$
+	Field skin_images_dir$
 	Field data_dir$
 	Field variant_dir$
 	Field skin_dir$
 	Field weapon_dir$
 	Field font_size%
+	Field raw_json_view_max_column_width%
 	Field data_font_size%
 	Field starsector_base_dir$
 	Field hide_vanilla_data%
@@ -52,10 +54,12 @@ Type Application
 		'MARK load core files
 		app_obj.get_starfarer_dir()
 		If app_obj.images_dir.length = 0        Then app_obj.images_dir = app_obj.starsector_base_dir
+		If app_obj.weapon_images_dir.length = 0 Then app_obj.weapon_images_dir = app_obj.starsector_base_dir
+		If app_obj.skin_images_dir.length = 0   Then app_obj.skin_images_dir = app_obj.starsector_base_dir
 		If app_obj.data_dir.length = 0          Then app_obj.data_dir = app_obj.starsector_base_dir
 		If app_obj.variant_dir.length = 0       Then app_obj.variant_dir = app_obj.starsector_base_dir
 		If app_obj.skin_dir.length = 0          Then app_obj.skin_dir = app_obj.starsector_base_dir
-		If app_obj.weapon_images_dir.length = 0 Then app_obj.weapon_images_dir = app_obj.starsector_base_dir
+		If app_obj.raw_json_view_max_column_width = 0 Then app_obj.raw_json_view_max_column_width = 60
 		Return app_obj
 	EndFunction
 	

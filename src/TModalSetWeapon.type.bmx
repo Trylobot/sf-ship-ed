@@ -1,5 +1,5 @@
 
-Type TModalWeapon Extends TSubroutine
+Type TModalSetWeapon Extends TSubroutine
 	'images
 	Field turret_img:TImage
 	Field turretUnder_img:TImage
@@ -46,6 +46,8 @@ Type TModalWeapon Extends TSubroutine
 		ws.mount = "TURRET"
 		WD.weaponEditorAnime = Null
 		ni = si = - 1
+    RadioMenuArray( MENU_MODE_WEAPON, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_WEAPON)
 		DebugLogFile(" Activate Weapon Editor")
 	EndMethod
 
@@ -55,28 +57,28 @@ Type TModalWeapon Extends TSubroutine
 		Select EventID()
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_OFFSETS] 'offset mode Toggle
-				If ed.mode = "offsets" Then ed.mode = "images" Else ed.mode = "offsets"
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_DISPLAYMODE] 'TURRET/HARDPOINT Toggle
-				If weapon_display_mode = "TURRET" Then weapon_display_mode = "HARDPOINT" Else weapon_display_mode = "TURRET"
-				ws.mount = weapon_display_mode
-				WD.weaponEditorAnime = Null
-				update_sprite_img( data, sprite )
-			'IMAGES
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_MAIN]
-				try_load_sprite( ed, data, sprite, weapon_display_mode, "main" )
-				load_weapon_images( data, sprite )
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_BARREL]
-				try_load_sprite( ed, data, sprite, weapon_display_mode, "gun" )
-				load_weapon_images( data, sprite )	
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_UNDER]
-				try_load_sprite( ed, data, sprite, weapon_display_mode, "under" )
-				load_weapon_images( data, sprite )
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_GLOW]
-				try_load_sprite( ed, data, sprite, weapon_display_mode, "glow" )
-				load_weapon_images( data, sprite )
-			Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_GLOWTOGGLE]
-				do_draw_glow = Not do_draw_glow
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_OFFSETS] 'offset mode Toggle
+					If ed.mode = "offsets" Then ed.mode = "images" Else ed.mode = "offsets"
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_DISPLAYMODE] 'TURRET/HARDPOINT Toggle
+					If weapon_display_mode = "TURRET" Then weapon_display_mode = "HARDPOINT" Else weapon_display_mode = "TURRET"
+					ws.mount = weapon_display_mode
+					WD.weaponEditorAnime = Null
+					update_sprite_img( data, sprite )
+				'IMAGES
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_MAIN]
+					try_load_sprite( ed, data, sprite, weapon_display_mode, "main" )
+					load_weapon_images( data, sprite )
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_BARREL]
+					try_load_sprite( ed, data, sprite, weapon_display_mode, "gun" )
+					load_weapon_images( data, sprite )	
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_UNDER]
+					try_load_sprite( ed, data, sprite, weapon_display_mode, "under" )
+					load_weapon_images( data, sprite )
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WPIMG_GLOW]
+					try_load_sprite( ed, data, sprite, weapon_display_mode, "glow" )
+					load_weapon_images( data, sprite )
+				Case functionMenuSub[MENU_MODE_WEAPON][MENU_SUBFUNCTION_WEAPON_WEAPON_GLOWTOGGLE]
+					do_draw_glow = Not do_draw_glow
 			EndSelect
 		EndSelect
 		'MODE-SPECIFIC UPDATE CALL
@@ -98,9 +100,8 @@ Type TModalWeapon Extends TSubroutine
 	EndMethod
 
 	Method Draw( ed:TEditor, data:TData, sprite:TSprite )
-		
 		'DRAW SPRITES
-		If sprite.wpimg <> Null And weapon_display_mode = "HARDPOINT" Then xOffset = sprite.wpimg.height * - 0.25 Else xOffset = 0
+		If sprite.img <> Null And weapon_display_mode = "HARDPOINT" Then xOffset = sprite.img.height * - 0.25 Else xOffset = 0
 		If WD.show_weapon <> 0
 			If WD.show_weapon = 1 Then SetAlpha( 1 )
 			If WD.show_weapon = 2 Then SetAlpha( 0.5 )
@@ -151,7 +152,9 @@ Type TModalWeapon Extends TSubroutine
 				draw_barrel_offsets( ed, data, sprite )
 			Case "images"
 		EndSelect
-		draw_hud(ed, data)
+		If Not ed.show_data
+			draw_hud(ed, data)
+		EndIf
 	EndMethod
 
 	Method Save( ed:TEditor, data:TData, sprite:TSprite )
@@ -183,20 +186,20 @@ Type TModalWeapon Extends TSubroutine
 		Select weapon_display_mode
 			Case "TURRET"
 				If data.weapon.numFrames <= 1
-					sprite.wpimg = turret_img
+					sprite.img = turret_img
 				Else ' data.weapon.numFrames > 1
-					sprite.wpimg = turret_img_seq[0]
+					sprite.img = turret_img_seq[0]
 				EndIf
 			Case "HARDPOINT"
 				If data.weapon.numFrames <= 1
-					sprite.wpimg = hardpoint_img
+					sprite.img = hardpoint_img
 				Else ' data.weapon.numFrames > 1
-					sprite.wpimg = hardpoint_img_seq[0]
+					sprite.img = hardpoint_img_seq[0]
 				EndIf
 		EndSelect
-		If sprite.wpimg
-			spr_w = sprite.wpimg.width
-			spr_h = sprite.wpimg.height
+		If sprite.img
+			spr_w = sprite.img.width
+			spr_h = sprite.img.height
 		Else
 			spr_w = 0
 			spr_h = 0
@@ -204,7 +207,7 @@ Type TModalWeapon Extends TSubroutine
 	EndMethod
 
 	Method update_offsets( ed:TEditor, data:TData, sprite:TSprite )
-		If Not sprite.wpimg Then Return
+		If Not sprite.img Then Return
 		sprite.get_xy( MouseX, MouseY, img_x, img_y, False)
 		x = RoundFloat( img_x - xOffset, DO_ROUND)
 		y = RoundFloat( - img_y, DO_ROUND )
@@ -256,7 +259,7 @@ Type TModalWeapon Extends TSubroutine
 			EndSelect
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenu[4]
+			Case functionMenu[MENU_FUNCTION_REMOVE]
 				'remove
 				data.remove_nearest_weapon_offset( x, y, weapon_display_mode )
 				data.update_weapon()
@@ -500,3 +503,43 @@ Type TModalWeapon Extends TSubroutine
 	EndMethod
 
 EndType
+
+
+Function draw_weapons( ed:TEditor, data:TData, sprite:TSprite, wd:TWeaponDrawer )
+  wd.update( ed, data ) 
+  If wd.show_weapon = 0 Then Return
+  SetColor( 255, 255, 255 )
+  If wd.show_weapon = 1 Then SetAlpha( 1 )
+  If wd.show_weapon = 2 Then SetAlpha( 0.5 )
+  Select ed.program_mode
+    Case "ship"
+      For Local i% = 0 Until data.ship.weaponSlots.length * 6
+        Local j% = i Mod data.ship.weaponSlots.length
+        Local k% = i / data.ship.weaponSlots.length
+        Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[j]
+        If weaponslot.is_builtin() Or weaponslot.is_decorative()
+          Local weaponID$ = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) )
+          Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) )
+          If weapon And weapon.draw_order() + weaponslot.draw_order() = k Then wd.draw_weaponInSlot(weaponslot, weapon, data, sprite)
+        EndIf
+      Next    
+    Case "variant"
+      Local weapons:TMap = data.variant.getAllWeapons()
+      For Local i% = 0 Until data.ship.weaponSlots.length * 6
+        Local j% = i Mod data.ship.weaponSlots.length
+        Local k% = i / data.ship.weaponSlots.length
+        Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[j]
+        'well, I did the null check later so don't needs in these part...i hope
+        Local weaponID$
+        If data.ship.builtInWeapons.ValueForKey(weaponslot.id)
+          weaponID = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id))
+        Else 
+          weaponID  = String(weapons.ValueForKey(weaponslot.id)) ' could be null but it's ok
+        End If
+        Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID)) ' could be null but it's ok
+        If weapon And weapon.draw_order() + weaponslot.draw_order() = k Then wd.draw_weaponInSlot(weaponslot, weapon, data, sprite)
+      Next    
+  EndSelect
+  SetAlpha( 1 )
+End Function
+

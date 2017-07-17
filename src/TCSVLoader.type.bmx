@@ -3,7 +3,8 @@ Type TCSVLoader
 	Global EXPLICIT_NULL_PREFIX$ = "___NULL___"
 	
 	'loads a CSV into a map
-	Function Load:TMap( file$, key_field$, csv_rows:TMap = Null, field_order:TList = Null, row_order:TList = Null )
+	Function Load%( file$, key_field$, csv_rows:TMap = Null, field_order:TList = Null, row_order:TList = Null )
+		Local rows_loaded% = 0
 		If Not csv_rows Then csv_rows = CreateMap()
 		'Local Input$ = LoadString( file )
 		Local Input$ = LoadTextAs ( file , CODE_MODE)
@@ -16,10 +17,9 @@ Type TCSVLoader
 			If fields[f] = Null
 				fields[f] = EXPLICIT_NULL_PREFIX + f
 			EndIf
-			If field_order
-				field_order.AddLast( fields[f] )
-			EndIf
+			If field_order Then field_order.AddLast( fields[f] )
 		Next
+		Local key$
 		For Local i% = 1 Until csv_data.length
 			Local row:TMap = CreateMap()
 			Local values$[] = csv_data[i]
@@ -33,15 +33,19 @@ Type TCSVLoader
 					row.Insert( fields[j], "" )
 				EndIf
 			Next
-			If row.ValueForKey( key_field ) <> Null And row.ValueForKey( key_field ) <> ""
+			key = String( row.ValueForKey( key_field ))
+			If key
 				'confirm that the row has a valid identifer
-				csv_rows.Insert( row.ValueForKey( key_field ), row )
-				If row_order
-					row_order.AddLast( row.ValueForKey( key_field ))
+				If Not csv_rows.Contains( key )
+					rows_loaded :+ 1
+				Else
+					DebugLogFile(" warning: duplicate key: "+key+" ["+file+"]") ' in-game, this would be an error: duplicate key
 				EndIf
+				csv_rows.Insert( key, row )
+				If row_order Then row_order.AddLast( key )
 			EndIf
 		Next
-		Return csv_rows
+		Return rows_loaded
 	EndFunction
 
 	Function Save_Row( file$, row:TMap, key_field$, field_order:TList )
@@ -168,7 +172,6 @@ Type TCSVLoader
 		EndWhile
 		Return records
 	End Function
-
 
 	'escapes string data if it contains one or more field-separators or record-separators
 	Function csv_conservative_escape$( field_data$ )

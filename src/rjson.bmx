@@ -63,12 +63,13 @@ Supported transformation type selectors:
 Supported transformation imperatives:
 * XJ_DELETE 
 * XJ_RENAME( new_field_name )
-* XJ_CONVERT( new_json_type_code ) 
+* XJ_CONVERT( new_json_type_code )
 
 
 EndRem
 
 SuperStrict
+'Module twrc.rjson ' local copy of actual module, for convenience
 Import brl.reflection
 Import brl.retro
 Import brl.linkedlist
@@ -87,7 +88,7 @@ Type json
 	Global formatted_array% = True 'false: compact,   true: indented; global setting
 	Global empty_container_as_null% = False 'false: [] {} "",   true: null
 	Global indent_size% = 2 'spaces per indent level, if formatted is true; global setting
-	Global precision% = 6 'default floating-point precision, can be overridden per field/object/instance/item/value
+	Global precision% = 6 'cstdio.h default floating-point precision; can be overridden per field/object/instance/item/value
 	
 	'Transformations
 	Global transformations:TMap = CreateMap()
@@ -186,8 +187,8 @@ Type json
 				intermediate_object = New TArray
 			Case TValue.JSONTYPE_OBJECT
 				intermediate_object = New TObject
-			Case TValue.JSONTYPE_EMUN
-				intermediate_object = New TEmun				
+			Case TValue.JSONTYPE_ENUM
+				intermediate_object = New TEnum				
 		EndSelect
 		Return intermediate_object
 	EndFunction
@@ -436,7 +437,7 @@ Type json
 
 	'////////////////////////////////////////////////////////////////////////////
 
-	Function FormatDouble:String( value:Double, precision:Int )
+	Function FormatDouble:String( value:Double, precision:Int=-1 )
 		'trims trailing zeroes and decimal separator
 		Extern "C"
 			Function snprintf_:Int( s:Byte Ptr, n:Int, Format$z, p:Int, v1:Double) = "snprintf"
@@ -444,7 +445,7 @@ Type json
 		Const CHAR_0:Byte = Asc("0")
 		Const CHAR_DOT:Byte = Asc(".")
 		Const STR_FMT:String = "%.*f"
-		If precision = -1 Then precision = 6 'cstdio.h default
+		If precision = -1 Then precision = json.precision
 		Local i:Double
 		Local buf:Byte[256]
 		Local sz:Int = snprintf_( buf, buf.Length, STR_FMT, precision, value)
@@ -683,7 +684,7 @@ Type TValue
 				Return json.SEL_ARRAY
 			Case JSONTYPE_OBJECT
 				Return json.SEL_OBJECT
-			Case JSONTYPE_EMUN
+			Case JSONTYPE_ENUM
 				Return json.SEL_EMUN
 			Default
 				Return Null
@@ -711,7 +712,7 @@ Type TValue
 		ElseIf encoded.StartsWith( OBJECT_BEGIN )
 			Return JSONTYPE_OBJECT
 		ElseIf json.IsAlphaNumericOrUnderscore( encoded )
-			Return JSONTYPE_EMUN 'unquoted string that should be a emun item.
+			Return JSONTYPE_ENUM 'unquoted string that should be a emun item.
 		Else
 			Return JSONTYPE_INVALID
 		EndIf
@@ -725,7 +726,7 @@ Type TValue
 	Const JSONTYPE_STRING% = 3
 	Const JSONTYPE_ARRAY% = 4
 	Const JSONTYPE_OBJECT% = 5
-	Const JSONTYPE_EMUN% = 6	
+	Const JSONTYPE_ENUM% = 6	
 
 	'ASCII Literals
 	Const OBJECT_BEGIN$                  = "{"
@@ -840,9 +841,9 @@ Type TBoolean Extends TValue
 			Case JSONTYPE_ARRAY
 				val.value = (Not TArray(other).elements.IsEmpty())
 			Case JSONTYPE_OBJECT
-				val.value = (Not TObject(other).fields.IsEmpty() )
-			Case JSONTYPE_EMUN
-				val.value = (TEMUN(other).value <> "")
+				val.value = (Not TObject(other).fields.IsEmpty())
+			Case JSONTYPE_ENUM
+				val.value = (TEnum(other).value <> "")
 		EndSelect
 		Return val
 	EndFunction
@@ -863,14 +864,19 @@ Type TNumber Extends TValue
 	EndMethod
 
 	Method Decode( encoded$, cursor% Var )
+		'(untested) roughly equivalent regular expression:
+		'  [+-.]?\d+(:?[.]\d+)?(:?[eE][+-]?\d+)?f?
 		json.EatWhitespace( encoded, cursor )
 		Local cursor_start% = cursor
 		Local floating_point% = False
 		json.EatSpecific( encoded, cursor, "+-", 1 ) 'positive/negative
-		json.EatSpecific( encoded, cursor, "0123456789",, 1 )
-		If json.EatSpecific( encoded, cursor, ".", 1 ) 'decimal pt.
+		If json.EatSpecific( encoded, cursor, ".", 1 ) 'leading decimal pt.
 			floating_point = True
-			json.EatSpecific( encoded, cursor, "0123456789",, 1 )
+		End If
+		json.EatSpecific( encoded, cursor, "0123456789",, 1 )
+		If Not floating_point And json.EatSpecific( encoded, cursor, ".", 1 ) 'middle decimal pt.
+			floating_point = True
+			json.EatSpecific( encoded, cursor, "0123456789",, 1 ) 'digits following decimal point
 		End If
 		If json.EatSpecific( encoded, cursor, "eE", 1 ) 'scientific notation
 			floating_point = True
@@ -913,8 +919,8 @@ Type TNumber Extends TValue
 				val.value = 0
 			Case JSONTYPE_OBJECT
 				val.value = 0
-			Case JSONTYPE_EMUN
-				val.value = TEmun(other).value.ToDouble()
+			Case JSONTYPE_ENUM
+				val.value = TEnum(other).value.ToDouble()
 		EndSelect
 		Return val
 	EndFunction
@@ -1041,25 +1047,25 @@ Type TString Extends TValue
 				val.value = ""
 			Case JSONTYPE_OBJECT
 				val.value = ""
-			Case JSONTYPE_EMUN
-				val.value = TEmun(other).value			
+			Case JSONTYPE_ENUM
+				val.value = TEnum(other).value			
 		EndSelect
 		Return val
 	EndFunction
 	
-	Function CreateFormString:TString (input$)
+	Function CreateFromString:TString (input$)
 		Local str:TString = New TString
 		str.value = Input
 		Return str
 	End Function
 EndType
 
-Type TEmun Extends TValue
+Type TEnum Extends TValue
 
 	Field value:String
 
 	Method New()
-		value_type = JSONTYPE_EMUN
+		value_type = JSONTYPE_ENUM
 	EndMethod
 
 	Method Encode:String( indent%, precision% )
@@ -1101,13 +1107,13 @@ Type TEmun Extends TValue
 	EndMethod
 
 	Method Copy:TValue()
-		Local val:TEmun = New TEmun
+		Local val:TEnum = New TEnum
 		val.value = value
 		Return val
 	EndMethod
 
 	Method Equals%( other:Object )
-		Return (TEmun(other) <> Null And TEmun(other).value_type = JSONTYPE_EMUN And TEmun(other).value = Self.value)
+		Return (TEnum(other) <> Null And TEnum(other).value_type = JSONTYPE_ENUM And TEnum(other).value = Self.value)
 	EndMethod
 	
 	Method ToString$()
@@ -1115,7 +1121,7 @@ Type TEmun Extends TValue
 	End Method
 
 	Function Create:TValue( other:TValue )
-		Local val:TEmun = New TEmun
+		Local val:TEnum = New TEnum
 		Select other.value_type
 			Case JSONTYPE_NULL
 				val.value = other.Encode( 0, json.precision )
@@ -1129,14 +1135,14 @@ Type TEmun Extends TValue
 				val.value = ""
 			Case JSONTYPE_OBJECT
 				val.value = ""
-			Case JSONTYPE_EMUN
-				val.value = TEmun(other).value			
+			Case JSONTYPE_ENUM
+				val.value = TEnum(other).value			
 		EndSelect
 		Return val
 	EndFunction
 	
-	Function CreateFormString:TEmun (input$)
-		Local emun:TEmun = New TEmun
+	Function CreateFromString:TEnum (input$)
+		Local emun:TEnum = New TEnum
 		emun.value = Input
 		Return emun
 	End Function
@@ -1287,7 +1293,7 @@ Type TArray Extends TValue
 				For Local field_name$ = EachIn TObject(other).fields.Keys()
 					val.elements.AddLast( TValue(TObject(other).fields.ValueForKey( field_name )).Copy() )
 				Next
-			Case JSONTYPE_EMUN
+			Case JSONTYPE_ENUM
 				val = New TArray
 		EndSelect
 		Return val
@@ -1443,7 +1449,7 @@ Type TObject Extends TValue
 				Next
 			Case JSONTYPE_OBJECT
 				val = TObject(other.Copy() )
-			Case JSONTYPE_EMUN
+			Case JSONTYPE_ENUM
 				val = New TObject
 		EndSelect
 		Return val
@@ -1620,7 +1626,7 @@ Type TValue_Transformation
 							Case json.SEL_OBJECT
 								new_val = TObject.Create( old_val )
 							Case json.SEL_EMUN
-								new_val = TEmun.Create(old_val)							
+								new_val = TEnum.Create(old_val)							
 						EndSelect
 						If result.container_TObject
 							result.container_TObject.fields.Insert( result.object_field_name, new_val )

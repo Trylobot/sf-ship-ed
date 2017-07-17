@@ -7,21 +7,28 @@ Function config_json_transforms()
   json.precision = 6
   'Application
   json.add_transform( "stringify_settings", "$hide_vanilla_data", json.XJ_CONVERT, "boolean" )
+  'TStarfarerShip
+  json.add_transform( "stringify_ship", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
+  json.add_transform( "stringify_ship", "$builtInMods:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
+  json.add_transform( "stringify_ship", "$coversColor:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
   'TStarfarerShipWeapon
   json.add_transform( "parse_ship", "$weaponSlots:array/:object/$type:string", json.XJ_RENAME, "type_" )
   json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$type_:string", json.XJ_RENAME, "type" )
   json.add_transform( "stringify_ship", "$weaponSlots:array/:object/$position:array", json.XJ_DELETE,, predicate_omit_position )
-  json.add_transform( "stringify_ship", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
-  json.add_transform( "stringify_ship", "$builtInMods:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
-  json.add_transform( "stringify_ship", "$coversColor:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
-  'TStarfarerVariant
-  json.add_transform( "stringify_variant", "$goalVariant", json.XJ_CONVERT, "boolean" )
   'TStarfarerCustomEngineStyleSpec
   json.add_transform( "parse_ship", "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
   json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:object/$type_:string", json.XJ_RENAME, "type" )
   json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleSpec:object", json.XJ_DELETE,, predicate_omit_styleSpec )
   json.add_transform( "stringify_ship", "$engineSlots:array/:object/$styleId:string", json.XJ_DELETE,, predicate_omit_styleId )
-  'TStarfarerShip
+  'TStarfarerVariant
+  json.add_transform( "stringify_variant", "$goalVariant", json.XJ_CONVERT, "boolean" )
+  'TStarfarerSkin
+  json.add_transform( "parse_skin", "$weaponSlotChanges:object/:object/$type:string", json.XJ_RENAME, "type_" )
+  json.add_transform( "stringify_skin", "$weaponSlotChanges:object/:object/$type_:string", json.XJ_RENAME, "type" )
+  json.add_transform( "stringify_skin", "$restoreToBaseHull", json.XJ_CONVERT, "boolean" )
+  json.add_transform( "stringify_skin", "$hullDesignation:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+  json.add_transform( "stringify_skin", "$coversColor:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+  json.add_transform( "stringify_skin", "$weaponSlotChanges:object/:object/$type_:string", json.XJ_RENAME, "type" )
   json.add_transform( "stringify_skin", "$baseValue:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
   json.add_transform( "stringify_skin", "$baseValueMult:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
   json.add_transform( "stringify_skin", "$fleetPoints:number", json.XJ_DELETE,, predicate_omit_if_equals_zero )
@@ -39,8 +46,21 @@ Function config_json_transforms()
   json.add_transform( "stringify_skin", "$builtInWeapons:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
   json.add_transform( "stringify_skin", "$removeEngineSlots:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
   json.add_transform( "stringify_skin", "$engineSlotChanges:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
+  'TStarfarerSkin - omit unchanged fields in X_SlotChanges by detecting poisoned default values
+  json.add_transform( "stringify_skin", "$engineSlotChanges/:object/$location:array", json.XJ_DELETE,, predicate_omit_if_empty_array )
+  json.add_transform( "stringify_skin", "$engineSlotChanges/:object/$length:number", json.XJ_DELETE,, predicate_omit_if_equals_FLOAT_MAX )
+  json.add_transform( "stringify_skin", "$engineSlotChanges/:object/$width:number", json.XJ_DELETE,, predicate_omit_if_equals_FLOAT_MAX )
+  json.add_transform( "stringify_skin", "$engineSlotChanges/:object/$angle:number", json.XJ_DELETE,, predicate_omit_if_equals_FLOAT_MAX )
+  json.add_transform( "stringify_skin", "$engineSlotChanges/:object/$style:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+  json.add_transform( "stringify_skin", "$engineSlotChanges/:object/$styleId:string", json.XJ_DELETE,, predicate_omit_if_empty_string )
+  json.add_transform( "stringify_skin", "$engineSlotChanges/:object/$styleSpec:object", json.XJ_DELETE,, predicate_omit_if_empty_object )
+  json.add_transform( "stringify_skin", "$engineSlotChanges/:object/$contrailSize:number", json.XJ_DELETE,, predicate_omit_if_equals_FLOAT_MAX )
+  'TStarfarerShipWeaponChange (for deep type coercion within skin parsing)
+  json.add_transform( "parse_skin_weapon", "$type:string", json.XJ_RENAME, "type_" )
+  json.add_transform( "stringify_skin_weapon", "$type_:string", json.XJ_RENAME, "type" )
   'TStarfarerCustomEngineStyleSpec
-  json.add_transform( "parse_CustomEngineStyle", "$engineSlots:array/:object/$styleSpec:object/$type:string", json.XJ_RENAME, "type_" )
+  json.add_transform( "parse_custom_engine_style", "$type:string", json.XJ_RENAME, "type_" )
+  json.add_transform( "stringify_custom_engine_style", "$type_:string", json.XJ_RENAME, "type" )
   'TStarfarerWeapon
   json.add_transform( "parse_weapon", "$type:string", json.XJ_RENAME, "type_" )
   json.add_transform( "stringify_weapon", "$type_:string", json.XJ_RENAME, "type" )

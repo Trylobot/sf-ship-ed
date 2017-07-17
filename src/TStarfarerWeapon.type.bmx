@@ -23,7 +23,7 @@ Type TStarfarerWeapon
 	'essential to beam
 	Field fringeColor#[] = [255.0, 255.0, 255.0, 255.0]
 	Field coreColor#[] = [255.0, 255.0, 255.0, 255.0]
-	Field textureType:Object = TEmun.CreateFormString("ROUGH") 'TEmun, TString[]
+	Field textureType:Object = TEnum.CreateFromString("ROUGH") 'TEnum, TString[]
 	
 	'optional 	
 	Field turretUnderSprite$ = ""

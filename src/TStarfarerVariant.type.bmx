@@ -35,7 +35,7 @@ Type TStarfarerVariant
 		Return weaponMap
 	EndMethod
 	
-	Method clone:TStarfarerVariant ()
+	Method Clone:TStarfarerVariant ()
 		Local c:TStarfarerVariant = New TStarfarerVariant
 		c.displayName = displayName + " Copy"
 		c.hullId = hullId
@@ -53,6 +53,12 @@ Type TStarfarerVariant
 		c.wings = wings[..]
 		Return c
 	End Method
+
+	Method CoerceTypes()
+		For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn weaponGroups
+			Fix_Map_TStrings( weaponGroup.weapons )
+		Next
+	EndMethod
 	
 	
 End Type

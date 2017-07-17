@@ -17,6 +17,8 @@ Type TEditor
 	Field builtIn_hullMod_i%
 	Field builtIn_wing_i%
 	Field variant_hullMod_i%
+	Field skin_hullMod_i%
+	Field skin_engine_i%
 	Field variant_wing_i%
 	Field group_field_i%
 	'mouse states
@@ -55,21 +57,28 @@ Type TEditor
 	Field ico_exit:TImage
 	Field engineflame:TImage
 	Field engineflamecore:TImage
-	'stock data
-	Field stock_ships:TMap 'String (hullId) --> TStarfarerShip
-	Field stock_variants:TMap 'String (variantId) --> TStarfarerVariant
-	Field stock_hull_variants_assoc:TMap 'String (TList) --> List of variant_id's asssociated with the hullid
-	Field stock_weapons:TMap 'String(id) --> TStarfarerWeapon
-	Field stock_engine_styles:TMap'<String,TStarfarerCustomEngineStyleSpec>  'CUSTOM Engine styleId --> engine data object
-	Field stock_ship_stats:TMap 'String (id:hullId) --> TMap (csv stats keys --> values)
-	Field stock_wing_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
-	Field stock_variant_wing_stats_assoc:TMap 'String (TList) --> List of wing_id's associated with the variantId
-	Field stock_weapon_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
-	Field stock_hullmod_stats:TMap 'String (id) --> TMap (csv stats keys --> values)
-	Field stock_ship_stats_field_order:TList'<String> 'column names
-	Field stock_wing_stats_field_order:TList'<String> 'column names
-	Field stock_weapon_stats_field_order:TList'<String> 'column names
-	Field multiselect_values:TMap 'String (field) --> TMap (set of valid values)
+	'stock (and mod) data
+	Field stock_ships:TMap                    '<String,Object>  hullId --> TStarfarerShip
+	Field stock_variants:TMap                 '<String,Object>  variantId --> TStarfarerVariant
+	Field stock_hull_variants_assoc:TMap      '<String,TList>   hullId --> TList of variantIds (referencing the hullId)
+	Field stock_skins:TMap                    '<String,Object>  skinHullId --> TStarfarerSkin
+	Field stock_hull_skins_assoc:TMap         '<String,TList>   hullId --> TList of skinHullIds (referencing the hullId)
+	Field stock_skins_variants_assoc:TMap     '<String,TList>   skinHullId --> TList of variantIds (referencing the hullId, not knowing it is a skinHullId)
+	Field stock_weapons:TMap                  '<String,Object>  weaponId --> TStarfarerWeapon
+	Field stock_engine_styles:TMap            '<String,Object>  engine style spec id --> TStarfarerCustomEngineStyleSpec
+	Field stock_ship_stats:TMap               '<String,TMap>    hullId --> TMap (csv columns --> values)
+	Field stock_wing_stats:TMap               '<String,TMap>    wingId --> TMap (csv columns --> values)
+	Field stock_variant_wing_stats_assoc:TMap '<String,TList>   variantId --> TList of wingId (referencing the variantId)
+	Field stock_weapon_stats:TMap             '<String,TMap>    weaponId --> TMap (csv columns --> values)
+	Field stock_hullmod_stats:TMap            '<String,TMap>    hullmodId --> TMap (csv columns --> values)
+	'metadata
+	Field stock_ship_stats_field_order:TList     '<String>  csv column (ordered)
+	Field stock_wing_stats_field_order:TList     '<String>  csv column (ordered)
+	Field stock_weapon_stats_field_order:TList   '<String>  csv column (ordered)
+	Field stock_hullmod_count%            
+	Field stock_hullmod_ids_sorted:TList         '<String>  csv row id value
+	'
+	Field multiselect_values:TMap                '<String,TMap>     field (enum) --> [value set] (TMap <value,value>)
 
 	Method New()
 		program_mode = "ship"
@@ -87,6 +96,9 @@ Type TEditor
 		stock_ships = CreateMap()
 		stock_variants = CreateMap()
 		stock_hull_variants_assoc = CreateMap()
+		stock_skins = CreateMap()
+		stock_hull_skins_assoc = CreateMap()
+		stock_skins_variants_assoc = CreateMap()
 		stock_weapons = CreateMap()
 		stock_engine_styles = CreateMap()
 		stock_engine_styles.Insert( "", "" ) 'NULL engine style means "use the included styleSpec data"
@@ -100,6 +112,8 @@ Type TEditor
 		stock_ship_stats_field_order = ship_data_csv_field_order_template.Copy()
 		stock_wing_stats_field_order = wing_data_csv_field_order_template.Copy()
 		stock_weapon_stats_field_order = weapon_data_csv_field_order_template.Copy()
+		stock_hullmod_count = 0
+		stock_hullmod_ids_sorted = CreateList()
 		'scraped enum values
 		multiselect_values = CreateMap()
 	EndMethod
@@ -107,8 +121,8 @@ Type TEditor
 	Method load_stock_ship:TStarfarerShip( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir + file )
-			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ) )
-			Fix_Map_TStrings( ship.builtInWeapons ) 'TEMPORARY
+			Local ship:TStarfarerShip = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ))
+			ship.CoerceTypes()
 			stock_ships.Insert( ship.hullId, ship )
 			load_multiselect_value( "ship.hullSize", ship.hullSize )
 			load_multiselect_value( "ship.style", ship.style )
@@ -134,10 +148,8 @@ Type TEditor
 	Method load_stock_variant:TStarfarerVariant( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir + file )
-			Local variant:TStarfarerVariant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
-			For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
-				Fix_Map_TStrings( weaponGroup.weapons ) 'TEMPORARY
-			Next
+			Local variant:TStarfarerVariant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant", "parse_variant" ))
+			variant.CoerceTypes()
 			'save variant data
 			stock_variants.Insert( variant.variantId, variant )
 			'save association to hull that it references
@@ -159,17 +171,64 @@ Type TEditor
 		EndTry
 	End Method
 
+	Method load_stock_skin:TStarfarerSkin( dir$, file$ )
+		Try
+			' stock_skins
+			' stock_hull_skins_assoc
+			' stock_skins_variants_assoc
+			Local input_json_str$ = LoadString( dir + file )
+			Local skin:TStarfarerSkin = TStarfarerSkin( json.parse( input_json_str, "TStarfarerSkin" ))
+			skin.CoerceTypes()
+			'save data
+			stock_skins.Insert( skin.skinHullId, skin )
+			'save association to hull that it references
+			Local assoc:TList = TList( stock_hull_skins_assoc.ValueForKey( skin.baseHullId ))
+			If Not assoc
+				assoc = CreateList()
+				stock_hull_skins_assoc.Insert( skin.baseHullId, assoc )
+			EndIf
+			assoc.AddLast( skin.skinHullId )
+			Rem
+				TODO: find variants that reference skin.skinHullId
+					OPTION 1: move them to stock_skins_variants_assoc
+					OPTION 2: copy them to stock_skins_variants_assoc
+					OPTION 3: create "ghost" TStarfarerShip that represents the merging of
+					  the skin file grafted on top of its base hull ship
+					  for the variant to reference, not knowing it's a virtual/ghost datafile
+			EndRem
+			'scan for multiselect values ?
+			'For ...
+			'	load_multiselect_value( "skin.path.to.value", valueref )
+			'Next
+			DebugLogFile " LOADED "+file
+			Return skin
+		Catch ex$ 'capture errors, print & continue
+			DebugLogFile " Error: "+file+" "+ex
+			Return Null
+		EndTry
+	EndMethod
+
 	Method get_default_variant:TStarfarerVariant( hullId$ )
 		Local assoc:TList = TList( stock_hull_variants_assoc.ValueForKey( hullId ))
 		Local variant:TStarfarerVariant
 		If assoc And Not assoc.IsEmpty()
 			variant = TStarfarerVariant( stock_variants.ValueForKey( assoc.First() ))
-		Else
+		Else ' is this behavior even desirable? we can't tell if it worked o
 			variant = New TStarfarerVariant
 			variant.hullId = hullId
 			variant.variantId = hullId+"_variant"
 		EndIf
 		Return variant
+	EndMethod
+
+	Method get_default_skin:TStarfarerSkin( hullId$ )
+		Local assoc:TList = TList( stock_hull_skins_assoc.ValueForKey( hullId ))
+		Local skin:TStarfarerSkin
+		If assoc And Not assoc.IsEmpty()
+			skin = TStarfarerSkin( stock_skins.ValueForKey( assoc.First() ))
+		EndIf
+		' it's entirely normal for there to be no skins, so don't just make one up if there aren't any
+		Return skin
 	EndMethod
 
 	Method verify_variant_association%( hullId$, variantId$ )
@@ -199,6 +258,14 @@ Type TEditor
 	Method load_stock_engine_styles( dir$, file$ )
 		Try
 			Local input_json_str$ = LoadString( dir + file )
+			Local engine_styles:TMap = TMap( json.parse( input_json_str, "TMap" ))
+			' this (type hinting within TMap/TList) needs to be supported by rjson.bmx, badly
+			Fix_Map_Arbitrary( engine_styles, "TStarfarerCustomEngineStyleSpec", "parse_custom_engine_style" )
+			For Local styleId$ = EachIn engine_styles.Keys()
+				load_multiselect_value( "ship.engine.styleId", styleId )
+				stock_engine_styles.Insert( styleId, TStarfarerCustomEngineStyleSpec( engine_styles.ValueForKey( styleId )))
+			Next
+			Rem
 			Local intermediate_objects:TObject = TObject(json.parse( input_json_str, Null, "parse_CustomEngineStyle") )
 			For Local styleId$ = EachIn intermediate_objects.fields.Keys()
 				load_multiselect_value( "ship.engine.styleId", styleId )
@@ -208,26 +275,38 @@ Type TEditor
 				stock_engine_styles.Insert(styleId, engine_style)
 				'Print intermediate_object.ToString()
 			Next	
-'			Local engine_styles:TMap = TMap( json.parse( input_json_str, "TMap" ) )
-'			For Local styleId$ = EachIn engine_styles.Keys()
-'				load_multiselect_value( "ship.engine.styleId", styleId )
-'				Local str$ = String(MapValueForKey(engine_styles, styleId) )
-'				Local style:TStarfarerCustomEngineStyleSpec = TStarfarerCustomEngineStyleSpec (MapValueForKey(engine_styles, styleId) )
-'				stock_engine_styles.Insert(styleId, style)
-'			Next
+			''''
+			Local engine_styles:TMap = TMap( json.parse( input_json_str, "TMap" ) )
+			For Local styleId$ = EachIn engine_styles.Keys()
+				load_multiselect_value( "ship.engine.styleId", styleId )
+				Local str$ = String(MapValueForKey(engine_styles, styleId) )
+				Local style:TStarfarerCustomEngineStyleSpec = TStarfarerCustomEngineStyleSpec (MapValueForKey(engine_styles, styleId) )
+				stock_engine_styles.Insert(styleId, style)
+			Next
+			EndRem
 		Catch ex$ 'ignore parsing errors and continue
 			DebugLogFile " Error: "+file+" "+ex
 		EndTry
+	EndMethod
+
+	Method get_engine_color%[]( engine:TStarfarerShipEngine )
+		If engine.styleSpec Then Return engine.styleSpec.engineColor
+		Local styleID$ = engine.style
+		If styleID = "CUSTOM" Then styleID = engine.styleId
+		Local Value:Object = stock_engine_styles.ValueForKey( styleID )
+		If Value Then Return (TStarfarerCustomEngineStyleSpec (Value) ).engineColor..
+		Else Return [255, 255, 255, 255]
 	EndMethod
 
 	Method load_stock_ship_stats( dir$, file$, save_field_order%=False )
 		Try
 			If save_field_order
 				stock_ship_stats_field_order = CreateList()
-				TCSVLoader.Load( dir + file, "id", stock_ship_stats, stock_ship_stats_field_order )
+				TCSVLoader.Load( dir+file, "id", stock_ship_stats, stock_ship_stats_field_order )
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_ship_stats )
 			EndIf
+			stock_ship_stats.Remove("") ' omit blanks and spacers
 			Local row:TMap
 			For Local id$ = EachIn stock_ship_stats.Keys()
 				'scan all rows for multiselect values
@@ -256,7 +335,7 @@ Type TEditor
 			Else
 				TCSVLoader.Load( dir+file, "id", stock_wing_stats )
 			EndIf
-			stock_wing_stats.Remove("") ' omit this, it is likely a spacer from the raw file data
+			stock_wing_stats.Remove("") ' omit blanks and spacers
 			Local row:TMap
 			For Local id$ = EachIn stock_wing_stats.Keys()
 				'scan all rows for multiselect values and save association to variant
@@ -296,12 +375,14 @@ Type TEditor
 
 	Method load_stock_weapon_stats( dir$, file$, save_field_order% = False )
 		Try
-			If save_field_order
+			'If save_field_order
 				'stock_weapon_stats_field_order = CreateList()
+				' QUESTION: why was stock_weapon_stats_field_order omitted unconditionally? 
 				TCSVLoader.Load( dir+file, "id", stock_weapon_stats )', stock_weapon_stats_field_order )
-			Else
-				TCSVLoader.Load( dir+file, "id", stock_weapon_stats )
-			EndIf
+			'Else
+			'	TCSVLoader.Load( dir+file, "id", stock_weapon_stats )
+			'EndIf
+			stock_weapon_stats.Remove("") ' omit blanks and spacers
 			Local row:TMap
 			For Local id$ = EachIn stock_weapon_stats.Keys()
 				'scan all rows for multiselect values
@@ -324,12 +405,21 @@ Type TEditor
 
 	Method load_stock_hullmod_stats( dir$, file$, save_field_order%=False )
 		Try
-			TCSVLoader.Load( dir+file, "id", stock_hullmod_stats )
+			stock_hullmod_count :+ TCSVLoader.Load( dir+file, "id", stock_hullmod_stats )
+			If stock_hullmod_stats.Remove("") Then stock_hullmod_count :- 1 ' omit blanks and spacers
 			DebugLogFile " LOADED "+file
 		Catch ex$ 'ignore parsing errors and continue
 			DebugLogFile " Error: "+file+" "+ex
 		EndTry
 	End Method
+
+	Method sort_hullmods_by_ordnance_points( ascending%=True )
+		stock_hullmod_ids_sorted.Clear()
+		For Local hullmod_id$ = EachIn stock_hullmod_stats.Keys()
+			stock_hullmod_ids_sorted.AddLast( hullmod_id )
+		Next
+		stock_hullmod_ids_sorted.Sort( ascending, compare_hullmod_ids )' global fn
+	EndMethod
 
 	'//////////////
 

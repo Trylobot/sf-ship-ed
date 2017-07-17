@@ -25,6 +25,8 @@ Type TModalSetShipCSV Extends TGenericCSVSubroutine
 		stock_stats = ed.stock_ship_stats
 		stock_stats_field_order = ed.stock_ship_stats_field_order
 		data_csv_row = data.csv_row
+    RadioMenuArray( MENU_MODE_SHIPSTATS, modeMenu )
+    rebuildFunctionMenu(MENU_MODE_SHIPSTATS)
 		DebugLogFile(" Activate Ship CSV Editor")
 	EndMethod
 

@@ -1,38 +1,38 @@
 '-----------------------
 
 Type TStarfarerShipEngine
-	Field angle#
-	Field contrailSize#
-	Field length#
 	Field location#[]
+	Field length#
+	Field width#
+	Field angle#
 	Field style$
 	Field styleId$
 	Field styleSpec:TStarfarerCustomEngineStyleSpec
-	Field width#
+	Field contrailSize#
 	
 	Method New()
-		angle = 180.0
-		contrailSize = 30.0
-		length = 30.0
 		location = [ 0.0, 0.0 ]
+		length = 30.0
+		width = 10.0
+		angle = 180.0
 		style = "LOW_TECH"
 		styleId = Null
 		styleSpec = Null
-		width = 10.0
+		contrailSize = 30.0
 	End Method
 
 	Method Clone:TStarfarerShipEngine()
 		Local copy:TStarfarerShipEngine = New TStarfarerShipEngine
-		copy.angle = angle
-		copy.contrailSize = contrailSize
-		copy.length = length
 		copy.location = location[..]
+		copy.length = length
+		copy.width = width
+		copy.angle = angle
 		copy.style = style
 		copy.styleId = styleId
 		If styleSpec
 			copy.styleSpec = styleSpec.Clone()
 		EndIf
-		copy.width = width
+		copy.contrailSize = contrailSize
 		return copy
 	End Method
 End Type

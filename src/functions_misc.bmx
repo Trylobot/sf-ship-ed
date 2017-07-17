@@ -58,6 +58,31 @@ Function remove_at#[]( arr#[], i% )
 	End If
 EndFunction
 
+Function intarray_remove_at%[]( arr%[], i% )
+	If i >= 0 And i < arr.Length
+		If arr.Length = 1 Then Return Null Else Return arr[..i] + arr[i + 1..]
+	Else
+		Return arr
+	End If
+EndFunction
+
+Function remove_first_val_from_intarray%[]( arr%[], val% )
+	If Not arr Then Return arr
+	For Local i% = 0 Until arr.length
+		If arr[i] = val
+			Return intarray_remove_at( arr, i )
+		EndIf
+	Next
+	Return arr
+EndFunction
+
+Function intarray_append%[]( arr%[], val% )
+	If Not arr Then Return [val]
+	arr = arr[..(arr.length+1)]
+	arr[arr.length-1] = val
+	Return arr
+EndFunction
+
 Function calc_distance#( x1#, y1#, x2#, y2# )
 	Local diff_x#, diff_y#
 	diff_x = x2 - x1
@@ -145,6 +170,14 @@ Function zero_pad$( num%, length% )
 	Return str
 EndFunction
 
+Function in_int_array%( val%, arr%[] )
+	If Not arr Then Return False
+	For Local i% = 0 Until arr.Length
+		If arr[i] = val Then Return True
+	Next
+	Return False
+EndFunction
+
 Function in_str_array%( val$, arr$[] )
 	If Not arr Then Return False
 	For Local i% = 0 Until arr.Length
@@ -158,7 +191,7 @@ EndFunction
 ' That functionality should also address forcing null arrays to [] and null objects to {}
 Function Fix_Map_TStrings( map:TMap )
 	If map And Not map.IsEmpty()
-		For Local key$ = EachIn map.Keys()
+		For Local key:Object = EachIn map.Keys()
 			Local val:TString = TString( map.ValueForKey( key ))
 			If val
 				map.Insert( key, val.value )
@@ -167,8 +200,32 @@ Function Fix_Map_TStrings( map:TMap )
 	EndIf
 EndFunction
 
+' semi-reflective version of Fix_Map_TStrings
+'   intended for use with intermediate JSON data, to get it the rest of the way there
+' does not modify keys
+Function Fix_Map_Arbitrary( map:TMap, target_type$, transforms_set$=Null )
+	If map And Not map.IsEmpty()
+		Local destination_type_id:TTypeId = TTypeId.ForName( target_type )
+		If destination_type_id
+			'DebugLog("  "+destination_type_id.Name())
+			For Local key:Object = EachIn map.Keys()
+				' TODO: self: fucking implement this in rjson for fucks sake, it's getting ridiculous
+				Local intermediate_object:TValue = TValue( map.ValueForKey( key ))
+				'DebugLog("    "+String(key)+":"+TTypeId.ForObject(intermediate_object).Name())
+				If transforms_set
+					json.execute_transforms( transforms_set, intermediate_object )
+				EndIf
+				Local destination_object:Object = json.initialize_object( intermediate_object, destination_type_id )
+				'DebugLog("      --> "+String(key)+":"+TTypeId.ForObject(destination_object).Name())
+				map.Insert( key, destination_object )
+			Next
+		EndIf
+	EndIf
+EndFunction
+
 Function CurveValue:Float(Current:Float, Destination:Float, Curve:Int)
 	Current = Current + ( (Destination - Current) /Curve)
 	Return Current
 End Function
+
 

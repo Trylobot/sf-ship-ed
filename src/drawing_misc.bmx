@@ -262,45 +262,51 @@ Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36,
 	SetAlpha( a )
 End Function
 
-Function draw_engine( x#, y#, w%, l%, rot#, z#, em% = False, engineColor%[], drawPoint% = True)
-	Local a# = GetAlpha()
+
+
+Function draw_engine( eX#, eY#, eL#, eW#, eA#, sZ#, emphasis%=False, eC%[], drawPoint%=True, is_removed%=False)
+	Local alpha# = GetAlpha()
 	Local outer_r% = 5
 	Local inner_r% = 4
-	If em
+	If emphasis
 		outer_r = 10
 		inner_r = 8
 	End If
-	SetRotation( - rot )
+	SetRotation( -eA )
 	'draw sizing rect
 	If drawPoint
 		SetColor( 255, 255, 255 )
-		If em Then SetAlpha( a * 0.05 ) Else SetAlpha( a * 0.025 )
-		SetScale( z, z )
-		DrawRect( x + z * (l / 2) * Cos(rot + 90), y - z * (l / 2) * Sin(rot + 90), w, l )
+		If emphasis Then SetAlpha( alpha * 0.05 ) Else SetAlpha( alpha * 0.025 )
+		SetScale( sZ, sZ )
+		DrawRect( eX + sZ * (eW / 2) * Cos(eA + 90), eY - sZ * (eW / 2) * Sin(eA + 90), eL, eW )
 	EndIf
 	'draw flame
-	If em Then SetAlpha( a * 0.25 ) Else SetAlpha( a * 0.75 )
-	SetScale ( (w / 32.0) * z, (l / 32.0) * z)
-	SetColor(engineColor[0], engineColor[1], engineColor[2])
-	DrawImage(ed.engineflame, x + z * (l / 2) * Cos(rot + 90), y - z * (l / 2) * Sin(rot + 90) )
+	If emphasis Then SetAlpha( alpha * 0.25 ) Else SetAlpha( alpha * 0.75 )
+	SetScale ( (eL / 32.0) * sZ, (eW / 32.0) * sZ)
+	SetColor(eC[0], eC[1], eC[2])
+	If Not is_removed
+		DrawImage(ed.engineflame, eX + sZ * (eW / 2) * Cos(eA + 90), eY - sZ * (eW / 2) * Sin(eA + 90) )
+	EndIf
 	SetColor( 255, 255, 255 )
 	SetBlend(LIGHTBLEND)
-	DrawImage(ed.engineflamecore, x + z * (l / 2) * Cos(rot + 90), y - z * (l / 2) * Sin(rot + 90) )	
+	If Not is_removed
+		DrawImage(ed.engineflamecore, eX + sZ * (eW / 2) * Cos(eA + 90), eY - sZ * (eW / 2) * Sin(eA + 90) )	
+	EndIf
 	SetBlend(ALPHABLEND)
 	SetRotation( 0 )
 	SetScale( 1, 1 )
-	SetAlpha( a * 1 )
+	SetAlpha( alpha*1 )
 	If (drawPoint)
 		'draw bg
 		SetColor( 0, 0, 0 )
-		DrawOval( x-outer_r, y-outer_r, 2*outer_r, 2*outer_r )
+		DrawOval( eX-outer_r, eY-outer_r, 2*outer_r, 2*outer_r )
 		'draw fg
 		SetColor( 255, 255, 255 )
-		DrawOval( x - inner_r, y - inner_r, 2 * inner_r, 2 * inner_r )
+		DrawOval( eX-inner_r, eY-inner_r, 2*inner_r, 2*inner_r )
 	EndIf
 	'reset
 	SetLineWidth( 1 )
-	SetAlpha( a )
+	SetAlpha( alpha )
 End Function
 
 Function draw_weapon_slot_info( ed:TEditor, data:TData, sprite:TSprite, weaponSlot:TStarfarerShipWeapon )
@@ -598,3 +604,14 @@ Type TSmoothScroll
 		currLevel = Null
 	End Method
 End Type
+
+
+Global DEBUG_BUFFER_OFFSET% = 0
+Function DebugDraw( str$, x%=0,y%=0, ox#=0.0:Float,oy#=0.0:Float )
+  'Function draw_string( source:Object, x%, y%, fg% = $FFFFFF, bg% = $000000, origin_x# = 0.0, origin_y# = 0.0, line_height_override% = - 1, draw_bg% = False, s# = 1.0 )
+	draw_string( str, x+0,y+DEBUG_BUFFER_OFFSET,,, ox,oy,, True )
+	DEBUG_BUFFER_OFFSET :+ LINE_HEIGHT
+EndFunction
+Function DebugDrawReset()
+	DEBUG_BUFFER_OFFSET = 0
+EndFunction

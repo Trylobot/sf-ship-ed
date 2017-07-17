@@ -6,13 +6,13 @@ Type TData
 	Field json_str$
 	Field json_view:TList'<TextWidget>
 
-	Field skin:TStarfarerSkin
-	Field json_str_skin$
-	Field json_view_skin:TList'<TextWidget>
-
 	Field variant:TStarfarerVariant
 	Field json_str_variant$
 	Field json_view_variant:TList'<TextWidget>
+
+	Field skin:TStarfarerSkin
+	Field json_str_skin$
+	Field json_view_skin:TList'<TextWidget>
 
 	Field csv_row:TMap'<String,String>  'column name --> value
 	Field csv_row_wing:TMap'<String,String>  'column name --> value
@@ -30,8 +30,8 @@ Type TData
 	Field snapshot_shouldhold% = False
 	Field snapshot_holdcurr% = False
 	Field snapshot_undoing% = False
-	Field snapshot_curr:Tsnapshot
-	Field snapshot_init:Tsnapshot
+	Field snapshot_curr:TSnapshot
+	Field snapshot_init:TSnapshot
 
 
 	Method New()
@@ -44,10 +44,16 @@ Type TData
 	Method Clear()
 		ship = New TStarfarerShip
 		variant = New TStarfarerVariant
+		skin = New TStarfarerSkin
 		csv_row = ship_data_csv_field_template.Copy()
 		csv_row_wing = wing_data_csv_field_template.Copy()
 		csv_row_weapon = weapon_data_csv_field_template.Copy()
 		weapon = New TStarfarerWeapon
+		update()
+		update_variant()
+		update_skin()
+		update_weapon()
+
 		changed = False
 		snapshots_undo:TList = CreateList()
 		snapshots_redo:TList = CreateList()
@@ -55,7 +61,8 @@ Type TData
 	
 	'requires subsequent call to update()
 	Method decode( input_json_str$ )
-		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ) )
+		ship = TStarfarerShip( json.parse( input_json_str, "TStarfarerShip", "parse_ship" ))
+		ship.CoerceTypes()
 		enforce_ship_internal_consistency()
 	End Method
 	
@@ -63,15 +70,13 @@ Type TData
 		json.formatted = True
 		'encode ship object as json data
 		json_str = json.stringify( ship, "stringify_ship" )
-		json_view = columnize_text( json_str )
+		json_view = columnize_text( json_str, APP.raw_json_view_max_column_width )
 		changed = True
-		take_snapshot(1)
+		take_snapshot(MENU_MODE_SHIP)
 	End Method
 
 	'requires subsequent call to update()
 	Method enforce_ship_internal_consistency()
-		'TEMPORARY fix for not properly initializing this data
-		Fix_Map_TStrings( ship.builtInWeapons )
 		'Ensure built-in weapons data is internally consistent
 		For Local weapon_slot_id$ = EachIn ship.builtInWeapons.Keys()
 			'to do
@@ -95,7 +100,8 @@ Type TData
 
 	'requires subsequent call to update_variant()
 	Method decode_variant( input_json_str$ )
-		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ) )
+		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant", "parse_variant" ))
+		variant.CoerceTypes()
 		enforce_variant_internal_consistency()
 	End Method
 	
@@ -103,32 +109,32 @@ Type TData
 		json.formatted = True
 		'encode object as json data
 		json_str_variant = json.stringify( variant, "stringify_variant" )
-		json_view_variant = columnize_text( json_str_variant )
+		json_view_variant = columnize_text( json_str_variant, APP.raw_json_view_max_column_width )
 		changed = True
-		take_snapshot(2)
+		take_snapshot(MENU_MODE_VARIANT)
 	End Method
 
 	'requires subsequent call to update_skin()
 	Method decode_skin( input_json_str$ )
-		skin = TStarfarerSkin( json.parse( input_json_str, "TStarfarerSkin" ))
+		skin = TStarfarerSkin( json.parse( input_json_str, "TStarfarerSkin", "parse_skin" ))
+		skin.CoerceTypes()
 		'enforce_skin_internal_consistency()
 	End Method
 	
-	Method update_skin()
+	Method update_skin( suppress_change_detection%=False )
 		json.formatted = True
 		'encode object as json data
 		json_str_skin = json.stringify( skin, "stringify_skin" )
-		json_view_skin = columnize_text( json_str_skin )
-		changed = True
-		take_snapshot(2)
+		json_view_skin = columnize_text( json_str_skin, APP.raw_json_view_max_column_width )
+		If Not suppress_change_detection
+			changed = True
+			take_snapshot(MENU_MODE_SKIN)
+		EndIf
 	End Method
 
 	'requires subsequent call to update_variant()
 	Method enforce_variant_internal_consistency()
-		'TEMPORARY fix for not properly initializing this data
-		For Local weaponGroup:TStarfarerVariantWeaponGroup = EachIn variant.weaponGroups
-			Fix_Map_TStrings( weaponGroup.weapons )
-		Next
+		'
 	EndMethod
 
 	'requires subsequent call to update_variant()
@@ -185,9 +191,9 @@ Type TData
 	Method update_weapon()
 		json.formatted = True
 		json_str_weapon = json.stringify( weapon, "stringify_weapon" )
-		json_view_weapon = columnize_text( json_str_weapon )
+		json_view_weapon = columnize_text( json_str_weapon, APP.raw_json_view_max_column_width )
 		changed = True
-		take_snapshot(5)
+		take_snapshot(MENU_MODE_WEAPON)
 	EndMethod
 
 	Method set_hullId( old_hullId$, hullId$ )
@@ -538,7 +544,7 @@ Type TData
 	End Method
 
 	'requires subsequent call to update()
-	Method set_engine_angle( slot_i%, img_x#, img_y#, update_symmetrical_counterpart_if_any%=False )
+	Method set_engine_angle( slot_i%, img_x#,img_y#, update_symmetrical_counterpart_if_any%=False )
 		If Not ship.engineSlots Or Not ship.center Then Return
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
@@ -878,6 +884,60 @@ Type TData
 
 	'////////////////
 
+	'requires subsequent call to update_skin()
+	Method toggle_skin_builtin_hullmod( hullmod_id$ )
+		If skin.builtInMods.length > 0
+			Local found% = False
+			For Local i% = 0 Until skin.builtInMods.length
+				If skin.builtInMods[i] = hullmod_id
+					'Found, Remove
+					found = True
+					For i = i Until skin.builtInMods.Length-1
+						skin.builtInMods[i] = skin.builtInMods[i+1]
+					Next
+					skin.builtInMods = skin.builtInMods[..skin.builtInMods.length-1]
+				EndIf
+			Next
+			If Not found
+				'Non-Empty but Not Found, Add
+				skin.builtInMods = skin.builtInMods[..skin.builtInMods.length+1]
+				skin.builtInMods[skin.builtInMods.length-1] = hullmod_id
+			EndIf
+		Else
+			'Empty, Add
+			skin.builtInMods = New String[1]
+			skin.builtInMods[0] = hullmod_id
+		EndIf
+	EndMethod
+
+	'requires subsequent call to update_skin()
+	Method toggle_skin_removeBuiltInMods_hullmod( hullmod_id$ )
+		If skin.removeBuiltInMods.length > 0
+			Local found% = False
+			For Local i% = 0 Until skin.removeBuiltInMods.length
+				If skin.removeBuiltInMods[i] = hullmod_id
+					'Found, Remove
+					found = True
+					For i = i Until skin.removeBuiltInMods.Length-1
+						skin.removeBuiltInMods[i] = skin.removeBuiltInMods[i+1]
+					Next
+					skin.removeBuiltInMods = skin.removeBuiltInMods[..skin.removeBuiltInMods.length-1]
+				EndIf
+			Next
+			If Not found
+				'Non-Empty but Not Found, Add
+				skin.removeBuiltInMods = skin.removeBuiltInMods[..skin.removeBuiltInMods.length+1]
+				skin.removeBuiltInMods[skin.removeBuiltInMods.length-1] = hullmod_id
+			EndIf
+		Else
+			'Empty, Add
+			skin.removeBuiltInMods = New String[1]
+			skin.removeBuiltInMods[0] = hullmod_id
+		EndIf
+	EndMethod
+
+	'////////////////
+
 	'requires subsequent call to update_weapon()
 	Method append_weapon_offset( x#, y#, mount_type$, reflect_over_y_axis% = False )
 		If Not weapon Then Return
@@ -1004,23 +1064,27 @@ Type TData
 		Return value.ToInt()
 	EndMethod
 
-	Method get_hullmod_csv_ordnance_points%( hullMod_id$ )
+	Method get_hullmod_csv_ordnance_points%( hullMod_id$, hullSize$=Null )
 		'uses ship size and hullmod data
 		Local hullMod_stats:TMap = TMap( ed.stock_hullmod_stats.ValueForKey( hullMod_id ))
 		If Not hullMod_stats Then Return 0 'ID not found in csv data
-		Local column_key$ = ""
-		Select ship.hullSize
-			Case "FRIGATE"
-				column_key = "cost_frigate"
-			Case "DESTROYER"
-				column_key = "cost_dest"
-			Case "CRUISER"
-				column_key = "cost_cruiser"
-			Case "CAPITAL_SHIP"
-				column_key = "cost_capital"
-			Default
-				Return 0 'hullMod cost cannot be found
-		EndSelect
+		Local column_key$
+		If hullSize ' explicit
+			column_key = hullSize
+		Else 'Not hullSize
+			Select ship.hullSize ' fallback to the currently-loaded ship
+				Case "FRIGATE"
+					column_key = "cost_frigate"
+				Case "DESTROYER"
+					column_key = "cost_dest"
+				Case "CRUISER"
+					column_key = "cost_cruiser"
+				Case "CAPITAL_SHIP"
+					column_key = "cost_capital"
+				Default
+					Return 0 'hullMod cost cannot be found
+			EndSelect
+		EndIf
 		Local value$ = String( hullMod_stats.ValueForKey( column_key ))
 		If Not value Then Return 0 'csv row found, but did not contain column
 		Return value.ToInt()
@@ -1128,7 +1192,7 @@ Type TData
 		Return nearest_i
 	End Method
 	
-	Method find_nearest_bound_segment_i (img_x#, img_y#, x1_i# Var, y1_i# Var, x2_i#var, y2_i# Var)
+	Method find_nearest_bound_segment_i( img_x#,img_y#,  x1_i# Var,y1_i# Var,  x2_i# Var,y2_i# Var )
 		If Not ship.bounds Or Not ship.center Then x1_i = y1_i = x2_i = y2_i = - 1
 		x1_i = find_nearest_bound_segment_1st_i(img_x, img_y)
 		y1_i = x1_i + 1
@@ -1252,19 +1316,34 @@ Type TData
 		If Not ship.engineSlots Or Not ship.center Then Return -1
 		img_x = img_x - ship.center[1]
 		img_y = -( img_y - ship.center[0] )
-		Local nearest_i% = -1
-		Local nearest_dist# = -1
-		Local dist#
-		For Local i% = 0 Until ship.engineSlots.length
-			dist = calc_distance( img_x, img_y, ship.engineSlots[i].location[0], ship.engineSlots[i].location[1] )
-			If nearest_i = -1 Or dist < nearest_dist
+		Local nearest_i% = -1, nearest_dist# = 10e38:Float, dist#, engine_location#[]
+		For Local slot% = 0 Until ship.engineSlots.length
+			engine_location = ship.engineSlots[slot].location
+			dist = calc_distance( img_x,img_y, engine_location[0],engine_location[1] )
+			If dist < nearest_dist
+				nearest_i = slot
 				nearest_dist = dist
-				nearest_i = i
 			End If
 		Next
 		Return nearest_i
 	End Method
-	
+
+	Method find_nearest_skin_engine%( img_x#, img_y# )
+		If Not ship.engineSlots Or Not data.ship.center Then Return -1
+		img_x = img_x - ship.center[1]
+		img_y = ship.center[0] - img_y
+		Local nearest_i% = -1, nearest_dist# = 10e38:Float, dist#, engine_location#[]
+		For Local slot% = 0 Until ship.engineSlots.length
+			engine_location = skin_engine_get_location( slot )
+			dist = calc_distance( img_x,img_y, engine_location[0],engine_location[1] )
+			If dist < nearest_dist
+				nearest_i = slot
+				nearest_dist = dist
+			EndIf
+		Next
+		Return nearest_i
+	EndMethod
+
 	Method get_launch_bay_by_contextual_index:TStarfarerShipWeapon( LB_i% )
 		If Not ship.weaponSlots Or LB_i = - 1 Then Return Null
 		Local c_i% = 0
@@ -1349,6 +1428,24 @@ Type TData
 		Return Null
 	End Method
 
+	Method find_symmetrical_skin_engine_counterpart_slot%( slot% )
+		Local location#[] = skin_engine_get_location( slot )
+		Local length# = skin_engine_get_length( slot )
+		Local width# = skin_engine_get_width( slot )
+		Local angle# = skin_engine_get_angle( slot )
+		'
+		For Local idx% = 0 Until ship.engineSlots.length
+			If  location[0] = skin_engine_get_location( idx )[0] ..
+			And location[1] = - skin_engine_get_location( idx )[1] ..
+			And length = skin_engine_get_length( idx ) ..
+			And width = skin_engine_get_width( idx ) ..
+			And angle = - skin_engine_get_angle( idx )
+				Return idx
+			End If
+		Next
+		Return -1
+	End Method
+
 	Method has_hullmod%( hullmod_id$ )
 		If variant.hullMods.length > 0
 			Local found% = False
@@ -1377,10 +1474,226 @@ Type TData
 		EndIf
 	EndMethod
 
-	Method columnize_text:TList( text$ )
+	'/////////////////////
+
+	Method skin_adds_hullmod%( hullmod_id$ )
+		For Local scan_hullmod_id$ = EachIn skin.builtInMods
+			If scan_hullmod_id = hullmod_id Then Return True
+		Next
+		Return False
+	EndMethod
+
+	Method skin_removes_hullmod%( hullmod_id$ )
+		For Local scan_hullmod_id$ = EachIn skin.removeBuiltInMods
+			If scan_hullmod_id = hullmod_id Then Return True
+		Next
+		Return False
+	EndMethod
+
+	'----
+	' returns the skin's engine slot (if set), or Null if marked for removal
+	Method get_skin_engine_slot:TStarfarerShipEngineChange( slot% )
+		If in_int_array( slot, skin.removeEngineSlots ) Then Return Null
+		Return TStarfarerShipEngineChange( skin.engineSlotChanges.ValueForKey( String.FromInt( slot )) )
+	EndMethod
+
+	' does not do anything if the given skin engine slot is not marked for removal, or already has changes
+	' returns the prepped engine
+	Method prep_skin_engine_slot_change:TStarfarerShipEngineChange( slot% )
+		' clear the removed flag, if set
+		If in_int_array( slot, skin.removeEngineSlots )
+			skin.removeEngineSlots = remove_first_val_from_intarray( skin.removeEngineSlots, slot )
+		EndIf
+		' add a new ship-engine-change obj to the skin's engine slot map, if it doesn't already have one
+		Local skinEngine:TStarfarerShipEngineChange = TStarfarerShipEngineChange( ..
+			skin.engineSlotChanges.ValueForKey( String.FromInt( slot )) )
+		If Not skinEngine
+			skinEngine = New TStarfarerShipEngineChange
+			skin.engineSlotChanges.Insert( String.FromInt( slot ), skinEngine )
+		EndIf
+		Return skinEngine
+	EndMethod
+
+	'----
+	Method skin_engine_get_location#[]( slot% )
+		If Not ship.engineSlots Then Return Null
+		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
+		If skinEngine And skinEngine.location <> TStarfarerShipEngineChange.__location
+			Return skinEngine.location
+		Else
+			Local baseEngine:TStarfarerShipEngine = ship.engineSlots[slot]
+			Return baseEngine.location
+		EndIf
+	EndMethod
+
+	Method skin_engine_get_length#( slot% )
+		If Not ship.engineSlots Then Return 0
+		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
+		If skinEngine And skinEngine.length <> TStarfarerShipEngineChange.__length
+			Return skinEngine.length
+		Else
+			Local baseEngine:TStarfarerShipEngine = ship.engineSlots[slot]
+			Return baseEngine.length
+		EndIf
+	EndMethod
+
+	Method skin_engine_get_width#( slot% )		
+		If Not ship.engineSlots Then Return 0
+		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
+		If skinEngine And skinEngine.width <> TStarfarerShipEngineChange.__width
+			Return skinEngine.width
+		Else
+			Local baseEngine:TStarfarerShipEngine = ship.engineSlots[slot]
+			Return baseEngine.width
+		EndIf
+	EndMethod
+
+	Method skin_engine_get_angle#( slot% )	
+		If Not ship.engineSlots Then Return 0	
+		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
+		If skinEngine And skinEngine.angle <> TStarfarerShipEngineChange.__angle
+			Return skinEngine.angle
+		Else
+			Local baseEngine:TStarfarerShipEngine = ship.engineSlots[slot]
+			Return baseEngine.angle
+		EndIf
+	EndMethod
+
+	Method skin_engine_get_color%[]( ed:TEditor, slot% )		
+		If Not ship.engineSlots Then Return Null
+		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
+		If skinEngine And ..
+		(    skinEngine.style <> TStarfarerShipEngineChange.__style ..
+		Or   skinEngine.styleId <> TStarfarerShipEngineChange.__styleId ..
+		Or   skinEngine.styleSpec <> TStarfarerShipEngineChange.__styleSpec )
+			Return ed.get_engine_color( skinEngine )
+		Else
+			Local baseEngine:TStarfarerShipEngine = ship.engineSlots[slot]
+			Return ed.get_engine_color( baseEngine )
+		EndIf
+	EndMethod
+
+	'----
+	Method skin_engine_set_location( slot%, img_x#,img_y#, mirror%=False )
+		If Not ship.engineSlots Or Not ship.center Then Return
+		Local ship_mx# = img_x - ship.center[1], ..
+		      ship_my# = ship.center[0] - img_y
+		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+		Local mirrored_slot%
+		Local skinEngine_mirrored:TStarfarerShipEngine
+		If mirror
+			mirrored_slot = find_symmetrical_skin_engine_counterpart_slot( slot )
+			If mirrored_slot <> -1
+				skinEngine_mirrored = prep_skin_engine_slot_change( slot )
+			EndIf
+		EndIf
+		skinEngine.location = New Float[2]
+		skinEngine.location[0] = ship_mx
+		skinEngine.location[1] = ship_my
+		If mirror And skinEngine_mirrored
+			skinEngine_mirrored.location = New Float[2]
+			skinEngine_mirrored.location[0] = ship_mx
+			skinEngine_mirrored.location[1] = - ship_my
+		EndIf
+	EndMethod
+
+	Method skin_engine_set_size( slot%, img_x#,img_y#, mirror%=False )		
+		If Not ship.engineSlots Or Not ship.center Then Return
+		Local ship_mx# = img_x - ship.center[1], ..
+		      ship_my# = ship.center[0] - img_y
+		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+		Local mirrored_slot%
+		Local skinEngine_mirrored:TStarfarerShipEngine
+		If mirror
+			mirrored_slot = find_symmetrical_skin_engine_counterpart_slot( slot )
+			If mirrored_slot <> -1
+				skinEngine_mirrored = prep_skin_engine_slot_change( slot )
+			EndIf
+		EndIf
+		Local skinEngine_location#[] = skin_engine_get_location( slot )
+		Local skinEngine_angle# = skin_engine_get_angle( slot )
+		' mouse relative to engine location
+		Local mouse#[] = New Float[2]
+		mouse[0] = ship_mx - skinEngine_location[0]
+		mouse[1] = ship_my - skinEngine_location[1]
+		' new length, by line segment along current angle of engine
+		Local norm#[] = New Float[2]
+		norm[0] = Cos( skinEngine_angle )
+		norm[1] = Sin( skinEngine_angle )
+		skinEngine.length = Max( 0, norm[0]*mouse[0] + norm[1]*mouse[1])
+		' new width, by line segment along angle perpendicular to angle of engine
+		Local perp_norm#[] = New Float[2]
+		perp_norm[0] = Cos( skinEngine_angle + 90 )
+		perp_norm[1] = Sin( skinEngine_angle + 90 )
+		skinEngine.width = Abs( 2*(perp_norm[0]*mouse[0] + perp_norm[1]*mouse[1]) )
+		skinEngine.contrailSize = skinEngine.width
+		If mirror And skinEngine_mirrored
+			skinEngine_mirrored.length = skinEngine.length
+			skinEngine_mirrored.width = skinEngine.width
+			skinEngine_mirrored.contrailSize = skinEngine.contrailSize
+		EndIf
+	EndMethod
+
+	Method skin_engine_set_angle( slot%, img_x#,img_y#, mirror%=False )		
+		If Not ship.engineSlots Or Not ship.center Then Return
+		Local ship_mx# = img_x - ship.center[1], ..
+		      ship_my# = ship.center[0] - img_y
+		Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+		Local mirrored_slot%
+		Local skinEngine_mirrored:TStarfarerShipEngine
+		If mirror
+			mirrored_slot = find_symmetrical_skin_engine_counterpart_slot( slot )
+			If mirrored_slot <> -1
+				skinEngine_mirrored = prep_skin_engine_slot_change( slot )
+			EndIf
+		EndIf
+		Local skinEngine_location#[] = skin_engine_get_location( slot )
+		skinEngine.angle = calc_angle( skinEngine_location[0],skinEngine_location[1], ship_mx,ship_my )
+		If mirror And skinEngine_mirrored
+			skinEngine_mirrored.angle = -skinEngine.angle
+		EndIf
+	EndMethod
+
+	'Method skin_engine_set_style( slot%, style$=Null,styleId$=Null,styleSpec:TStarfarerCustomEngineStyleSpec=Null )
+	'	Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
+	'	skinEngine.style = style
+	'	skinEngine.styleId = styleId
+	'	skinEngine.styleSpec = styleSpec
+	'EndMethod
+
+	Method is_skin_engine_removed%( slot% )
+		Return in_int_array( slot, skin.removeEngineSlots )
+	EndMethod
+
+	Method is_skin_engine_changed%( slot% )
+		Local slot_str$ = String.FromInt( slot )
+		Return (skin.engineSlotChanges.Contains( slot_str ) ..
+			 And TStarfarerShipEngineChange( skin.engineSlotChanges.ValueForKey( slot_str )) <> Null)
+	EndMethod
+
+	' removes data about this engine slot from the skin (fallback to base hull, no modification)
+	Method skin_engine_clear_data( slot%, mirror%=False )
+		skin.removeEngineSlots = remove_first_val_from_intarray( skin.removeEngineSlots, slot )
+		skin.engineSlotChanges.Remove( String.FromInt( slot ))
+		'TODO: mirror
+	EndMethod
+
+	' mark the base engine slot as removed in the skin
+	Method skin_engine_mark_removal( slot%, mirror%=False )
+		skin.removeEngineSlots = intarray_append( skin.removeEngineSlots, slot )
+		skin.engineSlotChanges.Remove( String.FromInt( slot ))
+		'TODO: mirror
+	EndMethod
+
+	'/////////////////////
+
+	Method columnize_text:TList( text$, wrap_width% = 60 )
 		'break the data into viewport-sized column-chunks for condensed
 		Local columns:TList = CreateList()
 		Local lines$[] = text.Split("~n")
+		For Local L% = 0 Until lines.length
+			lines[L] = lines[L][..wrap_width]+" " ' truncate characters after 50
+		Next
 		Local lines_per_col% = H_MAX / DATA_LINE_HEIGHT - 2 'factor in status bar height at bottom, bout 2 lines or so
 		Local cols% = Ceil( Float(lines.length) / Float(lines_per_col) )
 		SetImageFont( DATA_FONT ) 'TextWidget uses TextWidth() to determine size, which uses current TImageFont
@@ -1396,53 +1709,58 @@ Type TData
 		If snapshot_undoing Then Return
 		If Not snapshot_inited Then Return
 		If Not snapshot_curr
-			snapshot_curr = New Tsnapshot
+			snapshot_curr = New TSnapshot
 		Else If Not snapshot_holdcurr
 			snapshots_undo.AddFirst(snapshot_curr)
 			snapshots_redo.Clear()
-			snapshot_curr = New Tsnapshot
+			snapshot_curr = New TSnapshot
 		EndIf
 		If snapshot_shouldhold Then snapshot_holdcurr = True
 		snapshot_curr.program_mode = ed.program_mode
 		snapshot_curr.mode = ed.mode
 		snapshot_curr.last_mode = ed.last_mode
+		
 		Select input
-		Case 1
-			snapshot_curr.json_str = json_str
-		Case 2
-			snapshot_curr.json_str_variant = json_str_variant
-		Case 3
-			snapshot_curr.csv_row = CopyMap(csv_row)
-		Case 4
-			snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
-		Case 5
-			snapshot_curr.json_str_weapon = json_str_weapon
-
-		Case 6
-			snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
-
-		Default
-			Select snapshot_curr.program_mode
-			Case "ship"
+			
+			Case MENU_MODE_SHIP
 				snapshot_curr.json_str = json_str
-			Case "variant"
+			Case MENU_MODE_VARIANT
 				snapshot_curr.json_str_variant = json_str_variant
-			Case "csv"
+			Case MENU_MODE_SKIN
+				snapshot_curr.json_str_skin = json_str_skin
+			Case MENU_MODE_SHIPSTATS
 				snapshot_curr.csv_row = CopyMap(csv_row)
-			Case "csv_wing"
+			Case MENU_MODE_WING
 				snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
-			Case "weapon"
+			Case MENU_MODE_WEAPON
 				snapshot_curr.json_str_weapon = json_str_weapon
-
-			Case "csv_weapon"
+			Case MENU_MODE_WEAPONSTATS
 				snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
 
-			End Select
-		End Select	
+			Default
+				Select snapshot_curr.program_mode
+					
+					Case "ship"
+						snapshot_curr.json_str = json_str
+					Case "variant"
+						snapshot_curr.json_str_variant = json_str_variant
+					Case "skin"
+						snapshot_curr.json_str_skin = json_str_skin
+					Case "csv"
+						snapshot_curr.csv_row = CopyMap(csv_row)
+					Case "csv_wing"
+						snapshot_curr.csv_row_wing = CopyMap( csv_row_wing )
+					Case "weapon"
+						snapshot_curr.json_str_weapon = json_str_weapon
+					Case "csv_weapon"
+						snapshot_curr.csv_row_weapon = CopyMap( csv_row_weapon )
+
+				EndSelect
+		EndSelect	
 	End Method
 	
 	Method take_initshot()
-		snapshot_init = New Tsnapshot
+		snapshot_init = New TSnapshot
 		snapshot_init.program_mode = ed.program_mode
 		snapshot_init.mode = ed.mode
 		snapshot_init.last_mode = ed.last_mode
@@ -1471,19 +1789,21 @@ Type TData
 
 	
 End Type	
-Type Tsnapshot	
+
+
+Type TSnapshot	
+	'
 	Field program_mode$
 	Field mode$
 	Field last_mode$
+	'
 	Field json_str$
 	Field json_str_variant$
+	Field json_str_skin$
 	Field csv_row:TMap'<String,String>  'column name --> value
 	Field csv_row_wing:TMap'<String,String>  'column name --> value
-
 	Field csv_row_weapon:TMap'<String,String>  'column name --> value
-
 	Field json_str_weapon$
-	'for string editing mode.
 	'Field values:TextWidget
-	
+
 End Type

@@ -20,6 +20,29 @@ Global CONTEXT_HELP:TMap
 
 Global mouse_str$
 
+Type TKeyboardHelpWidget
+	Field key$
+	Field desc$
+	Field show_key_as_icon%
+	Field enabled%
+	Field margin_bottom%
+	Field program_mode$
+	Field sub_mode$
+	
+	Function Create:TKeyboardHelpWidget( key$, desc$, show_key_as_icon%, enabled%, margin_bottom%, program_mode$=Null, sub_mode$=Null )
+		Local w:TKeyboardHelpWidget = New TKeyboardHelpWidget
+		w.key = key
+		w.desc = desc
+		w.show_key_as_icon = show_key_as_icon
+		w.enabled = enabled
+		w.margin_bottom = margin_bottom
+		w.program_mode = program_mode
+		w.sub_mode = sub_mode
+		Return w
+	End Function
+End Type
+
+
 Function load_help()
 	LocalizeString("{{}}")
 	HELP_WIDGETS = CreateList()
@@ -48,6 +71,7 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", LocalizeString("{{h_file_variant_saveData}}"), ICON_KB, True, 0, "variant" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", LocalizeString("{{h_file_newData}}"), ICON_CTRL_ALT_KB, True, 1, "variant" ) )
 	'//////////// 
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "I", LocalizeString("{{h_file_skin_loadImage}}"), ICON_KB, True, 0, "skin" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "D", LocalizeString("{{h_file_skin_loadData}}"), ICON_KB, True, 0, "skin" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "V", LocalizeString("{{h_file_skin_saveData}}"), ICON_KB, True, 0, "skin" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "N", LocalizeString("{{h_file_newData}}"), ICON_CTRL_ALT_KB, True, 1, "skin" ) )
@@ -135,6 +159,19 @@ Function load_help()
 	'//////////// 
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_ship_variantWings_addWing}}"), ICON_ENTER, True, 0, "variant", "variant_wings" ) )
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_ship_variantWings_removeWing}}"), ICON_KB, True, 1, "variant", "variant_wings" ) )
+	'////////////
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "W", LocalizeString("{{h_mode_skin_weaponSlots}}"), ICON_KB, True, 0, "skin" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "B", LocalizeString("{{h_mode_skin_builtInweapons}}"), ICON_KB, True, 0, "skin" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "E", LocalizeString("{{h_mode_skin_engineSlots}}"), ICON_KB, True, 0, "skin" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "H", LocalizeString("{{h_mode_skin_builtInhullmods}}"), ICON_KB, True, 0, "skin" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "A", LocalizeString("{{h_mode_skin_aiHints}}"), ICON_KB, True, 0, "skin" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", LocalizeString("{{h_mode_skin_details}}"), ICON_KB, True, 1, "skin" ) )
+	'////////////
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_drag}}"), ICON_CTRL_CLICK, True, 0, "skin", "changeremove_engines" ) )
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_setFacing}}"), ICON_MS_LEFT, True, 0, "skin", "changeremove_engines" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_function_engineSlots_setSize}}"), ICON_ALT_CLICK, True, 0, "skin", "changeremove_engines" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_engineSlots_remove}}"), ICON_KB, True, 0, "skin", "changeremove_engines" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "", LocalizeString("{{h_global_mirrored}}"), ICON_SPACEBAR, True, 1, "skin", "changeremove_engines" ))
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "T", LocalizeString("{{h_function_csvEdit}}"), ICON_KB, True, 1, "csv" ) )
 	'////////////

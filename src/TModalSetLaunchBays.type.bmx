@@ -1,5 +1,5 @@
 
-Type TModalLaunchBays Extends TSubroutine
+Type TModalSetLaunchBays Extends TSubroutine
 	
 	Field n_LB:TStarfarerShipWeapon 'nearest launch bay location's weapon object
 	Field n_LB_i% 'index of launch bay in data
@@ -81,7 +81,7 @@ Type TModalLaunchBays Extends TSubroutine
 			End Select
 		Case EVENT_GADGETACTION, EVENT_MENUACTION
 			Select EventSource()
-			Case functionMenu[4]
+			Case functionMenu[MENU_FUNCTION_REMOVE]
 					data.remove_launch_bay_port( n_LB_i, n_LB_loc_i, ed.bounds_symmetrical )
 					data.update()
 			EndSelect
