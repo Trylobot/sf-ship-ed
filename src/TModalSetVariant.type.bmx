@@ -4,7 +4,7 @@ Type TModalSetVariant Extends TSubroutine
 	Field ni%
 	Field wi%
 	Field line_i%
-	Field img_x#,img_y#
+	Field img_x#, img_y#
 	Field wx%,wy%
 	Field x%,y%
 	Field w%,h%
@@ -63,7 +63,12 @@ Type TModalSetVariant Extends TSubroutine
 	'///
 	Field cursor_widget:TextWidget
 	Field lasteventsource:Object
-
+	
+	Field variant_as_module:TStarfarerVariant
+	Field module_hull_name$
+	Field module_hull:TStarfarerShip
+	Field module_variant_name$
+	
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		ed.program_mode = "variant"
 		ed.last_mode = "normal"
@@ -186,12 +191,13 @@ Type TModalSetVariant Extends TSubroutine
 		ni = ed.weapon_lock_i
 		weapon_slot = data.ship.weaponSlots[ed.weapon_lock_i]
 		'try to find currently assigned weapon and select it in the list
+		'done some modify in ed.select_weapons so it will return variant ID when the weapon slot is STATION_MODULE
 		weapon_list = ed.select_weapons( weapon_slot.type_, weapon_slot.size )
 		found = False
 		For group = EachIn data.variant.weaponGroups
 			For weapon_slot_id = EachIn group.weapons.Keys()
 				If weapon_slot.id = weapon_slot_id
-					weapon_id = String( group.weapons.ValueForKey( weapon_slot_id ))
+					weapon_id = String( group.weapons.ValueForKey( weapon_slot_id ) )
 					For i = 0 Until weapon_list.length
 						If weapon_list[i] = weapon_id
 							ed.select_weapon_i = i
@@ -204,39 +210,59 @@ Type TModalSetVariant Extends TSubroutine
 			Next
 			If found Then Exit
 		Next
-		'///
-		weapon_list_display = weapon_list[..]
-		For wi = 0 Until weapon_list_display.length
-			weapon_id = weapon_list_display[wi]
-			weapon_stats = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
-			If weapon_stats
-				weapon_name = String( weapon_stats.ValueForKey( "name" ))
-				wep_op_str = String( weapon_stats.ValueForKey( "OPs" ))
-				wep_type_str = String( weapon_stats.ValueForKey( "type" ))
-				wep_range_str = String( weapon_stats.ValueForKey( "range" ))
-				wep_ammo_str = String( weapon_stats.ValueForKey( "ammo" ))
-				wep_damage_str = String( weapon_stats.ValueForKey( "damage/shot" ))
-				wep_energy_str = String( weapon_stats.ValueForKey( "energy/shot" ))
-				
-				If weapon_name
-					weapon_list_display[wi] = RSet(wep_op_str,3)+"  "+LSet(weapon_name,18)
-					If SHOW_MORE > 0
-						weapon_list_display[wi] = weapon_list_display[wi]+"  "+LSet(wep_type_str,7)+"  "+LSet(wep_range_str,5)
-						If SHOW_MORE = 2
-							weapon_list_display[wi] = weapon_list_display[wi]+"  "+LSet(wep_ammo_str,4)+"  "+LSet(wep_damage_str,6)+"  "+LSet(wep_energy_str,6)
+		'Module assign support
+		If Not weapon_slot.is_station_module()
+			weapon_list_display = weapon_list[..]
+			For wi = 0 Until weapon_list_display.length
+				weapon_id = weapon_list_display[wi]
+				weapon_stats = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ) )
+				If weapon_stats
+					weapon_name = String( weapon_stats.ValueForKey( "name" ))
+					wep_op_str = String( weapon_stats.ValueForKey( "OPs" ) )
+					wep_type_str = String( weapon_stats.ValueForKey( "type" ))
+					wep_range_str = String( weapon_stats.ValueForKey( "range" ))
+					wep_ammo_str = String( weapon_stats.ValueForKey( "ammo" ))
+					wep_damage_str = String( weapon_stats.ValueForKey( "damage/shot" ))
+					wep_energy_str = String( weapon_stats.ValueForKey( "energy/shot" ) )					
+					If weapon_name
+						weapon_list_display[wi] = RSet(wep_op_str, 3) + "  " + LSet(weapon_name, 18)
+						If SHOW_MORE > 0
+							weapon_list_display[wi] = weapon_list_display[wi]+"  "+LSet(wep_type_str,7)+"  "+LSet(wep_range_str,5)
+							If SHOW_MORE = 2
+								weapon_list_display[wi] = weapon_list_display[wi]+"  "+LSet(wep_ammo_str,4)+"  "+LSet(wep_damage_str,6)+"  "+LSet(wep_energy_str,6)
+							EndIf
 						EndIf
 					EndIf
 				EndIf
-			EndIf
-		Next
-		wep_head_str = RSet("OP",3)+"  "+LSet("Name",18)
-			If SHOW_MORE > 0
-				wep_head_str = wep_head_str+"  "+LSet("Type",7)+"  "+LSet("Range",5)
-				If SHOW_MORE = 2
-					wep_head_str = wep_head_str+"  "+LSet("Ammo",4)+"  "+LSet("Damage",6)+"  "+LSet("Energy",6)
+			Next
+			wep_head_str = RSet("OP", 3) + "  " + LSet("Name", 18)
+				If SHOW_MORE > 0
+					wep_head_str = wep_head_str+"  "+LSet("Type",7)+"  "+LSet("Range",5)
+					If SHOW_MORE = 2
+						wep_head_str = wep_head_str+"  "+LSet("Ammo",4)+"  "+LSet("Damage",6)+"  "+LSet("Energy",6)
+					EndIf
 				EndIf
-			EndIf
-		weapon_list_widget = TextWidget.Create( weapon_list_display )
+			weapon_list_widget = TextWidget.Create( weapon_list_display )
+		Else
+			weapon_list_display = weapon_list[..]
+			For wi = 0 Until weapon_list_display.length
+				weapon_id = weapon_list_display[wi]
+				variant_as_module = TStarfarerVariant( ed.stock_variants.ValueForKey( weapon_id ) )
+				If variant_as_module
+					module_hull_name = variant_as_module.hullId
+					'need update after skin stock install or somehow -D
+					module_hull = TStarfarerShip(ed.stock_ships.ValueForKey(module_hull_name) )
+					If module_hull ..
+					And module_hull.hullName ..
+					And module_hull.hullName <> "" ..
+					And module_hull.hullName <> "New Hull"..
+					Then module_hull_name = module_hull.hullName
+					module_variant_name = variant_as_module.displayName				
+					If module_hull_name Then weapon_list_display[wi] = module_hull_name + " " + module_variant_name
+				EndIf
+			Next	
+			weapon_list_widget = TextWidget.Create( weapon_list_display )		
+		EndIf
 		'update_weapon_assignment_list_cursor( ed )
 	EndMethod
 
@@ -525,7 +551,7 @@ Type TModalSetVariant Extends TSubroutine
 				Continue ' do not draw other weapons when selecting a weapon
 			EndIf
 			weapon_slot = data.ship.weaponSlots[i]
-			wx = sprite.sx + ( weapon_slot.locations[0] + data.ship.center[1])*sprite.Scale
+			wx = sprite.sx + ( weapon_slot.locations[0] + data.ship.center[1]) * sprite.scale
 			wy = sprite.sy + (-weapon_slot.locations[1] + data.ship.center[0])*sprite.Scale
 			SetRotation( 0 )
 			SetScale( 1, 1 )
@@ -533,9 +559,9 @@ Type TModalSetVariant Extends TSubroutine
 			If Not nearest
 				SetAlpha( Min( 0.5, 0.5*(sprite.scale/3.0) ))
 			EndIf
-			draw_weapon_slot_info( ed,data,sprite, weapon_slot )
+			draw_weapon_slot_info( ed, data, sprite, weapon_slot )
 			If ed.weapon_lock_i = -1 'the select-a-weapon list will be drawn instead if it's non-null
-				draw_assigned_weapon_info( ed,data,sprite, weapon_slot )
+				draw_assigned_weapon_info( ed, data, sprite, weapon_slot )
 			EndIf
 		Next
 		

@@ -411,7 +411,7 @@ Repeat
         draw_ship( ed, sprite )
         draw_weapons(ed, data, sprite, WD)      
         
-        Select ed.program_mode      
+        Select ed.program_mode
           
           Case "ship"
             Select ed.mode
@@ -1304,39 +1304,41 @@ EndFunction
 
 Function draw_weapons( ed:TEditor, data:TData, sprite:TSprite, wd:TWeaponDrawer )
 
-  wd.update( ed, data ) 
+  wd.update( ed, data )
   If wd.show_weapon = 0 Then Return
   SetColor( 255, 255, 255 )
   If wd.show_weapon = 1 Then SetAlpha( 1 )
   If wd.show_weapon = 2 Then SetAlpha( 0.5 )
   Select ed.program_mode
     Case "ship"
-      For Local i% = 0 Until data.ship.weaponSlots.length * 6
-        Local j% = i Mod data.ship.weaponSlots.length
-        Local k% = i / data.ship.weaponSlots.length
-        Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[j]
-        If weaponslot.is_builtin() Or weaponslot.is_decorative()
-          Local weaponID$ = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) )
-          Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) )
-          If weapon And weapon.draw_order() + weaponslot.draw_order() = k Then wd.draw_weaponInSlot(weaponslot, weapon, data, sprite)
-        EndIf
-      Next    
+'      For Local i% = 0 Until data.ship.weaponSlots.length * 6
+'        Local j% = i Mod data.ship.weaponSlots.length
+'        Local k% = i / data.ship.weaponSlots.length
+'        Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[j]
+'        If weaponslot.is_builtin() Or weaponslot.is_decorative()
+'          Local weaponID$ = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) )
+'          Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) )
+'          If weapon And weapon.draw_order() + weaponslot.draw_order() = k Then wd.draw_weaponInSlot(weaponslot, weapon, data, sprite)
+'        EndIf
+'      Next
+	wd.draw_weapons(True, data, sprite)
     Case "variant"
-      Local weapons:TMap = data.variant.getAllWeapons()
-      For Local i% = 0 Until data.ship.weaponSlots.length * 6
-        Local j% = i Mod data.ship.weaponSlots.length
-        Local k% = i / data.ship.weaponSlots.length
-        Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[j]
-        'well, I did the null check later so don't needs in these part...i hope
-        Local weaponID$
-        If data.ship.builtInWeapons.ValueForKey(weaponslot.id)
-          weaponID = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id))
-        Else 
-          weaponID  = String(weapons.ValueForKey(weaponslot.id)) ' could be null but it's ok
-        End If
-        Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID)) ' could be null but it's ok
-        If weapon And weapon.draw_order() + weaponslot.draw_order() = k Then wd.draw_weaponInSlot(weaponslot, weapon, data, sprite)
-      Next    
+'      Local weapons:TMap = data.variant.getAllWeapons()
+'      For Local i% = 0 Until data.ship.weaponSlots.length * 6
+'        Local j% = i Mod data.ship.weaponSlots.length
+'        Local k% = i / data.ship.weaponSlots.length
+'        Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[j]
+'        'well, I did the null check later so don't needs in these part...i hope
+'        Local weaponID$
+'        If data.ship.builtInWeapons.ValueForKey(weaponslot.id)
+'          weaponID = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id))
+'        Else 
+'          weaponID  = String(weapons.ValueForKey(weaponslot.id)) ' could be null but it's ok
+'        End If
+'        Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID)) ' could be null but it's ok
+'        If weapon And weapon.draw_order() + weaponslot.draw_order() = k Then wd.draw_weaponInSlot(weaponslot, weapon, data, sprite)
+'      Next
+	wd.draw_weapons(False, data, sprite)
   EndSelect
   SetAlpha( 1 )
 End Function
@@ -1402,11 +1404,11 @@ EndFunction
 
 'data_dir$ should be either "starfarer-core/" or "mods/{ModDirectory}/"
 Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla% = False )
-  Local stock_ships_dir$ =    data_dir+"data/hulls/"
-  Local stock_variants_dir$ = data_dir+"data/variants/"
-  Local stock_variants_fighters_dir$ = data_dir+"data/variants/fighters/"
-  Local stock_variants_drones_dir$ = data_dir+"data/variants/drones/"
-  Local stock_weapons_dir$ =  data_dir+"data/weapons/"
+  Local stock_ships_dir$ = data_dir + "data/hulls/"
+  Local stock_variants_dir$ = data_dir + "data/variants/"
+'  Local stock_variants_fighters_dir$ = data_dir + "data/variants/fighters/"
+'  Local stock_variants_drones_dir$ = data_dir + "data/variants/drones/"
+  Local stock_weapons_dir$ = data_dir + "data/weapons/"
   Local stock_hullmods_dir$ = data_dir + "data/hullmods/"
   Local stock_config_dir$ = data_dir + "data/config/"
   '/////
@@ -1416,21 +1418,36 @@ Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla% = False )
     If ExtractExt( stock_ship_file ) <> "ship" Then Continue
     ed.load_stock_ship( stock_ships_dir, stock_ship_file )
   Next
-  Local stock_variants_files$[] = LoadDir( stock_variants_dir )
-  For Local stock_variant_file$ = EachIn stock_variants_files
-    If ExtractExt( stock_variant_file ) <> "variant" Then Continue
-    ed.load_stock_variant( stock_variants_dir, stock_variant_file )
-  Next
-  Local stock_variants_fighters_files$[] = LoadDir( stock_variants_fighters_dir )
-  For Local stock_variant_file$ = EachIn stock_variants_fighters_files
-    If ExtractExt( stock_variant_file ) <> "variant" Then Continue
-    ed.load_stock_variant( stock_variants_fighters_dir, stock_variant_file )
-  Next
-  Local stock_variants_drones_files$[] = LoadDir( stock_variants_drones_dir )
-  For Local stock_variant_file$ = EachIn stock_variants_drones_files
-    If ExtractExt( stock_variant_file ) <> "variant" Then Continue
-    ed.load_stock_variant( stock_variants_drones_dir, stock_variant_file )
-  Next
+  'modified for load all files in sub dir -D
+  Local dirs$[]
+  dirs = dirs + [stock_variants_dir]
+  Local done% = False
+  While Not done
+	Local subdirs$[]
+	Local files$[]
+	For Local dir$ = EachIn dirs
+		dirs = dirs[1..]
+		files = LoadDir( dir)
+		For Local file$ = EachIn files
+'			Print file
+'			Print dir + file
+'			Print FileType( dir + file )
+			If FileType( dir + file ) = FILETYPE_DIR Then subdirs :+ [(dir + file + "/")]
+			If ExtractExt( file ) = "variant" Then ed.load_stock_variant( dir, file )
+		Next
+	Next
+	If Not subdirs.length Then done = True Else dirs :+ subdirs
+  Wend
+'  Local stock_variants_fighters_files$[] = LoadDir( stock_variants_fighters_dir )
+'  For Local stock_variant_file$ = EachIn stock_variants_fighters_files
+'    If ExtractExt( stock_variant_file ) <> "variant" Then Continue
+'    ed.load_stock_variant( stock_variants_fighters_dir, stock_variant_file )
+'  Next
+'  Local stock_variants_drones_files$[] = LoadDir( stock_variants_drones_dir )
+'  For Local stock_variant_file$ = EachIn stock_variants_drones_files
+'    If ExtractExt( stock_variant_file ) <> "variant" Then Continue
+'    ed.load_stock_variant( stock_variants_drones_dir, stock_variant_file )
+'  Next
   Local stock_weapons_files$[] = LoadDir( stock_weapons_dir )
   For Local stock_weapon_file$ = EachIn stock_weapons_files
     If ExtractExt( stock_weapon_file ) <> "wpn" Then Continue
@@ -1525,7 +1542,7 @@ Function load_ship_data( ed:TEditor, data:TData, sprite:TSprite, use_new% = Fals
     data.update_variant()
     'FIGHTER WING CSV/STATS data'
     'if the current wing data doesn't reference the loaded variant, load one that does if possible
-    If Not ed.verify_wing_data_association( data.variant.variantId, String(data.csv_row_wing.ValueForKey("id")))
+    If Not ed.verify_wing_data_association( data.variant.variantId, String(data.csv_row_wing.ValueForKey("id") ) )
       data.csv_row_wing = ed.get_default_wing( data.variant.variantId )
     EndIf
     'IMAGE (implied)

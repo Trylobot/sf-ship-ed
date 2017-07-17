@@ -42,6 +42,16 @@ Type TStarfarerShip
 		Return dst
 	End Method
 
+	Method getNameOrID$()
+	DebugStop
+		If hullName <> Null And hullName <> "New Hull"
+			Return hullName
+		Else
+			Return hullId
+		EndIf
+		Return ""
+	End Method	
+	
 End Type
 
 

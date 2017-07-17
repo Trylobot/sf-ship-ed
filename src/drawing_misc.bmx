@@ -330,22 +330,41 @@ Function draw_assigned_weapon_info( ed:TEditor, data:TData, sprite:TSprite, weap
 	Local weapon_id$ = data.find_assigned_slot_weapon( weaponSlot.id )
 	Local current_weapon_str$ = ""
 	If weapon_id
-		Local wep_stats:TMap = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
-		If wep_stats
-			Local wep_name$ = String( wep_stats.ValueForKey( "name" ))
-			If wep_name
-				current_weapon_str :+ wep_name
-			Else
-				current_weapon_str :+ weapon_id
-			EndIf
-			If Not weaponSlot.is_builtin()
-				current_weapon_str :+ "~n"
-				Local op_cost$ = String( wep_stats.ValueForKey( "OPs" ))
-				If op_cost
-					current_weapon_str :+ op_cost + " OP"
+		'module support  -D
+		If Not weaponSlot.is_station_module()
+			Local wep_stats:TMap = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ) )
+			If wep_stats
+				Local wep_name$ = String( wep_stats.ValueForKey( "name" ) )
+				If wep_name
+					current_weapon_str :+ wep_name
 				Else
-					current_weapon_str :+ "? OP"
+					current_weapon_str :+ weapon_id
 				EndIf
+				If Not weaponSlot.is_builtin()
+					current_weapon_str :+ "~n"
+					Local op_cost$ = String( wep_stats.ValueForKey( "OPs" ))
+					If op_cost
+						current_weapon_str :+ op_cost + " OP"
+					Else
+						current_weapon_str :+ "? OP"
+					EndIf
+				EndIf
+			EndIf
+		Else
+			Local variant:TStarfarerVariant = TStarfarerVariant( ed.stock_variants.ValueForKey( weapon_id ) )
+			If variant
+				Local hull_name$ = variant.hullId
+				'need update after skin stock install or somehow -D
+				Local hull:TStarfarerShip = TStarfarerShip(ed.stock_ships.ValueForKey(hull_name) )
+				If hull ..
+				And hull.hullName ..
+				And hull.hullName <> "" ..
+				And hull.hullName <> "New Hull"..
+				Then hull_name = hull.hullName
+				Local variant_name$ = variant.displayName
+				current_weapon_str :+ hull_name
+				current_weapon_str :+ "~n"
+				current_weapon_str :+ variant_name
 			EndIf
 		EndIf
 	Else
