@@ -7,11 +7,49 @@ Type TWeaponDrawer
 	Field playingAnime% = 0
 	Field _needCheckPlaying% = False
 	Field weaponEditorAnime:TAnime
+	Field renderQueue:TList 'TWeaponRenderData
 	
 	Method New()
 		buffed_img = CreateMap()
 		buffed_img_seq = CreateMap()
 		animes = CreateMap()	
+		renderQueue = CreateList()
+	End Method
+	
+	Method draw_all_weapons(builtin_only%, data:TData, sprite:TSprite, x_offset# = 0, y_offset# = 0)
+		If builtin_only
+			For Local i% = 0 Until data.ship.weaponSlots.length
+				Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[i]
+				If weaponslot.is_builtin() Or weaponslot.is_decorative()
+					Local weaponID$ = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) )
+					Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) )
+					If weapon
+						Local renderData:TWeaponRenderData = New TWeaponRenderData
+						renderData.init(weaponslot, weapon)
+						renderQueue.AddLast(renderData)						EndIf
+				EndIf
+			Next
+		Else
+			Local weapons:TMap = data.variant.getAllWeapons()
+			For Local i% = 0 Until data.ship.weaponSlots.length
+				Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[i]
+				'well, I did the null check later so don't needs in these part...i hope
+				Local weaponID$
+				weaponID = String(weapons.ValueForKey(weaponslot.id) ) 'load from weapon groups frist
+				If Not weaponID Then weaponID = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) ) 'then, try the built-in list
+				Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) ) ' could be null but it's ok
+				If weapon
+					Local renderData:TWeaponRenderData = New TWeaponRenderData
+					renderData.init(weaponslot, weapon)
+					renderQueue.AddLast(renderData)	
+				EndIf
+			Next			
+		EndIf
+		renderQueue.sort()
+		For Local d:TWeaponRenderData = EachIn renderQueue
+			draw_weaponInSlot(d.weaponSlot, d.weapon, data, sprite, x_offset, y_offset)
+		Next
+		renderQueue.Clear()
 	End Method
 	
 	Method update(ed:TEditor, data:TData)
@@ -22,9 +60,9 @@ Type TWeaponDrawer
 		Else
 			Local weapons:TMap = data.variant.getAllWeapons()
 			For Local anime:TAnime = EachIn MapValues( animes )
-				If anime.weaponSlot_i > data.ship.weaponSlots.length -1 Or data.ship.weaponSlots[anime.weaponSlot_i].id <> anime.weaponSlot_id 'slot removed
+				If anime.weaponSlot_i > data.ship.weaponSlots.length - 1 Or data.ship.weaponSlots[anime.weaponSlot_i].id <> anime.weaponSlot_id 'slot removed
 					MapRemove(animes, anime.weaponSlot_id)
-				Else 
+				Else
 					Local inSlotWeapon_id$
 					If data.ship.builtInWeapons.ValueForKey(anime.weaponSlot_id)
 						inSlotWeapon_id = String(data.ship.builtInWeapons.ValueForKey(anime.weaponSlot_id) )
@@ -249,7 +287,7 @@ Type TWeaponDrawer
 	End Method
 	
 	Method getSpriteSeqBySpac:TImage[] (weapon:TStarfarerWeapon, weapon_mount$)
-		If weapon_mount = Null Or weapon_mount.length = 0 Or weapon_mount="HIDDEN" Then Return Null
+		If weapon_mount = Null Or weapon_mount.length = 0 Or weapon_mount = "HIDDEN" Then Return Null
 		If Not weapon Then Return Null
 		Local img_0_path$ = Null
 		If weapon_mount = "HARDPOINT" Then img_0_path = resource_search( weapon.hardpointSprite )
@@ -285,7 +323,7 @@ Type TWeaponDrawer
 		EndIf
 	End Method
 	
-	Method draw_weaponInSlot( weaponSlot:TStarfarerShipWeapon, weapon:TStarfarerWeapon, data:TData, sprite:TSprite )
+	Method draw_weaponInSlot( weaponSlot:TStarfarerShipWeapon, weapon:TStarfarerWeapon, data:TData, sprite:TSprite, x_offset# = 0, y_offset# = 0 )
 		If weaponSlot.mount = "HIDDEN" Then Return
 		If Not weapon Then Return
 		If Not weaponSlot Then Return
@@ -485,3 +523,51 @@ Type TAnime
 	End Method
 	
 End Type
+
+Type TWeaponRenderData
+	Field weaponSlot:TStarfarerShipWeapon
+	Field weapon:TStarfarerWeapon
+	Field renderOrder# = 0
+	
+	Method init (ws:TStarfarerShipWeapon, w:TStarfarerWeapon)
+	weaponSlot = ws
+	weapon = w
+	Local offset# = Abs weaponSlot.locations[0] / 100000 + Abs weaponSlot.locations[1] / 10000
+			renderOrder = renderOrder - offset
+	If Not weapon.renderBelowAllWeapons	
+		renderOrder = weapon.draw_order() * 2
+		If weapon.type_ = "MISSILE" And (weapon.renderHints.elements.Contains("RENDER_LOADED_MISSILES") Or weapon.renderHints.elements.Contains("RENDER_LOADED_MISSILES_UNLESS_HIDDEN") ) Then renderOrder = renderOrder - 1
+		If Not weaponSlot.mount = "HARDPOINT" Then renderOrder = renderOrder + 20
+	EndIf
+	End Method
+	
+	Method Compare:Int(d:Object)
+		Local rd:TWeaponRenderData = TWeaponRenderData(d)
+		If rd Then
+			If renderOrder < rd.renderOrder Then
+				Return -1
+			ElseIf renderOrder > rd.renderOrder Then
+				Return 1
+			Else
+				Return 0
+			EndIf
+		Else
+			Return 0
+		EndIf
+	EndMethod
+End Type
+
+Function draw_weapons( ed:TEditor, data:TData, sprite:TSprite, wd:TWeaponDrawer )
+  wd.update( ed, data )
+  If wd.show_weapon = 0 Then Return
+  SetColor( 255, 255, 255 )
+  If wd.show_weapon = 1 Then SetAlpha( 1 )
+  If wd.show_weapon = 2 Then SetAlpha( 0.5 )
+  Select ed.program_mode
+    Case "ship"
+	wd.draw_all_weapons(True, data, sprite)
+    Case "variant"
+	wd.draw_all_weapons(False, data, sprite)
+  EndSelect
+  SetAlpha( 1 )
+End Function

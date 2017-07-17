@@ -140,7 +140,7 @@ Type TEditor
 			DebugLogFile " LOADED "+file
 			Return ship
 		Catch ex$ 'ignore parsing errors and continue
-			DebugLogFile " Error: "+file+" "+ex
+			DebugLogFile " Error: " + file + " " + ex
 			Return Null
 		EndTry
 	End Method
@@ -425,35 +425,47 @@ Type TEditor
 
 	Method select_weapons$[]( slot_type$, slot_size$ )
 		Local matches$[] = New String[0]
-		For Local weapon_id$ = EachIn stock_weapons.Keys()
-			Local weapon:TStarfarerWeapon = TStarfarerWeapon( stock_weapons.ValueForKey( weapon_id ))
-			Local size_diff% = (weapon_size_value( slot_size ) - weapon_size_value( weapon.size ))
-			'slot type match and same size or bigger by one step
-			'or universal/built-in type with same size
-			'or decorative weapons for decorative slots
-			'or energy/ballistic weapons for hybrid slots with same size
-			'or energy/missile weapons for synergy slots with same size
-			'or missile/ballistic weapons for composite slots with same size
-			If slot_type <> "DECORATIVE"
-				If Not ( weapon.type_ = "DECORATIVE" ) ..
-				And (( slot_type = "UNIVERSAL" And size_diff = 0 ) ..
-					Or ( slot_type = "BUILT_IN" And size_diff = 0 ) ..
-					Or ( slot_type = weapon.type_ And size_diff >= 0 And size_diff <= 1 ) ..
-					Or ( slot_type = "HYBRID" And size_diff = 0 And (weapon.type_ = "ENERGY" Or weapon.type_ = "BALLISTIC") )..
-					Or ( slot_type = "SYNERGY" And size_diff = 0 And (weapon.type_ = "ENERGY" Or weapon.type_ = "MISSILE") )..
-					Or ( slot_type = "COMPOSITE" And size_diff = 0 And (weapon.type_ = "MISSILE" Or weapon.type_ = "BALLISTIC") ).. 
-					)
-					matches = matches[..(matches.length + 1)]
-					matches[matches.length - 1] = weapon.id
+		'for weapons
+		If slot_type <> "STATION_MODULE"	
+			For Local weapon_id$ = EachIn stock_weapons.Keys()
+				Local weapon:TStarfarerWeapon = TStarfarerWeapon( stock_weapons.ValueForKey( weapon_id ) )
+				Local size_diff% = (weapon_size_value( slot_size ) - weapon_size_value( weapon.size ) )
+				'slot type match and same size or bigger by one step
+				'or universal/built-in type with same size
+				'or decorative weapons for decorative slots
+				'or energy/ballistic weapons for hybrid slots with same size
+				'or energy/missile weapons for synergy slots with same size
+				'or missile/ballistic weapons for composite slots with same size
+				If slot_type <> "DECORATIVE" 			
+					If ( slot_type = "UNIVERSAL" And size_diff = 0 ) ..
+						Or ( slot_type = "BUILT_IN" And size_diff = 0 ) ..
+						Or ( slot_type = weapon.type_ And size_diff >= 0 And size_diff <= 1 ) ..
+						Or ( slot_type = "HYBRID" And size_diff = 0 And (weapon.type_ = "ENERGY" Or weapon.type_ = "BALLISTIC") )..
+						Or ( slot_type = "SYNERGY" And size_diff = 0 And (weapon.type_ = "ENERGY" Or weapon.type_ = "MISSILE") )..
+						Or ( slot_type = "COMPOSITE" And size_diff = 0 And (weapon.type_ = "MISSILE" Or weapon.type_ = "BALLISTIC") )				
+						matches = matches[..(matches.length + 1)]
+						matches[matches.length - 1] = weapon.id
+					EndIf
+				ElseIf slot_type = "DECORATIVE"
+					If ( size_diff = 0 And weapon.type_ = "DECORATIVE" )
+						matches = matches[..(matches.length + 1)]
+						matches[matches.length - 1] = weapon.id
+					EndIf
 				EndIf
-			Else
-				If  ( slot_type = "DECORATIVE" And size_diff = 0 ) ..
-				And ( weapon.type_ = "DECORATIVE" )
-					matches = matches[..(matches.length + 1)]
-					matches[matches.length - 1] = weapon.id
-				EndIf
-			EndIf
-		Next
+			Next
+		'for modules
+		Else
+			DebugStop
+			For Local variant_id$ = EachIn stock_variants.Keys()
+				matches = matches + [variant_id]
+'				Local variant:TStarfarerVariant = TStarfarerVariant( stock_variants.ValueForKey( variant_id ) )				
+'				Local hull:TStarfarerShip = TStarfarerShip(stock_ships.ValueForKey(variant.hullId) )
+'				If hull
+'					Local name$ = hull.getNameOrID() + " " + variant.displayName
+'					matches = matches + [name]
+'				EndIf
+			Next
+		EndIf
 		Return matches
 	EndMethod
 

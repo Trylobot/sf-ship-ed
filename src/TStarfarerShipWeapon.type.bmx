@@ -31,10 +31,10 @@ Type TStarfarerShipWeapon
 		  And  Not is_system() ..
 		  And  Not is_decorative()
 	EndMethod
-
-	Method draw_order%()
-		If mount = "TURRET" Then Return 3 Else Return 0
-	End Method
+	
+	Method is_station_module%()
+		Return (type_ = "STATION_MODULE" )
+	End Method	
 	
 	Method New()
 		angle = 0.0

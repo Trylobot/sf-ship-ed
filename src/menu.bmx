@@ -1,6 +1,6 @@
 '////////////////////////////////////////////////
 'function menu
-'  this is a little too complex. 
+'  this is a little too complex.
 
 'You're right, it is. Try assigning symbolic names to these magical fucking numbers, for starters.
 ' - T
@@ -8,11 +8,11 @@
 Global mainMenuNeedUpdate% = False
 
 Local s% = 0
-Global MENU_FILE% = s; s:+1
-Global MENU_FILE_NEW% = s; s:+1
+Global MENU_FILE% = s; s:+ 1
+Global MENU_FILE_NEW% = s; s:+ 1
 Global MENU_FILE_LOAD_MOD% = s; s:+1
-Global MENU_FILE_LOAD_DATA% = s; s:+1
-Global MENU_FILE_LOAD_IMAGE% = s; s:+1
+Global MENU_FILE_LOAD_DATA% = s; s:+ 1
+Global MENU_FILE_LOAD_IMAGE% = s; s:+ 1
 Global MENU_FILE_SAVE% = s; s:+1
 Global MENU_FILE_EXIT% = s; s:+1
 Global fileMenu:TGadget[s];

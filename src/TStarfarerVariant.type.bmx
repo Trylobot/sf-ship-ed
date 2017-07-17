@@ -60,5 +60,6 @@ Type TStarfarerVariant
 		Next
 	EndMethod
 	
+	
 End Type
 
