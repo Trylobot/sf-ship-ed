@@ -13,11 +13,11 @@ Type TWingRenderer
 	Method draw_all_wings(ed:TEditor, data:TData , built_in_only% = False)
 			For Local i% = 0 Until data.get_fighterbays_count()
 			If i < data.ship.builtInWings.length
-				WR.draw_fighter_icons(data.ship.builtInWings[i], i, ed , True)				
+				draw_fighter_icons(data.ship.builtInWings[i], i, ed , True)				
 			Else If Not built_in_only And i < data.ship.builtInWings.length + data.variant.wings.length
-				WR.draw_fighter_icons(data.variant.wings[i - data.ship.builtInWings.length], i, ed)
+				draw_fighter_icons(data.variant.wings[i - data.ship.builtInWings.length], i, ed)
 			Else
-				WR.draw_fighter_icons(Null, i, ed)
+				draw_fighter_icons(Null, i, ed)
 			EndIf
 		Next	
 	End Method

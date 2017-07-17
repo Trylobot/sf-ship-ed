@@ -54,5 +54,6 @@ Type TStarfarerVariant
 		Return c
 	End Method
 	
+	
 End Type
 

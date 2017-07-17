@@ -83,14 +83,14 @@ Type TStarfarerWeapon
 		
 	End Method
 	
-	Method draw_order%()
+	Method draw_order#()
 		Select size
 		Case "LARGE"
-			Return 2
+			Return 3
 		Case"MEDIUM"
-			Return 1
+			Return 2
 		Case "SMALL"
-			Return 0
+			Return 1
 		End Select
 		Return 0
 	End Method

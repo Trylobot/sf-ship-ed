@@ -95,7 +95,7 @@ Type TData
 
 	'requires subsequent call to update_variant()
 	Method decode_variant( input_json_str$ )
-		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ))
+		variant = TStarfarerVariant( json.parse( input_json_str, "TStarfarerVariant" ) )
 		enforce_variant_internal_consistency()
 	End Method
 	
@@ -165,7 +165,7 @@ Type TData
 				If weapon_slot_id_exists( weapon_slot_id )
 					Local weapon_slot:TStarfarerShipWeapon = find_weapon_slot_by_id( weapon_slot_id )
 					Local valid_weapons$[] = ed.select_weapons( weapon_slot.type_, weapon_slot.size )
-					Local weapon_id$ = String( group.weapons.ValueForKey( weapon_slot_id ))
+					Local weapon_id$ = String( group.weapons.ValueForKey( weapon_slot_id ) )
 					If Not in_str_array( weapon_id, valid_weapons )
 						'Not valid
 						unassign_weapon_from_slot( weapon_slot_id )	
