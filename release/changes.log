@@ -9,7 +9,8 @@ SKIN EDITOR
 
 VARIANT EDITOR / STATION_MODULE support
 - Show installed module (variant) in slot.
-- Module selector for STATION_MODULE slots.
+- Render installed STATION_MODULE (variant)
+- Module selector for STATION_MODULE slots, including variants based on skins
 - stock_variants loader looks for variants in subdirectories
 
 WEAPON RENDERING
