@@ -16,7 +16,7 @@ Type TWeaponDrawer
 		renderQueue = CreateList()
 	End Method
 	
-	Method draw_weapons(builtin_only%, data:TData, sprite:TSprite, x_offset# = 0, y_offset# = 0)
+	Method draw_all_weapons(builtin_only%, data:TData, sprite:TSprite, x_offset# = 0, y_offset# = 0)
 		If builtin_only
 			For Local i% = 0 Until data.ship.weaponSlots.length
 				Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[i]
@@ -556,3 +556,18 @@ Type TWeaponRenderData
 		EndIf
 	EndMethod
 End Type
+
+Function draw_weapons( ed:TEditor, data:TData, sprite:TSprite, wd:TWeaponDrawer )
+  wd.update( ed, data )
+  If wd.show_weapon = 0 Then Return
+  SetColor( 255, 255, 255 )
+  If wd.show_weapon = 1 Then SetAlpha( 1 )
+  If wd.show_weapon = 2 Then SetAlpha( 0.5 )
+  Select ed.program_mode
+    Case "ship"
+	wd.draw_all_weapons(True, data, sprite)
+    Case "variant"
+	wd.draw_all_weapons(False, data, sprite)
+  EndSelect
+  SetAlpha( 1 )
+End Function
