@@ -16,6 +16,40 @@ Type TWeaponDrawer
 		renderQueue = CreateList()
 	End Method
 	
+	' do not support module on module yet
+	Method queue_module_weapons(renderQueue:TList Var, weapon_slot:TStarfarerShipWeapon, variantID$, data:TData, sprite:TSprite)
+		Local variant_tem:TStarfarerVariant = TStarfarerVariant( ed.stock_variants.ValueForKey( variantID ) )
+		If Not variant_tem Then Return
+		Local hullID_tem$ = variant_tem.hullId
+		Local skin_tem:TStarfarerSkin = TStarfarerSkin(ed.stock_skins.ValueForKey( hullID_tem ) )
+		If skin_tem Then hullID_tem = skin_tem.baseHullId
+		Local ship_tem:TStarfarerShip = TStarfarerShip(ed.stock_ships.ValueForKey(hullID_tem) )
+		If Not ship_tem Then Return
+		Local x# = weapon_slot.locations[0]
+		Local y# = weapon_slot.locations[1]
+		Local facing# = weapon_slot.angle
+		Local variantRenderData:TWeaponRenderData = New TWeaponRenderData
+		variantRenderData.inti_for_module(weapon_slot, variant_tem)
+		variantRenderData.set_facing_and_offset(x, y, facing)
+		renderQueue.AddLast(variantRenderData)
+		Local weapons:TMap = variant_tem.getAllWeapons()
+			For Local i% = 0 Until ship_tem.weaponSlots.length
+				Local weaponslot:TStarfarerShipWeapon = ship_tem.weaponSlots[i]
+				'well, I did the null check later so don't needs in these part...i hope
+				Local weaponID$
+				weaponID = String(weapons.ValueForKey(weaponslot.id) ) 'load from weapon groups frist
+				If Not weaponID Then weaponID = String(ship_tem.builtInWeapons.ValueForKey(weaponslot.id) ) 'then, try the built-in list
+				Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) ) ' could be null but it's ok
+				If weapon
+					Local renderData:TWeaponRenderData = New TWeaponRenderData
+					renderData.init(weaponslot, weapon)
+					renderData.set_facing_and_offset(x, y, facing)
+					renderData.set_is_station_module_weapon()
+					renderQueue.AddLast(renderData)	
+				EndIf
+			Next
+	End Method
+	
 	Method draw_all_weapons(builtin_only%, data:TData, sprite:TSprite, x_offset# = 0, y_offset# = 0)
 		If builtin_only
 			For Local i% = 0 Until data.ship.weaponSlots.length
@@ -37,17 +71,27 @@ Type TWeaponDrawer
 				Local weaponID$
 				weaponID = String(weapons.ValueForKey(weaponslot.id) ) 'load from weapon groups frist
 				If Not weaponID Then weaponID = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) ) 'then, try the built-in list
-				Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) ) ' could be null but it's ok
-				If weapon
-					Local renderData:TWeaponRenderData = New TWeaponRenderData
-					renderData.init(weaponslot, weapon)
-					renderQueue.AddLast(renderData)	
+				If weaponID
+					If weaponslot.type_ <> "STATION_MODULE"
+						Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) ) ' could be null but it's ok
+						If weapon
+							Local renderData:TWeaponRenderData = New TWeaponRenderData
+							renderData.init(weaponslot, weapon)
+							renderQueue.AddLast(renderData)	
+						EndIf
+					Else
+						queue_module_weapons(renderQueue, weaponslot, weaponID, data, sprite)
+					EndIf 						
 				EndIf
 			Next			
 		EndIf
-		renderQueue.sort()
+		renderQueue.Sort()
 		For Local d:TWeaponRenderData = EachIn renderQueue
-			draw_weaponInSlot(d.weaponSlot, d.weapon, data, sprite, x_offset, y_offset)
+			If d.weapon
+				draw_weaponInSlot(d.weaponSlot, d.weapon, data, sprite, d.x_offset, d.y_offset, d.facing)
+			Else If d.variant
+				draw_variantInSlot(d.weaponSlot, d.variant, data, sprite, d.x_offset, d.y_offset)
+			EndIf			
 		Next
 		renderQueue.Clear()
 	End Method
@@ -171,7 +215,7 @@ Type TWeaponDrawer
 					If anime 
 						anime.isPlaying = play
 						' for the 0 fps things
-						If anime.interval = -1
+						If anime.interval = - 1
 							If play 
 								anime.Forward()
 							Else 
@@ -188,7 +232,7 @@ Type TWeaponDrawer
 					Local anime:TAnime = TAnime (MapValueForKey(animes, weaponSlotId) )
 					anime.isPlaying = play
 					' for the 0 fps things
-					If anime.interval = -1
+					If anime.interval = - 1
 						If play 
 							anime.Forward()
 						Else 
@@ -293,7 +337,7 @@ Type TWeaponDrawer
 		If weapon_mount = "HARDPOINT" Then img_0_path = resource_search( weapon.hardpointSprite )
 		If weapon_mount = "TURRET" Then img_0_path = resource_search( weapon.turretSprite )
 		If img_0_path			
-			If MapValueForKey(buffed_img_seq, img_0_path) Return TImage[] (MapValueForKey(buffed_img_seq, img_0_path))
+			If MapValueForKey(buffed_img_seq, img_0_path) Return TImage[] (MapValueForKey(buffed_img_seq, img_0_path) )
 		EndIf 
 		Local zero_pad_length% = 2
 		Local num_idx% = img_0_path.FindLast( zero_pad(0,zero_pad_length) )
@@ -323,25 +367,65 @@ Type TWeaponDrawer
 		EndIf
 	End Method
 	
-	Method draw_weaponInSlot( weaponSlot:TStarfarerShipWeapon, weapon:TStarfarerWeapon, data:TData, sprite:TSprite, x_offset# = 0, y_offset# = 0 )
+	Method draw_variantInSlot( weaponSlot:TStarfarerShipWeapon, variant_to_render:TStarfarerVariant, data:TData, sprite:TSprite, x_offset# = 0, y_offset# = 0 , angle_offset# = 0)
+		If weaponSlot.mount = "HIDDEN" Then Return
+		If Not variant_to_render Then Return
+		If Not weaponSlot Then Return
+		Local rotation# = 90 - weaponSlot.angle - angle_offset
+		While rotation > 360
+			rotation :- 360
+		Wend
+		While rotation < 0
+			rotation :+ 360
+		Wend
+		SetRotation( rotation )
+		SetScale( sprite.scale, sprite.scale )
+		'draw		
+		Local img_path$
+		Local hullID$ = variant_to_render.hullId		
+		Local hull:TStarfarerShip = TStarfarerShip(ed.stock_ships.ValueForKey(hullID) )				
+		If hull
+			img_path = resource_search(hull.spriteName)				
+		Else
+			Local skin:TStarfarerSkin = TStarfarerSkin(ed.stock_skins.ValueForKey(hullID) )
+			If skin Then img_path = resource_search(skin.spriteName)
+		EndIf
+		Local variantIMG:TImage
+		If img_path Then variantIMG = getSpriteByPath(img_path)
+		If variantIMG
+			'calculate the center point offset
+			Local x# = (variantIMG.width * 0.5) - hull.center[0]
+			Local y# = (variantIMG.height * 0.5) - hull.center[1]
+			rotate_vector2f(y, x, rotation)
+			'calc. coords
+			x = sprite.sx + (data.ship.center[1] + weaponSlot.locations[0] + x ) * sprite.scale
+			y = sprite.sy + (data.ship.center[0] - weaponSlot.locations[1] - y ) * sprite.scale
+			DrawImage(variantIMG, x, y)	
+		EndIf
+	End Method
+	
+	Method draw_weaponInSlot( weaponSlot:TStarfarerShipWeapon, weapon:TStarfarerWeapon, data:TData, sprite:TSprite, x_offset# = 0, y_offset# = 0 , angle_offset# = 0)
 		If weaponSlot.mount = "HIDDEN" Then Return
 		If Not weapon Then Return
 		If Not weaponSlot Then Return
-		Local rotation# = 90 - weaponSlot.angle
-		'it should be in range from -360 to 720 so do it in easy way
-		If rotation > 360 Then rotation :- 360
-		If rotation < 360 Then	rotation :+ 360
+		Local rotation# = 90 - weaponSlot.angle - angle_offset
+		While rotation > 360
+			rotation :- 360
+		Wend
+		While rotation < 0
+			rotation :+ 360
+		Wend
 		If MapValueForKey(animes, weaponSlot.id)
 			Local anime:TAnime = TAnime ( MapValueForKey(animes, weaponSlot.id) )
-			draw_weaponBySpec(weapon, weaponSlot.mount, weaponSlot.locations, rotation, data, sprite, anime.currFrame)
+			draw_weaponBySpec(weapon, weaponSlot.mount, weaponSlot.locations, rotation, data, sprite, anime.currFrame, x_offset, y_offset, angle_offset)
 		Else If ed.program_mode = "weapon"
-			If weaponEditorAnime Then draw_weaponBySpec(weapon, weaponSlot.mount, weaponSlot.locations, rotation, data, sprite, weaponEditorAnime.currFrame)..
-			Else draw_weaponBySpec(weapon, weaponSlot.mount, weaponSlot.locations, rotation, data, sprite)
-		Else draw_weaponBySpec(weapon, weaponSlot.mount, weaponSlot.locations, rotation, data, sprite)
+			If weaponEditorAnime Then draw_weaponBySpec(weapon, weaponSlot.mount, weaponSlot.locations, rotation, data, sprite, weaponEditorAnime.currFrame, x_offset, y_offset, angle_offset )..
+			Else draw_weaponBySpec(weapon, weaponSlot.mount, weaponSlot.locations, rotation, data, sprite, - 1, x_offset, y_offset, angle_offset)
+		Else draw_weaponBySpec(weapon, weaponSlot.mount, weaponSlot.locations, rotation, data, sprite, - 1, x_offset, y_offset, angle_offset)
 		End If
 	End Method
 	
-	Method draw_weaponBySpec( weapon:TStarfarerWeapon, weapon_mount$, weapon_loc#[], rotation#, data:TData, sprite:TSprite, frame_to_draw% = - 1 )
+	Method draw_weaponBySpec( weapon:TStarfarerWeapon, weapon_mount$, weapon_loc#[], rotation#, data:TData, sprite:TSprite, frame_to_draw% = - 1, x_offset# = 0, y_offset# = 0, angle_offset# = 0)
 		'init var
 		Local main_img:TImage = Null
 		Local under_img:TImage = Null
@@ -386,38 +470,28 @@ Type TWeaponDrawer
 		'check if we have thing to draw with for sure
 		If Not main_img And Not under_img And Not gun_img Then Return
 		'calculate the hardpoint offset
-		Local x# = 0
-		Local y# = 0
+		Local x# = weapon_loc[0]
+		Local y# = weapon_loc[1]
+		rotate_vector2f(x, y, angle_offset)
 		If ed.program_mode <> "weapon" And weapon_mount = "HARDPOINT"
 			If main_img
 				Local c# = ImageHeight(main_img) * 0.25
-				x = c*Sin(rotation)
-				y = c*Cos(rotation)
+				x :+ c * Sin(rotation)
+				y :+ c * Cos(rotation)
 			'juse in case if there are not hardpointSprit but have something others
 			Else If under_img
 				Local c# = ImageHeight(under_img) * 0.25
-				x = c*Sin(rotation)
-				y = c*Cos(rotation)
-			Else If gun_img 
+				x :+ c * Sin(rotation)
+				y :+ c * Cos(rotation)
+			Else If gun_img
 				Local c# = ImageHeight(gun_img) * 0.25
-				x = c*Sin(rotation)
-				y = c*Cos(rotation)
+				x :+ c * Sin(rotation)
+				y :+ c * Cos(rotation)
 			EndIf 
-		EndIf
-		'check for RENDER_BARREL_BELOW
-'		Local rbb% = False
-'		Local i%
-'		If weapon.renderHints
-'			For i =0 Until weapon.renderHints.length
-'				If weapon.renderHints[i] = "RENDER_BARREL_BELOW"
-'					rbb = True
-'					Exit
-'				EndIf
-'			Next
-'		EndIf		
+		EndIf	
 		'OK let's draw
-		x :+ weapon_loc[0]
-		y :+ weapon_loc[1]
+		x:+ x_offset
+		y:+ y_offset
 		draw_weaponByImg(main_img, under_img, gun_img, [x, y], rotation, weapon.check_render_barrel_below(), data, sprite)
 	EndMethod
 	
@@ -455,8 +529,7 @@ Type TWeaponDrawer
 				DrawImage( gun_img, x, y )
 			EndIf
 		EndIf
-	EndMethod	
-	
+	EndMethod
 End Type
 
 Type TAnime
@@ -528,17 +601,40 @@ Type TWeaponRenderData
 	Field weaponSlot:TStarfarerShipWeapon
 	Field weapon:TStarfarerWeapon
 	Field renderOrder# = 0
+	Field x_offset# = 0
+	Field y_offset# = 0
+	Field facing# = 0
+	Field variant:TStarfarerVariant
 	
 	Method init (ws:TStarfarerShipWeapon, w:TStarfarerWeapon)
-	weaponSlot = ws
-	weapon = w
-	Local offset# = Abs weaponSlot.locations[0] / 100000 + Abs weaponSlot.locations[1] / 10000
-			renderOrder = renderOrder - offset
-	If Not weapon.renderBelowAllWeapons	
-		renderOrder = weapon.draw_order() * 2
-		If weapon.type_ = "MISSILE" And (weapon.renderHints.elements.Contains("RENDER_LOADED_MISSILES") Or weapon.renderHints.elements.Contains("RENDER_LOADED_MISSILES_UNLESS_HIDDEN") ) Then renderOrder = renderOrder - 1
-		If Not weaponSlot.mount = "HARDPOINT" Then renderOrder = renderOrder + 20
-	EndIf
+		weaponSlot = ws
+		weapon = w
+		Local offset_weight# = Abs weaponSlot.locations[0] / 100000 + Abs weaponSlot.locations[1] / 10000
+			renderOrder :- offset_weight
+		If Not weapon.renderBelowAllWeapons
+			renderOrder = weapon.draw_order() * 2
+			If weapon.type_ = "MISSILE" And (weapon.renderHints.elements.Contains("RENDER_LOADED_MISSILES") Or weapon.renderHints.elements.Contains("RENDER_LOADED_MISSILES_UNLESS_HIDDEN") ) Then renderOrder = renderOrder - 1
+			If Not weaponSlot.mount = "HARDPOINT" Then renderOrder = renderOrder + 20
+		EndIf
+	End Method
+
+	Method inti_for_module(ws:TStarfarerShipWeapon, v:TStarfarerVariant)
+		weaponSlot = ws
+		VARIANT = v
+		Local offset_weight# = Abs weaponSlot.locations[0] / 100000 + Abs weaponSlot.locations[1] / 10000
+		renderOrder :- offset_weight
+		'hope this is right
+		renderOrder :- 20
+	End Method
+
+	Method set_facing_and_offset(x#, y#, facing_arc#)
+		x_offset = x
+		y_offset = y
+		facing = facing_arc	
+	End Method
+
+	Method set_is_station_module_weapon()
+		renderOrder :+ 100
 	End Method
 	
 	Method Compare:Int(d:Object)
@@ -556,6 +652,16 @@ Type TWeaponRenderData
 		EndIf
 	EndMethod
 End Type
+
+Function rotate_vector2f( x# Var, y# Var, rotate_angle#)
+	If rotate_angle = 0 Then Return
+	Local c# = Cos(rotate_angle)
+	Local s# = Sin(rotate_angle)
+	Local x_tem# = x
+	Local y_tem# = y
+	x = x_tem * c - y_tem * s
+	y = x_tem * s + y_tem * c
+End Function
 
 Function draw_weapons( ed:TEditor, data:TData, sprite:TSprite, wd:TWeaponDrawer )
   wd.update( ed, data )

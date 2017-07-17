@@ -455,15 +455,8 @@ Type TEditor
 			Next
 		'for modules
 		Else
-			DebugStop
 			For Local variant_id$ = EachIn stock_variants.Keys()
 				matches = matches + [variant_id]
-'				Local variant:TStarfarerVariant = TStarfarerVariant( stock_variants.ValueForKey( variant_id ) )				
-'				Local hull:TStarfarerShip = TStarfarerShip(stock_ships.ValueForKey(variant.hullId) )
-'				If hull
-'					Local name$ = hull.getNameOrID() + " " + variant.displayName
-'					matches = matches + [name]
-'				EndIf
 			Next
 		EndIf
 		Return matches
