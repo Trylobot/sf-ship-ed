@@ -68,6 +68,7 @@ Type TModalSetVariant Extends TSubroutine
 	Field module_hull_name$
 	Field module_hull:TStarfarerShip
 	Field module_variant_name$
+	Field module_skin:TStarfarerSkin
 	
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		ed.program_mode = "variant"
@@ -255,13 +256,19 @@ Type TModalSetVariant Extends TSubroutine
 				variant_as_module = TStarfarerVariant( ed.stock_variants.ValueForKey( weapon_id ) )
 				If variant_as_module
 					module_hull_name = variant_as_module.hullId
-					'need update after skin stock install or somehow -D
-					module_hull = TStarfarerShip(ed.stock_ships.ValueForKey(module_hull_name) )
-					If module_hull ..
-					And module_hull.hullName ..
-					And module_hull.hullName <> "" ..
-					And module_hull.hullName <> "New Hull"..
-					Then module_hull_name = module_hull.hullName
+					module_hull = TStarfarerShip(ed.stock_ships.ValueForKey(module_hull_name) )					
+					If module_hull
+						If module_hull.hullName ..
+						And module_hull.hullName <> "" ..
+						And module_hull.hullName <> "New Hull"..
+						Then module_hull_name = module_hull.hullName						
+					Else
+						module_skin = TStarfarerSkin(ed.stock_skins.ValueForKey(module_hull_name) )
+						If module_skin.hullName ..
+						And module_skin.hullName <> "" ..
+						And module_skin.hullName <> "Hull Skin"..
+						Then module_hull_name = module_skin.hullName
+					EndIf						
 					module_variant_name = variant_as_module.displayName				
 					If module_hull_name Then weapon_list_display[wi] = module_hull_name + " " + module_variant_name
 				EndIf
