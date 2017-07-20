@@ -26,7 +26,7 @@ Type TModalSetStringData Extends TSubroutine
 	Field MODE_WEAPON%             = 4
 	Field MODE_SKIN%               = 5
 	Field MODE_SKIN_WEAPON_CHANGE% = 6
-	Field MODE_SHIP_ENGINE_CHANGE% = 7
+	Field MODE_SKIN_ENGINE_CHANGE% = 7
 	Field subroutine_mode%
 
 	Field customBeamTexTmp:TArray
@@ -34,16 +34,24 @@ Type TModalSetStringData Extends TSubroutine
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		ed.last_mode = ed.mode
 		ed.mode = "string_data"
-		ed.edit_strings_weapon_i = - 1
-		ed.edit_strings_engine_i = - 1
+		ed.edit_strings_weapon_i = -1
+		ed.edit_strings_engine_i = -1
+		ed.edit_strings_skin_weapon_i = -1
+		ed.edit_strings_skin_engine_i = -1
 		FlushEvent()
 		If sprite 'context-sensitive editing
 			Local img_x#, img_y#
 			sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+			' ship
 			If ed.last_mode = "weapon_slots"
-				ed.edit_strings_weapon_i = data.find_nearest_weapon_slot( img_x, img_y )
+				ed.edit_strings_weapon_i = data.find_nearest_weapon_slot( img_x,img_y )
 			ElseIf ed.last_mode = "engine_slots"
-				ed.edit_strings_engine_i = data.find_nearest_engine( img_x, img_y )
+				ed.edit_strings_engine_i = data.find_nearest_engine( img_x,img_y )
+			' skin
+			ElseIf ed.last_mode = "changeremove_weaponslots"
+				'ed.edit_strings_skin_weapon_i = data.find_nearest_skin_weapon( img_x,img_y )
+			ElseIf ed.last_mode = "changeremove_engines"
+				ed.edit_strings_skin_engine_i = data.find_nearest_skin_engine( img_x,img_y )
 			EndIf
 		EndIf
 		'set the subroutine module state
@@ -68,14 +76,14 @@ Type TModalSetStringData Extends TSubroutine
 			EndIf
 		
 		Else If ed.program_mode = "skin"
-			If ed.edit_strings_weapon_i <> - 1
+			If ed.edit_strings_skin_weapon_i <> -1
 				subroutine_mode = MODE_SKIN_WEAPON_CHANGE
 				'target = data.skin.weaponSlotChanges.ValueForKey(ed.edit_strings_weapon_i)
 				'DebugLogFile(" Editing Weaopn Slot " + ed.edit_strings_weapon_i + " " + (TStarfarerShipWeapon (target) ).id)
-			ElseIf ed.edit_strings_engine_i <> - 1
-				subroutine_mode = MODE_SHIP_ENGINE_CHANGE
-				'target = data.ship.engineSlotChanges.ValueForKey(ed.edit_strings_engine_i)
-				'DebugLogFile(" Editing Engine Slot " + ed.edit_strings_engine_i + " " + edit_strings_engine_i)
+			ElseIf ed.edit_strings_skin_engine_i <> -1
+				subroutine_mode = MODE_SKIN_ENGINE_CHANGE
+				target = data.prep_skin_engine_slot_change( ed.edit_strings_skin_engine_i )
+				DebugLogFile(" Editing Skin(Changed) Engine Slot " + ed.edit_strings_skin_engine_i)
 			Else
 				subroutine_mode = MODE_SKIN
 				target = data.skin
@@ -155,7 +163,7 @@ Type TModalSetStringData Extends TSubroutine
 							reset_cursor_color_period()
 							'///////////////////////
 							'Custom Engines check
-							If subroutine_mode = MODE_SHIP_ENGINE ..
+							If subroutine_mode = MODE_SHIP_ENGINE Or subroutine_mode = MODE_SKIN_ENGINE_CHANGE ..
 							And labels.lines[line_i] = "ship.engine.style"
 								If TStarfarerShipEngine(target).style <> "CUSTOM"
 									TStarfarerShipEngine(target).styleId = ""
@@ -170,7 +178,7 @@ Type TModalSetStringData Extends TSubroutine
 								EndIf
 								Load( ed,data,sprite ) 're-create string-editing window
 								'Save( ed,data,sprite )
-							ElseIf subroutine_mode = MODE_SHIP_ENGINE ..
+							ElseIf subroutine_mode = MODE_SHIP_ENGINE Or subroutine_mode = MODE_SKIN_ENGINE_CHANGE ..
 							And TStarfarerShipEngine(target).style = "CUSTOM" ..
 							And labels.lines[line_i] = "ship.engine.styleId"
 								If TStarfarerShipEngine(target).styleId <> ""
@@ -267,26 +275,35 @@ Type TModalSetStringData Extends TSubroutine
 				data.update()
 				data.take_snapshot(3)
 			'//////////////////////////////////////
-			Case MODE_SHIP_ENGINE
+			Case MODE_SHIP_ENGINE, MODE_SKIN_ENGINE_CHANGE
 				i = 0
 				TStarfarerShipEngine(target).style = values.lines[i]; i:+1
+				TStarfarerShipEngine(target).contrailSize = values.lines[i].ToDouble(); i:+1
+				If TStarfarerShipEngine(target).style <> "CUSTOM"
+					TStarfarerShipEngine(target).styleId = "" 'rule enforcement
+				EndIf
 				'conditional chunk 1
-				If values.lines.length >= i + 1 And TStarfarerShipEngine(target).style = "CUSTOM"
+				If values.lines.length >= i + 2 And TStarfarerShipEngine(target).style = "CUSTOM"
 					TStarfarerShipEngine(target).styleId = values.lines[i]; i:+ 1
 				EndIf
 				'conditional chunk 2
-				If values.lines.length >= i + 7 And TStarfarerShipEngine(target).styleSpec <> Null
+				If values.lines.length >= i + 8 And TStarfarerShipEngine(target).styleSpec <> Null
 					TStarfarerShipEngine(target).styleSpec.type_ = values.lines[i]; i:+ 1
 					json.error_level = 0
 					TStarfarerShipEngine(target).styleSpec.engineColor = Int[]( json.parse( values.lines[i], "Int[]" )); i:+1
 					TStarfarerShipEngine(target).styleSpec.contrailColor = Int[]( json.parse( values.lines[i], "Int[]" )); i:+1
-					json.error_level = 1
+					json.error_level = 1 'TODO: restore to old value instead of assuming this value
 					TStarfarerShipEngine(target).styleSpec.contrailParticleSizeMult = values.lines[i].ToDouble(); i:+1
 					TStarfarerShipEngine(target).styleSpec.contrailParticleDuration = values.lines[i].ToDouble(); i:+1
 					TStarfarerShipEngine(target).styleSpec.contrailMaxSpeedMult = values.lines[i].ToDouble(); i:+1
 					TStarfarerShipEngine(target).styleSpec.contrailAngularVelocityMult = values.lines[i].ToDouble(); i:+1
 				EndIf
-				data.update()
+				Select subroutine_mode
+					Case MODE_SHIP_ENGINE
+						data.update()
+					Case MODE_SKIN_ENGINE_CHANGE
+						data.update_skin()
+				EndSelect
 			'///////////////////////////////////////
 			Case MODE_SHIP_WEAPON 
 				i = 0
@@ -447,11 +464,13 @@ Type TModalSetStringData Extends TSubroutine
 				TStarfarerShip(target).spriteName +"~n"+..
 				TStarfarerShip(target).coversColor)
 		'//////////////////////////////////////
-		Case MODE_SHIP_ENGINE
+		Case MODE_SHIP_ENGINE, MODE_SKIN_ENGINE_CHANGE
 			labels = TextWidget.Create( ..
-				"ship.engine.style" )
+				"ship.engine.style" +"~n"+..
+				"ship.engine.contrailSize" )
 			values = TextWidget.Create( ..
-				TStarfarerShipEngine(target).style )
+				TStarfarerShipEngine(target).style +"~n"+..
+				json.FormatDouble( TStarfarerShipEngine(target).contrailSize, 3 ) )
 			If TStarfarerShipEngine(target).style = "CUSTOM"
 				labels.append( TextWidget.Create( ..
 					"ship.engine.styleId" ))
@@ -542,6 +561,36 @@ Type TModalSetStringData Extends TSubroutine
 				json.FormatDouble( TStarfarerSkin(target).baseValueMult, 3 ) +"~n"+..
 				TStarfarerSkin(target).descriptionId +"~n"+..
 				TStarfarerSkin(target).descriptionPrefix )
+		Case MODE_SKIN_WEAPON_CHANGE
+		Case MODE_SKIN_ENGINE_CHANGE
+			labels = TextWidget.Create( ..
+				"ship.engine.style" )
+			values = TextWidget.Create( ..
+				TStarfarerShipEngine(target).style )
+			If TStarfarerShipEngine(target).style = "CUSTOM"
+				labels.append( TextWidget.Create( ..
+					"ship.engine.styleId" ))
+				values.append( TextWidget.Create( ..
+					TStarfarerShipEngine(target).styleId ))
+			EndIf
+			If TStarfarerShipEngine(target).styleSpec <> Null
+				labels.append( TextWidget.Create( ..
+					"ship.engine.styleSpec.type" +"~n"+..
+					"ship.engine.styleSpec.engineColor" +"~n"+..
+					"ship.engine.styleSpec.contrailColor" +"~n"+..
+					"ship.engine.styleSpec.contrailParticleSizeMult" +"~n"+..
+					"ship.engine.styleSpec.contrailParticleDuration" +"~n"+..
+					"ship.engine.styleSpec.contrailMaxSpeedMult" +"~n"+..
+					"ship.engine.styleSpec.contrailAngularVelocityMult" ))
+				values.append( TextWidget.Create( ..
+					TStarfarerShipEngine(target).styleSpec.type_ + "~n" + ..
+					json.stringify( TStarfarerShipEngine(target).styleSpec.engineColor ) + "~n" + ..
+					json.stringify( TStarfarerShipEngine(target).styleSpec.contrailColor ) + "~n" + ..
+					json.FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailParticleSizeMult, 3 ) + "~n" + ..
+					json.FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailParticleDuration, 3 ) +"~n"+..
+					json.FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailMaxSpeedMult, 3 ) +"~n"+..
+					json.FormatDouble( TStarfarerShipEngine(target).styleSpec.contrailAngularVelocityMult, 3 ) ) )
+			EndIf
 		'//////////////////////////////////////
 		Case MODE_WEAPON
 			labels = TextWidget.Create( ..

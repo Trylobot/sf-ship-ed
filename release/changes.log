@@ -2,7 +2,7 @@ ______________________________________________________________________________
 editor version 3.0.0-pre-alpha-2 (starsector 0.8.1a) [Trylobot & Deathfly]
 
 SKIN EDITOR
-- Change/Remove Engines
+- Change/Remove Engine Slot style/position/size/orientation
 - Add/Remove Built-In Hullmods
 - Edit Details (Strings)
 - Render Skin Sprite
@@ -16,6 +16,9 @@ VARIANT EDITOR / STATION_MODULE support
 WEAPON RENDERING
 - Render order now more closely follows the in-game render order
 - Foundations laid for for STATION_MODULE rendering
+
+ENGINE MODE (ship, skin)
+- Added "contrailSize" to string editor (for setting to 128 for maneuvering jets, if necessary)
 
 ______________________________________________________________________________
 editor version 2.7.4 (starsector 0.8.1a) [Deathfly & Trylobot]

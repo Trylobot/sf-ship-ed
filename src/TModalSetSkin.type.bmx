@@ -22,7 +22,7 @@ Type TModalSetSkin Extends TSubroutine
 
 	'------------------------------------
 	'mode: "changeremove_engines"
-	Field engine_lock_i%
+
 
 	'------------------------------------
 	'mode: "addremove_hullmods"
@@ -44,7 +44,7 @@ Type TModalSetSkin Extends TSubroutine
 		ed.mode = "none"
 		'-------
 		selected_hullmod_idx = -1
-		engine_lock_i = -1
+		ed.engine_lock_i = -1
 		' set sprite
 		sprite.img = Null
     autoload_skin_image( ed, data, sprite )
@@ -78,7 +78,7 @@ Type TModalSetSkin Extends TSubroutine
 
 			
 			Case "changeremove_engines"
-				engine_lock_i = -1
+				ed.engine_lock_i = -1
 				'initialize_engine_links( ed, data )
 			
 			Case "addremove_hullmods"
@@ -261,7 +261,7 @@ Type TModalSetSkin Extends TSubroutine
 		'
 		Local img_x#, img_y#
 		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
-		Local focus_i% = engine_lock_i
+		Local focus_i% = ed.engine_lock_i
 		If focus_i = -1 Then focus_i = data.find_nearest_skin_engine( img_x,img_y )
 		'
 		Select EventID()
@@ -272,36 +272,36 @@ Type TModalSetSkin Extends TSubroutine
 						'set angle
 						Select EventID()
 							Case EVENT_MOUSEDOWN
-								engine_lock_i = focus_i
-								data.skin_engine_set_angle( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								ed.engine_lock_i = focus_i
+								data.skin_engine_set_angle( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEMOVE
-								data.skin_engine_set_angle( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								data.skin_engine_set_angle( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEUP
-								engine_lock_i = -1
+								ed.engine_lock_i = -1
 								data.update_skin()
 						EndSelect
 					Case 18 '(MODIFIER_CONTROL|MODIFIER_LMOUSE)
 						'set location
 						Select EventID()
 							Case EVENT_MOUSEDOWN
-								engine_lock_i = focus_i
-								data.skin_engine_set_location( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								ed.engine_lock_i = focus_i
+								data.skin_engine_set_location( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEMOVE
-								data.skin_engine_set_location( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								data.skin_engine_set_location( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEUP
-								engine_lock_i = -1
+								ed.engine_lock_i = -1
 								data.update_skin()
 						EndSelect
 					Case 20 '(MODIFIER_ALT|MODIFIER_LMOUSE)
 						'set size
 						Select EventID()
 							Case EVENT_MOUSEDOWN
-								engine_lock_i = focus_i
-								data.skin_engine_set_size( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								ed.engine_lock_i = focus_i
+								data.skin_engine_set_size( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEMOVE
-								data.skin_engine_set_size( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								data.skin_engine_set_size( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEUP
-								engine_lock_i = -1
+								ed.engine_lock_i = -1
 								data.update_skin()
 						EndSelect
 				End Select
@@ -374,7 +374,7 @@ Type TModalSetSkin Extends TSubroutine
 		' get location of nearest engine, unless it is currently locked (due to button input)
 		Local img_x#, img_y#
 		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
-		Local focus_i% = engine_lock_i
+		Local focus_i% = ed.engine_lock_i
 		If focus_i = -1 Then focus_i = data.find_nearest_skin_engine( img_x,img_y )
 		''---------------------------
 		'DebugDraw("nearest: "+focus_i, ..

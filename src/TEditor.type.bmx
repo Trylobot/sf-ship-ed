@@ -14,6 +14,8 @@ Type TEditor
 	Field select_weapon_i%
 	Field edit_strings_weapon_i%
 	Field edit_strings_engine_i%
+	Field edit_strings_skin_weapon_i%
+	Field edit_strings_skin_engine_i%
 	Field builtIn_hullMod_i%
 	Field builtIn_wing_i%
 	Field variant_hullMod_i%
@@ -85,8 +87,10 @@ Type TEditor
 		mode = "null"
 		mouse_z = MouseZ
 		bounds_symmetrical = True
-		edit_strings_weapon_i = - 1
+		edit_strings_weapon_i = -1
 		edit_strings_engine_i = -1
+		edit_strings_skin_weapon_i = -1
+		edit_strings_skin_engine_i = -1
 		selected_zoom_level = 3 '=1.0
 		initialize_stock_data_containers()
 	End Method
