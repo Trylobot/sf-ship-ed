@@ -402,7 +402,7 @@ Repeat
         'draw
         draw_bg( ed )
         draw_sprite( ed, sprite )
-        draw_weapons( ed, data, sprite, WD )      
+        draw_weapons( ed, data, sprite, WD )
         
         Select ed.program_mode
 
@@ -1278,8 +1278,8 @@ Function draw_status( ed:TEditor, data:TData, sprite:TSprite )
     EndSelect
     draw_string( title_w, 4, 4 )
   EndIf
-
 EndFunction
+
 
 Function load_ui( ed:TEditor )
   AutoMidHandle( True )
@@ -1342,6 +1342,7 @@ EndFunction
 
 'data_dir$ should be either "starfarer-core/" or "mods/{ModDirectory}/"
 Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla% = False )
+
   Local stock_ships_dir$ =    data_dir+"data/hulls/"
   Local stock_variants_dir$ = data_dir+"data/variants/"
   Local stock_variants_fighters_dir$ = data_dir+"data/variants/fighters/"
@@ -1357,6 +1358,27 @@ Function load_stock_data( ed:TEditor, data:TData, data_dir$, vanilla% = False )
     If ExtractExt( stock_ship_file ) <> "ship" Then Continue
     ed.load_stock_ship( stock_ships_dir, stock_ship_file )
   Next
+
+  'modified for load all files in sub dir -D
+  Local dirs$[]
+  dirs = dirs + [stock_variants_dir]
+  Local done% = False
+  While Not done
+	Local subdirs$[]
+	Local files$[]
+	For Local dir$ = EachIn dirs
+		dirs = dirs[1..]
+		files = LoadDir( dir)
+		For Local file$ = EachIn files
+'			Print file
+'			Print dir + file
+'			Print FileType( dir + file )
+			If FileType( dir + file ) = FILETYPE_DIR Then subdirs :+ [(dir + file + "/")]
+			If ExtractExt( file ) = "variant" Then ed.load_stock_variant( dir, file )
+		Next
+	Next
+	If Not subdirs.length Then done = True Else dirs :+ subdirs
+  Wend
   Local stock_variants_files$[] = LoadDir( stock_variants_dir )
   For Local stock_variant_file$ = EachIn stock_variants_files
     If ExtractExt( stock_variant_file ) <> "variant" Then Continue
@@ -1446,42 +1468,12 @@ Function DebugLogFile( msg$ )
   EndTry
 EndFunction
 
-
-
 Function RadioMenuArray ( i%, MenuArray:TGadget[])
   For Local j% = 0 Until MenuArray.Length
     If j = i Then   CheckMenu(MenuArray[j]) Else UncheckMenu(MenuArray[j])    
   Next
   mainMenuNeedUpdate = True
 EndFunction
-
-Rem
-'find and disable menu in a hacky way
-Function MenuSetHidden(menu:TGadget, hidden%, parent:TGadget = Null)
-  If hidden
-    menu.SetEnabled(False)
-    menu.parent = Null
-  Else
-    menu.SetEnabled(True)
-    menu.parent = parent
-  EndIf
-  mainMenuNeedUpdate = True
-End Function
-
-'find and disable menus array in a hacky way.
-Function MenusArraySetHidden(menusArray:TGadget[], hidden%, parent:TGadget = Null)
-  For Local i% = 0 Until menusArray.Length
-    MenuSetHidden(menusArray[i], hidden, parent)
-  Next
-EndFunction
-
-'find and disable other menus arrays while enable the selected one 
-Function RadioMenuArrayArray ( i%, MenuArrayArray:TGadget[][], parent:TGadget = Null)
-  For Local j% = 0 Until MenuArrayArray.Length
-    If j = i Then MenusArraySetHidden(MenuArrayArray[j], False, parent) Else MenusArraySetHidden(MenuArrayArray[j], True, parent)
-  Next
-EndFunction
-EndRem
 
 Function undo(ed:TEditor, data:TData, sprite:TSprite, redo% = False)
   Local snap:Tsnapshot
@@ -1558,4 +1550,3 @@ Function FlushEvent%()
   Wend
   Return i
 End Function
-
