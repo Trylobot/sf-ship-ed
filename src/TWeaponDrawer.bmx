@@ -45,7 +45,7 @@ Type TWeaponDrawer
 					renderData.init(weaponslot, weapon)
 					renderData.set_facing_and_offset(x, y, facing)
 					renderData.set_is_station_module_weapon()
-					renderQueue.AddLast(renderData)	
+					renderQueue.AddLast(renderData)
 				EndIf
 			Next
 	End Method
@@ -153,7 +153,6 @@ Type TWeaponDrawer
 			Case "ship"
 				Select ed.mode
 				Case "weapon_slots"
-				'DebugStop
 				animeControl(sub_set_weapon_slots.ni, ed, data)
 				Case "built_in_weapons"
 				animeControl(sub_set_built_in_weapons.ni, ed, data)
@@ -277,7 +276,7 @@ Type TWeaponDrawer
 	
 	Method getAnimeForSlot_i:TAnime (weaponSlot_i%, ed:TEditor, data:TData)
 		If weaponSlot_i = -1 Then Return Null
-		If weaponSlot_i > data.ship.weaponSlots.length -1 Then Return Null 'This should not happen but just in case
+		If weaponSlot_i > data.ship.weaponSlots.length - 1 Then Return Null 'This should not happen but just in case
 		Local weaponSlotId$ = data.ship.weaponSlots[weaponSlot_i].id
 		If MapValueForKey(animes, weaponSlotId) 'good, it is in map
 			Return TAnime (MapValueForKey(animes, weaponSlotId) )
@@ -304,12 +303,15 @@ Type TWeaponDrawer
 				Local weaponSlot:TStarfarerShipWeapon = data.ship.weaponSlots[weaponSlot_i]
 				Local weaponID$
 				If MapValueForKey(data.ship.builtInWeapons, weaponSlot.id)
-					weaponID = String (MapValueForKey(data.ship.builtInWeapons, weaponSlot.id))	
+					weaponID = String (MapValueForKey(data.ship.builtInWeapons, weaponSlot.id) )	
 				Else If MapValueForKey(data.variant.getAllweapons(), weaponSlot.id)
 					weaponID = String (MapValueForKey(data.variant.getAllweapons(), weaponSlot.id))	
-				Else Return Null
+				Else					
+					Return Null
 				EndIf
-				Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID))	
+				If Not weaponID Then Return Null
+				Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) )	
+				If Not weapon Then Return null
 				If weapon.numFrames <= 1 Then Return Null
 				Local anime:TAnime = New TAnime
 				anime.init( weaponSlot_i, weaponSlot, weaponID, weapon )
@@ -388,11 +390,14 @@ Type TWeaponDrawer
 			img_path = resource_search(hull.spriteName)				
 		Else
 			Local skin:TStarfarerSkin = TStarfarerSkin(ed.stock_skins.ValueForKey(hullID) )
-			If skin Then img_path = resource_search(skin.spriteName)
+			If skin
+				img_path = resource_search(skin.spriteName)
+				hull = TStarfarerShip(ed.stock_ships.ValueForKey(skin.baseHullId) )	
+			EndIf
 		EndIf
 		Local variantIMG:TImage
 		If img_path Then variantIMG = getSpriteByPath(img_path)
-		If variantIMG
+		If variantIMG And hull
 			'calculate the center point offset
 			Local x# = (variantIMG.width * 0.5) - hull.center[0]
 			Local y# = (variantIMG.height * 0.5) - hull.center[1]
