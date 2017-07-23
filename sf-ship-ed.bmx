@@ -900,7 +900,7 @@ Function check_function_menu% ( ed:TEditor, data:TData, sprite:TSprite )
     Case "skin"
       Select EventSource()
         Case functionMenu[MENU_FUNCTION_EXIT] 'exit
-          sub_set_skin.SetEditorMode( ed, data, sprite, "none" )
+          sub_set_skin.Escape( ed, data, sprite )
         Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_WEAPONSLOTS]
           sub_set_skin.SetEditorMode( ed, data, sprite, "changeremove_weaponslots" )
         Case functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_WEAPONS]

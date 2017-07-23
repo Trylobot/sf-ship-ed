@@ -97,6 +97,20 @@ Type TModalSetSkin Extends TSubroutine
 		SS.reset()
 	EndMethod
 
+	Method Escape( ed:TEditor, data:TData, sprite:TSprite )
+		Select ed.mode
+			Case "changeremove_weaponslots", "addremove_builtin_weapons"
+				If weapon_lock_i <> -1 Then weapon_lock_i = -1 ' unlock from weapon
+				Return
+			Case "changeremove_engines"
+				If engine_lock_i <> -1 Then engine_lock_i = -1 ' unlock from engine
+				Return
+		EndSelect
+		' default behavior; exit out of current module sub-mode
+		ed.last_mode = ed.mode
+		ed.mode = "none"
+	EndMethod
+
 	Method Update( ed:TEditor, data:TData, sprite:TSprite )
 		' check for external data changes which can affect this mode's UI
 		If SHOW_MORE_cached <> SHOW_MORE ..
@@ -295,15 +309,11 @@ Type TModalSetSkin Extends TSubroutine
 			'---------------------------------------------------------
 			' show status of each weapon as it relates to this skin (and, its "base hull" (ship))
 			Local weapon_status$ = "   "
-			If weapon_lock_base_builtin_weapon_id = weapon_id
-				If Not weapon_lock_skin_specifies_weapon
-					weapon_status = " b "
-				Else
-					weapon_status = "---"
-				EndIf
-			ElseIf weapon_lock_skin_builtin_weapon_id = weapon_id
-				weapon_status = "[+]"
-			EndIf
+			If weapon_lock_base_builtin_weapon_id = weapon_id Then weapon_status = " b "
+			If weapon_lock_skin_builtin_weapon_id = weapon_id Then weapon_status = "[s]"
+			If weapon_lock_base_builtin_weapon_id = weapon_id ..
+				And weapon_lock_skin_specifies_weapon ..
+				And weapon_lock_skin_builtin_weapon_id <> weapon_id Then weapon_status = "---"
 			weapon_chooser.set_cell(r,c, weapon_status); c :+ 1
 			i :+ 1
 		Next
@@ -426,8 +436,6 @@ Type TModalSetSkin Extends TSubroutine
 				EndIf
 			Case EVENT_GADGETACTION, EVENT_MENUACTION
 				Select EventSource()
-					Case functionMenu[MENU_FUNCTION_EXIT] ' escape (close modal)
-						destroy_weapon_chooser()
 					Case functionMenu[MENU_FUNCTION_REMOVE] ' remove built-in weapon from slot
 						slot = weapon_lock_i
 						If slot = -1 Then slot = nearest_i
@@ -441,6 +449,7 @@ Type TModalSetSkin Extends TSubroutine
 								data.skin_builtin_weapon_remove( slot_id )
 							EndIf
 						EndIf
+						weapon_lock_i = -1 ' close chooser
 				EndSelect
 			Case EVENT_KEYDOWN, EVENT_KEYREPEAT
 				If weapon_lock_i <> -1
@@ -449,7 +458,7 @@ Type TModalSetSkin Extends TSubroutine
 							slot_id = data.ship.weaponSlots[weapon_lock_i].id
 							data.skin_builtin_weapon_assign( slot_id, selected_weapon_id )
 							data.update_skin()
-							destroy_weapon_chooser()
+							weapon_lock_i = -1 ' close chooser
 						Case KEY_DOWN
 							selected_weapon_idx :+ 1
 						Case KEY_UP
@@ -554,11 +563,6 @@ Type TModalSetSkin Extends TSubroutine
 					Case KEY_PAGEUP
 						selected_hullmod_idx :- 5
 				EndSelect
-			Case EVENT_GADGETACTION, EVENT_MENUACTION
-				Select EventSource()
-					Case functionMenu[MENU_FUNCTION_EXIT]
-						selected_hullmod_idx = - 1
-				EndSelect
 		End Select
 		'bounds enforce (wrap top/bottom)
 		If selected_hullmod_idx > (ed.stock_hullmod_count - 1)
@@ -642,33 +646,40 @@ Type TModalSetSkin Extends TSubroutine
 		SetAlpha( 1 )
 	EndMethod
 
+	Method draw_builtin_weapon_slot_textboxes( ed:TEditor, data:TData, sprite:TSprite, slot% )
+		Local xy#[] = data.get_skin_weapon_slot_location( slot )
+		Local sz$ = data.get_skin_weapon_slot_size( slot )
+		Local tp$ = data.get_skin_weapon_slot_type( slot )
+		Local mt$ = data.get_skin_weapon_slot_mount( slot )
+		draw_builtin_weapon_slot_info( ed,data,sprite,, xy,sz,tp,mt )
+		'If weapon_lock_i = -1
+			Local slot_id$ = data.ship.weaponSlots[slot].id
+			Local wpid$ = data.get_skin_equipped_builtin_weapon_id( slot_id )
+			draw_builtin_assigned_weapon_info( ed,data,sprite,, xy,wpid )
+		'EndIf
+	EndMethod
+
 	Method draw_builtin_weapon_info( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
 		'
 		Local img_x#,img_y#
 		sprite.get_img_xy( MouseX, MouseY, img_x,img_y )
-		Local nearest_i% = data.find_nearest_skin_weapon_slot( img_x,img_y )
-		' text boxes
-		For Local slot% = 0 Until data.ship.weaponSlots.Length
-			If weapon_lock_i <> -1 And weapon_lock_i <> slot Then Continue ' selective rendering when locked
-			SetRotation( 0 )
-			SetScale( 1, 1 )
-			If nearest_i = slot
-				SetAlpha( 0.8 )
-			Else
-				SetAlpha( Min( 0.4, 0.5*(sprite.scale/3.0) ))
-			EndIf
-			Local xy#[] = data.get_skin_weapon_slot_location( slot )
-			Local sz$ = data.get_skin_weapon_slot_size( slot )
-			Local tp$ = data.get_skin_weapon_slot_type( slot )
-			Local mt$ = data.get_skin_weapon_slot_mount( slot )
-			draw_builtin_weapon_slot_info( ed,data,sprite,, xy,sz,tp,mt )
-			If weapon_lock_i = -1
-				Local slot_id$ = data.ship.weaponSlots[slot].id
-				Local wpid$ = data.get_skin_equipped_builtin_weapon_id( slot_id )
-				draw_builtin_assigned_weapon_info( ed,data,sprite,, xy,wpid )
-			EndIf
-		Next
+		Local focus_i% = weapon_lock_i
+		If focus_i = -1 Then focus_i = data.find_nearest_skin_weapon_slot( img_x,img_y )
+		'---------------
+		' text boxes (normal)
+		SetRotation( 0 )
+		SetScale( 1, 1 )
+		SetAlpha( Min( 0.4, 0.5*(sprite.scale/3.0) ))
+		If weapon_lock_i = -1
+			For Local slot% = 0 Until data.ship.weaponSlots.Length
+				draw_builtin_weapon_slot_textboxes( ed,data,sprite, slot )
+			Next
+		EndIf
+		' text boxes (for focused slot, or locked-on slot)
+		SetAlpha( 1 )
+		draw_builtin_weapon_slot_textboxes( ed,data,sprite, focus_i )
+		'---------------
 		' weapon icons
 		For Local slot% = 0 Until data.ship.weaponSlots.Length
 			If weapon_lock_i <> -1 And weapon_lock_i <> slot Then Continue ' selective rendering when locked
@@ -677,6 +688,7 @@ Type TModalSetSkin Extends TSubroutine
 	EndMethod
 
 	Method draw_weapons_chooser( ed:TEditor, data:TData )
+		If weapon_lock_i = -1 Then Return ' context-sensitive modal dialog
 		Local x# = 10
 		Local y# = SS.ScrollTo(H_MID - LINE_HEIGHT*(selected_weapon_idx + 0.5))
 		Local ox# = 0.0

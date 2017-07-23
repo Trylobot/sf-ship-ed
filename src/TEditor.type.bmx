@@ -434,12 +434,14 @@ Type TEditor
 			For Local weapon_id$ = EachIn stock_weapons.Keys()
 				Local weapon:TStarfarerWeapon = TStarfarerWeapon( stock_weapons.ValueForKey( weapon_id ) )
 				Local size_diff% = (weapon_size_value( slot_size ) - weapon_size_value( weapon.size ) )
-				'slot type match and same size or bigger by one step
-				'or universal/built-in type with same size
-				'or decorative weapons for decorative slots
-				'or energy/ballistic weapons for hybrid slots with same size
-				'or energy/missile weapons for synergy slots with same size
-				'or missile/ballistic weapons for composite slots with same size
+				Rem
+					slot type match, and same size (OR weapon is smaller by no more than one "step")
+						OR universal/built-in type with same size
+						OR energy/ballistic weapons for hybrid slots with same size
+						OR energy/missile weapons for synergy slots with same size
+						OR missile/ballistic weapons for composite slots with same size
+						OR decorative weapons for decorative slots (size does not matter for decorative)
+				EndRem
 				If slot_type <> "DECORATIVE" 			
 					If ( slot_type = "UNIVERSAL" And size_diff = 0 ) ..
 						Or ( slot_type = "BUILT_IN" And size_diff = 0 ) ..

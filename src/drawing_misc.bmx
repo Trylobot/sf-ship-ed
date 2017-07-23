@@ -430,25 +430,19 @@ Function draw_builtin_assigned_weapon_info( ed:TEditor,data:TData,sprite:TSprite
 	Local wx% = sprite.sx + ( xy[0] + data.ship.center[1])*sprite.Scale
 	Local wy% = sprite.sy + (-xy[1] + data.ship.center[0])*sprite.Scale
 	'try and find a name for the weapon id, or fall back intelligently
-	Local current_weapon_str$ = ""
+	Local str$ = Null
 	If weapon_id
 		Local wep_stats:TMap = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
-		If wep_stats
-			Local wep_name$ = String( wep_stats.ValueForKey( "name" ))
-			If wep_name
-				current_weapon_str :+ wep_name
-			Else
-				current_weapon_str :+ weapon_id
-			EndIf
-		EndIf
+		If wep_stats Then str = String( wep_stats.ValueForKey( "name" ))
+		If Not str Then str = weapon_id
 	Else
-		current_weapon_str :+ "empty"
+		str = "empty"
 	EndIf
 	Local fg% = $FFFFFF
 	Local bg% = $000000
-	Local current_weapon_widget:TextWidget = TextWidget.Create( current_weapon_str )
-	draw_container( wx-30,wy, current_weapon_widget.w+20,current_weapon_widget.h+20, 1.0,0.5, fg,bg )
-	draw_string( current_weapon_widget, wx-40,wy, fg,bg, 1.0,0.5 )
+	Local txt:TextWidget = TextWidget.Create( str )
+	draw_container( wx-30,wy, txt.w+20,txt.h+20, 1.0,0.5, fg,bg )
+	draw_string( txt, wx-40,wy, fg,bg, 1.0,0.5 )
 EndFunction
 
 Function draw_builtin_weapon_mount( wx%, wy%, weaponSlot:TStarfarerShipWeapon )
