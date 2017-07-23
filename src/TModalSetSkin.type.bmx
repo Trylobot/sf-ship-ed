@@ -18,7 +18,11 @@ Type TModalSetSkin Extends TSubroutine
 
 	'------------------------------------
 	'mode: "addremove_builtin_weapons"
-
+	Field compatible_weapon_ids$[]
+	Field weapon_chooser:TableWidget
+	Field selected_weapon_idx%
+	Field selected_weapon_id$
+	Field weapon_chooser_text:TextWidget
 
 	'------------------------------------
 	'mode: "changeremove_engines"
@@ -44,6 +48,7 @@ Type TModalSetSkin Extends TSubroutine
 		ed.mode = "none"
 		'-------
 		weapon_lock_i = -1
+		selected_weapon_idx = -1
 		engine_lock_i = -1
 		selected_hullmod_idx = -1
 		' set sprite
@@ -76,8 +81,8 @@ Type TModalSetSkin Extends TSubroutine
 				weapon_lock_i = -1
 			
 			Case "addremove_builtin_weapons"
+				weapon_lock_i = -1
 
-			
 			Case "changeremove_engines"
 				engine_lock_i = -1
 			
@@ -110,6 +115,7 @@ Type TModalSetSkin Extends TSubroutine
 			
 			Case "addremove_builtin_weapons"
 				process_input_addremove_builtin_weapons( ed, data )
+				update_weapon_chooser( ed, data )
 			
 			Case "changeremove_engines"
 				process_input_changeremove_engines( ed, data )
@@ -132,7 +138,8 @@ Type TModalSetSkin Extends TSubroutine
 				draw_weaponslots( ed, data )
 			
 			Case "addremove_builtin_weapons"
-				'draw_weapons_chooser( ed, data )
+				draw_weapon_assignments( ed, data )
+				draw_weapons_chooser( ed, data )
 			
 			Case "changeremove_engines"
 				draw_engines( ed, data )
@@ -157,6 +164,21 @@ Type TModalSetSkin Extends TSubroutine
 
 	'--------------------------------------
 	' init functions
+
+	Method initialize_weapon_chooser( ed:TEditor, data:TData )
+		If weapon_lock_i = -1 Then Return
+		'Local rows% =    1 + "number of weapons compatible with selected weapon slot"
+				
+	EndMethod
+
+	Method destroy_weapon_chooser()
+		weapon_lock_i = -1
+		compatible_weapon_ids = Null
+		weapon_chooser = Null
+		selected_weapon_idx = -1
+		selected_weapon_id = Null
+		weapon_chooser_text = Null
+	EndMethod
 
 	Method initialize_hullmod_chooser( ed:TEditor, data:TData )
 		Local rows% =    1 + ed.stock_hullmod_count
@@ -208,6 +230,9 @@ Type TModalSetSkin Extends TSubroutine
 	'--------------------------------------
 	' update functions
 
+	Method update_weapon_chooser( ed:TEditor, data:TData )
+	EndMethod
+
 	Method update_hullmod_chooser( ed:TEditor, data:TData )
 		' update only: cursor row, status (columns: 0, 1)
 		Local i% = 0
@@ -238,7 +263,7 @@ Type TModalSetSkin Extends TSubroutine
 	EndMethod
 
 	'--------------------------------------
-	' input handler functions	
+	' input handler functions
 
 	Method process_input_changeremove_weaponslots( ed:TEditor, data:TData )
 		If Not data.ship.center Then Return
@@ -303,7 +328,66 @@ Type TModalSetSkin Extends TSubroutine
 	EndMethod
 
 	Method process_input_addremove_builtin_weapons( ed:TEditor, data:TData )
-		
+		If Not data.ship.center Then Return
+		'
+		Local img_x#, img_y#
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+		Local nearest_i% = data.find_nearest_skin_weapon_slot( img_x,img_y )
+		Local slot%, slot_id$
+		Select EventID()
+			Case EVENT_MOUSEDOWN
+				If ModKeyAndMouseKey = MODIFIER_LMOUSE ' left mouse click with no modifiers
+					If weapon_lock_i = -1
+						weapon_lock_i = nearest_i
+						If weapon_lock_i <> -1
+							'------------------------------------
+							initialize_weapon_chooser( ed, data )
+							'------------------------------------
+						EndIf
+					EndIf
+				EndIf
+			Case EVENT_GADGETACTION, EVENT_MENUACTION
+				Select EventSource()
+					Case functionMenu[MENU_FUNCTION_EXIT] ' escape (close modal)
+						destroy_weapon_chooser()
+					Case functionMenu[MENU_FUNCTION_REMOVE] ' remove built-in weapon from slot
+						slot = weapon_lock_i
+						If slot = -1 Then slot = nearest_i
+						If slot <> -1
+							slot_id = data.ship.weaponSlots[slot].id
+							' if there ARE existing changes in this skin for the weapon slot; erase them
+							If data.skin_adds_builtin_weapon( slot_id ) ..
+							Or data.skin_removes_builtin_weapon( slot_id )
+								data.skin_builtin_weapon_clear_data( slot_id )
+							Else ' else (NO changes), mark it removed
+								data.skin_builtin_weapon_remove( slot_id )
+							EndIf
+						EndIf
+				EndSelect
+			Case EVENT_KEYDOWN, EVENT_KEYREPEAT
+				If weapon_lock_i <> -1
+					Select EventData()
+						Case KEY_ENTER
+							slot_id = data.ship.weaponSlots[weapon_lock_i].id
+							data.skin_builtin_weapon_assign( slot_id, selected_weapon_id )
+							data.update_skin()
+							destroy_weapon_chooser()
+						Case KEY_DOWN
+							selected_weapon_idx :+ 1
+						Case KEY_UP
+							selected_weapon_idx :- 1
+						Case KEY_PAGEDOWN
+							selected_weapon_idx :+ 5
+						Case KEY_PAGEUP
+							selected_weapon_idx :- 5
+					EndSelect
+					' wrap cursor
+					If compatible_weapon_ids
+						If selected_weapon_idx < 0 Then selected_weapon_idx = compatible_weapon_ids.Length - 1 
+						If selected_weapon_idx > (compatible_weapon_ids.Length - 1) Then selected_weapon_idx = 0
+					EndIf
+				EndIf
+		EndSelect
 	EndMethod
 
 	Method process_input_changeremove_engines( ed:TEditor, data:TData )
@@ -479,6 +563,19 @@ Type TModalSetSkin Extends TSubroutine
 				EndIf
 		End Select
 		SetAlpha( 1 )
+	EndMethod
+
+	Method draw_weapon_assignments( ed:TEditor, data:TData )
+	EndMethod
+
+	Method draw_weapons_chooser( ed:TEditor, data:TData )
+		Local x# = W_MID
+		Local y# = SS.ScrollTo(H_MID - LINE_HEIGHT*(selected_weapon_idx + 0.5))
+		Local ox# = 0.5
+		Local oy# = 0.0
+		If weapon_chooser_text <> Null
+			weapon_chooser_text.draw( x,y, ox,oy )
+		EndIf
 	EndMethod
 
 	Method draw_engines( ed:TEditor, data:TData )

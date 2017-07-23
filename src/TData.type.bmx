@@ -936,6 +936,30 @@ Type TData
 		EndIf
 	EndMethod
 
+	'requires subsequent call to update_skin()
+	Method skin_builtin_weapon_clear_data( weapon_slot_id$ )
+		skin.removeBuiltInWeapons = remove_first_val_from_strarray( skin.removeBuiltInWeapons, weapon_slot_id )
+		skin.builtInWeapons.Remove( weapon_slot_id )
+	EndMethod
+
+	'requires subsequent call to update_skin()
+	Method skin_builtin_weapon_remove( weapon_slot_id$ )
+		skin.removeBuiltInWeapons = strarray_append( skin.removeBuiltInWeapons, weapon_slot_id )
+	EndMethod
+
+	'requires subsequent call to update_skin()
+	Method skin_builtin_weapon_assign( weapon_slot_id$, weapon_id$ )
+		skin.builtInWeapons.Insert( weapon_slot_id, weapon_id )
+	EndMethod
+
+	Method skin_adds_builtin_weapon%( weapon_slot_id$ )
+		Return skin.builtInWeapons.Contains( weapon_slot_id )
+	EndMethod
+
+	Method skin_removes_builtin_weapon%( weapon_slot_id$ )
+		Return in_str_array( weapon_slot_id, skin.removeBuiltInWeapons )
+	EndMethod
+
 	'////////////////
 
 	'requires subsequent call to update_weapon()

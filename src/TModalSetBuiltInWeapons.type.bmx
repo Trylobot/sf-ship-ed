@@ -33,7 +33,7 @@ Type TModalSetBuiltInWeapons Extends TSubroutine
 		ed.field_i = 0
 		decorative_mode = EventSource() = functionMenuSub[MENU_MODE_SHIP][MENU_SUBFUNCTION_SHIP_DECORATIVE]
 		ni = - 1
-		DebugLogFile(" Activate Build-in/Deco Weapon Editor")
+		DebugLogFile(" Activate Built-in/Decorative Weapon Editor")
 		SS.reset()
 	EndMethod
 
