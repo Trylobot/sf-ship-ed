@@ -233,8 +233,9 @@ Function draw_pointer( x%, y%, rot#, em%=False, r%=12, l%=24, fg%=$FFFFFF,bg%=$0
 	SetAlpha( a )
 EndFunction
 
-Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36, fg%=$FFFFFF,bg%=$000000 )
+Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36, fg%=$FFFFFF,bg%=$000000, is_removed%=False )
 	Local a# = GetAlpha()
+	If is_removed Then a :* 0.333
 	'draw arc
 	SetColor((fg&$FF0000) Shr 16,(fg&$FF00) Shr 8,(fg&$FF))
 	SetAlpha( a*0.20 )
@@ -259,7 +260,11 @@ Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36,
 	EndIf
 	'cleanup
 	SetLineWidth( 1 )
-	SetAlpha( a )
+	If is_removed
+		SetAlpha( a * 3 )
+	Else
+		SetAlpha( a )
+	EndIf
 End Function
 
 

@@ -14,7 +14,7 @@ Type TModalSetSkin Extends TSubroutine
 
 	'------------------------------------
 	'mode: "changeremove_weaponslots"
-
+	Field weapon_lock_i%
 
 	'------------------------------------
 	'mode: "addremove_builtin_weapons"
@@ -22,7 +22,7 @@ Type TModalSetSkin Extends TSubroutine
 
 	'------------------------------------
 	'mode: "changeremove_engines"
-
+	Field engine_lock_i%
 
 	'------------------------------------
 	'mode: "addremove_hullmods"
@@ -43,8 +43,9 @@ Type TModalSetSkin Extends TSubroutine
 		ed.last_mode = "none"
 		ed.mode = "none"
 		'-------
+		weapon_lock_i = -1
+		engine_lock_i = -1
 		selected_hullmod_idx = -1
-		ed.engine_lock_i = -1
 		' set sprite
 		sprite.img = Null
     autoload_skin_image( ed, data, sprite )
@@ -72,14 +73,13 @@ Type TModalSetSkin Extends TSubroutine
 		Select new_mode
 			
 			Case "changeremove_weaponslots"
-
+				weapon_lock_i = -1
 			
 			Case "addremove_builtin_weapons"
 
 			
 			Case "changeremove_engines"
-				ed.engine_lock_i = -1
-				'initialize_engine_links( ed, data )
+				engine_lock_i = -1
 			
 			Case "addremove_hullmods"
 				selected_hullmod_idx = 0
@@ -101,7 +101,6 @@ Type TModalSetSkin Extends TSubroutine
 			ship_hullSize_cached = data.ship.hullSize
 			'
 			initialize_hullmod_chooser( ed, data )
-			' ...
 		EndIf
 		'-----
 		Select ed.mode
@@ -114,7 +113,6 @@ Type TModalSetSkin Extends TSubroutine
 			
 			Case "changeremove_engines"
 				process_input_changeremove_engines( ed, data )
-				update_engine_links( ed, data )
 			
 			Case "addremove_hullmods"
 				process_input_addremove_hullmods( ed, data )
@@ -131,7 +129,7 @@ Type TModalSetSkin Extends TSubroutine
 		Select ed.mode
 			
 			Case "changeremove_weaponslots"
-				'draw_weaponslots( ed, data )
+				draw_weaponslots( ed, data )
 			
 			Case "addremove_builtin_weapons"
 				'draw_weapons_chooser( ed, data )
@@ -159,9 +157,6 @@ Type TModalSetSkin Extends TSubroutine
 
 	'--------------------------------------
 	' init functions
-
-	'Method initialize_engine_links( ed:TEditor, data:TData )
-	'EndMethod
 
 	Method initialize_hullmod_chooser( ed:TEditor, data:TData )
 		Local rows% =    1 + ed.stock_hullmod_count
@@ -213,9 +208,6 @@ Type TModalSetSkin Extends TSubroutine
 	'--------------------------------------
 	' update functions
 
-	Method update_engine_links( ed:TEditor, data:TData )
-	EndMethod
-
 	Method update_hullmod_chooser( ed:TEditor, data:TData )
 		' update only: cursor row, status (columns: 0, 1)
 		Local i% = 0
@@ -249,7 +241,65 @@ Type TModalSetSkin Extends TSubroutine
 	' input handler functions	
 
 	Method process_input_changeremove_weaponslots( ed:TEditor, data:TData )
-		
+		If Not data.ship.center Then Return
+		'
+		Local img_x#, img_y#
+		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
+		Local focus_i% = weapon_lock_i
+		If focus_i = -1 Then focus_i = data.find_nearest_skin_weapon_slot( img_x,img_y )
+		'
+		Select EventID()
+			Case EVENT_MOUSEMOVE, EVENT_MOUSEDOWN, EVENT_MOUSEUP
+				'process input
+				Select ModKeyAndMouseKey
+					Case 16 '(MODIFIER_LMOUSE)
+						'set facing direction
+						Select EventID()
+							Case EVENT_MOUSEDOWN
+								weapon_lock_i = focus_i
+								data.set_skin_weapon_slot_angle( weapon_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEMOVE
+								data.set_skin_weapon_slot_angle( weapon_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEUP
+								weapon_lock_i = -1
+								data.update_skin()
+						EndSelect
+					Case 18 '(MODIFIER_CONTROL|MODIFIER_LMOUSE)
+						'set location
+						Select EventID()
+							Case EVENT_MOUSEDOWN
+								weapon_lock_i = focus_i
+								data.set_skin_weapon_slot_location( weapon_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEMOVE
+								data.set_skin_weapon_slot_location( weapon_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEUP
+								weapon_lock_i = -1
+								data.update_skin()
+						EndSelect
+					Case 20 '(MODIFIER_ALT|MODIFIER_LMOUSE)
+						'set degree of freedom
+						Select EventID()
+							Case EVENT_MOUSEDOWN
+								weapon_lock_i = focus_i
+								data.set_skin_weapon_slot_arc( weapon_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEMOVE
+								data.set_skin_weapon_slot_arc( weapon_lock_i, img_x,img_y, ed.bounds_symmetrical )
+							Case EVENT_MOUSEUP
+								weapon_lock_i = -1
+								data.update_skin()
+						EndSelect
+				End Select
+			Case EVENT_GADGETACTION, EVENT_MENUACTION
+				Select EventSource()
+					Case functionMenu[MENU_FUNCTION_REMOVE]
+						If data.is_skin_weapon_slot_changed( focus_i )
+							data.skin_weapon_slot_clear_data( focus_i, ed.bounds_symmetrical )
+						ElseIf Not data.is_skin_weapon_slot_removed( focus_i )
+							data.skin_weapon_slot_mark_removal( focus_i, ed.bounds_symmetrical )
+						EndIf
+						data.update_skin()
+				EndSelect
+		EndSelect
 	EndMethod
 
 	Method process_input_addremove_builtin_weapons( ed:TEditor, data:TData )
@@ -261,7 +311,7 @@ Type TModalSetSkin Extends TSubroutine
 		'
 		Local img_x#, img_y#
 		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
-		Local focus_i% = ed.engine_lock_i
+		Local focus_i% = engine_lock_i
 		If focus_i = -1 Then focus_i = data.find_nearest_skin_engine( img_x,img_y )
 		'
 		Select EventID()
@@ -272,36 +322,36 @@ Type TModalSetSkin Extends TSubroutine
 						'set angle
 						Select EventID()
 							Case EVENT_MOUSEDOWN
-								ed.engine_lock_i = focus_i
-								data.skin_engine_set_angle( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								engine_lock_i = focus_i
+								data.set_skin_engine_angle( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEMOVE
-								data.skin_engine_set_angle( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								data.set_skin_engine_angle( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEUP
-								ed.engine_lock_i = -1
+								engine_lock_i = -1
 								data.update_skin()
 						EndSelect
 					Case 18 '(MODIFIER_CONTROL|MODIFIER_LMOUSE)
 						'set location
 						Select EventID()
 							Case EVENT_MOUSEDOWN
-								ed.engine_lock_i = focus_i
-								data.skin_engine_set_location( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								engine_lock_i = focus_i
+								data.set_skin_engine_location( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEMOVE
-								data.skin_engine_set_location( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								data.set_skin_engine_location( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEUP
-								ed.engine_lock_i = -1
+								engine_lock_i = -1
 								data.update_skin()
 						EndSelect
 					Case 20 '(MODIFIER_ALT|MODIFIER_LMOUSE)
 						'set size
 						Select EventID()
 							Case EVENT_MOUSEDOWN
-								ed.engine_lock_i = focus_i
-								data.skin_engine_set_size( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								engine_lock_i = focus_i
+								data.set_skin_engine_size( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEMOVE
-								data.skin_engine_set_size( ed.engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
+								data.set_skin_engine_size( engine_lock_i, img_x,img_y, ed.bounds_symmetrical )
 							Case EVENT_MOUSEUP
-								ed.engine_lock_i = -1
+								engine_lock_i = -1
 								data.update_skin()
 						EndSelect
 				End Select
@@ -366,6 +416,71 @@ Type TModalSetSkin Extends TSubroutine
 	Method draw_hud( ed:TEditor, data:TData )
 	EndMethod
 
+	Method draw_weaponslots( ed:TEditor, data:TData )
+		If Not data.ship.center Then Return
+
+		' get location of nearest engine, unless it is currently locked (due to button input)
+		Local img_x#,img_y#
+		sprite.get_img_xy( MouseX, MouseY, img_x,img_y )
+		Local focus_i% = weapon_lock_i
+		If focus_i = -1 Then focus_i = data.find_nearest_skin_weapon_slot( img_x,img_y )
+		' draw "pointers" (weapon slot icons)
+		SetRotation( 0 )
+		SetScale( 1, 1 )
+		SetAlpha( 1 )
+		For Local slot% = 0 Until data.ship.weaponSlots.length
+			' TODO: should we still be skipping launch bays in the skin? since the type can be changed?
+			'   I guess, for now, we will continue to skip them.
+			If data.ship.weaponSlots[slot].is_launch_bay()
+				Continue ' should not draw as weapon slot
+			EndIf
+			'
+			Local weapon_location#[] = data.get_skin_weapon_slot_location( slot )
+			Local weapon_angle# = data.get_skin_weapon_slot_angle( slot )
+			Local weapon_arc# = data.get_skin_weapon_slot_arc( slot )
+			Local focused% = (slot = focus_i)
+			Local x# = sprite.sx + sprite.scale*(data.ship.center[1] + weapon_location[0])
+			Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - weapon_location[1])
+			Local is_removed% = data.is_skin_weapon_slot_removed( slot )
+			draw_weapon_mount( x,y, weapon_angle,weapon_arc, focused,,,,,, is_removed )
+		Next
+		SetRotation( 0 )
+		SetScale( 1, 1 )
+		SetAlpha( 1 )
+		' get mouse position on screen, mapped to ship's coordinate space
+		Local ship_mx#, ship_my#
+		ship_mx = +img_x - data.ship.center[1]
+		ship_my = -img_y + data.ship.center[0]
+		' draw crosshairs
+		Local mx# = sprite.sx + img_x*sprite.scale
+		Local my# = sprite.sy + img_y*sprite.scale
+		draw_crosshairs( mx,my, 16 )
+		'
+		Local location#[]
+		If focus_i <> -1
+			location = data.get_skin_weapon_slot_location( focus_i )
+		EndIf
+		' update contextual mouse text readouts
+		Select ModKeyAndMouseKey
+			Case 0, 16 ' 0=???, (MODIFIER_LMOUSE)
+				If focus_i <> -1
+					mouse_str :+ coord_string(location[0],location[1]) ..
+					      +"~n"+ json.FormatDouble(data.get_skin_weapon_slot_angle(focus_i),2)+Chr($00B0) +"~n"
+				EndIf
+			Case 2, 18 ' 2=???, (MODIFIER_CONTROL|MODIFIER_LMOUSE)
+				If focus_i <> -1
+					mouse_str :+ coord_string(location[0],location[1]) +"~n"
+				Else
+					mouse_str :+ coord_string(ship_mx,ship_my) +"~n"
+				EndIf
+			Case 4, 20 ' 4=???, (MODIFIER_ALT|MODIFIER_LMOUSE)
+				If focus_i <> -1
+					mouse_str :+ json.FormatDouble(data.get_skin_weapon_slot_arc(focus_i),2)+Chr($00B0)+" (arc)~n"
+				EndIf
+		End Select
+		SetAlpha( 1 )
+	EndMethod
+
 	Method draw_engines( ed:TEditor, data:TData )
 		If Not data.ship.center Then Return
 		''---------------
@@ -374,7 +489,7 @@ Type TModalSetSkin Extends TSubroutine
 		' get location of nearest engine, unless it is currently locked (due to button input)
 		Local img_x#, img_y#
 		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
-		Local focus_i% = ed.engine_lock_i
+		Local focus_i% = engine_lock_i
 		If focus_i = -1 Then focus_i = data.find_nearest_skin_engine( img_x,img_y )
 		''---------------------------
 		'DebugDraw("nearest: "+focus_i, ..
@@ -383,12 +498,12 @@ Type TModalSetSkin Extends TSubroutine
 		' draw engines
 		If data.ship.engineSlots
 			For Local slot% = 0 Until data.ship.engineSlots.length
-				Local engine_location#[] = data.skin_engine_get_location( slot )
-				Local engine_length# = data.skin_engine_get_length( slot )
-				Local engine_width# = data.skin_engine_get_width( slot )
-				Local engine_angle# = data.skin_engine_get_angle( slot )
+				Local engine_location#[] = data.get_skin_engine_location( slot )
+				Local engine_length# = data.get_skin_engine_length( slot )
+				Local engine_width# = data.get_skin_engine_width( slot )
+				Local engine_angle# = data.get_skin_engine_angle( slot )
 				Local focused% = (slot = focus_i)
-				Local engine_color%[] = data.skin_engine_get_color( ed, slot )
+				Local engine_color%[] = data.get_skin_engine_color( ed, slot )
 				Local x# = sprite.sx + sprite.scale*(data.ship.center[1] + engine_location[0])
 				Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - engine_location[1])
 				Local is_removed% = data.is_skin_engine_removed( slot )
@@ -404,7 +519,6 @@ Type TModalSetSkin Extends TSubroutine
 				'-------------------------
 			Next
 		EndIf
-
 		' get mouse position on screen, mapped to ship's coordinate space
 		Local ship_mx#, ship_my#
 		ship_mx = +img_x - data.ship.center[1]
@@ -417,22 +531,21 @@ Type TModalSetSkin Extends TSubroutine
 		Select ModKeyAndMouseKey
 			Case 0, 16 ' 0=???, (MODIFIER_LMOUSE)
 				If focus_i <> -1
-					mouse_str :+ json.FormatDouble(data.skin_engine_get_angle( focus_i ), 2) + Chr($00B0) + "~n"
+					mouse_str :+ json.FormatDouble(data.get_skin_engine_angle( focus_i ), 2) + Chr($00B0) + "~n"
 				EndIf
 			Case 2, 18 ' 2=???, (MODIFIER_CONTROL|MODIFIER_LMOUSE)
 				If focus_i <> -1
-					Local location#[] = data.skin_engine_get_location( focus_i )
-					mouse_str :+ coord_string( location[0],location[1] ) + "~n" ..
+					Local location#[] = data.get_skin_engine_location( focus_i )
+					mouse_str :+ coord_string( location[0],location[1] ) + "~n"
 				Else
 					mouse_str :+ coord_string( ship_mx, ship_my ) + "~n"
 				EndIf
 			Case 4, 20 ' 4=???, (MODIFIER_ALT|MODIFIER_LMOUSE)
 				If focus_i <> -1
-					mouse_str :+ json.FormatDouble(data.skin_engine_get_width( focus_i ), 1) ..
-					  + "x" +    json.FormatDouble(data.skin_engine_get_length( focus_i ), 1) + "~n"
+					mouse_str :+ json.FormatDouble(data.get_skin_engine_width( focus_i ), 1) ..
+					  + "x" +    json.FormatDouble(data.get_skin_engine_length( focus_i ), 1) + "~n"
 				EndIf
 		End Select
-
 	EndMethod
 
 	Method draw_hullmods_chooser( ed:TEditor, data:TData )

@@ -1228,23 +1228,49 @@ Type TData
 	Method find_nearest_weapon_slot%( img_x#, img_y#)
 		If Not ship.weaponSlots Or Not ship.center Then Return -1
 		img_x = img_x - ship.center[1]
-		img_y = -( img_y - ship.center[0] )
-		Local nearest_i% = - 1
-		Local nearest_dist# = -1
+		img_y = ship.center[0] - img_y
+		Local location#[]
 		Local dist#
-		For Local i% = 0 Until ship.weaponSlots.length
-			If ship.weaponSlots[i].is_launch_bay()
+		Local nearest_dist# = 10e38:Float
+		Local nearest_i% = - 1
+		For Local slot% = 0 Until ship.weaponSlots.length
+			If ship.weaponSlots[slot].is_launch_bay()
 				Continue 'skip these
 			EndIf
-			dist = calc_distance( img_x, img_y, ship.weaponSlots[i].locations[0], ship.weaponSlots[i].locations[1] )
-			If nearest_i = - 1 Or dist < nearest_dist
+			location = ship.weaponSlots[slot].locations
+			dist = calc_distance( img_x,img_y, location[0],location[1] )
+			If dist < nearest_dist
 				nearest_dist = dist
-				nearest_i = i
+				nearest_i = slot
 			End If
 		Next
 		Return nearest_i
 	End Method
 	
+	' this is similar to finding weapon slots in SHIP mode
+	' but also considers possible changes made to a base hull by a skin
+	Method find_nearest_skin_weapon_slot%( img_x#,img_y# )
+		If Not ship.weaponSlots Or Not ship.center Then Return -1
+		img_x = img_x - ship.center[1]
+		img_y = ship.center[0] - img_y
+		Local location#[]
+		Local dist#
+		Local nearest_dist# = 10e38:Float
+		Local nearest_i% = - 1
+		For Local slot% = 0 Until ship.weaponSlots.length
+			If ship.weaponSlots[slot].is_launch_bay()
+				Continue 'skip?
+			EndIf
+			location = get_skin_weapon_slot_location( slot )
+			dist = calc_distance( img_x,img_y, location[0],location[1] )
+			If dist < nearest_dist
+				nearest_i = slot
+				nearest_dist = dist
+			End If
+		Next
+		Return nearest_i
+	EndMethod
+
 	'excludes built-in weapon slots because this method is intended
 	'to work properly in VARIANT mode;
 	Method find_nearest_variant_weapon_slot%( img_x#, img_y# )
@@ -1311,12 +1337,14 @@ Type TData
 		Return nearest_i
 	End Method
 
-	
-	Method find_nearest_engine%( img_x#, img_y# )
+	Method find_nearest_engine%( img_x#,img_y# )
 		If Not ship.engineSlots Or Not ship.center Then Return -1
 		img_x = img_x - ship.center[1]
-		img_y = -( img_y - ship.center[0] )
-		Local nearest_i% = -1, nearest_dist# = 10e38:Float, dist#, engine_location#[]
+		img_y = ship.center[0] - img_y
+		Local engine_location#[]
+		Local dist#
+		Local nearest_dist# = 10e38:Float
+		Local nearest_i% = -1
 		For Local slot% = 0 Until ship.engineSlots.length
 			engine_location = ship.engineSlots[slot].location
 			dist = calc_distance( img_x,img_y, engine_location[0],engine_location[1] )
@@ -1328,13 +1356,16 @@ Type TData
 		Return nearest_i
 	End Method
 
-	Method find_nearest_skin_engine%( img_x#, img_y# )
+	Method find_nearest_skin_engine%( img_x#,img_y# )
 		If Not ship.engineSlots Or Not data.ship.center Then Return -1
 		img_x = img_x - ship.center[1]
 		img_y = ship.center[0] - img_y
-		Local nearest_i% = -1, nearest_dist# = 10e38:Float, dist#, engine_location#[]
+		Local engine_location#[]
+		Local dist#
+		Local nearest_dist# = 10e38:Float
+		Local nearest_i% = -1
 		For Local slot% = 0 Until ship.engineSlots.length
-			engine_location = skin_engine_get_location( slot )
+			engine_location = get_skin_engine_location( slot )
 			dist = calc_distance( img_x,img_y, engine_location[0],engine_location[1] )
 			If dist < nearest_dist
 				nearest_i = slot
@@ -1428,18 +1459,36 @@ Type TData
 		Return Null
 	End Method
 
+	' does not compare: mount$, size$, type$  (but maybe it should?)
+	'   anyway, the base/ship weapon symmetry finder ignores the same.
+	Method find_symmetrical_skin_weapon_counterpart_slot%( slot% )
+		Local location#[] = get_skin_weapon_slot_location( slot )
+		Local angle# = get_skin_weapon_slot_angle( slot )
+		Local arc# = get_skin_weapon_slot_arc( slot )
+		'
+		For Local idx% = 0 Until ship.weaponSlots.length
+			If  location[0] =  get_skin_weapon_slot_location( idx )[0] ..
+			And location[1] = -get_skin_weapon_slot_location( idx )[1] ..
+			And angle       = -get_skin_weapon_slot_angle( idx ) ..
+			And arc         =  get_skin_weapon_slot_arc( idx )
+				Return idx
+			End If
+		Next
+		Return -1
+	EndMethod
+
 	Method find_symmetrical_skin_engine_counterpart_slot%( slot% )
-		Local location#[] = skin_engine_get_location( slot )
-		Local length# = skin_engine_get_length( slot )
-		Local width# = skin_engine_get_width( slot )
-		Local angle# = skin_engine_get_angle( slot )
+		Local location#[] = get_skin_engine_location( slot )
+		Local length# = get_skin_engine_length( slot )
+		Local width# = get_skin_engine_width( slot )
+		Local angle# = get_skin_engine_angle( slot )
 		'
 		For Local idx% = 0 Until ship.engineSlots.length
-			If  location[0] = skin_engine_get_location( idx )[0] ..
-			And location[1] = - skin_engine_get_location( idx )[1] ..
-			And length = skin_engine_get_length( idx ) ..
-			And width = skin_engine_get_width( idx ) ..
-			And angle = - skin_engine_get_angle( idx )
+			If  location[0] = get_skin_engine_location( idx )[0] ..
+			And location[1] = - get_skin_engine_location( idx )[1] ..
+			And length = get_skin_engine_length( idx ) ..
+			And width = get_skin_engine_width( idx ) ..
+			And angle = - get_skin_engine_angle( idx )
 				Return idx
 			End If
 		Next
@@ -1515,7 +1564,7 @@ Type TData
 	EndMethod
 
 	'----
-	Method skin_engine_get_location#[]( slot% )
+	Method get_skin_engine_location#[]( slot% )
 		If Not ship.engineSlots Then Return Null
 		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
 		If skinEngine And skinEngine.location <> TStarfarerShipEngineChange.__location
@@ -1526,7 +1575,7 @@ Type TData
 		EndIf
 	EndMethod
 
-	Method skin_engine_get_length#( slot% )
+	Method get_skin_engine_length#( slot% )
 		If Not ship.engineSlots Then Return 0
 		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
 		If skinEngine And skinEngine.length <> TStarfarerShipEngineChange.__length
@@ -1537,7 +1586,7 @@ Type TData
 		EndIf
 	EndMethod
 
-	Method skin_engine_get_width#( slot% )		
+	Method get_skin_engine_width#( slot% )		
 		If Not ship.engineSlots Then Return 0
 		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
 		If skinEngine And skinEngine.width <> TStarfarerShipEngineChange.__width
@@ -1548,7 +1597,7 @@ Type TData
 		EndIf
 	EndMethod
 
-	Method skin_engine_get_angle#( slot% )	
+	Method get_skin_engine_angle#( slot% )	
 		If Not ship.engineSlots Then Return 0	
 		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
 		If skinEngine And skinEngine.angle <> TStarfarerShipEngineChange.__angle
@@ -1559,7 +1608,7 @@ Type TData
 		EndIf
 	EndMethod
 
-	Method skin_engine_get_color%[]( ed:TEditor, slot% )		
+	Method get_skin_engine_color%[]( ed:TEditor, slot% )		
 		If Not ship.engineSlots Then Return Null
 		Local skinEngine:TStarfarerShipEngineChange = get_skin_engine_slot( slot )
 		If skinEngine And ..
@@ -1574,7 +1623,7 @@ Type TData
 	EndMethod
 
 	'----
-	Method skin_engine_set_location( slot%, img_x#,img_y#, mirror%=False )
+	Method set_skin_engine_location( slot%, img_x#,img_y#, mirror%=False )
 		If Not ship.engineSlots Or Not ship.center Then Return
 		Local ship_mx# = img_x - ship.center[1], ..
 		      ship_my# = ship.center[0] - img_y
@@ -1592,12 +1641,12 @@ Type TData
 		skinEngine.location[1] = ship_my
 		If mirror And skinEngine_mirrored
 			skinEngine_mirrored.location = New Float[2]
-			skinEngine_mirrored.location[0] = ship_mx
-			skinEngine_mirrored.location[1] = - ship_my
+			skinEngine_mirrored.location[0] =  ship_mx
+			skinEngine_mirrored.location[1] = -ship_my
 		EndIf
 	EndMethod
 
-	Method skin_engine_set_size( slot%, img_x#,img_y#, mirror%=False )		
+	Method set_skin_engine_size( slot%, img_x#,img_y#, mirror%=False )		
 		If Not ship.engineSlots Or Not ship.center Then Return
 		Local ship_mx# = img_x - ship.center[1], ..
 		      ship_my# = ship.center[0] - img_y
@@ -1610,8 +1659,8 @@ Type TData
 				skinEngine_mirrored = prep_skin_engine_slot_change( slot )
 			EndIf
 		EndIf
-		Local skinEngine_location#[] = skin_engine_get_location( slot )
-		Local skinEngine_angle# = skin_engine_get_angle( slot )
+		Local skinEngine_location#[] = get_skin_engine_location( slot )
+		Local skinEngine_angle# = get_skin_engine_angle( slot )
 		' mouse relative to engine location
 		Local mouse#[] = New Float[2]
 		mouse[0] = ship_mx - skinEngine_location[0]
@@ -1634,7 +1683,7 @@ Type TData
 		EndIf
 	EndMethod
 
-	Method skin_engine_set_angle( slot%, img_x#,img_y#, mirror%=False )		
+	Method set_skin_engine_angle( slot%, img_x#,img_y#, mirror%=False )		
 		If Not ship.engineSlots Or Not ship.center Then Return
 		Local ship_mx# = img_x - ship.center[1], ..
 		      ship_my# = ship.center[0] - img_y
@@ -1647,19 +1696,12 @@ Type TData
 				skinEngine_mirrored = prep_skin_engine_slot_change( slot )
 			EndIf
 		EndIf
-		Local skinEngine_location#[] = skin_engine_get_location( slot )
+		Local skinEngine_location#[] = get_skin_engine_location( slot )
 		skinEngine.angle = calc_angle( skinEngine_location[0],skinEngine_location[1], ship_mx,ship_my )
 		If mirror And skinEngine_mirrored
 			skinEngine_mirrored.angle = -skinEngine.angle
 		EndIf
 	EndMethod
-
-	'Method skin_engine_set_style( slot%, style$=Null,styleId$=Null,styleSpec:TStarfarerCustomEngineStyleSpec=Null )
-	'	Local skinEngine:TStarfarerShipEngineChange = prep_skin_engine_slot_change( slot )
-	'	skinEngine.style = style
-	'	skinEngine.styleId = styleId
-	'	skinEngine.styleSpec = styleSpec
-	'EndMethod
 
 	Method is_skin_engine_removed%( slot% )
 		Return in_int_array( slot, skin.removeEngineSlots )
@@ -1672,6 +1714,7 @@ Type TData
 	EndMethod
 
 	' removes data about this engine slot from the skin (fallback to base hull, no modification)
+	'requires subsequent call to update_skin()
 	Method skin_engine_clear_data( slot%, mirror%=False )
 		skin.removeEngineSlots = remove_first_val_from_intarray( skin.removeEngineSlots, slot )
 		skin.engineSlotChanges.Remove( String.FromInt( slot ))
@@ -1679,10 +1722,166 @@ Type TData
 	EndMethod
 
 	' mark the base engine slot as removed in the skin
+	'requires subsequent call to update_skin()
 	Method skin_engine_mark_removal( slot%, mirror%=False )
 		skin.removeEngineSlots = intarray_append( skin.removeEngineSlots, slot )
 		skin.engineSlotChanges.Remove( String.FromInt( slot ))
 		'TODO: mirror
+	EndMethod
+
+	'----
+	' returns the skin's weapon slot (if set), or Null if marked for removal
+	Method get_skin_weapon_slot:TStarfarerShipWeaponChange( slot% )
+		Local weapon_slot_id$ = ship.weaponSlots[slot].id
+		If in_str_array( weapon_slot_id, skin.removeWeaponSlots ) Then Return Null
+		Return TStarfarerShipWeaponChange( skin.weaponSlotChanges.ValueForKey( weapon_slot_id ))
+	EndMethod
+
+	' does not do anything if the given skin weapon slot is not marked for removal, or already has changes
+	' returns the corresponding weapon
+	Method prep_skin_weapon_slot_change:TStarfarerShipWeaponChange( slot% )
+		Local weapon_slot_id$ = ship.weaponSlots[slot].id
+		' clear the removed flag, if set
+		If in_str_array( weapon_slot_id, skin.removeWeaponSlots )
+			skin.removeWeaponSlots = remove_first_val_from_strarray( skin.removeWeaponSlots, weapon_slot_id )
+		EndIf
+		' add a new ship-weapon-slot-change obj to the skin's weapon slot map, if it doesn't already have one
+		Local skinWeapon:TStarfarerShipWeaponChange = TStarfarerShipWeaponChange( ..
+			skin.weaponSlotChanges.ValueForKey( weapon_slot_id ))
+		If Not skinWeapon
+			skinWeapon = New TStarfarerShipWeaponChange
+			skin.weaponSlotChanges.Insert( weapon_slot_id, skinWeapon )
+		EndIf
+		Return skinWeapon
+	EndMethod
+
+	'----
+	Method get_skin_weapon_slot_location#[]( slot% )
+		If Not ship.weaponSlots Then Return Null
+		Local skinWeapon:TStarfarerShipWeaponChange = get_skin_weapon_slot( slot )
+		If skinWeapon And skinWeapon.locations <> TStarfarerShipWeaponChange.__locations
+			Return skinWeapon.locations
+		Else
+			Local baseWeapon:TStarfarerShipWeapon = ship.weaponSlots[slot]
+			Return baseWeapon.locations
+		EndIf
+	EndMethod
+
+	Method get_skin_weapon_slot_angle#( slot% )
+		If Not ship.weaponSlots Then Return Null
+		Local skinWeapon:TStarfarerShipWeaponChange = get_skin_weapon_slot( slot )
+		If skinWeapon And skinWeapon.angle <> TStarfarerShipWeaponChange.__angle
+			Return skinWeapon.angle
+		Else
+			Local baseWeapon:TStarfarerShipWeapon = ship.weaponSlots[slot]
+			Return baseWeapon.angle
+		EndIf
+	EndMethod
+
+	Method get_skin_weapon_slot_arc#( slot% )
+		If Not ship.weaponSlots Then Return Null
+		Local skinWeapon:TStarfarerShipWeaponChange = get_skin_weapon_slot( slot )
+		If skinWeapon And skinWeapon.arc <> TStarfarerShipWeaponChange.__arc
+			Return skinWeapon.arc
+		Else
+			Local baseWeapon:TStarfarerShipWeapon = ship.weaponSlots[slot]
+			Return baseWeapon.arc
+		EndIf
+	EndMethod
+
+	'----
+	'requires subsequent call to update_skin()
+	Method set_skin_weapon_slot_location( slot%, img_x#,img_y#, mirror%=False )
+		If Not ship.weaponSlots Or Not ship.center Then Return
+		Local ship_mx# = img_x - ship.center[1], ..
+		      ship_my# = ship.center[0] - img_y
+		Local skinWeapon:TStarfarerShipWeaponChange = prep_skin_weapon_slot_change( slot )
+		Local mirrored_slot%
+		Local skinWeapon_mirrored:TStarfarerShipWeapon
+		If mirror
+			mirrored_slot = find_symmetrical_skin_weapon_counterpart_slot( slot )
+			If mirrored_slot <> -1
+				skinWeapon_mirrored = prep_skin_weapon_slot_change( slot )
+			EndIf
+		EndIf
+		skinWeapon.locations = New Float[2]
+		skinWeapon.locations[0] = ship_mx
+		skinWeapon.locations[1] = ship_my
+		If mirror and skinWeapon_mirrored
+			skinWeapon_mirrored.locations = New Float[2]
+			skinWeapon_mirrored.locations[0] =  ship_mx
+			skinWeapon_mirrored.locations[1] = -ship_my ' mirror across X-axis
+		EndIf
+	EndMethod
+
+	'requires subsequent call to update_skin()
+	Method set_skin_weapon_slot_angle( slot%, img_x#,img_y#, mirror%=False )
+		If Not ship.weaponSlots Or Not ship.center Then Return
+		Local ship_mx# = img_x - ship.center[1], ..
+		      ship_my# = ship.center[0] - img_y
+		Local skinWeapon:TStarfarerShipWeaponChange = prep_skin_weapon_slot_change( slot )
+		Local mirrored_slot%
+		Local skinWeapon_mirrored:TStarfarerShipWeapon
+		If mirror
+			mirrored_slot = find_symmetrical_skin_weapon_counterpart_slot( slot )
+			If mirrored_slot <> -1
+				skinWeapon_mirrored = prep_skin_weapon_slot_change( slot )
+			EndIf
+		EndIf
+		Local skinWeapon_location#[] = get_skin_weapon_slot_location( slot )
+		skinWeapon.angle = calc_angle( skinWeapon_location[0],skinWeapon_location[1], ship_mx,ship_my )
+		If mirror And skinWeapon_mirrored
+			skinWeapon_mirrored.angle = -skinWeapon.angle
+		EndIf
+	EndMethod
+
+	'requires subsequent call to update_skin()
+	Method set_skin_weapon_slot_arc( slot%, img_x#,img_y#, mirror%=False )
+		If Not ship.weaponSlots Or Not ship.center Then Return
+		Local ship_mx# = img_x - ship.center[1], ..
+		      ship_my# = ship.center[0] - img_y
+		Local skinWeapon:TStarfarerShipWeaponChange = prep_skin_weapon_slot_change( slot )
+		Local mirrored_slot%
+		Local skinWeapon_mirrored:TStarfarerShipWeapon
+		If mirror
+			mirrored_slot = find_symmetrical_skin_weapon_counterpart_slot( slot )
+			If mirrored_slot <> -1
+				skinWeapon_mirrored = prep_skin_weapon_slot_change( slot )
+			EndIf
+		EndIf
+		Local skinWeapon_location#[] = get_skin_weapon_slot_location( slot )
+		Local raw_angle# = calc_angle( skinWeapon_location[0],skinWeapon_location[1], ship_mx,ship_my )
+		skinWeapon.arc = Abs( 2 * ang_wrap( raw_angle - skinWeapon.angle ))
+		If skinWeapon.arc < 0 Then skinWeapon.arc = 0
+		If skinWeapon.arc > 360 Then skinWeapon.arc = 360
+		If mirror And skinWeapon_mirrored
+			skinWeapon_mirrored.arc = skinWeapon.arc
+		EndIf
+	EndMethod
+
+	Method skin_weapon_slot_clear_data( slot%, mirror%=False )
+		Local weapon_slot_id$ = ship.weaponSlots[slot].id
+		skin.removeWeaponSlots = remove_first_val_from_strarray( skin.removeWeaponSlots, weapon_slot_id )
+		skin.weaponSlotChanges.Remove( weapon_slot_id )
+		'TODO: mirror
+	EndMethod
+
+	Method skin_weapon_slot_mark_removal( slot%, mirror%=False )
+		Local weapon_slot_id$ = ship.weaponSlots[slot].id
+		skin.removeWeaponSlots = strarray_append( skin.removeWeaponSlots, weapon_slot_id )
+		skin.weaponSlotChanges.Remove( weapon_slot_id )
+		'TODO: mirror
+	EndMethod
+
+	Method is_skin_weapon_slot_changed%( slot% )
+		Local weapon_slot_id$ = ship.weaponSlots[slot].id
+		Return (skin.weaponSlotChanges.Contains( weapon_slot_id ) ..
+			 And TStarfarerShipWeaponChange( skin.weaponSlotChanges.ValueForKey( weapon_slot_id )) <> Null)
+	EndMethod
+
+	Method is_skin_weapon_slot_removed%( slot% )
+		Local weapon_slot_id$ = ship.weaponSlots[slot].id
+		Return in_str_array( weapon_slot_id, skin.removeWeaponSlots )
 	EndMethod
 
 	'/////////////////////

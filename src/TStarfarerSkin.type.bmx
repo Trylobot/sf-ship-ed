@@ -17,11 +17,11 @@ Type TStarfarerSkin
 	Field removeBuiltInMods$[] ' hullmod ids
 	Field builtInMods$[] ' hullmod ids
 	Field removeWeaponSlots$[] ' weapon slot id's
-	Field weaponSlotChanges:TMap'<String,TStarfarerShipWeaponChange>  weapon slot id --> TStarfarerShipWeapon
+	Field weaponSlotChanges:TMap'<String,TStarfarerShipWeaponChange>  weapon slot id --> TStarfarerShipWeaponChange
 	Field removeBuiltInWeapons$[] ' weapon slot id's
 	Field builtInWeapons:TMap'<String,String>  weapon slot id --> weapon id
 	Field removeEngineSlots%[] ' engine slot indices (no id's)
-	Field engineSlotChanges:TMap'<String,TStarfarerShipEngineChange>  engine slot index (as string) --> TStarfarerShipEngine
+	Field engineSlotChanges:TMap'<String,TStarfarerShipEngineChange>  engine slot index (as string) --> TStarfarerShipEngineChange
 	Field coversColor$
 	
 	Method New()

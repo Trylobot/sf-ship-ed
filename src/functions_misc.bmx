@@ -66,6 +66,14 @@ Function intarray_remove_at%[]( arr%[], i% )
 	End If
 EndFunction
 
+Function strarray_remove_at$[]( arr$[], i% )
+	If i >= 0 And i < arr.Length
+		If arr.Length = 1 Then Return Null Else Return arr[..i] + arr[i+1..]
+	Else
+		Return arr
+	End If
+EndFunction
+
 Function remove_first_val_from_intarray%[]( arr%[], val% )
 	If Not arr Then Return arr
 	For Local i% = 0 Until arr.length
@@ -76,7 +84,24 @@ Function remove_first_val_from_intarray%[]( arr%[], val% )
 	Return arr
 EndFunction
 
+Function remove_first_val_from_strarray$[]( arr$[], val$ )
+	If Not arr Then Return arr
+	For Local i% = 0 Until arr.length
+		If arr[i] = val
+			Return strarray_remove_at( arr, i )
+		EndIf
+	Next
+	Return arr
+EndFunction
+
 Function intarray_append%[]( arr%[], val% )
+	If Not arr Then Return [val]
+	arr = arr[..(arr.length+1)]
+	arr[arr.length-1] = val
+	Return arr
+EndFunction
+
+Function strarray_append$[]( arr$[], val$ )
 	If Not arr Then Return [val]
 	arr = arr[..(arr.length+1)]
 	arr[arr.length-1] = val

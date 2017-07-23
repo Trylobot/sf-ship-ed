@@ -231,7 +231,7 @@ Function rebuildFunctionMenu(index%)
     Case MENU_MODE_SKIN
       functionMenuSub[MENU_MODE_SKIN] = New TGadget[MENUSIZE_MENU_SUBFUNCTION_SKIN_____]
       functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_WEAPONSLOTS] = CreateMenu("{{m_function_skin_changeremove_weaponslots}}", 600, functionMenu[MENU_FUNCTION], KEY_W )
-      functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_WEAPONS] = CreateMenu("{{m_function_skin_addremove_builtin_weapons}}", 601, functionMenu[MENU_FUNCTION], KEY_B )
+      functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_WEAPONS] = CreateMenu("{{m_function_skin_addremove_builtin_weapons}}", 601, functionMenu[MENU_FUNCTION], KEY_U )
       functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_CHANGEREMOVE_ENGINES] = CreateMenu("{{m_function_skin_changeremove_engines}}", 602, functionMenu[MENU_FUNCTION], KEY_E )
       functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_BUILTIN_HULLMODS] = CreateMenu("{{m_function_skin_addremove_builtin_hullmods}}", 603, functionMenu[MENU_FUNCTION], KEY_H )
       functionMenuSub[MENU_MODE_SKIN][MENU_SUBFUNCTION_SKIN_ADDREMOVE_HINTS] = CreateMenu("{{m_function_skin_addremove_hints}}", 604, functionMenu[MENU_FUNCTION], KEY_A )

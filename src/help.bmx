@@ -161,7 +161,7 @@ Function load_help()
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( CHAR_BACK_ARROW, LocalizeString("{{h_function_ship_variantWings_removeWing}}"), ICON_KB, True, 1, "variant", "variant_wings" ) )
 	'////////////
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "W", LocalizeString("{{h_mode_skin_weaponSlots}}"), ICON_KB, True, 0, "skin" ))
-	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "B", LocalizeString("{{h_mode_skin_builtInweapons}}"), ICON_KB, True, 0, "skin" ))
+	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "U", LocalizeString("{{h_mode_skin_builtInweapons}}"), ICON_KB, True, 0, "skin" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "E", LocalizeString("{{h_mode_skin_engineSlots}}"), ICON_KB, True, 0, "skin" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "H", LocalizeString("{{h_mode_skin_builtInhullmods}}"), ICON_KB, True, 0, "skin" ))
 	HELP_WIDGETS.AddLast( TKeyboardHelpWidget.Create( "A", LocalizeString("{{h_mode_skin_aiHints}}"), ICON_KB, True, 0, "skin" ))
