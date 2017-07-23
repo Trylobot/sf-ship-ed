@@ -111,14 +111,14 @@ Type TModalSetSkin Extends TSubroutine
 		Select ed.mode
 			
 			Case "changeremove_weaponslots"
-				process_input_changeremove_weaponslots( ed, data )
+				process_input_changeremove_weaponslots( ed, data, sprite )
 			
 			Case "addremove_builtin_weapons"
-				process_input_addremove_builtin_weapons( ed, data )
+				process_input_addremove_builtin_weapons( ed, data, sprite )
 				update_weapon_chooser( ed, data )
 			
 			Case "changeremove_engines"
-				process_input_changeremove_engines( ed, data )
+				process_input_changeremove_engines( ed, data, sprite )
 			
 			Case "addremove_hullmods"
 				process_input_addremove_hullmods( ed, data )
@@ -135,14 +135,14 @@ Type TModalSetSkin Extends TSubroutine
 		Select ed.mode
 			
 			Case "changeremove_weaponslots"
-				draw_weaponslots( ed, data )
+				draw_weaponslots( ed, data, sprite )
 			
 			Case "addremove_builtin_weapons"
-				draw_weapon_assignments( ed, data )
+				draw_builtin_weapon_info( ed, data, sprite )
 				draw_weapons_chooser( ed, data )
 			
 			Case "changeremove_engines"
-				draw_engines( ed, data )
+				draw_engines( ed, data, sprite )
 			
 			Case "addremove_hullmods"
 				draw_hullmods_chooser( ed, data )
@@ -167,8 +167,49 @@ Type TModalSetSkin Extends TSubroutine
 
 	Method initialize_weapon_chooser( ed:TEditor, data:TData )
 		If weapon_lock_i = -1 Then Return
-		'Local rows% =    1 + "number of weapons compatible with selected weapon slot"
-				
+		'---
+		Local weapon_slot_type$ = data.get_skin_weapon_slot_type( weapon_lock_i )
+		Local weapon_slot_size$ = data.get_skin_weapon_slot_size( weapon_lock_i )
+		Local weapon_lock_slot_id$ = data.ship.weaponSlots[weapon_lock_i].id
+		Local equipped_weapon_id$ = data.get_skin_equipped_builtin_weapon_id( weapon_lock_slot_id )
+		compatible_weapon_ids = ed.select_weapons( weapon_slot_type, weapon_slot_size )
+		'---
+		Local rows% = 1 + compatible_weapon_ids.Length
+		Local cols% = 1 + 1 + 1 + 1 + 1 + 1 ' cursor, status, ops (contextual), name, size, type
+		weapon_chooser = New TableWidget
+		weapon_chooser.resize(rows,cols)
+		weapon_chooser.justify_col(2, JUSTIFY_RIGHT) ' ops
+		'-------------------------------------
+		'header
+		Local r% = 0
+		Local c% = 1 + 1 + 0 ' skip: cursor, status
+		weapon_chooser.set_cell(r,c, "OPs"); c :+ 1
+		weapon_chooser.set_cell(r,c, "Name"); c :+ 1
+		weapon_chooser.set_cell(r,c, "Size"); c :+ 1
+		weapon_chooser.set_cell(r,c, "Type"); c :+ 1
+		'-------------------------------------
+		'data
+		Local i% = 0
+		For Local weapon_id$ = EachIn compatible_weapon_ids
+			Local weapon:TStarfarerWeapon = TStarfarerWeapon( ed.stock_weapons.ValueForKey( weapon_id ))
+			Local weapon_stats:TMap = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
+			' table ptr
+			r = 1 + i     ' skip header
+			c = 1 + 1 + 0 ' skip cursor, status
+			'----------------------------------
+			weapon_chooser.set_cell(r,c, String( data.get_weapon_csv_ordnance_points( weapon_id ))); c :+ 1
+			weapon_chooser.set_cell(r,c, String( weapon_stats.ValueForKey("name"))); c :+ 1
+			weapon_chooser.set_cell(r,c, weapon.size); c :+ 1
+			weapon_chooser.set_cell(r,c, weapon.type_); c :+ 1
+			'---
+			' initial position of chooser selection
+			If weapon_id = equipped_weapon_id
+				selected_weapon_idx = i
+				selected_weapon_id = weapon_id
+			EndIf
+			i :+ 1
+		Next
+		update_weapon_chooser( ed, data )
 	EndMethod
 
 	Method destroy_weapon_chooser()
@@ -182,7 +223,7 @@ Type TModalSetSkin Extends TSubroutine
 
 	Method initialize_hullmod_chooser( ed:TEditor, data:TData )
 		Local rows% =    1 + ed.stock_hullmod_count
-		Local columns% = 1 + 1 + 1 + 1     ' cursor, status, ops (contextual), name
+		Local columns% = 1 + 1 + 1 + 1 ' cursor, status, ops (contextual), name
 		If SHOW_MORE = 1 Or SHOW_MORE = 2
 			columns :+ 1 ' description
 		EndIf
@@ -231,6 +272,43 @@ Type TModalSetSkin Extends TSubroutine
 	' update functions
 
 	Method update_weapon_chooser( ed:TEditor, data:TData )
+		If weapon_lock_i = -1 Then Return
+		Local weapon_lock_slot_id$ = data.ship.weaponSlots[weapon_lock_i].id
+		Local weapon_lock_base_builtin_weapon_id$ = String( data.ship.builtInWeapons.ValueForKey( weapon_lock_slot_id ))
+		Local weapon_lock_skin_specifies_weapon% = data.skin_adds_builtin_weapon( weapon_lock_slot_id )
+		Local weapon_lock_skin_builtin_weapon_id$ = String( data.skin.builtInWeapons.ValueForKey( weapon_lock_slot_id ))
+		' update only: cursor row, status (columns: 0, 1)
+		Local i% = 0
+		For Local weapon_id$ = EachIn compatible_weapon_ids
+			Local weapon:TMap = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
+			' table pointer
+			Local r% = 1 + i ' skip: header
+			Local c% = 0
+			'---------------------------------------------------------
+			' retain ID of selected weapon
+			Local cursor$ = ""
+			If i = selected_weapon_idx
+				selected_weapon_id = weapon_id
+				cursor = CURSOR_STR
+			EndIf
+			weapon_chooser.set_cell(r,c, cursor); c :+ 1
+			'---------------------------------------------------------
+			' show status of each weapon as it relates to this skin (and, its "base hull" (ship))
+			Local weapon_status$ = "   "
+			If weapon_lock_base_builtin_weapon_id = weapon_id
+				If Not weapon_lock_skin_specifies_weapon
+					weapon_status = " b "
+				Else
+					weapon_status = "---"
+				EndIf
+			ElseIf weapon_lock_skin_builtin_weapon_id = weapon_id
+				weapon_status = "[+]"
+			EndIf
+			weapon_chooser.set_cell(r,c, weapon_status); c :+ 1
+			i :+ 1
+		Next
+		' cache for rendering
+		weapon_chooser_text = weapon_chooser.to_TextWidget()
 	EndMethod
 
 	Method update_hullmod_chooser( ed:TEditor, data:TData )
@@ -265,7 +343,7 @@ Type TModalSetSkin Extends TSubroutine
 	'--------------------------------------
 	' input handler functions
 
-	Method process_input_changeremove_weaponslots( ed:TEditor, data:TData )
+	Method process_input_changeremove_weaponslots( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
 		'
 		Local img_x#, img_y#
@@ -327,7 +405,7 @@ Type TModalSetSkin Extends TSubroutine
 		EndSelect
 	EndMethod
 
-	Method process_input_addremove_builtin_weapons( ed:TEditor, data:TData )
+	Method process_input_addremove_builtin_weapons( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
 		'
 		Local img_x#, img_y#
@@ -390,7 +468,7 @@ Type TModalSetSkin Extends TSubroutine
 		EndSelect
 	EndMethod
 
-	Method process_input_changeremove_engines( ed:TEditor, data:TData )
+	Method process_input_changeremove_engines( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
 		'
 		Local img_x#, img_y#
@@ -500,9 +578,8 @@ Type TModalSetSkin Extends TSubroutine
 	Method draw_hud( ed:TEditor, data:TData )
 	EndMethod
 
-	Method draw_weaponslots( ed:TEditor, data:TData )
+	Method draw_weaponslots( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
-
 		' get location of nearest engine, unless it is currently locked (due to button input)
 		Local img_x#,img_y#
 		sprite.get_img_xy( MouseX, MouseY, img_x,img_y )
@@ -565,33 +642,57 @@ Type TModalSetSkin Extends TSubroutine
 		SetAlpha( 1 )
 	EndMethod
 
-	Method draw_weapon_assignments( ed:TEditor, data:TData )
+	Method draw_builtin_weapon_info( ed:TEditor, data:TData, sprite:TSprite )
+		If Not data.ship.center Then Return
+		'
+		Local img_x#,img_y#
+		sprite.get_img_xy( MouseX, MouseY, img_x,img_y )
+		Local nearest_i% = data.find_nearest_skin_weapon_slot( img_x,img_y )
+		' text boxes
+		For Local slot% = 0 Until data.ship.weaponSlots.Length
+			If weapon_lock_i <> -1 And weapon_lock_i <> slot Then Continue ' selective rendering when locked
+			SetRotation( 0 )
+			SetScale( 1, 1 )
+			If nearest_i = slot
+				SetAlpha( 0.8 )
+			Else
+				SetAlpha( Min( 0.4, 0.5*(sprite.scale/3.0) ))
+			EndIf
+			Local xy#[] = data.get_skin_weapon_slot_location( slot )
+			Local sz$ = data.get_skin_weapon_slot_size( slot )
+			Local tp$ = data.get_skin_weapon_slot_type( slot )
+			Local mt$ = data.get_skin_weapon_slot_mount( slot )
+			draw_builtin_weapon_slot_info( ed,data,sprite,, xy,sz,tp,mt )
+			If weapon_lock_i = -1
+				Local slot_id$ = data.ship.weaponSlots[slot].id
+				Local wpid$ = data.get_skin_equipped_builtin_weapon_id( slot_id )
+				draw_builtin_assigned_weapon_info( ed,data,sprite,, xy,wpid )
+			EndIf
+		Next
+		' weapon icons
+		For Local slot% = 0 Until data.ship.weaponSlots.Length
+			If weapon_lock_i <> -1 And weapon_lock_i <> slot Then Continue ' selective rendering when locked
+
+		Next
 	EndMethod
 
 	Method draw_weapons_chooser( ed:TEditor, data:TData )
-		Local x# = W_MID
+		Local x# = 10
 		Local y# = SS.ScrollTo(H_MID - LINE_HEIGHT*(selected_weapon_idx + 0.5))
-		Local ox# = 0.5
+		Local ox# = 0.0
 		Local oy# = 0.0
 		If weapon_chooser_text <> Null
 			weapon_chooser_text.draw( x,y, ox,oy )
 		EndIf
 	EndMethod
 
-	Method draw_engines( ed:TEditor, data:TData )
+	Method draw_engines( ed:TEditor, data:TData, sprite:TSprite )
 		If Not data.ship.center Then Return
-		''---------------
-		'DebugDrawReset()
-		''---------------
 		' get location of nearest engine, unless it is currently locked (due to button input)
 		Local img_x#, img_y#
 		sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
 		Local focus_i% = engine_lock_i
 		If focus_i = -1 Then focus_i = data.find_nearest_skin_engine( img_x,img_y )
-		''---------------------------
-		'DebugDraw("nearest: "+focus_i, ..
-		'	W_MID,0, 0.5,0.0)
-		''---------------------------
 		' draw engines
 		If data.ship.engineSlots
 			For Local slot% = 0 Until data.ship.engineSlots.length
@@ -605,15 +706,6 @@ Type TModalSetSkin Extends TSubroutine
 				Local y# = sprite.sy + sprite.scale*(data.ship.center[0] - engine_location[1])
 				Local is_removed% = data.is_skin_engine_removed( slot )
 				draw_engine( x,y, engine_length,engine_width,engine_angle, sprite.scale, focused, engine_color,, is_removed )
-				'---------------------------
-				'DebugDraw("draw_engine( "..
-				'	+  "x="+json.FormatDouble(engine_location[0],1)..
-				'	+", y="+json.FormatDouble(engine_location[1],1)..
-				'	+", L="+json.FormatDouble(engine_length,1)..
-				'	+", W="+json.FormatDouble(engine_width,1)..
-				'	+", A="+json.FormatDouble(engine_angle,1)..
-				'	+")", W_MID,0, 0.5,0.0)
-				'-------------------------
 			Next
 		EndIf
 		' get mouse position on screen, mapped to ship's coordinate space

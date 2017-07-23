@@ -936,30 +936,6 @@ Type TData
 		EndIf
 	EndMethod
 
-	'requires subsequent call to update_skin()
-	Method skin_builtin_weapon_clear_data( weapon_slot_id$ )
-		skin.removeBuiltInWeapons = remove_first_val_from_strarray( skin.removeBuiltInWeapons, weapon_slot_id )
-		skin.builtInWeapons.Remove( weapon_slot_id )
-	EndMethod
-
-	'requires subsequent call to update_skin()
-	Method skin_builtin_weapon_remove( weapon_slot_id$ )
-		skin.removeBuiltInWeapons = strarray_append( skin.removeBuiltInWeapons, weapon_slot_id )
-	EndMethod
-
-	'requires subsequent call to update_skin()
-	Method skin_builtin_weapon_assign( weapon_slot_id$, weapon_id$ )
-		skin.builtInWeapons.Insert( weapon_slot_id, weapon_id )
-	EndMethod
-
-	Method skin_adds_builtin_weapon%( weapon_slot_id$ )
-		Return skin.builtInWeapons.Contains( weapon_slot_id )
-	EndMethod
-
-	Method skin_removes_builtin_weapon%( weapon_slot_id$ )
-		Return in_str_array( weapon_slot_id, skin.removeBuiltInWeapons )
-	EndMethod
-
 	'////////////////
 
 	'requires subsequent call to update_weapon()
@@ -1813,6 +1789,54 @@ Type TData
 		EndIf
 	EndMethod
 
+	Method get_skin_weapon_slot_type$( slot% )
+		If Not ship.weaponSlots Then Return Null
+		Local skinWeapon:TStarfarerShipWeaponChange = get_skin_weapon_slot( slot )
+		If skinWeapon And skinWeapon.type_ <> TStarfarerShipWeaponChange.__type_
+			Return skinWeapon.type_
+		Else
+			Local baseWeapon:TStarfarerShipWeapon = ship.weaponSlots[slot]
+			Return baseWeapon.type_
+		EndIf
+	EndMethod
+
+	Method get_skin_weapon_slot_size$( slot% )
+		If Not ship.weaponSlots Then Return Null
+		Local skinWeapon:TStarfarerShipWeaponChange = get_skin_weapon_slot( slot )
+		If skinWeapon And skinWeapon.size <> TStarfarerShipWeaponChange.__size
+			Return skinWeapon.size
+		Else
+			Local baseWeapon:TStarfarerShipWeapon = ship.weaponSlots[slot]
+			Return baseWeapon.size
+		EndIf
+	EndMethod
+
+	Method get_skin_weapon_slot_mount$( slot% )
+		If Not ship.weaponSlots Then Return Null
+		Local skinWeapon:TStarfarerShipWeaponChange = get_skin_weapon_slot( slot )
+		If skinWeapon And skinWeapon.mount <> TStarfarerShipWeaponChange.__mount
+			Return skinWeapon.mount
+		Else
+			Local baseWeapon:TStarfarerShipWeapon = ship.weaponSlots[slot]
+			Return baseWeapon.mount
+		EndIf
+	EndMethod
+
+	' inspects both the skin and its base hull for a built-in weapon id for the given slot id
+	'   giving priority to the skin, and taking into account the skin's potential removal of the slot
+	'   returns a valid weapon id, or null if the result is none
+	Method get_skin_equipped_builtin_weapon_id$( slot_id$ )
+		If skin_adds_builtin_weapon( slot_id )
+			Return String( skin.builtInWeapons.ValueForKey( slot_id ))
+		Else
+			If Not skin_removes_builtin_weapon( slot_id )
+				Return String( ship.builtInWeapons.ValueForKey( slot_id ))
+			Else
+				Return Null
+			EndIf
+		EndIf
+	EndMethod
+
 	'----
 	'requires subsequent call to update_skin()
 	Method set_skin_weapon_slot_location( slot%, img_x#,img_y#, mirror%=False )
@@ -1883,6 +1907,7 @@ Type TData
 		EndIf
 	EndMethod
 
+	'requires subsequent call to update_skin()
 	Method skin_weapon_slot_clear_data( slot%, mirror%=False )
 		Local weapon_slot_id$ = ship.weaponSlots[slot].id
 		skin.removeWeaponSlots = remove_first_val_from_strarray( skin.removeWeaponSlots, weapon_slot_id )
@@ -1890,6 +1915,7 @@ Type TData
 		'TODO: mirror
 	EndMethod
 
+	'requires subsequent call to update_skin()
 	Method skin_weapon_slot_mark_removal( slot%, mirror%=False )
 		Local weapon_slot_id$ = ship.weaponSlots[slot].id
 		skin.removeWeaponSlots = strarray_append( skin.removeWeaponSlots, weapon_slot_id )
@@ -1906,6 +1932,32 @@ Type TData
 	Method is_skin_weapon_slot_removed%( slot% )
 		Local weapon_slot_id$ = ship.weaponSlots[slot].id
 		Return in_str_array( weapon_slot_id, skin.removeWeaponSlots )
+	EndMethod
+
+	'requires subsequent call to update_skin()
+	Method skin_builtin_weapon_clear_data( weapon_slot_id$ )
+		skin.removeBuiltInWeapons = remove_first_val_from_strarray( skin.removeBuiltInWeapons, weapon_slot_id )
+		skin.builtInWeapons.Remove( weapon_slot_id )
+	EndMethod
+
+	'requires subsequent call to update_skin()
+	Method skin_builtin_weapon_remove( weapon_slot_id$ )
+		skin.removeBuiltInWeapons = strarray_append( skin.removeBuiltInWeapons, weapon_slot_id )
+	EndMethod
+
+	'requires subsequent call to update_skin()
+	Method skin_builtin_weapon_assign( weapon_slot_id$, weapon_id$ )
+		skin.builtInWeapons.Insert( weapon_slot_id, weapon_id )
+		' if weapon slot is marked as removed, clear the mark
+		skin.removeBuiltInWeapons = remove_first_val_from_strarray( skin.removeBuiltInWeapons, weapon_slot_id )
+	EndMethod
+
+	Method skin_adds_builtin_weapon%( weapon_slot_id$ )
+		Return skin.builtInWeapons.Contains( weapon_slot_id )
+	EndMethod
+
+	Method skin_removes_builtin_weapon%( weapon_slot_id$ )
+		Return in_str_array( weapon_slot_id, skin.removeBuiltInWeapons )
 	EndMethod
 
 	'/////////////////////

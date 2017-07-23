@@ -31,10 +31,18 @@ Type TStarfarerShipWeapon
 		  And  Not is_system() ..
 		  And  Not is_decorative()
 	EndMethod
-	
+	'derived field
 	Method is_station_module%()
 		Return (type_ = "STATION_MODULE" )
-	End Method	
+	End Method
+	'derived field
+	Method is_builtin_or_decorative%()
+		Select type_
+			Case "BUILT_IN", "DECORATIVE"
+				Return True
+		EndSelect
+		Return False
+	EndMethod
 	
 	Method New()
 		angle = 0.0

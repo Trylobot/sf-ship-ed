@@ -406,27 +406,30 @@ Function draw_variant_weapon_mount( wx%, wy%, weaponSlot:TStarfarerShipWeapon )
 	draw_weapon_mount( wx, wy, weaponSlot.angle, weaponSlot.arc, True, 8, 16, 24, fg_color,bg_color )
 EndFunction
 
-Function draw_builtin_weapon_slot_info( ed:TEditor, data:TData, sprite:TSprite, weaponSlot:TStarfarerShipWeapon )
+Function draw_builtin_weapon_slot_info( ed:TEditor,data:TData,sprite:TSprite, slot:TStarfarerShipWeapon=Null,xy#[]=Null,sz$=Null,tp$=Null,mt$=Null )
+	If slot = Null And (xy = Null Or sz = Null Or tp = Null Or mt = Null) Then Return ' not enough info
+	If Not xy Then xy = slot.locations
+	If Not sz Then sz = slot.size
+	If Not tp Then tp = slot.type_
+	If Not mt Then mt = slot.mount
 	'prep and compose string data
-	Local wx% = sprite.sx + (weaponSlot.locations[0] + data.ship.center[1])*sprite.Scale
-	Local wy% = sprite.sy + (-weaponSlot.locations[1] + data.ship.center[0])*sprite.Scale
-	Local wep_info:TextWidget = TextWidget.Create( ..
-		weaponSlot.size+"~n"+..
-		weaponSlot.type_+"~n"+..
-		weaponSlot.mount )
-	'set colors
-	Local fg_color% = $FFFFFF
-	Local bg_color% = $000000
-	'draw textbox
-	draw_container( wx + 30,wy, wep_info.w + 20,wep_info.h + 20, 0.0,0.5, fg_color,bg_color )
-	draw_string( wep_info, wx + 40,wy, fg_color,bg_color, 0.0,0.5 )
+	Local wx% = sprite.sx + ( xy[0] + data.ship.center[1])*sprite.Scale
+	Local wy% = sprite.sy + (-xy[1] + data.ship.center[0])*sprite.Scale
+	Local wep_info:TextWidget = TextWidget.Create( sz+"~n"+tp+"~n"+mt )
+	Local fg% = $FFFFFF
+	Local bg% = $000000
+	draw_container( wx+30,wy, wep_info.w+20,wep_info.h+20, 0.0,0.5, fg,bg )
+	draw_string( wep_info, wx+40,wy, fg,bg, 0.0,0.5 )
 EndFunction
 
-Function draw_builtin_assigned_weapon_info( ed:TEditor, data:TData, sprite:TSprite, weaponSlot:TStarfarerShipWeapon )
+Function draw_builtin_assigned_weapon_info( ed:TEditor,data:TData,sprite:TSprite, slot:TStarfarerShipWeapon=Null,xy#[]=Null,weapon_id$=Null )
+	If slot = Null And (xy = Null Or weapon_id = Null) Then Return ' not enough info
+	If Not xy Then xy = slot.locations
+	If Not weapon_id Then weapon_id = String( data.ship.builtInWeapons.ValueForKey( slot.id )) 'data.find_assigned_slot_weapon( slot.id )
 	'prep and compose string data
-	Local wx% = sprite.sx + (weaponSlot.locations[0] + data.ship.center[1])*sprite.Scale
-	Local wy% = sprite.sy + (-weaponSlot.locations[1] + data.ship.center[0])*sprite.Scale
-	Local weapon_id$ = String( data.ship.builtInWeapons.ValueForKey( weaponSlot.id )) 'data.find_assigned_slot_weapon( weaponSlot.id )
+	Local wx% = sprite.sx + ( xy[0] + data.ship.center[1])*sprite.Scale
+	Local wy% = sprite.sy + (-xy[1] + data.ship.center[0])*sprite.Scale
+	'try and find a name for the weapon id, or fall back intelligently
 	Local current_weapon_str$ = ""
 	If weapon_id
 		Local wep_stats:TMap = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ))
@@ -441,13 +444,11 @@ Function draw_builtin_assigned_weapon_info( ed:TEditor, data:TData, sprite:TSpri
 	Else
 		current_weapon_str :+ "empty"
 	EndIf
-	'set colors
-	Local fg_color% = $FFFFFF
-	Local bg_color% = $000000
-	'draw textbox
+	Local fg% = $FFFFFF
+	Local bg% = $000000
 	Local current_weapon_widget:TextWidget = TextWidget.Create( current_weapon_str )
-	draw_container( wx - 30, wy, current_weapon_widget.w + 20, current_weapon_widget.h + 20, 1.0,0.5, fg_color,bg_color )
-	draw_string( current_weapon_widget, wx - 40, wy, fg_color,bg_color, 1.0,0.5 )
+	draw_container( wx-30,wy, current_weapon_widget.w+20,current_weapon_widget.h+20, 1.0,0.5, fg,bg )
+	draw_string( current_weapon_widget, wx-40,wy, fg,bg, 1.0,0.5 )
 EndFunction
 
 Function draw_builtin_weapon_mount( wx%, wy%, weaponSlot:TStarfarerShipWeapon )
