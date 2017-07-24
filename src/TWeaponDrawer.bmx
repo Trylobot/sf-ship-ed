@@ -50,41 +50,56 @@ Type TWeaponDrawer
 			Next
 	End Method
 	
-	Method draw_all_weapons(builtin_only%, data:TData, sprite:TSprite, x_offset# = 0, y_offset# = 0)
-		If builtin_only
-			For Local i% = 0 Until data.ship.weaponSlots.length
-				Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[i]
-				If weaponslot.is_builtin() Or weaponslot.is_decorative()
-					Local weaponID$ = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) )
-					Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) )
-					If weapon
-						Local renderData:TWeaponRenderData = New TWeaponRenderData
-						renderData.init(weaponslot, weapon)
-						renderQueue.AddLast(renderData)						EndIf
-				EndIf
-			Next
-		Else
-			Local weapons:TMap = data.variant.getAllWeapons()
-			For Local i% = 0 Until data.ship.weaponSlots.length
-				Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[i]
-				'well, I did the null check later so don't needs in these part...i hope
-				Local weaponID$
-				weaponID = String(weapons.ValueForKey(weaponslot.id) ) 'load from weapon groups frist
-				If Not weaponID Then weaponID = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) ) 'then, try the built-in list
-				If weaponID
-					If weaponslot.type_ <> "STATION_MODULE"
-						Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) ) ' could be null but it's ok
+	Method draw_all_weapons( mode$, data:TData, sprite:TSprite )
+		Select mode
+			
+			Case "ship", "skin"
+				For Local i% = 0 Until data.ship.weaponSlots.length
+					Local weaponslot:TStarfarerShipWeapon
+					If mode = "ship"
+						weaponslot = data.ship.weaponSlots[i]
+					ElseIf mode = "skin"
+						weaponslot = data.get_merged_skin_weaponslot(i)
+					EndIf
+					If weaponslot.is_builtin() Or weaponslot.is_decorative()
+						Local weaponID$
+						If mode = "ship"
+							weaponID = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) )
+						ElseIf mode = "skin"
+							weaponID = data.get_skin_equipped_builtin_weapon_id(weaponslot.id)
+						EndIf
+						Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) )
 						If weapon
 							Local renderData:TWeaponRenderData = New TWeaponRenderData
 							renderData.init(weaponslot, weapon)
 							renderQueue.AddLast(renderData)	
 						EndIf
-					Else
-						queue_module_weapons(renderQueue, weaponslot, weaponID, data, sprite)
-					EndIf 						
-				EndIf
-			Next			
-		EndIf
+					EndIf
+				Next
+			
+			Case "variant"
+				Local weapons:TMap = data.variant.getAllWeapons()
+				For Local i% = 0 Until data.ship.weaponSlots.length
+					Local weaponslot:TStarfarerShipWeapon = data.ship.weaponSlots[i]
+					'well, I did the null check later so don't needs in these part...i hope
+					Local weaponID$
+					weaponID = String(weapons.ValueForKey(weaponslot.id) ) 'load from weapon groups frist
+					If Not weaponID Then weaponID = String(data.ship.builtInWeapons.ValueForKey(weaponslot.id) ) 'then, try the built-in list
+					If weaponID
+						If weaponslot.type_ <> "STATION_MODULE"
+							Local weapon:TStarfarerWeapon = TStarfarerWeapon (ed.stock_weapons.ValueForKey(weaponID) ) ' could be null but it's ok
+							If weapon
+								Local renderData:TWeaponRenderData = New TWeaponRenderData
+								renderData.init(weaponslot, weapon)
+								renderQueue.AddLast(renderData)	
+							EndIf
+						Else
+							queue_module_weapons(renderQueue, weaponslot, weaponID, data, sprite)
+						EndIf
+					EndIf
+				Next
+			
+		EndSelect
 		renderQueue.Sort()
 		For Local d:TWeaponRenderData = EachIn renderQueue
 			If d.weapon
@@ -625,7 +640,7 @@ Type TWeaponRenderData
 
 	Method inti_for_module(ws:TStarfarerShipWeapon, v:TStarfarerVariant)
 		weaponSlot = ws
-		VARIANT = v
+		variant = v
 		Local offset_weight# = Abs weaponSlot.locations[0] / 100000 + Abs weaponSlot.locations[1] / 10000
 		renderOrder :- offset_weight
 		'hope this is right
@@ -675,10 +690,8 @@ Function draw_weapons( ed:TEditor, data:TData, sprite:TSprite, wd:TWeaponDrawer 
   If wd.show_weapon = 1 Then SetAlpha( 1 )
   If wd.show_weapon = 2 Then SetAlpha( 0.5 )
   Select ed.program_mode
-    Case "ship"
-	wd.draw_all_weapons(True, data, sprite)
-    Case "variant"
-	wd.draw_all_weapons(False, data, sprite)
+    Case "ship", "variant", "skin"
+      wd.draw_all_weapons(ed.program_mode, data, sprite)
   EndSelect
   SetAlpha( 1 )
 End Function

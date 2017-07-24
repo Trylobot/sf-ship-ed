@@ -34,4 +34,16 @@ Type TStarfarerShipWeaponChange Extends TStarfarerShipWeapon
 		type_     = __type_
 	End Method
 
+	Method Overlay:TStarfarerShipWeapon( base:TStarfarerShipWeapon )
+		Local merged:TStarfarerShipWeapon = base.Clone()
+		If angle <> __angle         Then merged.angle = angle
+		If arc <> __arc             Then merged.arc = arc
+		If locations <> __locations Then merged.locations = locations
+		If position <> __position   Then merged.position = position
+		If mount <> __mount         Then merged.mount = mount
+		If size <> __size           Then merged.size = size
+		If type_ <> __type_         Then merged.type_ = type_
+		Return merged
+	EndMethod
+
 End Type

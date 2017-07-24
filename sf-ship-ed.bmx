@@ -820,10 +820,11 @@ Function check_weapondrawer%(ed:TEditor, data:TData, sprite:TSprite)
 End Function
 
 Function updata_weapondrawermenu(ed:TEditor)
-  Local flag# = (ed.mode <> "string" ..
-          And ( (ed.program_mode = "ship" And ( ed.mode = "built_in_weapons" Or ed.mode = "weapon_slots") ) ..
-            Or (ed.program_mode = "variant" And ed.variant_hullMod_i = - 1 And ed.group_field_i = - 1)..
-            Or (ed.program_mode = "weapon") ) )           
+  Local flag# =(ed.mode <> "string" ..
+          And ((ed.program_mode = "ship" And (ed.mode = "built_in_weapons"         Or ed.mode = "weapon_slots") ) ..
+            Or (ed.program_mode = "skin" And (ed.mode = "changeremove_weaponslots" Or ed.mode = "addremove_builtin_weapons")) ..
+            Or (ed.program_mode = "variant" And ed.variant_hullMod_i = - 1 And ed.group_field_i = - 1) ..
+            Or (ed.program_mode = "weapon") ) )
   If MenuEnabled(animateMenu[MENU_ANIMATE]) <> flag
     For Local i# = 0 Until animateMenu.length
       animateMenu[i].SetEnabled(flag)

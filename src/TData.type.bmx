@@ -1837,6 +1837,19 @@ Type TData
 		EndIf
 	EndMethod
 
+	' returns the base hull weapon slot (by index), merged with the skin data for the same slot
+	'   if skin removes slot, then null
+	Method get_merged_skin_weaponslot:TStarfarerShipWeapon( slot% )
+		If skin_removes_builtin_weapon( slot ) Then Return Null ' it doesn't exist anymore
+		Local base_weaponslot:TStarfarerShipWeapon = ship.weaponSlots[slot]
+		Local skin_weaponslot:TStarfarerShipWeaponChange = TStarfarerShipWeaponChange( skin.weaponSlotChanges.ValueForKey( base_weaponslot.id ))
+		If skin_weaponslot
+			Return skin_weaponslot.Overlay( base_weaponslot )
+		Else
+			Return base_weaponslot
+		EndIf
+	EndMethod
+
 	'----
 	'requires subsequent call to update_skin()
 	Method set_skin_weapon_slot_location( slot%, img_x#,img_y#, mirror%=False )

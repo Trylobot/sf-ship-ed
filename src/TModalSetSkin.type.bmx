@@ -646,17 +646,25 @@ Type TModalSetSkin Extends TSubroutine
 		SetAlpha( 1 )
 	EndMethod
 
-	Method draw_builtin_weapon_slot_textboxes( ed:TEditor, data:TData, sprite:TSprite, slot% )
+	Method draw_skin_builtin_weapon_slot_textboxes( ed:TEditor, data:TData, sprite:TSprite, slot% )
 		Local xy#[] = data.get_skin_weapon_slot_location( slot )
 		Local sz$ = data.get_skin_weapon_slot_size( slot )
 		Local tp$ = data.get_skin_weapon_slot_type( slot )
 		Local mt$ = data.get_skin_weapon_slot_mount( slot )
+		Local slot_id$ = data.ship.weaponSlots[slot].id
+		Local wpid$ = data.get_skin_equipped_builtin_weapon_id( slot_id )
 		draw_builtin_weapon_slot_info( ed,data,sprite,, xy,sz,tp,mt )
-		'If weapon_lock_i = -1
-			Local slot_id$ = data.ship.weaponSlots[slot].id
-			Local wpid$ = data.get_skin_equipped_builtin_weapon_id( slot_id )
-			draw_builtin_assigned_weapon_info( ed,data,sprite,, xy,wpid )
-		'EndIf
+		draw_builtin_assigned_weapon_info( ed,data,sprite,, xy,wpid )
+	EndMethod
+
+	Method draw_skin_builtin_weapon_mount( ed:TEditor, data:TData, sprite:TSprite, slot% )
+		If Not data.ship.center Then Return
+		Local xy#[] = data.get_skin_weapon_slot_location( slot )
+		Local wx# = sprite.sx + ( xy[0] + data.ship.center[1])*sprite.Scale
+		Local wy# = sprite.sy + (-xy[1] + data.ship.center[0])*sprite.Scale
+		Local angle# = data.get_skin_weapon_slot_angle( slot )
+		Local arc# = data.get_skin_weapon_slot_arc( slot )
+		draw_weapon_mount( wx,wy, angle,arc, True, 8,16,24, $FFFFFF,$000000 )
 	EndMethod
 
 	Method draw_builtin_weapon_info( ed:TEditor, data:TData, sprite:TSprite )
@@ -667,23 +675,37 @@ Type TModalSetSkin Extends TSubroutine
 		Local focus_i% = weapon_lock_i
 		If focus_i = -1 Then focus_i = data.find_nearest_skin_weapon_slot( img_x,img_y )
 		'---------------
-		' text boxes (normal)
+		' text boxes
 		SetRotation( 0 )
 		SetScale( 1, 1 )
-		SetAlpha( Min( 0.4, 0.5*(sprite.scale/3.0) ))
-		If weapon_lock_i = -1
-			For Local slot% = 0 Until data.ship.weaponSlots.Length
-				draw_builtin_weapon_slot_textboxes( ed,data,sprite, slot )
-			Next
-		EndIf
-		' text boxes (for focused slot, or locked-on slot)
-		SetAlpha( 1 )
-		draw_builtin_weapon_slot_textboxes( ed,data,sprite, focus_i )
+		For Local slot% = 0 Until data.ship.weaponSlots.Length
+			REM
+			////////////////////////////////
+			TODO: create a new indicator for when a built-in weapon slot from the base hull
+			  has been removed in the skin; perhaps the words "slot removed" would be enough?
+			  perhaps a new color, or an "X" icon on the slot's position.
+			////////////////////////////////
+			ENDREM
+			If slot = focus_i
+				SetAlpha( 0.8 )
+			Else
+				SetAlpha( Min( 0.4, 0.5*(sprite.scale/3.0) ))
+			EndIf
+			If slot = weapon_lock_i Or weapon_lock_i = -1
+				draw_skin_builtin_weapon_slot_textboxes( ed,data,sprite, slot )
+			EndIf
+		Next
 		'---------------
 		' weapon icons
 		For Local slot% = 0 Until data.ship.weaponSlots.Length
-			If weapon_lock_i <> -1 And weapon_lock_i <> slot Then Continue ' selective rendering when locked
-
+			If slot = focus_i
+				SetAlpha( 0.8 )
+			Else
+				SetAlpha( 0.4 )
+			EndIf
+			If slot = weapon_lock_i Or weapon_lock_i = -1
+				draw_skin_builtin_weapon_mount( ed,data,sprite, slot )
+			EndIf
 		Next
 	EndMethod
 
