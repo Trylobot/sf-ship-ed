@@ -2,6 +2,8 @@ ______________________________________________________________________________
 editor version 3.0.0-pre-alpha-2 (starsector 0.8.1a) [Trylobot & Deathfly]
 
 SKIN EDITOR
+- Change/Remove Weapon Slot position/angle/arc
+- Add/Remove Built-In Weapon Assignments
 - Change/Remove Engine Slot style/position/size/orientation
 - Add/Remove Built-In Hullmods
 - Edit Details (Strings)
