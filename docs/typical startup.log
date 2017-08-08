@@ -1,0 +1,894 @@
+Microsoft Windows [Version 10.0.15063]
+(c) 2017 Microsoft Corporation. All rights reserved.
+
+C:\Dev\BlitzMax\sf-ship-ed>build_debug.bat
+
+C:\Dev\BlitzMax\sf-ship-ed>del /F sf-ship-ed.debug.exe
+
+C:\Dev\BlitzMax\sf-ship-ed>set "BMK_LD_OPTS=-lmsvcrt -lgcc"
+
+C:\Dev\BlitzMax\sf-ship-ed>bmk makeapp -a -o sf-ship-ed.debug.exe sf-ship-ed.bmx
+Compiling:rjson.bmx
+flat assembler  version 1.69.14  (1572863 kilobytes memory)
+5 passes, 179322 bytes.
+Compiling:console.bmx
+flat assembler  version 1.69.14  (1572863 kilobytes memory)
+3 passes, 6416 bytes.
+Compiling:sf-ship-ed.bmx
+flat assembler  version 1.69.14  (1572863 kilobytes memory)
+5 passes, 1.1 seconds, 2423891 bytes.
+Linking:sf-ship-ed.debug.exe
+
+C:\Dev\BlitzMax\sf-ship-ed>pause
+Press any key to continue . . .
+
+C:\Dev\BlitzMax\sf-ship-ed>sf-ship-ed.debug.exe
+DebugLog:Loading localization file
+DebugLog: Enum  HIGH_TECH  (ship.engine.style)
+DebugLog: Enum  LOW_TECH  (ship.engine.style)
+DebugLog: Enum  LOW_TECH_FIGHTER  (ship.engine.style)
+DebugLog: Enum  MIDLINE  (ship.engine.style)
+DebugLog: Enum  CUSTOM  (ship.engine.style)
+DebugLog: Enum    (ship.engine.styleId)
+DebugLog: Enum  HIGH_TECH  (ship.engine.styleId)
+DebugLog: Enum  LOW_TECH  (ship.engine.styleId)
+DebugLog: Enum  MIDLINE  (ship.engine.styleId)
+DebugLog: Enum  midlineFlare  (ship.engine.styleId)
+DebugLog: Enum  SMOKE  (ship.engine.styleSpec.type)
+DebugLog: Enum  GLOW  (ship.engine.styleSpec.type)
+DebugLog: Enum  CAPITAL_SHIP  (ship.hullSize)
+DebugLog: Enum  CRUISER  (ship.hullSize)
+DebugLog: Enum  DESTROYER  (ship.hullSize)
+DebugLog: Enum  FIGHTER  (ship.hullSize)
+DebugLog: Enum  FRIGATE  (ship.hullSize)
+DebugLog: Enum  HIGH_TECH  (ship.style)
+DebugLog: Enum  LOW_TECH  (ship.style)
+DebugLog: Enum  MIDLINE  (ship.style)
+DebugLog: Enum  HARDPOINT  (ship.weapon.mount)
+DebugLog: Enum  HIDDEN  (ship.weapon.mount)
+DebugLog: Enum  TURRET  (ship.weapon.mount)
+DebugLog: Enum  LARGE  (ship.weapon.size)
+DebugLog: Enum  MEDIUM  (ship.weapon.size)
+DebugLog: Enum  SMALL  (ship.weapon.size)
+DebugLog: Enum  BALLISTIC  (ship.weapon.type)
+DebugLog: Enum  ENERGY  (ship.weapon.type)
+DebugLog: Enum  LAUNCH_BAY  (ship.weapon.type)
+DebugLog: Enum  MISSILE  (ship.weapon.type)
+DebugLog: Enum  UNIVERSAL  (ship.weapon.type)
+DebugLog: Enum  BUILT_IN  (ship.weapon.type)
+DebugLog: Enum  SYSTEM  (ship.weapon.type)
+DebugLog: Enum  DECORATIVE  (ship.weapon.type)
+DebugLog: Enum  HYBRID  (ship.weapon.type)
+DebugLog: Enum  SYNERGY  (ship.weapon.type)
+DebugLog: Enum  COMPOSITE  (ship.weapon.type)
+DebugLog: Enum  STATION_MODULE  (ship.weapon.type)
+DebugLog: Enum  ALTERNATING  (variant.weaponGroup.mode)
+DebugLog: Enum  LINKED  (variant.weaponGroup.mode)
+DebugLog: Enum  NONE  (ship_csv.shield type)
+DebugLog: Enum  OMNI  (ship_csv.shield type)
+DebugLog: Enum  FRONT  (ship_csv.shield type)
+DebugLog: Enum  PHASE  (ship_csv.shield type)
+DebugLog: Enum    (ship_csv.defense id)
+DebugLog: Enum  phasecloak  (ship_csv.defense id)
+DebugLog: Enum  V  (wing_csv.formation)
+DebugLog: Enum  CLAW  (wing_csv.formation)
+DebugLog: Enum  BOX  (wing_csv.formation)
+DebugLog: Enum    (wing_csv.formation)
+DebugLog: Enum  FIGHTER  (wing_csv.role)
+DebugLog: Enum  ASSAULT  (wing_csv.role)
+DebugLog: Enum  INTERCEPTOR  (wing_csv.role)
+DebugLog: Enum  BOMBER  (wing_csv.role)
+DebugLog: Enum  SUPPORT  (wing_csv.role)
+DebugLog: Enum  GLOW  (weapon.animationType)
+DebugLog: Enum  GLOW_AND_FLASH  (weapon.animationType)
+DebugLog: Enum  MUZZLE_FLASH  (weapon.animationType)
+DebugLog: Enum  NONE  (weapon.animationType)
+DebugLog: Enum  SMOKE  (weapon.animationType)
+DebugLog: Enum  ALTERNATING  (weapon.barrelMode)
+DebugLog: Enum  ALTERNATING_BURST  (weapon.barrelMode)
+DebugLog: Enum  LINKED  (weapon.barrelMode)
+DebugLog: Enum  LARGE  (weapon.size)
+DebugLog: Enum  MEDIUM  (weapon.size)
+DebugLog: Enum  SMALL  (weapon.size)
+DebugLog: Enum  beam  (weapon.specClass)
+DebugLog: Enum  projectile  (weapon.specClass)
+DebugLog: Enum  BALLISTIC  (weapon.type)
+DebugLog: Enum  ENERGY  (weapon.type)
+DebugLog: Enum  MISSILE  (weapon.type)
+DebugLog: Enum  SYSTEM  (weapon.type)
+DebugLog: Enum  DECORATIVE  (weapon.type)
+DebugLog: Enum  KINETIC  (weapon_csv.type)
+DebugLog: Enum  HIGH_EXPLOSIVE  (weapon_csv.type)
+DebugLog: Enum  FRAGMENTATION  (weapon_csv.type)
+DebugLog: Enum  ENERGY  (weapon_csv.type)
+DebugLog: Enum  False  (weapon.interruptibleBurst)
+DebugLog: Enum  True  (weapon.interruptibleBurst)
+DebugLog: Enum  False  (weapon.autocharge)
+DebugLog: Enum  True  (weapon.autocharge)
+DebugLog: Enum  False  (weapon.requiresFullCharge)
+DebugLog: Enum  True  (weapon.requiresFullCharge)
+DebugLog: Enum  False  (weapon.beamFireOnlyOnFullCharge)
+DebugLog: Enum  True  (weapon.beamFireOnlyOnFullCharge)
+DebugLog: Enum  False  (weapon.convergeOnPoint)
+DebugLog: Enum  True  (weapon.convergeOnPoint)
+DebugLog: Enum  False  (weapon.darkCore)
+DebugLog: Enum  True  (weapon.darkCore)
+DebugLog: Enum  CUSTOM  (weapon.textureType)
+DebugLog: Enum  SMOOTH  (weapon.textureType)
+DebugLog: Enum  MEDIUM  (weapon.textureType)
+DebugLog: Enum  ROUGH  (weapon.textureType)
+DebugLog: Enum  CHUNKY  (weapon.textureType)
+DebugLog: Enum  ROUGH2  (weapon.textureType)
+DebugLog: Enum  WEAVE  (weapon.textureType)
+DebugLog: Enum  LASER  (weapon.textureType)
+DebugLog: Loading STARFARER-CORE Data (Vanilla)
+DebugLog: LOADED afflictor.ship
+DebugLog: LOADED apogee.ship
+DebugLog: LOADED astral.ship
+DebugLog: LOADED atlas.ship
+DebugLog: LOADED aurora.ship
+DebugLog: LOADED bastillon.ship
+DebugLog: LOADED berserker.ship
+DebugLog: LOADED brawler.ship
+DebugLog: LOADED brilliant.ship
+DebugLog: LOADED broadsword.ship
+DebugLog: LOADED buffalo.ship
+DebugLog: LOADED buffalo_mk2.ship
+DebugLog: LOADED centurion.ship
+DebugLog: LOADED claw.ship
+DebugLog: LOADED colossus.ship
+DebugLog: LOADED colossus2.ship
+DebugLog: LOADED colossus3.ship
+DebugLog: LOADED condor.ship
+DebugLog: LOADED conquest.ship
+DebugLog: LOADED constructionrig.ship
+DebugLog: LOADED dagger.ship
+DebugLog: LOADED defender.ship
+DebugLog: LOADED derelict_mothership.ship
+DebugLog: LOADED derelict_mothership_bow_module.ship
+DebugLog: LOADED derelict_mothership_pod_engine_left.ship
+DebugLog: LOADED derelict_mothership_pod_m_left.ship
+DebugLog: LOADED derelict_mothership_pod_m_right.ship
+DebugLog: LOADED derelict_mothership_pod_s_right.ship
+DebugLog: LOADED derelict_mothership_sensor_mast.ship
+DebugLog: LOADED dominator.ship
+DebugLog: LOADED doom.ship
+DebugLog: LOADED dram.ship
+DebugLog: LOADED drone_assault.ship
+DebugLog: LOADED drone_borer.ship
+DebugLog: LOADED drone_pd.ship
+DebugLog: LOADED drone_pd_midline.ship
+DebugLog: LOADED drone_sensor.ship
+DebugLog: LOADED drone_terminator.ship
+DebugLog: LOADED drover.ship
+DebugLog: LOADED eagle.ship
+DebugLog: LOADED enforcer.ship
+DebugLog: LOADED falcon.ship
+DebugLog: LOADED flare.ship
+DebugLog: LOADED flash.ship
+DebugLog: LOADED fulgent.ship
+DebugLog: LOADED gemini.ship
+DebugLog: LOADED gladius.ship
+DebugLog: LOADED glimmer.ship
+DebugLog: LOADED gryphon.ship
+DebugLog: LOADED hammerhead.ship
+DebugLog: LOADED harbinger.ship
+DebugLog: LOADED hermes.ship
+DebugLog: LOADED heron.ship
+DebugLog: LOADED hoplon.ship
+DebugLog: LOADED hound.ship
+DebugLog: LOADED hyperion.ship
+DebugLog: LOADED kite.ship
+DebugLog: LOADED lasher.ship
+DebugLog: LOADED legion.ship
+DebugLog: LOADED longbow.ship
+DebugLog: LOADED lumen.ship
+DebugLog: LOADED lux.ship
+DebugLog: LOADED medusa.ship
+DebugLog: LOADED mercury.ship
+DebugLog: LOADED mining_drone.ship
+DebugLog: LOADED monitor.ship
+DebugLog: LOADED mora.ship
+DebugLog: LOADED mudskipper.ship
+DebugLog: LOADED mule.ship
+DebugLog: LOADED nebula.ship
+DebugLog: LOADED odyssey.ship
+DebugLog: LOADED omen.ship
+DebugLog: LOADED onslaught.ship
+DebugLog: LOADED ox.ship
+DebugLog: LOADED paragon.ship
+DebugLog: LOADED phaeton.ship
+DebugLog: LOADED picket.ship
+DebugLog: LOADED piranha.ship
+DebugLog: LOADED platform1.ship
+DebugLog: LOADED prometheus.ship
+DebugLog: LOADED rampart.ship
+DebugLog: LOADED remnant_armour1.ship
+DebugLog: LOADED remnant_armour2.ship
+DebugLog: LOADED remnant_armour3.ship
+DebugLog: LOADED remnant_hangar1.ship
+DebugLog: LOADED remnant_shield1.ship
+DebugLog: LOADED remnant_shield2.ship
+DebugLog: LOADED remnant_station1.ship
+DebugLog: LOADED remnant_station2.ship
+DebugLog: LOADED remnant_weapon_platform1.ship
+DebugLog: LOADED remnant_weapon_platform2.ship
+DebugLog: LOADED remnant_weapon_platform3.ship
+DebugLog: LOADED scarab.ship
+DebugLog: LOADED scintilla.ship
+DebugLog: LOADED sentry.ship
+DebugLog: LOADED shade.ship
+DebugLog: LOADED shepherd.ship
+DebugLog: LOADED shuttlepod.ship
+DebugLog: LOADED spark.ship
+DebugLog: LOADED starliner.ship
+DebugLog: LOADED station_small.ship
+DebugLog: LOADED sunder.ship
+DebugLog: LOADED talon.ship
+DebugLog: LOADED tarsus.ship
+DebugLog: LOADED tempest.ship
+DebugLog: LOADED thunder.ship
+DebugLog: LOADED trident.ship
+DebugLog: LOADED valkyrie.ship
+DebugLog: LOADED venture.ship
+DebugLog: LOADED vigilance.ship
+DebugLog: LOADED warden.ship
+DebugLog: LOADED warhound.ship
+DebugLog: LOADED warthog.ship
+DebugLog: LOADED wasp.ship
+DebugLog: LOADED wayfarer.ship
+DebugLog: LOADED wolf.ship
+DebugLog: LOADED xyphos.ship
+DebugLog: LOADED afflictor_d_pirates_Strike.variant
+DebugLog: LOADED afflictor_Strike.variant
+DebugLog: LOADED apogee_Balanced.variant
+DebugLog: LOADED astral_Attack.variant
+DebugLog: LOADED astral_Elite.variant
+DebugLog: LOADED astral_Strike.variant
+DebugLog: LOADED atlas_Standard.variant
+DebugLog: LOADED bastillon_Standard.variant
+DebugLog: LOADED berserker_Assault.variant
+DebugLog: LOADED brawler_Assault.variant
+DebugLog: LOADED brawler_Elite.variant
+DebugLog: LOADED brawler_Starting.variant
+DebugLog: LOADED buffalo2_FS.variant
+DebugLog: LOADED colossus2_Pather.variant
+DebugLog: LOADED colossus3_Pirate.variant
+DebugLog: LOADED colossus_Standard.variant
+DebugLog: LOADED condor_Attack.variant
+DebugLog: LOADED condor_Strike.variant
+DebugLog: LOADED condor_Support.variant
+DebugLog: LOADED crig_Standard.variant
+DebugLog: LOADED defender_PD.variant
+DebugLog: LOADED doom_Strike.variant
+DebugLog: LOADED dram_Light.variant
+DebugLog: LOADED drover_Strike.variant
+DebugLog: LOADED gemini_Standard.variant
+DebugLog: LOADED heron_Attack.variant
+DebugLog: LOADED heron_Strike.variant
+DebugLog: LOADED hyperion_Attack.variant
+DebugLog: LOADED hyperion_Strike.variant
+DebugLog: LOADED kite_Raider.variant
+DebugLog: LOADED medusa_Attack.variant
+DebugLog: LOADED medusa_CS.variant
+DebugLog: LOADED medusa_PD.variant
+DebugLog: LOADED medusa_Starting.variant
+DebugLog: LOADED monitor_Escort.variant
+DebugLog: LOADED monitor_Starting.variant
+DebugLog: LOADED mudskipper2_CS.variant
+DebugLog: LOADED mudskipper2_Hellbore.variant
+DebugLog: LOADED mudskipper_Standard.variant
+DebugLog: LOADED nebula_Standard.variant
+DebugLog: LOADED odyssey_Balanced.variant
+DebugLog: LOADED omen_PD.variant
+DebugLog: LOADED ox_Standard.variant
+DebugLog: LOADED phaeton_Standard.variant
+DebugLog: LOADED picket_Assault.variant
+DebugLog: LOADED prometheus_Super.variant
+DebugLog: LOADED sentry_FS.variant
+DebugLog: LOADED shade_Assault.variant
+DebugLog: LOADED shade_d_pirates_Assault.variant
+DebugLog: LOADED shepherd_Frontier.variant
+DebugLog: LOADED shepherd_Starting.variant
+DebugLog: LOADED starliner_Standard.variant
+DebugLog: LOADED tempest_Attack.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED tempest_Balanced.variant
+DebugLog: LOADED tempest_Starting.variant
+DebugLog: LOADED valkyrie_Elite.variant
+DebugLog: LOADED vigilance_AP.variant
+DebugLog: LOADED vigilance_FS.variant
+DebugLog: LOADED vigilance_Standard.variant
+DebugLog: LOADED vigilance_Starting.variant
+DebugLog: LOADED vigilance_Strike.variant
+DebugLog: LOADED warden_Defense.variant
+DebugLog: LOADED aurora_Assault.variant
+DebugLog: LOADED aurora_Assault_Support.variant
+DebugLog: LOADED aurora_Balanced.variant
+DebugLog: LOADED aurora_Escort.variant
+DebugLog: LOADED aurora_FS.variant
+DebugLog: LOADED aurora_Strike.variant
+DebugLog: LOADED brawler_pather_Raider.variant
+DebugLog: LOADED brawler_tritachyon_Standard.variant
+DebugLog: LOADED buffalo_d_Standard.variant
+DebugLog: LOADED buffalo_hegemony_Standard.variant
+DebugLog: LOADED buffalo_luddic_church_Standard.variant
+DebugLog: LOADED buffalo_pirates_Standard.variant
+DebugLog: LOADED buffalo_Standard.variant
+DebugLog: LOADED buffalo_tritachyon_Standard.variant
+DebugLog: LOADED centurion_Assault.variant
+DebugLog: LOADED centurion_Starting.variant
+DebugLog: LOADED cerberus_d_pirates_Shielded.variant
+DebugLog: LOADED cerberus_d_pirates_Standard.variant
+DebugLog: LOADED cerberus_d_Standard.variant
+DebugLog: LOADED cerberus_Hardened.variant
+DebugLog: LOADED cerberus_luddic_path_Attack.variant
+DebugLog: LOADED cerberus_Overdriven.variant
+DebugLog: LOADED cerberus_Shielded.variant
+DebugLog: LOADED cerberus_Standard.variant
+DebugLog: LOADED cerberus_Starting.variant
+DebugLog: LOADED conquest_Elite.variant
+DebugLog: LOADED conquest_Standard.variant
+DebugLog: LOADED bastillon_Standard.variant
+DebugLog: LOADED defender_PD.variant
+DebugLog: LOADED derelict_mothership_bow_module_Standard.variant
+DebugLog: LOADED derelict_mothership_pod_engine_left_Standard.variant
+DebugLog: LOADED derelict_mothership_pod_m_left_Standard.variant
+DebugLog: LOADED derelict_mothership_pod_m_right_Standard.variant
+DebugLog: LOADED derelict_mothership_pod_s_right_Standard.variant
+DebugLog: LOADED derelict_mothership_sensor_mast_Standard.variant
+DebugLog: LOADED picket_Assault.variant
+DebugLog: LOADED rampart_Standard.variant
+DebugLog: LOADED sentry_FS.variant
+DebugLog: LOADED warden_Defense.variant
+DebugLog: LOADED dominator_AntiCV.variant
+DebugLog: LOADED dominator_Assault.variant
+DebugLog: LOADED dominator_d_Assault.variant
+DebugLog: LOADED dominator_Outdated.variant
+DebugLog: LOADED dominator_Support.variant
+DebugLog: LOADED dominator_XIV_Elite.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_assault.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_borer.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_pd.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_pd_midline.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_sensor.variant
+DebugLog: LOADED drone_terminator.variant
+DebugLog: LOADED eagle_Assault.variant
+DebugLog: LOADED eagle_Balanced.variant
+DebugLog: LOADED eagle_d_Assault.variant
+DebugLog: LOADED eagle_xiv_Elite.variant
+DebugLog: LOADED enforcer_Assault.variant
+DebugLog: LOADED enforcer_Balanced.variant
+DebugLog: LOADED enforcer_CS.variant
+DebugLog: LOADED enforcer_d_pirates_Strike.variant
+DebugLog: LOADED enforcer_d_Strike.variant
+DebugLog: LOADED enforcer_Elite.variant
+DebugLog: LOADED enforcer_Escort.variant
+DebugLog: LOADED enforcer_Outdated.variant
+DebugLog: LOADED enforcer_Overdriven.variant
+DebugLog: LOADED enforcer_XIV_Elite.variant
+DebugLog: LOADED falcon_Attack.variant
+DebugLog: LOADED falcon_CS.variant
+DebugLog: LOADED falcon_d_CS.variant
+DebugLog: LOADED falcon_xiv_Elite.variant
+DebugLog: LOADED falcon_xiv_Escort.variant
+DebugLog: LOADED broadsword_Fighter.variant
+DebugLog: LOADED claw_Fighter.variant
+DebugLog: LOADED dagger_Bomber.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED gladius_Fighter.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED khopesh_Bomber.variant
+DebugLog: LOADED longbow_Support.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED mining_drone_Standard.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED piranha_Bomber.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED talon_Interceptor.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED thunder_Fighter.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED trident_Bomber.variant
+DebugLog: LOADED warthog_Fighter.variant
+DebugLog: LOADED wasp_Interceptor.variant
+DebugLog: LOADED xyphos_Fighter.variant
+DebugLog: LOADED gryphon_FS.variant
+DebugLog: LOADED gryphon_Standard.variant
+DebugLog: LOADED hammerhead_Balanced.variant
+DebugLog: LOADED hammerhead_d_CS.variant
+DebugLog: LOADED hammerhead_Elite.variant
+DebugLog: LOADED hammerhead_Overdriven.variant
+DebugLog: LOADED hammerhead_Support.variant
+DebugLog: LOADED hammerhead_Tutorial.variant
+DebugLog: LOADED harbinger_Strike.variant
+DebugLog: LOADED hermes_d_Standard.variant
+DebugLog: LOADED hermes_FS.variant
+DebugLog: LOADED hermes_Standard.variant
+DebugLog: LOADED hound_d_pirates_Shielded.variant
+DebugLog: LOADED hound_d_pirates_Standard.variant
+DebugLog: LOADED hound_d_Standard.variant
+DebugLog: LOADED hound_hegemony_Standard.variant
+DebugLog: LOADED hound_luddic_church_Standard.variant
+DebugLog: LOADED hound_luddic_path_Attack.variant
+DebugLog: LOADED hound_Overdriven.variant
+DebugLog: LOADED hound_Standard.variant
+DebugLog: LOADED hound_Starting.variant
+DebugLog: LOADED kite_Interceptor.variant
+DebugLog: LOADED kite_luddic_path_Raider.variant
+DebugLog: LOADED kite_luddic_path_Strike.variant
+DebugLog: LOADED kite_pirates_Raider.variant
+DebugLog: LOADED kite_Standard.variant
+DebugLog: LOADED kite_Starting.variant
+DebugLog: LOADED kite_Stock.variant
+DebugLog: LOADED kite_Support.variant
+DebugLog: LOADED lasher_Assault.variant
+DebugLog: LOADED lasher_CS.variant
+DebugLog: LOADED lasher_d_CS.variant
+DebugLog: LOADED lasher_luddic_church_Standard.variant
+DebugLog: LOADED lasher_luddic_path_Raider.variant
+DebugLog: LOADED lasher_Overdriven.variant
+DebugLog: LOADED lasher_PD.variant
+DebugLog: LOADED lasher_Standard.variant
+DebugLog: LOADED lasher_Starting.variant
+DebugLog: LOADED lasher_Strike.variant
+DebugLog: LOADED legion_Assault.variant
+DebugLog: LOADED legion_Escort.variant
+DebugLog: LOADED legion_FS.variant
+DebugLog: LOADED legion_Strike.variant
+DebugLog: LOADED mercury_Attack.variant
+DebugLog: LOADED mercury_d_Standard.variant
+DebugLog: LOADED mercury_FS.variant
+DebugLog: LOADED mercury_PD.variant
+DebugLog: LOADED mercury_Standard.variant
+DebugLog: LOADED mora_Assault.variant
+DebugLog: LOADED mora_Strike.variant
+DebugLog: LOADED mora_Support.variant
+DebugLog: LOADED mule_d_pirates_Smuggler.variant
+DebugLog: LOADED mule_d_pirates_Standard.variant
+DebugLog: LOADED mule_d_Standard.variant
+DebugLog: LOADED mule_Standard.variant
+DebugLog: LOADED mule_Starting.variant
+DebugLog: LOADED onslaught_Elite.variant
+DebugLog: LOADED onslaught_Outdated.variant
+DebugLog: LOADED onslaught_Standard.variant
+DebugLog: LOADED onslaught_xiv_Elite.variant
+DebugLog: LOADED paragon_Elite.variant
+DebugLog: LOADED paragon_Escort.variant
+DebugLog: LOADED paragon_Raider.variant
+DebugLog: LOADED brilliant_Standard.variant
+DebugLog: LOADED flash_Bomber.variant
+DebugLog: LOADED fulgent_Assault.variant
+DebugLog: LOADED fulgent_Support.variant
+DebugLog: LOADED glimmer_Assault.variant
+DebugLog: LOADED glimmer_Support.variant
+DebugLog: LOADED lumen_Standard.variant
+DebugLog: LOADED lux_Fighter.variant
+DebugLog: LOADED remnant_armour1_Standard.variant
+DebugLog: LOADED remnant_armour2_Standard.variant
+DebugLog: LOADED remnant_armour3_Standard.variant
+DebugLog: LOADED remnant_hangar1_Standard.variant
+DebugLog: LOADED remnant_hangar1_Strike.variant
+DebugLog: LOADED remnant_shield1_Standard.variant
+DebugLog: LOADED remnant_shield2_Standard.variant
+DebugLog: LOADED remnant_weapon_platform1_Standard.variant
+DebugLog: LOADED remnant_weapon_platform2_Standard.variant
+DebugLog: LOADED remnant_weapon_platform3_Standard.variant
+DebugLog: LOADED scintilla_Strike.variant
+DebugLog: LOADED scintilla_Support.variant
+DebugLog: LOADED spark_Interceptor.variant
+DebugLog: LOADED scarab_Experimental.variant
+DebugLog: LOADED scarab_Starting.variant
+DebugLog: LOADED platform1_Standard.variant
+DebugLog: LOADED remnant_station2_Damaged.variant
+DebugLog: LOADED remnant_station2_Standard.variant
+DebugLog: LOADED station_derelict_survey_mothership_Standard.variant
+DebugLog: LOADED station_small_Standard.variant
+DebugLog: LOADED sunder_Assault.variant
+DebugLog: LOADED sunder_CS.variant
+DebugLog: LOADED sunder_d_Assault.variant
+DebugLog: LOADED sunder_Overdriven.variant
+DebugLog: LOADED tarsus_d_Standard.variant
+DebugLog: LOADED tarsus_Standard.variant
+DebugLog: LOADED venture_Balanced.variant
+DebugLog: LOADED venture_Outdated.variant
+DebugLog: LOADED wayfarer_Standard.variant
+DebugLog: LOADED wayfarer_Starting.variant
+DebugLog: LOADED wolf_Assault.variant
+DebugLog: LOADED wolf_CS.variant
+DebugLog: LOADED wolf_d_Attack.variant
+DebugLog: LOADED wolf_d_pirates_Attack.variant
+DebugLog: LOADED wolf_hegemony_Assault.variant
+DebugLog: LOADED wolf_hegemony_CS.variant
+DebugLog: LOADED wolf_hegemony_PD.variant
+DebugLog: LOADED wolf_Overdriven.variant
+DebugLog: LOADED wolf_PD.variant
+DebugLog: LOADED wolf_Starting.variant
+DebugLog: LOADED wolf_Strike.variant
+DebugLog: LOADED afflictor_d_pirates_Strike.variant
+DebugLog: LOADED afflictor_Strike.variant
+DebugLog: LOADED apogee_Balanced.variant
+DebugLog: LOADED astral_Attack.variant
+DebugLog: LOADED astral_Elite.variant
+DebugLog: LOADED astral_Strike.variant
+DebugLog: LOADED atlas_Standard.variant
+DebugLog: LOADED bastillon_Standard.variant
+DebugLog: LOADED berserker_Assault.variant
+DebugLog: LOADED brawler_Assault.variant
+DebugLog: LOADED brawler_Elite.variant
+DebugLog: LOADED brawler_Starting.variant
+DebugLog: LOADED buffalo2_FS.variant
+DebugLog: LOADED colossus2_Pather.variant
+DebugLog: LOADED colossus3_Pirate.variant
+DebugLog: LOADED colossus_Standard.variant
+DebugLog: LOADED condor_Attack.variant
+DebugLog: LOADED condor_Strike.variant
+DebugLog: LOADED condor_Support.variant
+DebugLog: LOADED crig_Standard.variant
+DebugLog: LOADED defender_PD.variant
+DebugLog: LOADED doom_Strike.variant
+DebugLog: LOADED dram_Light.variant
+DebugLog: LOADED drover_Strike.variant
+DebugLog: LOADED gemini_Standard.variant
+DebugLog: LOADED heron_Attack.variant
+DebugLog: LOADED heron_Strike.variant
+DebugLog: LOADED hyperion_Attack.variant
+DebugLog: LOADED hyperion_Strike.variant
+DebugLog: LOADED kite_Raider.variant
+DebugLog: LOADED medusa_Attack.variant
+DebugLog: LOADED medusa_CS.variant
+DebugLog: LOADED medusa_PD.variant
+DebugLog: LOADED medusa_Starting.variant
+DebugLog: LOADED monitor_Escort.variant
+DebugLog: LOADED monitor_Starting.variant
+DebugLog: LOADED mudskipper2_CS.variant
+DebugLog: LOADED mudskipper2_Hellbore.variant
+DebugLog: LOADED mudskipper_Standard.variant
+DebugLog: LOADED nebula_Standard.variant
+DebugLog: LOADED odyssey_Balanced.variant
+DebugLog: LOADED omen_PD.variant
+DebugLog: LOADED ox_Standard.variant
+DebugLog: LOADED phaeton_Standard.variant
+DebugLog: LOADED picket_Assault.variant
+DebugLog: LOADED prometheus_Super.variant
+DebugLog: LOADED sentry_FS.variant
+DebugLog: LOADED shade_Assault.variant
+DebugLog: LOADED shade_d_pirates_Assault.variant
+DebugLog: LOADED shepherd_Frontier.variant
+DebugLog: LOADED shepherd_Starting.variant
+DebugLog: LOADED starliner_Standard.variant
+DebugLog: LOADED tempest_Attack.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED tempest_Balanced.variant
+DebugLog: LOADED tempest_Starting.variant
+DebugLog: LOADED valkyrie_Elite.variant
+DebugLog: LOADED vigilance_AP.variant
+DebugLog: LOADED vigilance_FS.variant
+DebugLog: LOADED vigilance_Standard.variant
+DebugLog: LOADED vigilance_Starting.variant
+DebugLog: LOADED vigilance_Strike.variant
+DebugLog: LOADED warden_Defense.variant
+DebugLog: LOADED broadsword_Fighter.variant
+DebugLog: LOADED claw_Fighter.variant
+DebugLog: LOADED dagger_Bomber.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED gladius_Fighter.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED khopesh_Bomber.variant
+DebugLog: LOADED longbow_Support.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED mining_drone_Standard.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED piranha_Bomber.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED talon_Interceptor.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED thunder_Fighter.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED trident_Bomber.variant
+DebugLog: LOADED warthog_Fighter.variant
+DebugLog: LOADED wasp_Interceptor.variant
+DebugLog: LOADED xyphos_Fighter.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_assault.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_borer.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_pd.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_pd_midline.variant
+DebugLog: [WARN] could not find field name mods in object of type TStarfarerVariant
+DebugLog: LOADED drone_sensor.variant
+DebugLog: LOADED drone_terminator.variant
+DebugLog: LOADED afflictor_d_pirates.skin
+DebugLog: LOADED brawler_pather.skin
+DebugLog: [WARN] could not find field name type in object of type TStarfarerShipWeaponChange
+DebugLog: [WARN] could not find field name type in object of type TStarfarerShipWeaponChange
+DebugLog: LOADED brawler_tritachyon.skin
+DebugLog: LOADED buffalo_d.skin
+DebugLog: LOADED buffalo_hegemony.skin
+DebugLog: LOADED buffalo_luddic_church.skin
+DebugLog: LOADED buffalo_pirates.skin
+DebugLog: LOADED buffalo_tritachyon.skin
+DebugLog: LOADED cerberus_d.skin
+DebugLog: LOADED cerberus_d_pirates.skin
+DebugLog: LOADED cerberus_luddic_path.skin
+DebugLog: LOADED dominator_d.skin
+DebugLog: LOADED dominator_xiv.skin
+DebugLog: LOADED eagle_d.skin
+DebugLog: [WARN] could not initialize String from TArray
+DebugLog: LOADED eagle_xiv.skin
+DebugLog: LOADED enforcer_d.skin
+DebugLog: LOADED enforcer_d_pirates.skin
+DebugLog: [WARN] could not initialize String from TArray
+DebugLog: LOADED enforcer_xiv.skin
+DebugLog: LOADED falcon_d.skin
+DebugLog: [WARN] could not initialize String from TArray
+DebugLog: LOADED falcon_xiv.skin
+DebugLog: LOADED hammerhead_d.skin
+DebugLog: LOADED hermes_d.skin
+DebugLog: LOADED hound_d.skin
+DebugLog: LOADED hound_d_pirates.skin
+DebugLog: LOADED hound_hegemony.skin
+DebugLog: LOADED hound_luddic_church.skin
+DebugLog: LOADED hound_luddic_path.skin
+DebugLog: [WARN] could not initialize String from TEnum
+DebugLog: LOADED kite_d.skin
+DebugLog: [WARN] could not initialize String from TEnum
+DebugLog: LOADED kite_hegemony.skin
+DebugLog: [WARN] could not initialize String from TEnum
+DebugLog: LOADED kite_luddic_path.skin
+DebugLog: [WARN] could not initialize String from TEnum
+DebugLog: LOADED kite_original.skin
+DebugLog: [WARN] could not initialize String from TEnum
+DebugLog: LOADED kite_pirates.skin
+DebugLog: LOADED lasher_d.skin
+DebugLog: LOADED lasher_luddic_church.skin
+DebugLog: LOADED lasher_pather.skin
+DebugLog: LOADED mercury_d.skin
+DebugLog: [WARN] could not initialize String from TEnum
+DebugLog: LOADED mudskipper2.skin
+DebugLog: LOADED mule_d.skin
+DebugLog: LOADED mule_d_pirates.skin
+DebugLog: LOADED onslaught_xiv.skin
+DebugLog: LOADED shade_d_pirates.skin
+DebugLog: LOADED sunder_d.skin
+DebugLog: LOADED talon_tritachyon.skin
+DebugLog: LOADED tarsus_d.skin
+DebugLog: LOADED wolf_d.skin
+DebugLog: LOADED wolf_d_pirates.skin
+DebugLog: LOADED wolf_hegemony.skin
+DebugLog: LOADED amblaster.wpn
+DebugLog: LOADED annihilator.wpn
+DebugLog: LOADED annihilatorpod.wpn
+DebugLog: LOADED annihilator_fighter.wpn
+DebugLog: LOADED arbalest.wpn
+DebugLog: LOADED atropos.wpn
+DebugLog: LOADED atropos_single.wpn
+DebugLog: LOADED autopulse.wpn
+DebugLog: LOADED blinker_green.wpn
+DebugLog: LOADED blinker_red.wpn
+DebugLog: LOADED bomb.wpn
+DebugLog: LOADED chaingun.wpn
+DebugLog: LOADED clusterbomb.wpn
+DebugLog: LOADED cyclone.wpn
+DebugLog: LOADED devastator.wpn
+DebugLog: LOADED dualflak.wpn
+DebugLog: LOADED flak.wpn
+DebugLog: LOADED fragbomb.wpn
+DebugLog: LOADED gauss.wpn
+DebugLog: LOADED gravitonbeam.wpn
+DebugLog: LOADED guardian.wpn
+DebugLog: LOADED hammer.wpn
+DebugLog: LOADED hammerrack.wpn
+DebugLog: LOADED hammer_single.wpn
+DebugLog: LOADED harpoon.wpn
+DebugLog: LOADED harpoonpod.wpn
+DebugLog: LOADED harpoon_single.wpn
+DebugLog: LOADED heatseeker.wpn
+DebugLog: LOADED heavyac.wpn
+DebugLog: LOADED heavyblaster.wpn
+DebugLog: LOADED heavyburst.wpn
+DebugLog: LOADED heavymauler.wpn
+DebugLog: LOADED heavymg.wpn
+DebugLog: LOADED heavymortar.wpn
+DebugLog: LOADED heavyneedler.wpn
+DebugLog: LOADED hellbore.wpn
+DebugLog: LOADED hephag.wpn
+DebugLog: LOADED hil.wpn
+DebugLog: LOADED hurricane.wpn
+DebugLog: LOADED hveldriver.wpn
+DebugLog: LOADED interdictorbeam.wpn
+DebugLog: LOADED ionbeam.wpn
+DebugLog: LOADED ioncannon.wpn
+DebugLog: LOADED ionpulser.wpn
+DebugLog: LOADED irpulse.wpn
+DebugLog: LOADED irpulse_fighter.wpn
+DebugLog: LOADED lightac.wpn
+DebugLog: LOADED lightag.wpn
+DebugLog: LOADED lightdualac.wpn
+DebugLog: LOADED lightdualmg.wpn
+DebugLog: LOADED lightmg.wpn
+DebugLog: LOADED lightmortar.wpn
+DebugLog: LOADED lightneedler.wpn
+DebugLog: LOADED lights_buffalo.wpn
+DebugLog: LOADED lights_hound.wpn
+DebugLog: LOADED locust.wpn
+DebugLog: LOADED lrpdlaser.wpn
+DebugLog: LOADED mark9.wpn
+DebugLog: LOADED miningblaster.wpn
+DebugLog: LOADED mininglaser.wpn
+DebugLog: LOADED mjolnir.wpn
+DebugLog: LOADED multineedler.wpn
+DebugLog: LOADED pdburst.wpn
+DebugLog: LOADED pdlaser.wpn
+DebugLog: LOADED phasebeam.wpn
+DebugLog: LOADED phasecl.wpn
+DebugLog: LOADED phasecl_bomber.wpn
+DebugLog: LOADED pilum.wpn
+DebugLog: LOADED plasma.wpn
+DebugLog: LOADED pulselaser.wpn
+DebugLog: LOADED railgun.wpn
+DebugLog: LOADED reaper.wpn
+DebugLog: LOADED sabot.wpn
+DebugLog: LOADED sabotpod.wpn
+DebugLog: LOADED sabot_single.wpn
+DebugLog: LOADED salamanderpod.wpn
+DebugLog: LOADED sensordish.wpn
+DebugLog: LOADED shredder.wpn
+DebugLog: LOADED squall.wpn
+DebugLog: LOADED swarmer.wpn
+DebugLog: LOADED swarmer_fighter.wpn
+DebugLog: LOADED tachyonlance.wpn
+DebugLog: LOADED taclaser.wpn
+DebugLog: LOADED tpc.wpn
+DebugLog: LOADED typhoon.wpn
+DebugLog: LOADED vulcan.wpn
+DebugLog: LOADED ship_data.csv
+DebugLog: LOADED wing_data.csv
+DebugLog: Enum    (weapon_csv.type)
+DebugLog: LOADED weapon_data.csv
+DebugLog: LOADED hull_mods.csv
+DebugLog: Loading MOD Data: K:\Games\Starsector\mods\ss-nom/
+DebugLog: Enum  ANCIENT_NAERAN  (ship.style)
+DebugLog: Enum  ANCIENT_NAERAN  (ship.engine.style)
+DebugLog: LOADED nom_ant.ship
+DebugLog: LOADED nom_cactus.ship
+DebugLog: LOADED nom_cobra.ship
+DebugLog: LOADED nom_damselfly.ship
+DebugLog: LOADED nom_death_bloom.ship
+DebugLog: LOADED nom_dragonfly.ship
+DebugLog: LOADED nom_dust_devil.ship
+DebugLog: LOADED nom_fang.ship
+DebugLog: LOADED nom_flycatcher.ship
+DebugLog: LOADED nom_gecko.ship
+DebugLog: LOADED nom_gila_monster.ship
+DebugLog: LOADED nom_iguana.ship
+DebugLog: LOADED nom_komodo.ship
+DebugLog: LOADED nom_komodo_p.ship
+DebugLog: LOADED nom_leaf.ship
+DebugLog: LOADED nom_oasis.ship
+DebugLog: LOADED nom_poison.ship
+DebugLog: LOADED nom_queen_bee.ship
+DebugLog: LOADED nom_rattlesnake.ship
+DebugLog: LOADED nom_roadrunner.ship
+DebugLog: LOADED nom_sandstorm.ship
+DebugLog: LOADED nom_scorpion.ship
+DebugLog: LOADED nom_tarantula.ship
+DebugLog: LOADED nom_toad.ship
+DebugLog: LOADED nom_tortoise.ship
+DebugLog: LOADED nom_willow.ship
+DebugLog: LOADED nom_wurm.ship
+DebugLog: LOADED nom_yellowjacket.ship
+DebugLog: LOADED nom_cactus_tanker.variant
+DebugLog: LOADED nom_cobra_personnel.variant
+DebugLog: LOADED nom_death_bloom_strike.variant
+DebugLog: LOADED nom_dragonfly_tug.variant
+DebugLog: LOADED nom_dust_devil_assault.variant
+DebugLog: LOADED nom_flycatcher_ant.variant
+DebugLog: LOADED nom_flycatcher_fang.variant
+DebugLog: LOADED nom_flycatcher_iguana.variant
+DebugLog: LOADED nom_flycatcher_toad.variant
+DebugLog: LOADED nom_gila_monster_antibattleship.variant
+DebugLog: LOADED nom_komodo_assault.variant
+DebugLog: LOADED nom_komodo_mk2_assault.variant
+DebugLog: LOADED nom_komodo_p_overdriven.variant
+DebugLog: LOADED nom_komodo_p_support.variant
+DebugLog: LOADED nom_komodo_royal_vanguard.variant
+DebugLog: LOADED nom_leaf_probe.variant
+DebugLog: LOADED nom_oasis_standard.variant
+DebugLog: LOADED nom_queen_bee_attack.variant
+DebugLog: LOADED nom_rattlesnake_assault.variant
+DebugLog: LOADED nom_roadrunner_pursuit.variant
+DebugLog: LOADED nom_sandstorm_assault.variant
+DebugLog: LOADED nom_scorpion_assault.variant
+DebugLog: LOADED nom_scorpion_royal_vanguard.variant
+DebugLog: LOADED nom_tortoise_freighter.variant
+DebugLog: LOADED nom_willow_salvage.variant
+DebugLog: LOADED nom_wurm_assault.variant
+DebugLog: LOADED nom_wurm_royal_vanguard.variant
+DebugLog: LOADED nom_yellowjacket_sniper.variant
+DebugLog: LOADED nom_damselfly_tug.variant
+DebugLog: LOADED nom_gecko_drone.variant
+DebugLog: LOADED nom_poison_drone.variant
+DebugLog: LOADED nom_ant_interceptor.variant
+DebugLog: LOADED nom_fang_bomber.variant
+DebugLog: LOADED nom_iguana_assault.variant
+DebugLog: LOADED nom_tarantula_attack.variant
+DebugLog: LOADED nom_toad_assault.variant
+DebugLog: LOADED nom_cactus_tanker.variant
+DebugLog: LOADED nom_cobra_personnel.variant
+DebugLog: LOADED nom_death_bloom_strike.variant
+DebugLog: LOADED nom_dragonfly_tug.variant
+DebugLog: LOADED nom_dust_devil_assault.variant
+DebugLog: LOADED nom_flycatcher_ant.variant
+DebugLog: LOADED nom_flycatcher_fang.variant
+DebugLog: LOADED nom_flycatcher_iguana.variant
+DebugLog: LOADED nom_flycatcher_toad.variant
+DebugLog: LOADED nom_gila_monster_antibattleship.variant
+DebugLog: LOADED nom_komodo_assault.variant
+DebugLog: LOADED nom_komodo_mk2_assault.variant
+DebugLog: LOADED nom_komodo_p_overdriven.variant
+DebugLog: LOADED nom_komodo_p_support.variant
+DebugLog: LOADED nom_komodo_royal_vanguard.variant
+DebugLog: LOADED nom_leaf_probe.variant
+DebugLog: LOADED nom_oasis_standard.variant
+DebugLog: LOADED nom_queen_bee_attack.variant
+DebugLog: LOADED nom_rattlesnake_assault.variant
+DebugLog: LOADED nom_roadrunner_pursuit.variant
+DebugLog: LOADED nom_sandstorm_assault.variant
+DebugLog: LOADED nom_scorpion_assault.variant
+DebugLog: LOADED nom_scorpion_royal_vanguard.variant
+DebugLog: LOADED nom_tortoise_freighter.variant
+DebugLog: LOADED nom_willow_salvage.variant
+DebugLog: LOADED nom_wurm_assault.variant
+DebugLog: LOADED nom_wurm_royal_vanguard.variant
+DebugLog: LOADED nom_yellowjacket_sniper.variant
+DebugLog: LOADED nom_ant_interceptor.variant
+DebugLog: LOADED nom_fang_bomber.variant
+DebugLog: LOADED nom_iguana_assault.variant
+DebugLog: LOADED nom_tarantula_attack.variant
+DebugLog: LOADED nom_toad_assault.variant
+DebugLog: LOADED nom_damselfly_tug.variant
+DebugLog: LOADED nom_gecko_drone.variant
+DebugLog: LOADED nom_poison_drone.variant
+DebugLog: LOADED nom_komodo_mk2.skin
+DebugLog: LOADED nom_komodo_royal.skin
+DebugLog: LOADED nom_scorpion_royal.skin
+DebugLog: LOADED nom_wurm_royal.skin
+DebugLog: LOADED nom_decorative_damselfly_tow_cable.wpn
+DebugLog: LOADED nom_decorative_oasis_habitat_ring.wpn
+DebugLog: LOADED nom_decorative_oasis_habitat_ring_structural_support_beam.wpn
+DebugLog: LOADED nom_decorative_tow_cable_anchor.wpn
+DebugLog: LOADED nom_doom_cannon.wpn
+DebugLog: LOADED nom_effect_faux_plasma.wpn
+DebugLog: LOADED nom_effect_faux_plasma_large.wpn
+DebugLog: LOADED nom_effect_faux_plasma_mini.wpn
+DebugLog: LOADED nom_firecracker.wpn
+DebugLog: LOADED nom_gamma_pulse_emp.wpn
+DebugLog: LOADED nom_heavy_electron_maser.wpn
+DebugLog: LOADED nom_light_electron_maser.wpn
+DebugLog: LOADED nom_lunar_crucible_fighter.wpn
+DebugLog: LOADED nom_maser_pulse_beam.wpn
+DebugLog: LOADED nom_retribution_postmortem_launcher.wpn
+DebugLog: LOADED nom_roadrunner_engine_fx.wpn
+DebugLog: LOADED nom_self_sustained_fusion_torpedo_bank.wpn
+DebugLog: LOADED nom_self_sustained_fusion_torpedo_large.wpn
+DebugLog: LOADED nom_self_sustained_fusion_torpedo_mini.wpn
+DebugLog: LOADED nom_self_sustained_fusion_torpedo_pod.wpn
+DebugLog: LOADED nom_solar_crucible.wpn
+DebugLog: LOADED nom_triple_electron_maser.wpn
+DebugLog: LOADED nom_twin_electron_maser.wpn
+DebugLog: LOADED nom_twin_ultralight_electron_maser.wpn
+DebugLog: LOADED nom_ultralight_electron_maser.wpn
+DebugLog: Enum  ANCIENT_NAERAN  (ship.engine.styleId)
+DebugLog: Enum  FUSION_TORPEDO  (ship.engine.styleId)
+DebugLog: LOADED ship_data.csv
+DebugLog: LOADED wing_data.csv
+DebugLog: LOADED weapon_data.csv
+DebugLog: LOADED hull_mods.csv
