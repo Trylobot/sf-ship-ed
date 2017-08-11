@@ -66,6 +66,18 @@ Type TStarfarerShipWeapon
 		copy.type_ = type_
 		Return copy
 	End Method
+
+	Rem
+	Method Draw( offset#[], scale#, em%=False )
+		'draw_weapon_mount_v2( sh_x#,sh_y#, wp_x#,wp_y#, ang#,arc#, sz#, em%, size$,type_$ )
+		draw_weapon_mount_v2( ..
+			offset[0], offset[1], ..
+			locations[0], locations[1], ..
+			angle, arc, scale, em, ..
+			size, type_ )
+	EndMethod
+	EndRem
+
 End Type
 
 

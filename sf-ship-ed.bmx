@@ -42,6 +42,8 @@ Incbin "assets/ico_mirr.png"
 Incbin "assets/ico_exit.png"
 Incbin "assets/engineflame32.png"
 Incbin "assets/engineflamecore32.png"
+Incbin "assets/engineflamecore32.png"
+Incbin "assets/weapon-slot-icons/LARGE-ENERGY.png"
 Incbin "release/ENG.ini"
 
 Const FLOAT_MAX# = 10e38:Float
@@ -390,6 +392,7 @@ Repeat
     Case EVENT_GADGETPAINT
       If EventSource() = Canvas
         Cls
+        DebugDrawReset
         'display string for mouse (usually context-help)
         mouse_str = ""    
 
@@ -1307,6 +1310,22 @@ Function load_ui( ed:TEditor )
   ed.engineflame = LoadImage( "incbin::assets/engineflame32.png", FILTEREDIMAGE | MIPMAPPEDIMAGE )
   ed.engineflamecore = LoadImage( "incbin::assets/engineflamecore32.png", FILTEREDIMAGE | MIPMAPPEDIMAGE )  
   AutoMidHandle( True )
+  ed.weapon_slot_icons = CreateMap()
+  'For Local size$ = EachIn ["SMALL","MEDIUM","LARGE"]
+  '  For Local type_$ = EachIn ["BALLISTIC","ENERGY","MISSILE","HYBRID","COMPOSITE","SYNERGY","UNIVERSAL","BUILT_IN"]
+  For Local size$ = EachIn ["LARGE"]
+    For Local type_$ = EachIn ["ENERGY"]
+      Local img_path$ = "incbin::assets/weapon-slot-icons/"+size+"-"+type_+".png"
+      Local img:TImage = LoadImage(img_path, FILTEREDIMAGE | MIPMAPPEDIMAGE )
+      ed.weapon_slot_icons.Insert(size+"-"+type_, img)
+      img = ed.get_weapon_slot_icon( size, type_ )
+      If img
+        DebugLogFile( " Loaded "+img_path+" ("+ImageWidth(img)+"x"+ImageHeight(img)+")" )
+      Else
+        DebugLogFile( " ERROR "+img_path )
+      EndIf
+    Next
+  Next
 End Function
 
 Function load_starfarer_data( ed:TEditor, data:TData )

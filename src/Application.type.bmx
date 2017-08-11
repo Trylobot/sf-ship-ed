@@ -38,12 +38,12 @@ Type Application
 		EndTry
 		Local app_obj:Application = Application( json.parse( settings_json, "Application" ) )
 		'MARK localization
-		DebugLogFile("Loading localization file")
+		DebugLogFile(" Loading localization file")
 		If app_obj.localization_file.length > 0
 			Try
 				LOC = LoadLanguage( app_obj.localization_file )
 			Catch ex:TStreamException
-				DebugLogFile( "Localization file load failed, loading ENG as Default" )
+				DebugLogFile( " Localization file load failed, loading ENG as Default" )
 				LOC = LoadLanguage( "incbin::release/ENG.ini" )
 			EndTry
 		Else

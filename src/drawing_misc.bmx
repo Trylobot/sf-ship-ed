@@ -267,7 +267,33 @@ Function draw_weapon_mount( x%, y%, rot#, arc#, em%=False, r%=12, l%=24, ra%=36,
 	EndIf
 End Function
 
-
+Rem
+	draw icons in the style of Starsector
+  - different icons per slot size and type
+  -   showing the facing angle and firing arc with additional lines
+  -   respecting the current global zoom level for scaling factor
+  - and the ability to "emphasize" an icon by enlarging it somewhat and making it more opaque
+  -   default (non-emphasized) mode being somewhat smaller and partially transparent
+  - along with a text label re-iterating slot size & type, and mount type 
+EndRem
+Function draw_weapon_mount_v2( ed:TEditor, x#,y#, ang#,arc#, sz#, em%, size$,type_$ )
+	Local icon:TImage = ed.get_weapon_slot_icon( size,type_ )
+	If icon
+		'DebugDraw( "DRAW: "+size+"-"+type_, W_MID,0, 0.5,0 )
+		If Not em
+			SetScale( 0.200*sz,0.200*sz )
+			SetAlpha( 0.500 )
+			SetColor( 255,255,255 )
+		Else
+			SetScale( 0.300*sz,0.300*sz )
+			SetAlpha( 1.000 )
+			SetColor( 255,255,255 )
+		EndIf
+		DrawImage( icon, x,y )
+	Else
+		'DebugDraw( "error: "+size+"-"+type_, W_MID,0, 0.5,0 )
+	EndIf
+EndFunction
 
 Function draw_engine( eX#, eY#, eL#, eW#, eA#, sZ#, emphasis%=False, eC%[], drawPoint%=True, is_removed%=False)
 	Local alpha# = GetAlpha()

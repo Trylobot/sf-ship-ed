@@ -59,6 +59,7 @@ Type TEditor
 	Field ico_exit:TImage
 	Field engineflame:TImage
 	Field engineflamecore:TImage
+	Field weapon_slot_icons:TMap              '<String,TImage>  "${size}-${type}" --> TImage
 	'stock (and mod) data
 	Field stock_ships:TMap                    '<String,Object>  hullId --> TStarfarerShip
 	Field stock_variants:TMap                 '<String,Object>  variantId --> TStarfarerVariant
@@ -552,5 +553,11 @@ Type TEditor
 		EndIf
 		Return False
 	End Method
+
+	Method get_weapon_slot_icon:TImage( size$, type_$ )
+		Return TImage(weapon_slot_icons.ValueForKey(size+"-"+type_))
+	EndMethod
+
+
 End Type
 

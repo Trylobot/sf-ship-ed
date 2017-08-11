@@ -1,5 +1,5 @@
 ______________________________________________________________________________
-editor version 3.0.0-pre-alpha-2 (starsector 0.8.1a) [Trylobot & Deathfly]
+editor version 3.0.0-pre-alpha-3 (starsector 0.8.1a) [Trylobot & Deathfly]
 
 SKIN EDITOR
 - Change/Remove Weapon Slot position/angle/arc
@@ -10,6 +10,7 @@ SKIN EDITOR
 - Render Skin Sprite
 
 VARIANT EDITOR / STATION_MODULE support
+- Render weapon slot icons (using official game iconography) instead of homogeneous circles and dots
 - Show installed module (variant) in slot.
 - Render installed STATION_MODULE (variant)
 - Module selector for STATION_MODULE slots, including variants based on skins

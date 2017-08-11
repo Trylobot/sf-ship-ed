@@ -69,6 +69,8 @@ Type TModalSetVariant Extends TSubroutine
 	Field module_hull:TStarfarerShip
 	Field module_variant_name$
 	Field module_skin:TStarfarerSkin
+	'////
+
 	
 	Method Activate( ed:TEditor, data:TData, sprite:TSprite )
 		ed.program_mode = "variant"
@@ -478,6 +480,7 @@ Type TModalSetVariant Extends TSubroutine
 		Case EVENT_MOUSEDOWN, EVENT_MOUSEUP, EVENT_MOUSEMOVE
 			sprite.get_img_xy( MouseX, MouseY, img_x, img_y )
 			'locate nearest entity
+			Local last_ni% = ni
 			ni = data.find_nearest_variant_weapon_slot( img_x, img_y )
 			If ni = - 1 Then Return
 			weapon_slot = data.ship.weaponSlots[ni]
@@ -553,6 +556,7 @@ Type TModalSetVariant Extends TSubroutine
 		'draw pointers
 		nearest = False
 		
+		Rem
 		'FIRST PASS: draw text boxes but make "really faint" if zoomed out too far
 		For i = 0 Until data.ship.weaponSlots.Length
 			If Not data.ship.weaponSlots[i].is_visible_to_variant()
@@ -576,7 +580,9 @@ Type TModalSetVariant Extends TSubroutine
 				draw_assigned_weapon_info( ed, data, sprite, weapon_slot )
 			EndIf
 		Next
+		EndRem
 		
+		Rem
 		'SECOND PASS: draw slot mount icons
 		For i = 0 Until data.ship.weaponSlots.Length
 			If Not data.ship.weaponSlots[i].is_visible_to_variant()
@@ -599,7 +605,27 @@ Type TModalSetVariant Extends TSubroutine
 			draw_variant_weapon_mount( wx, wy, weapon_slot )
 		Next
 		SetAlpha( 1 )
+		EndRem
+		For i = 0 Until data.ship.weaponSlots.Length
+			If Not data.ship.weaponSlots[i].is_visible_to_variant()
+				Continue 'skip these
+			EndIf
+			Local em% = (i = ni)
+			weapon_slot = data.ship.weaponSlots[i]
+			wx = sprite.sx + sprite.scale*( weapon_slot.locations[0] + data.ship.center[1])
+			wy = sprite.sy + sprite.Scale*(-weapon_slot.locations[1] + data.ship.center[0])
+			'Function draw_weapon_mount_v2( ed:TEditor, x#,y#, ang#,arc#, sz#, em%, size$,type_$ )
+			draw_weapon_mount_v2( ed, ..
+				wx, wy, ..
+				weapon_slot.angle, weapon_slot.arc, ..
+				sprite.scale, em, ..
+				weapon_slot.size, weapon_slot.type_ )
+		Next
+		SetRotation( 0 )
+		SetScale( 1, 1 )
+		SetAlpha( 1 )
 
+		Rem
 		'THIRD PASS: draw the nearest weapon mount, if there is one set
 		If ni <> - 1
 			weapon_slot = data.ship.weaponSlots[ni]
@@ -611,6 +637,7 @@ Type TModalSetVariant Extends TSubroutine
 			EndIf
 			draw_variant_weapon_mount( wx, wy, weapon_slot )
 		EndIf
+		EndRem
 	EndMethod
 
 	Method draw_weapon_groups_list( ed:TEditor, data:TData, sprite:TSprite )
