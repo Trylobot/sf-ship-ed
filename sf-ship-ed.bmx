@@ -26,6 +26,7 @@ Import "src/console.bmx"
 Import "assets/sf_icon.o"
 ?
 Incbin "release/sf-ship-ed-settings.json" 'for defaults
+Incbin "release/ENG.ini"
 Incbin "assets/bg.png"
 Incbin "assets/kb_key.png"
 Incbin "assets/kb_key_wide.png"
@@ -34,6 +35,7 @@ Incbin "assets/ms_left.png"
 Incbin "assets/ms_mid.png"
 Incbin "assets/ms_right.png"
 Incbin "assets/consola.ttf"
+Incbin "assets/lte50549.ttf"
 Incbin "assets/ico_dim.png"
 Incbin "assets/ico_pos.png"
 Incbin "assets/ico_ang.png"
@@ -43,11 +45,11 @@ Incbin "assets/ico_exit.png"
 Incbin "assets/engineflame32.png"
 Incbin "assets/engineflamecore32.png"
 Incbin "assets/engineflamecore32.png"
+Incbin "assets/weapon-slot-icons/SMALL-ENERGY.png"
+Incbin "assets/weapon-slot-icons/MEDIUM-ENERGY.png"
 Incbin "assets/weapon-slot-icons/LARGE-ENERGY.png"
-Incbin "release/ENG.ini"
 
 Const FLOAT_MAX# = 10e38:Float
-
 Include "src/config_json_transforms.bmx"
 Include "src/functions_misc.bmx"
 Include "src/drawing_misc.bmx"
@@ -113,6 +115,7 @@ Global Apprunning% = True
 Global W_MAX# = APP.window_size[0], W_MID# = W_MAX / 2.0
 Global H_MAX# = APP.window_size[1], H_MID# = H_MAX / 2.0
 Global FONT:TImageFont = Null
+Global GAME_FONT:TImageFont = Null
 Global DATA_FONT:TImageFont = Null
 Global LINE_HEIGHT% = APP.font_size + 1
 Global DATA_LINE_HEIGHT% = APP.data_font_size
@@ -161,10 +164,12 @@ EndIf
 
 If APP.custom_FONT.length > 0
   FONT = LoadImageFont( APP.custom_FONT, APP.font_size, SMOOTHFONT )
+  GAME_FONT = LoadImageFont( APP.custom_FONT, APP.font_size, SMOOTHFONT )
   DATA_FONT = LoadImageFont( APP.custom_FONT, APP.data_font_size, SMOOTHFONT )
   SetImageFont( FONT )
 Else
   FONT = LoadImageFont( "incbin::assets/consola.ttf", APP.font_size, SMOOTHFONT )
+  GAME_FONT = LoadImageFont( "incbin::assets/lte50549.ttf", APP.font_size, SMOOTHFONT )
   DATA_FONT = LoadImageFont( "incbin::assets/consola.ttf", APP.data_font_size, SMOOTHFONT )
   SetImageFont( FONT )
 EndIf
@@ -1313,7 +1318,7 @@ Function load_ui( ed:TEditor )
   ed.weapon_slot_icons = CreateMap()
   'For Local size$ = EachIn ["SMALL","MEDIUM","LARGE"]
   '  For Local type_$ = EachIn ["BALLISTIC","ENERGY","MISSILE","HYBRID","COMPOSITE","SYNERGY","UNIVERSAL","BUILT_IN"]
-  For Local size$ = EachIn ["LARGE"]
+  For Local size$ = EachIn ["SMALL","MEDIUM","LARGE"]
     For Local type_$ = EachIn ["ENERGY"]
       Local img_path$ = "incbin::assets/weapon-slot-icons/"+size+"-"+type_+".png"
       Local img:TImage = LoadImage(img_path, FILTEREDIMAGE | MIPMAPPEDIMAGE )

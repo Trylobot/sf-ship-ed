@@ -1128,6 +1128,28 @@ Type TData
 		Return Null
 	EndMethod
 
+	Method find_assigned_weapon_info$( slot_idx% )
+		If Not ship Or Not ship.weaponSlots Or Not ship.weaponSlots[ slot_idx ]
+			Return "Empty"
+		EndIf
+		Local weaponSlot:TStarfarerShipWeapon = ship.weaponSlots[ slot_idx ]
+		Local weapon_id$ = find_assigned_slot_weapon( weaponSlot.id )
+		If weapon_id
+			'module support  -D
+			If Not weaponSlot.is_station_module()
+				Local wep_stats:TMap = TMap( ed.stock_weapon_stats.ValueForKey( weapon_id ) )
+				If wep_stats
+					Local wep_name$ = String( wep_stats.ValueForKey( "name" ) )
+					If wep_name
+						Return wep_name
+					EndIf
+				EndIf
+				Return weapon_id
+			EndIf
+		EndIf
+		Return "Empty"
+	EndMethod
+
 	Method weapon_slot_id_exists%( id_str$ )
 		If Not ship Or Not ship.weaponslots Or ship.weaponslots.length = 0 Then Return False
 		For Local weapon_slot:TStarfarerShipWeapon = EachIn ship.weaponSlots

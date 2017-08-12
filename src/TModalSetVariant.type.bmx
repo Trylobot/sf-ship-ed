@@ -614,7 +614,7 @@ Type TModalSetVariant Extends TSubroutine
 			weapon_slot = data.ship.weaponSlots[i]
 			wx = sprite.sx + sprite.scale*( weapon_slot.locations[0] + data.ship.center[1])
 			wy = sprite.sy + sprite.Scale*(-weapon_slot.locations[1] + data.ship.center[0])
-			'Function draw_weapon_mount_v2( ed:TEditor, x#,y#, ang#,arc#, sz#, em%, size$,type_$ )
+			'draw_weapon_mount_v2( ed:TEditor, x#,y#, ang#,arc#, sz#, em%, size$,type_$ )
 			draw_weapon_mount_v2( ed, ..
 				wx, wy, ..
 				weapon_slot.angle, weapon_slot.arc, ..
@@ -624,6 +624,21 @@ Type TModalSetVariant Extends TSubroutine
 		SetRotation( 0 )
 		SetScale( 1, 1 )
 		SetAlpha( 1 )
+		If ni <> -1
+			weapon_slot = data.ship.weaponSlots[ni]
+			wx = sprite.sx + sprite.scale*( weapon_slot.locations[0] + data.ship.center[1])
+			wy = sprite.sy + sprite.Scale*(-weapon_slot.locations[1] + data.ship.center[0])
+			'draw_string( source:Object, x%, y%, fg% = $FFFFFF, bg% = $000000, origin_x# = 0.0, origin_y# = 0.0, line_height_override% = - 1, draw_bg% = False, s# = 1.0 )
+			Local f:TImageFont = GetImageFont()
+			SetImageFont( GAME_FONT )
+			Local s$ = weapon_slot.size[0..1] + weapon_slot.size[1..].ToLower()
+			Local t$ = weapon_slot.type_[0..1] + weapon_slot.type_[1..].ToLower()
+			Local m$ = weapon_slot.mount[0..1] + weapon_slot.mount[1..].ToLower()
+			Local w$ = data.find_assigned_weapon_info( ni )
+			draw_string( s+" "+t+" "+m+" ("+w+")", ..
+				wx, wy + 32, ,, 0.5,0, ,, 1.0 )
+			SetImageFont( f )
+		EndIf
 
 		Rem
 		'THIRD PASS: draw the nearest weapon mount, if there is one set
