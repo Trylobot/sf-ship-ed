@@ -1,0 +1,358 @@
+{
+  "bounds": [
+    -373,
+    -274.5,
+    372,
+    -137.5,
+    372,
+    137.5,
+    -373,
+    274.5
+  ],
+  "builtInWings": [],
+  "center": [
+    300,
+    400
+  ],
+  "collisionRadius": 0,
+  "engineSlots": [],
+  "height": 400,
+  "hullId": "test_ship1",
+  "hullName": "Test Ship",
+  "hullSize": "CRUISER",
+  "shieldCenter": [
+    0,
+    0
+  ],
+  "shieldRadius": 0,
+  "spriteName": "graphics/ships/test_ship1.png",
+  "style": "LOW_TECH",
+  "viewOffset": 0,
+  "weaponSlots": [
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0001",
+      "locations": [
+        -350,
+        252.5
+      ],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "BALLISTIC"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0002",
+      "locations": [
+        -349,
+        179.5
+      ],
+      "mount": "TURRET",
+      "size": "MEDIUM",
+      "type": "BALLISTIC"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0003",
+      "locations": [
+        -349,
+        105.5
+      ],
+      "mount": "TURRET",
+      "size": "LARGE",
+      "type": "BALLISTIC"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0004",
+      "locations": [
+        -351,
+        10.5
+      ],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "ENERGY"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0005",
+      "locations": [
+        -350,
+        -64.5
+      ],
+      "mount": "TURRET",
+      "size": "MEDIUM",
+      "type": "ENERGY"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0006",
+      "locations": [
+        -350,
+        -138.5
+      ],
+      "mount": "TURRET",
+      "size": "LARGE",
+      "type": "ENERGY"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0007",
+      "locations": [
+        -350,
+        -232.5
+      ],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "MISSILE"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0008",
+      "locations": [
+        -349,
+        -306.5
+      ],
+      "mount": "TURRET",
+      "size": "MEDIUM",
+      "type": "MISSILE"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0009",
+      "locations": [
+        -349,
+        -381.5
+      ],
+      "mount": "TURRET",
+      "size": "LARGE",
+      "type": "MISSILE"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0010",
+      "locations": [
+        -245,
+        252.5
+      ],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "HYBRID"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0011",
+      "locations": [
+        -245,
+        180.5
+      ],
+      "mount": "TURRET",
+      "size": "MEDIUM",
+      "type": "HYBRID"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0012",
+      "locations": [
+        -244,
+        105.5
+      ],
+      "mount": "TURRET",
+      "size": "LARGE",
+      "type": "HYBRID"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0013",
+      "locations": [
+        -244,
+        14.5
+      ],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "COMPOSITE"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0014",
+      "locations": [
+        -243,
+        -61.5
+      ],
+      "mount": "TURRET",
+      "size": "MEDIUM",
+      "type": "COMPOSITE"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0015",
+      "locations": [
+        -242,
+        -136.5
+      ],
+      "mount": "TURRET",
+      "size": "LARGE",
+      "type": "COMPOSITE"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0016",
+      "locations": [
+        -243,
+        -228.5
+      ],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "SYNERGY"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0017",
+      "locations": [
+        -243,
+        -301.5
+      ],
+      "mount": "TURRET",
+      "size": "MEDIUM",
+      "type": "SYNERGY"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0018",
+      "locations": [
+        -242,
+        -378.5
+      ],
+      "mount": "TURRET",
+      "size": "LARGE",
+      "type": "SYNERGY"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0019",
+      "locations": [
+        -145,
+        12.5
+      ],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "BUILT_IN"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0020",
+      "locations": [
+        -146,
+        -62.5
+      ],
+      "mount": "TURRET",
+      "size": "MEDIUM",
+      "type": "BUILT_IN"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0021",
+      "locations": [
+        -145,
+        -137.5
+      ],
+      "mount": "TURRET",
+      "size": "LARGE",
+      "type": "BUILT_IN"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0022",
+      "locations": [
+        -142,
+        255.5
+      ],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "UNIVERSAL"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0023",
+      "locations": [
+        -142,
+        183.5
+      ],
+      "mount": "TURRET",
+      "size": "MEDIUM",
+      "type": "UNIVERSAL"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0024",
+      "locations": [
+        -142,
+        106.5
+      ],
+      "mount": "TURRET",
+      "size": "LARGE",
+      "type": "UNIVERSAL"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0025",
+      "locations": [
+        -143,
+        -228.5
+      ],
+      "mount": "TURRET",
+      "size": "SMALL",
+      "type": "STATION_MODULE"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0026",
+      "locations": [
+        -142,
+        -303.5
+      ],
+      "mount": "TURRET",
+      "size": "MEDIUM",
+      "type": "STATION_MODULE"
+    },
+    {
+      "angle": 0,
+      "arc": 0,
+      "id": "WS0027",
+      "locations": [
+        -141,
+        -379.5
+      ],
+      "mount": "TURRET",
+      "size": "LARGE",
+      "type": "STATION_MODULE"
+    }
+  ],
+  "width": 800
+}

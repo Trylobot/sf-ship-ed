@@ -45,9 +45,30 @@ Incbin "assets/ico_exit.png"
 Incbin "assets/engineflame32.png"
 Incbin "assets/engineflamecore32.png"
 Incbin "assets/engineflamecore32.png"
+Incbin "assets/weapon-slot-icons/SMALL-BALLISTIC.png"
+Incbin "assets/weapon-slot-icons/MEDIUM-BALLISTIC.png"
+Incbin "assets/weapon-slot-icons/LARGE-BALLISTIC.png"
 Incbin "assets/weapon-slot-icons/SMALL-ENERGY.png"
 Incbin "assets/weapon-slot-icons/MEDIUM-ENERGY.png"
 Incbin "assets/weapon-slot-icons/LARGE-ENERGY.png"
+Incbin "assets/weapon-slot-icons/SMALL-MISSILE.png"
+Incbin "assets/weapon-slot-icons/MEDIUM-MISSILE.png"
+Incbin "assets/weapon-slot-icons/LARGE-MISSILE.png"
+Incbin "assets/weapon-slot-icons/SMALL-HYBRID.png"
+Incbin "assets/weapon-slot-icons/MEDIUM-HYBRID.png"
+Incbin "assets/weapon-slot-icons/LARGE-HYBRID.png"
+Incbin "assets/weapon-slot-icons/SMALL-COMPOSITE.png"
+Incbin "assets/weapon-slot-icons/MEDIUM-COMPOSITE.png"
+Incbin "assets/weapon-slot-icons/LARGE-COMPOSITE.png"
+Incbin "assets/weapon-slot-icons/SMALL-SYNERGY.png"
+Incbin "assets/weapon-slot-icons/MEDIUM-SYNERGY.png"
+Incbin "assets/weapon-slot-icons/LARGE-SYNERGY.png"
+Incbin "assets/weapon-slot-icons/SMALL-UNIVERSAL.png"
+Incbin "assets/weapon-slot-icons/MEDIUM-UNIVERSAL.png"
+Incbin "assets/weapon-slot-icons/LARGE-UNIVERSAL.png"
+Incbin "assets/weapon-slot-icons/SMALL-BUILT_IN.png"
+Incbin "assets/weapon-slot-icons/MEDIUM-BUILT_IN.png"
+Incbin "assets/weapon-slot-icons/LARGE-BUILT_IN.png"
 
 Const FLOAT_MAX# = 10e38:Float
 Include "src/config_json_transforms.bmx"
@@ -1316,10 +1337,8 @@ Function load_ui( ed:TEditor )
   ed.engineflamecore = LoadImage( "incbin::assets/engineflamecore32.png", FILTEREDIMAGE | MIPMAPPEDIMAGE )  
   AutoMidHandle( True )
   ed.weapon_slot_icons = CreateMap()
-  'For Local size$ = EachIn ["SMALL","MEDIUM","LARGE"]
-  '  For Local type_$ = EachIn ["BALLISTIC","ENERGY","MISSILE","HYBRID","COMPOSITE","SYNERGY","UNIVERSAL","BUILT_IN"]
   For Local size$ = EachIn ["SMALL","MEDIUM","LARGE"]
-    For Local type_$ = EachIn ["ENERGY"]
+    For Local type_$ = EachIn ["BALLISTIC","ENERGY","MISSILE","HYBRID","COMPOSITE","SYNERGY","UNIVERSAL","BUILT_IN"]
       Local img_path$ = "incbin::assets/weapon-slot-icons/"+size+"-"+type_+".png"
       Local img:TImage = LoadImage(img_path, FILTEREDIMAGE | MIPMAPPEDIMAGE )
       ed.weapon_slot_icons.Insert(size+"-"+type_, img)
