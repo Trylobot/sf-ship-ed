@@ -105,13 +105,17 @@ Type TModalSetVariant Extends TSubroutine
 			draw_hud( ed, data )
 		EndIf
 		If ed.weapon_lock_i <> - 1
+			draw_weapons( ed, data, sprite, WD )
 			draw_weapon_assignment_list()
 		ElseIf ed.variant_hullMod_i <> -1
+			draw_weapons( ed, data, sprite, WD )
 			draw_hullmods_list()
 		ElseIf ed.group_field_i <> - 1
+			draw_weapons( ed, data, sprite, WD )
 			draw_weapon_groups_list( ed, data, sprite )
 		Else
 			draw_all_weapon_slots( ed, data, sprite )
+			draw_weapons( ed, data, sprite, WD )
 		EndIf
 		SetAlpha( 1 )
 	EndMethod

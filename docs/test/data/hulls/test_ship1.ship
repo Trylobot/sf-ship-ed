@@ -9,6 +9,11 @@
     -373,
     274.5
   ],
+  "builtInWeapons": {
+    "WS0019": "lightdualac",
+    "WS0020": "pulselaser",
+    "WS0021": "plasma"
+  },
   "builtInWings": [],
   "center": [
     300,
@@ -42,7 +47,7 @@
       "type": "BALLISTIC"
     },
     {
-      "angle": 0,
+      "angle": -13.5,
       "arc": 0,
       "id": "WS0002",
       "locations": [
@@ -54,7 +59,7 @@
       "type": "BALLISTIC"
     },
     {
-      "angle": 0,
+      "angle": -46,
       "arc": 0,
       "id": "WS0003",
       "locations": [
@@ -66,8 +71,8 @@
       "type": "BALLISTIC"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -58,
+      "arc": 30,
       "id": "WS0004",
       "locations": [
         -351,
@@ -78,8 +83,8 @@
       "type": "ENERGY"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -72,
+      "arc": 30,
       "id": "WS0005",
       "locations": [
         -350,
@@ -90,8 +95,8 @@
       "type": "ENERGY"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -90,
+      "arc": 30,
       "id": "WS0006",
       "locations": [
         -350,
@@ -102,8 +107,8 @@
       "type": "ENERGY"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -111.5,
+      "arc": 60,
       "id": "WS0007",
       "locations": [
         -350,
@@ -114,8 +119,8 @@
       "type": "MISSILE"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -136,
+      "arc": 59,
       "id": "WS0008",
       "locations": [
         -349,
@@ -126,8 +131,8 @@
       "type": "MISSILE"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -162,
+      "arc": 60,
       "id": "WS0009",
       "locations": [
         -349,
@@ -138,8 +143,8 @@
       "type": "MISSILE"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -36.5,
+      "arc": 150,
       "id": "WS0010",
       "locations": [
         -245,
@@ -150,8 +155,8 @@
       "type": "HYBRID"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -29.5,
+      "arc": 150,
       "id": "WS0011",
       "locations": [
         -245,
@@ -163,7 +168,7 @@
     },
     {
       "angle": 0,
-      "arc": 0,
+      "arc": 150,
       "id": "WS0012",
       "locations": [
         -244,
@@ -174,8 +179,8 @@
       "type": "HYBRID"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": 22.5,
+      "arc": 120,
       "id": "WS0013",
       "locations": [
         -244,
@@ -186,8 +191,8 @@
       "type": "COMPOSITE"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": 51,
+      "arc": 120,
       "id": "WS0014",
       "locations": [
         -243,
@@ -198,8 +203,8 @@
       "type": "COMPOSITE"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": 90,
+      "arc": 120,
       "id": "WS0015",
       "locations": [
         -242,
@@ -210,8 +215,8 @@
       "type": "COMPOSITE"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": 127.5,
+      "arc": 90,
       "id": "WS0016",
       "locations": [
         -243,
@@ -222,8 +227,8 @@
       "type": "SYNERGY"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": 156,
+      "arc": 90,
       "id": "WS0017",
       "locations": [
         -243,
@@ -234,8 +239,8 @@
       "type": "SYNERGY"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": 180,
+      "arc": 90,
       "id": "WS0018",
       "locations": [
         -242,
@@ -246,8 +251,8 @@
       "type": "SYNERGY"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": 163.5,
+      "arc": 210,
       "id": "WS0019",
       "locations": [
         -145,
@@ -258,8 +263,8 @@
       "type": "BUILT_IN"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": 56,
+      "arc": 210,
       "id": "WS0020",
       "locations": [
         -146,
@@ -270,8 +275,8 @@
       "type": "BUILT_IN"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -65,
+      "arc": 210,
       "id": "WS0021",
       "locations": [
         -145,
@@ -283,7 +288,7 @@
     },
     {
       "angle": 0,
-      "arc": 0,
+      "arc": 180,
       "id": "WS0022",
       "locations": [
         -142,
@@ -294,8 +299,8 @@
       "type": "UNIVERSAL"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -45,
+      "arc": 180,
       "id": "WS0023",
       "locations": [
         -142,
@@ -306,8 +311,8 @@
       "type": "UNIVERSAL"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -137.5,
+      "arc": 180,
       "id": "WS0024",
       "locations": [
         -142,
@@ -318,8 +323,8 @@
       "type": "UNIVERSAL"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -110,
+      "arc": 240,
       "id": "WS0025",
       "locations": [
         -143,
@@ -330,8 +335,8 @@
       "type": "STATION_MODULE"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": 30.5,
+      "arc": 240,
       "id": "WS0026",
       "locations": [
         -142,
@@ -342,8 +347,8 @@
       "type": "STATION_MODULE"
     },
     {
-      "angle": 0,
-      "arc": 0,
+      "angle": -74.5,
+      "arc": 240,
       "id": "WS0027",
       "locations": [
         -141,

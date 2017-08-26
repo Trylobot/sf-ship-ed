@@ -102,9 +102,17 @@ Function draw_crosshairs( x%, y%, r%, diagonal% = False )
 	SetLineWidth( lw )
 End Function
 
-Function draw_arc( x%, y%, r%, a1#, a2#, c%, pie% = True )
-	c = Max(1, c)
-	Local segments#[] = New Float[2 * c]
+Function SetColorHex( color% )
+	'$RRGGBB
+	SetColor( ..
+		(color & $FF0000) Shr 16, ..
+		(color & $FF00) Shr 8, ..
+		(color & $FF) )
+EndFunction
+
+Function draw_arc( x%,y%, r%, a1#,a2#,c%,pie%=True, fg%=$FFFFFF,bg%=$000000,w%=2,sz#=1.0 )
+	c = Max(1, c*(Min(sz,4.0)))
+	Local segments#[] = New Float[2*c]
 	Local a#
 	For Local i% = 0 Until 2*c Step 2
 		a = a1 + ( (i / 2) * (a2 - a1) ) / c
@@ -112,25 +120,33 @@ Function draw_arc( x%, y%, r%, a1#, a2#, c%, pie% = True )
 		segments[i+1] = y - r*Sin(a)
 	Next
 	'draw bg
-	SetColor( 0,0,0 )
-	SetLineWidth( 4 )
-	For Local i% = 0 Until 2 * c - 2 Step 2
-		DrawLine( segments[i], segments[i+1], segments[i+2], segments[i+3] )
-	Next
-	If pie
-		DrawLine( segments[0], segments[1], x, y )
-		DrawLine( segments[2*c-2], segments[2*c-1], x, y )
-	End If
+	If bg <> -1
+		SetColorHex( bg )
+		SetLineWidth( 2 + w )
+		For Local i% = 0 Until 2*c - 2 Step 2
+			DrawLine( segments[i],segments[i+1], segments[i+2],segments[i+3] )
+		Next
+		If pie
+			DrawLine( segments[0],segments[1], x,y )
+			If a1 <> a2
+				DrawLine( segments[2*c-2],segments[2*c-1], x,y )
+			EndIf
+		End If
+	EndIf
 	'draw fg
-	SetColor( 255,255,255 )
-	SetLineWidth( 2 )
-	For Local i% = 0 Until 2*c-2 Step 2
-		DrawLine( segments[i], segments[i+1], segments[i+2], segments[i+3] )
-	Next
-	If pie
-		DrawLine( segments[0], segments[1], x, y )
-		DrawLine( segments[2*c-2], segments[2*c-1], x, y )
-	End If
+	If fg <> -1
+		SetColorHex( fg )
+		SetLineWidth( w )
+		For Local i% = 0 Until 2*c - 2 Step 2
+			DrawLine( segments[i],segments[i+1], segments[i+2],segments[i+3] )
+		Next
+		If pie
+			DrawLine( segments[0],segments[1], x,y )
+			If a1 <> a2
+				DrawLine( segments[2*c-2],segments[2*c-1], x,y )
+			EndIf
+		End If
+	EndIf
 End Function
 
 Function draw_dot( x%, y%, em%=False )
@@ -277,22 +293,59 @@ Rem
   - along with a text label re-iterating slot size & type, and mount type 
 EndRem
 Function draw_weapon_mount_v2( ed:TEditor, x#,y#, ang#,arc#, sz#, em%, size$,type_$ )
+	'draw arc
+	Local radius#
+		Select size
+			Case "SMALL"
+				radius = sz*24
+			Case "MEDIUM"
+				radius = sz*36
+			Case "LARGE"
+				radius = sz*46
+		EndSelect
+		If em Then radius = 1.5 * radius
+	Local color% = get_weapon_type_color(type_)
+	Local alpha# = 0.5;	If em Then alpha = 1.0
+	Local line_width% = Max( 1, 2*sz )
+	SetScale( 1,1 )
+	SetAlpha( sz*alpha )
+	draw_arc( x,y, radius, ang+(arc/2), ang-(arc/2), arc/2,, color,-1,line_width,sz )
+	'draw icon
 	Local icon:TImage = ed.get_weapon_slot_icon( size,type_ )
 	If icon
 		'DebugDraw( "DRAW: "+size+"-"+type_, W_MID,0, 0.5,0 )
-		If Not em
-			SetScale( 0.200*sz,0.200*sz )
-			SetAlpha( 0.500 )
-			SetColor( 255,255,255 )
-		Else
-			SetScale( 0.300*sz,0.300*sz )
-			SetAlpha( 1.000 )
-			SetColor( 255,255,255 )
-		EndIf
+		Local scale_factor# = 0.2; If em Then scale_factor = 0.3
+		SetScale( scale_factor*sz,scale_factor*sz )
+		SetColor( 255,255,255 )
+		SetAlpha( alpha )
+		SetRotation( 0 )
 		DrawImage( icon, x,y )
 	Else
 		'DebugDraw( "error: "+size+"-"+type_, W_MID,0, 0.5,0 )
 	EndIf
+EndFunction
+
+Function get_weapon_type_color%(type_$)
+	Select type_
+		Case "BALLISTIC"
+			Return $FBD300
+		Case "ENERGY"
+			Return $44C4FB
+		Case "MISSILE"
+			Return $9AFE00
+		Case "HYBRID"
+			Return $EB9800
+		Case "COMPOSITE"
+			Return $D6FE00
+		Case "SYNERGY"
+			Return $00FAC5
+		Case "UNIVERSAL"
+			Return $FEFEFE
+		Case "BUILT_IN"
+			Return $FEFEFE
+		Default
+			Return $FFFFFF
+	EndSelect
 EndFunction
 
 Function draw_engine( eX#, eY#, eL#, eW#, eA#, sZ#, emphasis%=False, eC%[], drawPoint%=True, is_removed%=False)

@@ -431,7 +431,12 @@ Repeat
         'draw
         draw_bg( ed )
         draw_sprite( ed, sprite )
-        draw_weapons( ed, data, sprite, WD )
+        
+        'drawing order exception for variant/weapon mode
+        '  variant editor decides on when to draw weapons
+        If ed.program_mode <> "variant"
+          draw_weapons( ed, data, sprite, WD )
+        EndIf
         
         Select ed.program_mode
 

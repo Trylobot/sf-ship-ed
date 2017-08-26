@@ -8,6 +8,37 @@
   "permaMods": [],
   "quality": 0,
   "variantId": "test_ship1_variant",
-  "weaponGroups": [],
+  "weaponGroups": [
+    {
+      "autofire": false,
+      "mode": "LINKED",
+      "weapons": {
+        "WS0001": "lightac",
+        "WS0002": "dualflak",
+        "WS0003": "gauss",
+        "WS0004": "mininglaser",
+        "WS0005": "miningblaster",
+        "WS0006": "phasebeam",
+        "WS0007": "sabot_single",
+        "WS0008": "harpoonpod",
+        "WS0009": "squall",
+        "WS0010": "lightdualmg",
+        "WS0011": "heavymortar",
+        "WS0012": "hil",
+        "WS0013": "hammer",
+        "WS0014": "heavymg",
+        "WS0015": "mjolnir",
+        "WS0016": "ioncannon",
+        "WS0017": "heavyburst",
+        "WS0018": "locust",
+        "WS0019": "lightdualac",
+        "WS0020": "pulselaser",
+        "WS0021": "plasma",
+        "WS0022": "railgun",
+        "WS0023": "pilum",
+        "WS0024": "tachyonlance"
+      }
+    }
+  ],
   "wings": []
 }
